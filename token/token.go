@@ -8,21 +8,27 @@ package token
 // that each character should be a UTF-8 character, runes are an easy choice for the tokens below.
 // Each `\uXXXX` value can easily be made into a rune by using `rune(0xXXXX)`.
 
+// TODO(elliot): Each token will likely start off just reading the first character. If for example,
+// there was just a `$` on it's own, we'd instantly know that a punctuator was being read. On the
+// other hand, if a `4` was read, then we'd have to keep reading it until we knew if it was an int
+// value or a float value. This will not use regular expressions though, like the comments below
+// might suggest, as that might be too slow.
+
 const (
 	Illegal = iota
 	EOF
 
 	// 2.1.6: Lexical Tokens.
-	Punctuator
-	Name
-	IntValue
-	FloatValue
-	StringValue
+	Punctuator  // One of: !, $, (, ), ..., :, =, @, [, ], {, |, }
+	Name        // Regex: /[_A-Za-z][_0-9A-Za-z]*/
+	IntValue    // Regex: /^[+-]?(0|[1-9]+)$/
+	FloatValue  // Regex: /^[+-]?(0|[1-9]+)(\.[0-9]+)?([eE][+-]?[0-9]+)?$/
+	StringValue // Trickier: "", "some string", "\u1234", "\b\f\n\r\t", "this\nis_a%$string\u0020"
 
 	// 2.1.7: Ignored Tokens
-	UnicodeBOM // "\uFEFF"
-	WhiteSpace // "\u0009" || "\u0020"
-	LineTerminator
-	Comment
-	Comma
+	UnicodeBOM     // Unicode: "\uFEFF"
+	WhiteSpace     // Unicode: "\u0009" || "\u0020". Only significant in strings
+	LineTerminator // Unicode: "\u000A", "\u000D". Only significant in strings
+	Comment        // Literal: "#". Consume up to next LineTerminator
+	Comma          // Literal: ","
 )
