@@ -3,6 +3,8 @@
 // can be found at http://facebook.github.io/graphql/October2016.
 package token
 
+import "fmt"
+
 // TODO(elliot): Go strings are UTF-8, but reading a file actually allows us to read bytes. For now,
 // let's just assume that everything is UTF-8, otherwise it's going to be far more complex. Given
 // that each character should be a UTF-8 character, runes are an easy choice for the tokens below.
@@ -15,7 +17,7 @@ package token
 // might suggest, as that might be too slow.
 
 const (
-	Illegal = iota
+	Illegal Type = iota
 	EOF
 
 	// 2.1.6: Lexical Tokens.
@@ -32,3 +34,45 @@ const (
 	Comment        // Literal: "#". Consume up to next LineTerminator
 	Comma          // Literal: ","
 )
+
+// typeNames is a map of token types to their names as strings.
+var typeNames = map[Type]string{
+	Illegal:        "Illegal",
+	EOF:            "EOF",
+	Punctuator:     "Punctuator",
+	Name:           "Name",
+	IntValue:       "IntValue",
+	FloatValue:     "FloatValue",
+	StringValue:    "StringValue",
+	UnicodeBOM:     "UnicodeBOM",
+	WhiteSpace:     "WhiteSpace",
+	LineTerminator: "LineTerminator",
+	Comment:        "Comment",
+	Comma:          "Comma",
+}
+
+// Type represents a type of token. The types are predefined as constants.
+type Type int
+
+// Token represents a small, easily categorisable data structure that is fed to the parser to
+// produce the abstract syntax tree (AST). The token contains the type, and the literal value that
+// was consumed (if necessary). This provides the parser with an easier and more workable source of
+// input.
+type Token struct {
+	Type    Type
+	Literal string
+}
+
+// String returns a string representation of a token.
+func (t Token) String() string {
+	res, ok := typeNames[t.Type]
+	if !ok {
+		panic(fmt.Sprintf("invalid type given: %d", t.Type))
+	}
+
+	if t.Literal != "" {
+		res += "(" + t.Literal + ")"
+	}
+
+	return res
+}
