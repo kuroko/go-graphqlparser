@@ -71,6 +71,10 @@ func (l *Lexer) Token() Token {
 	return l.token
 }
 
+func (l *Lexer) Read() (rune, int) {
+    return l.read()
+}
+
 // read attempts to read the next rune from the buffered reader. Returns the EOF rune if an error
 // occurs. The return values are the rune that was read, and it's width in bytes.
 func (l *Lexer) read() (rune, int) {
