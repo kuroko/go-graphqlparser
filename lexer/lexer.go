@@ -1,8 +1,6 @@
 package lexer
 
 import (
-	"unicode"
-
 	"github.com/bucketd/go-graphqlparser/token"
 )
 
@@ -50,7 +48,7 @@ func (l *Lexer) Scan() Token {
 	case r == '{' || r == '}':
 		return l.scanPunctuator()
 	// Ignore spaces...
-	case unicode.IsSpace(r):
+	case r == ' ':
 		l.read()
 		return l.Scan()
 	}
