@@ -1,10 +1,7 @@
 package lexer
 
 import (
-	"bufio"
-	"fmt"
-	"io"
-	"unicode/utf8"
+	"unicode"
 
 	"github.com/bucketd/go-graphqlparser/token"
 )
@@ -21,40 +18,87 @@ type Token struct {
 	Line     int        // The line number at the start of this item.
 }
 
-// String returns a string representation of a token.
-func (t Token) String() string {
-	res, ok := token.TypeNames[t.Type]
-	if !ok {
-		panic(fmt.Sprintf("invalid type given: %d", t.Type))
-	}
-
-	if t.Literal != "" {
-		res += "(" + t.Literal + ")"
-	}
-
-	return res
-}
-
 // Lexer holds the state of a state machine for lexically analysing GraphQL queries.
 type Lexer struct {
-	reader        *bufio.Reader // A buffered reader, for reading runes safely.
-	bytePos       int           // The start position of the last rune read, in bytes.
-	runePos       int           // The start position of the last rune read, in runes.
-	prevRune      rune          // The last rune that was read.
-	prevRuneWidth int           // The width of the last rune read, in bytes.
-	token         Token         // The last token that was lexed.
+	input    []rune // The input query string as runes.
+	inputLen int
+	pos      int   // The start position of the last rune read, in runes.
+	token    Token // The last token that was lexed.
 }
 
 // New returns a new lexer, for lexically analysing GraphQL queries from a given reader.
-func New(input io.Reader) *Lexer {
+func New(input string) *Lexer {
+	// Runes have been used after benchmarking several different approaches. Readers seem to add a
+	// lot of overhead (a surprisingly large amount in fact). Bytes are fairly quick, but not as
+	// quick as using runes. Runes do take more memory per operation, but the different isn't really
+	// all that important.
+	runes := []rune(input)
+
 	return &Lexer{
-		reader: bufio.NewReader(input),
+		input:    runes,
+		inputLen: len(runes),
 	}
 }
 
 // Scan attempts
 func (l *Lexer) Scan() Token {
-	return Token{}
+	r := l.peek()
+
+	switch {
+	case (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
+		return l.scanName()
+	case r == '{' || r == '}':
+		return l.scanPunctuator()
+	// Ignore spaces...
+	case unicode.IsSpace(r):
+		l.read()
+		return l.Scan()
+	}
+
+	return Token{
+		Type:     token.EOF,
+		Position: l.pos,
+		// TODO(seeruk): Line number.
+	}
+}
+
+func (l *Lexer) scanName() Token {
+	start := l.pos
+	end := l.pos + 1
+
+	// We already know the first rune is valid part of a name.
+	l.read()
+
+	var done bool
+	for !done {
+		r := l.read()
+
+		switch {
+		case (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
+			end++
+		default:
+			done = true
+		}
+	}
+
+	return Token{
+		Type:     token.Name,
+		Literal:  string(l.input[start:end]),
+		Position: start,
+		// TODO(seeruk): Line number.
+	}
+}
+
+func (l *Lexer) scanPunctuator() Token {
+	start := l.pos
+
+	r := l.read()
+
+	return Token{
+		Type:     token.Punctuator,
+		Literal:  string(r),
+		Position: start,
+	}
 }
 
 // Next will return true if there are more tokens yet to be scanned in this lexer's input.
@@ -71,54 +115,40 @@ func (l *Lexer) Token() Token {
 	return l.token
 }
 
-func (l *Lexer) Read() (rune, int) {
-    return l.read()
+func (l *Lexer) Read() rune {
+	return l.read()
 }
 
-// read attempts to read the next rune from the buffered reader. Returns the EOF rune if an error
-// occurs. The return values are the rune that was read, and it's width in bytes.
-func (l *Lexer) read() (rune, int) {
-	r, w, err := l.reader.ReadRune()
-	if err != nil {
-		// TODO(seeruk): Should all errors yield EOF?
-		return eof, utf8.RuneLen(eof)
+func (l *Lexer) Unread() {
+	l.unread()
+}
+
+func (l *Lexer) peek() rune {
+	defer l.unread()
+	return l.read()
+}
+
+// read attempts to read the next rune from the input. Returns the EOF rune if an error occurs. The
+// return values are the rune that was read, and it's width in bytes.
+func (l *Lexer) read() rune {
+	if l.pos+1 > l.inputLen {
+		return eof
 	}
 
-	// Update previous rune.
-	l.prevRune = r
-	l.prevRuneWidth = w
+	r := l.input[l.pos]
 
-	// Update positions.
-	l.bytePos += w
-	l.runePos++
+	l.pos++
 
-	return r, w
+	return r
 }
 
 // unread attempts to rewind the underlying buffered reader, allowing a previously read rune to be
 // read again.
 func (l *Lexer) unread() {
-	// If we've just unread, we can't do it again.
-	if l.prevRune < 0 || l.prevRuneWidth < 0 {
-		return
-	}
-
 	// If we've not read anything, we can't unread.
-	if l.runePos <= 0 || l.bytePos <= 0 {
+	if l.pos <= 0 {
 		return
 	}
 
-	err := l.reader.UnreadRune()
-	if err != nil {
-		// TODO(seeruk): Should maybe handle this better?
-		return
-	}
-
-	// Disallow another unread, we don't have the information to allow this.
-	l.prevRune = rune(-1)
-	l.prevRuneWidth = -1
-
-	// Update position.
-	l.bytePos -= l.prevRuneWidth
-	l.runePos--
+	l.pos--
 }

@@ -1,30 +1,40 @@
 package main
 
 import (
-    "bytes"
-    "fmt"
-    "time"
+	"fmt"
+	"time"
 
-    "github.com/bucketd/go-graphqlparser/lexer"
+	"github.com/bucketd/go-graphqlparser/lexer"
+	"github.com/bucketd/go-graphqlparser/token"
 )
 
 func main() {
-    start := time.Now()
+	input := "query foo { name model }"
 
-    for i := 0; i < 1000000; i++ {
-        l := lexer.New(bytes.NewReader([]byte("Hello, 世界")))
+	start := time.Now()
 
-        for {
-            r, w := l.Read()
-            if r == rune(0) {
-                break;
-            }
+	for i := 0; i < 5000000; i++ {
+		lxr := lexer.New(input)
 
-            _ = r
-            _ = w
-        }
-    }
+		for {
+			tok := lxr.Scan()
+			if tok.Type == token.EOF {
+				break
+			}
 
-    fmt.Println(time.Since(start))
+			_ = tok
+		}
+	}
+
+	fmt.Println(time.Since(start))
+
+	//start = time.Now()
+	//
+	//for i := 0; i < 1000000; i++ {
+	//	for _, r := range []rune(input) {
+	//		_ = r
+	//	}
+	//}
+	//
+	//fmt.Println(time.Since(start))
 }
-
