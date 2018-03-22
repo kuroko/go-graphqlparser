@@ -12,24 +12,50 @@ import (
 )
 
 func main() {
-	input := bytes.NewReader([]byte("query foo { name model }\xEF"))
+	//runtime.GOMAXPROCS(1)
+
+	input := bytes.NewReader([]byte("query foo { name model foo bar baz qux }"))
+
+	//lxr := lexer.New(input)
+	//
+	//for {
+	//	tok := lxr.Scan()
+	//	if tok.Type == token.EOF {
+	//		break
+	//	}
+	//
+	//	spew.Dump(tok)
+	//}
+	//
+	//os.Exit(0)
 
 	fmt.Println("==> Single-threaded, 5,000,000 iterations:")
 
 	start := time.Now()
 
-	for i := 0; i < 5000000; i++ {
-		lxr := lexer.New(input)
+	var wg1 sync.WaitGroup
 
-		for {
-			tok := lxr.Scan()
-			if tok.Type == token.EOF {
-				break
+	wg1.Add(1)
+
+	go func() {
+		for j := 0; j < 5000000; j++ {
+
+			lxr := lexer.New(input)
+
+			for {
+				tok := lxr.Scan()
+				if tok.Type == token.EOF {
+					break
+				}
+
+				_ = tok
 			}
-
-			_ = tok
 		}
-	}
+
+		wg1.Done()
+	}()
+
+	wg1.Wait()
 
 	fmt.Printf("    %s\n", time.Since(start))
 	fmt.Println("==> Multi-threaded, 5,000,000 iterations per core:")

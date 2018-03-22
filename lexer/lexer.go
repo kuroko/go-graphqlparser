@@ -7,8 +7,12 @@ import (
 	"github.com/bucketd/go-graphqlparser/token"
 )
 
-// eof represents the end of input.
-const eof = rune(0)
+const (
+	// maxBytes is the max bytes to read at a time.
+	maxBytes = 4
+	// eof represents the end of input.
+	eof = rune(0)
+)
 
 // Token represents a small, easily categorisable data structure that is fed to the parser to
 // produce the abstract syntax tree (AST).
@@ -21,15 +25,18 @@ type Token struct {
 
 // Lexer holds the state of a state machine for lexically analysing GraphQL queries.
 type Lexer struct {
-	input io.ReadSeeker // The input query string.
-	pos   int           // The start position of the last rune read, in bytes.
-	rpos  int           // The start position of the last rune read, in runes.
-	wid   int           // The width of the last rune read, in bytes.
-	token Token         // The last token that was lexed.
+	input io.Reader // The input query string.
+	pos   int       // The start position of the last rune read, in bytes.
+	rpos  int       // The start position of the last rune read, in runes.
+	wid   int       // The width of the last rune read, in bytes.
+	token Token     // The last token that was lexed.
+
+	lbs  []byte
+	lbsl int
 }
 
 // New returns a new lexer, for lexically analysing GraphQL queries from a given reader.
-func New(input io.ReadSeeker) *Lexer {
+func New(input io.Reader) *Lexer {
 	return &Lexer{
 		input: input,
 	}
@@ -111,25 +118,37 @@ func (l *Lexer) Read() rune {
 	return l.read()
 }
 
-func (l *Lexer) Unread() {
-	l.unread()
-}
-
 // read attempts to read the next rune from the input. Returns the EOF rune if an error occurs. The
 // return values are the rune that was read, and it's width in bytes.
 func (l *Lexer) read() rune {
-	// 4 bytes is the maximum size of a valid UTF-8 encoded character point.
-	bs := make([]byte, 4)
-
-	// Read as much as possible from the reader. Or hit the end of the input.
-	_, err := l.input.Read(bs)
-	if err != nil {
-		return eof
+	// Start off with the maximum amount of bytes we should be reading. If we have some previous
+	// bytes leftover from another read, then we should cut down the length of the next set of bytes
+	// that are going to be read (`bl`).
+	bl := maxBytes
+	if l.lbsl > 0 {
+		bl = bl - l.lbsl
 	}
+
+	// The length of leftover bytes (l.lbsl) and the length of this byte slice together should be as
+	// long as `maxBytes`.
+	bs := make([]byte, bl)
+
+	// Read as much as possible from the reader. Or hit the end of the input. If we shouldn't read
+	// anything because we've already got `maxBytes` leftover from a previous read, then we don't
+	// bother attempting a read.
+	if l.lbsl < maxBytes {
+		_, err := l.input.Read(bs)
+		if err != nil && l.lbsl == 0 {
+			return eof
+		}
+	}
+
+	// Combine the leftover bytes from the last read with the bytes we've just read.
+	fbs := append(l.lbs, bs...)
 
 	// Hack to get runes from strings faster.
 	var r rune
-	for _, r = range string(bs) {
+	for _, r = range string(fbs) {
 		break
 	}
 
@@ -139,19 +158,8 @@ func (l *Lexer) read() rune {
 	l.pos += w
 	l.rpos++
 
-	// Seek to the start position of the next character, otherwise we'll get garbage results.
-	l.input.Seek(int64(l.pos), io.SeekStart)
+	l.lbs = fbs[w:]
+	l.lbsl = 4 - w
 
 	return r
-}
-
-// unread attempts to rewind the underlying buffered reader, allowing a previously read rune to be
-// read again.
-func (l *Lexer) unread() {
-	// If we've not read anything, we can't unread.
-	if l.pos <= 0 {
-		return
-	}
-
-	l.pos--
 }
