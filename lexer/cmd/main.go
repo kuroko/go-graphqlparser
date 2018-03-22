@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/bucketd/go-graphqlparser/lexer"
@@ -9,6 +10,8 @@ import (
 )
 
 func main() {
+	runtime.GOMAXPROCS(1)
+
 	input := "query foo { name model }"
 
 	start := time.Now()
