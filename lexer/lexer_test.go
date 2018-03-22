@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/token"
@@ -41,25 +42,25 @@ import (
 //	assert.Equal(t, tok.Type, token.Name)
 //}
 
-//func BenchmarkLexer(b *testing.B) {
-//	input := "Hello, 世界"
-//
-//	for i := 0; i < b.N; i++ {
-//		lexer := New(input)
-//
-//		for {
-//			r := lexer.read()
-//			if r == eof {
-//				break
-//			}
-//
-//			_ = r
-//		}
-//	}
-//}
+func BenchmarkLexer(b *testing.B) {
+	input := bytes.NewReader([]byte("Hello, 世界"))
+
+	for i := 0; i < b.N; i++ {
+		lexer := New(input)
+
+		for {
+			r := lexer.read()
+			if r == eof {
+				break
+			}
+
+			_ = r
+		}
+	}
+}
 
 func BenchmarkLexer_Scan(b *testing.B) {
-	input := "query foo { name model }"
+	input := bytes.NewReader([]byte("query foo { name model }"))
 
 	for i := 0; i < b.N; i++ {
 		lxr := New(input)

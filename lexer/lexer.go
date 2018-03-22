@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"io"
 	"unicode/utf8"
 
 	"github.com/bucketd/go-graphqlparser/token"
@@ -20,18 +21,17 @@ type Token struct {
 
 // Lexer holds the state of a state machine for lexically analysing GraphQL queries.
 type Lexer struct {
-	input    string // The input query string.
-	inputLen int    // The input length, in bytes.
-	pos      int    // The start position of the last rune read, in bytes.
-	rpos     int    // The start position of the last rune read, in runes.
-	token    Token  // The last token that was lexed.
+	input io.ReadSeeker // The input query string.
+	pos   int           // The start position of the last rune read, in bytes.
+	rpos  int           // The start position of the last rune read, in runes.
+	wid   int           // The width of the last rune read, in bytes.
+	token Token         // The last token that was lexed.
 }
 
 // New returns a new lexer, for lexically analysing GraphQL queries from a given reader.
-func New(input string) *Lexer {
+func New(input io.ReadSeeker) *Lexer {
 	return &Lexer{
-		input:    input,
-		inputLen: len(input),
+		input: input,
 	}
 }
 
@@ -41,12 +41,11 @@ func (l *Lexer) Scan() Token {
 
 	switch {
 	case (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
-		return l.scanName()
+		return l.scanName(r)
 	case r == '{' || r == '}':
 		return l.scanPunctuator(r)
 	// Ignore spaces...
 	case r == ' ':
-		l.read()
 		return l.Scan()
 	}
 
@@ -57,12 +56,10 @@ func (l *Lexer) Scan() Token {
 	}
 }
 
-func (l *Lexer) scanName() Token {
-	start := l.pos
-	end := l.pos + 1
+func (l *Lexer) scanName(r rune) Token {
+	start := l.rpos - 1
 
-	// We already know the first rune is valid part of a name.
-	//l.read()
+	rs := []rune{r}
 
 	var done bool
 	for !done {
@@ -70,7 +67,7 @@ func (l *Lexer) scanName() Token {
 
 		switch {
 		case (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
-			end++
+			rs = append(rs, r)
 		default:
 			done = true
 		}
@@ -78,14 +75,14 @@ func (l *Lexer) scanName() Token {
 
 	return Token{
 		Type:     token.Name,
-		Literal:  string(l.input[start:end]),
+		Literal:  string(rs),
 		Position: start,
 		// TODO(seeruk): Line number.
 	}
 }
 
 func (l *Lexer) scanPunctuator(r rune) Token {
-	start := l.pos
+	start := l.rpos - 1
 
 	//r := l.read()
 
@@ -121,21 +118,29 @@ func (l *Lexer) Unread() {
 // read attempts to read the next rune from the input. Returns the EOF rune if an error occurs. The
 // return values are the rune that was read, and it's width in bytes.
 func (l *Lexer) read() rune {
-	if l.pos+1 > l.inputLen {
+	// 4 bytes is the maximum size of a valid UTF-8 encoded character point.
+	bs := make([]byte, 4)
+
+	// Read as much as possible from the reader. Or hit the end of the input.
+	_, err := l.input.Read(bs)
+	if err != nil {
 		return eof
 	}
 
-	// This looks pretty weird, but it's the fastest way I've found to get a rune out of a string,
-	// one at a time, reliably.
+	// Hack to get runes from strings faster.
 	var r rune
-	for _, r = range l.input[l.pos:] {
+	for _, r = range string(bs) {
 		break
 	}
 
+	// Find start position of next character.
 	w := utf8.RuneLen(r)
 
 	l.pos += w
 	l.rpos++
+
+	// Seek to the start position of the next character, otherwise we'll get garbage results.
+	l.input.Seek(int64(l.pos), io.SeekStart)
 
 	return r
 }

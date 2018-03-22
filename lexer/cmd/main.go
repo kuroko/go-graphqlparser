@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"runtime"
 	"sync"
@@ -11,9 +12,9 @@ import (
 )
 
 func main() {
-	fmt.Println("==> Single-threaded, 5,000,000 iterations:")
+	input := bytes.NewReader([]byte("query foo { name model }\xEF"))
 
-	input := "query foo { name model }"
+	fmt.Println("==> Single-threaded, 5,000,000 iterations:")
 
 	start := time.Now()
 

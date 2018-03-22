@@ -51,3 +51,8 @@ var TypeNames = map[Type]string{
 
 // Type represents a type of token. The types are predefined as constants.
 type Type int
+
+// String returns the name of this type.
+func (t *Type) String() string {
+	return TypeNames[*t]
+}
