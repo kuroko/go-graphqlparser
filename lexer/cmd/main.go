@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/bucketd/go-graphqlparser/lexer"
@@ -10,7 +11,7 @@ import (
 )
 
 func main() {
-	runtime.GOMAXPROCS(1)
+	fmt.Println("==> Single-threaded, 5,000,000 iterations:")
 
 	input := "query foo { name model }"
 
@@ -29,7 +30,40 @@ func main() {
 		}
 	}
 
-	fmt.Println(time.Since(start))
+	fmt.Printf("    %s\n", time.Since(start))
+	fmt.Println("==> Multi-threaded, 5,000,000 iterations per core:")
+
+	start = time.Now()
+
+	var wg sync.WaitGroup
+
+	for i := 0; i < runtime.GOMAXPROCS(0); i++ {
+		wg.Add(1)
+
+		go func(w int) {
+			wstart := time.Now()
+
+			for j := 0; j < 5000000; j++ {
+				lxr := lexer.New(input)
+
+				for {
+					tok := lxr.Scan()
+					if tok.Type == token.EOF {
+						break
+					}
+
+					_ = tok
+				}
+			}
+
+			fmt.Printf("    Worker %d finished. Took: %s\n", w, time.Since(wstart))
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
+
+	fmt.Printf("    %s\n", time.Since(start))
 
 	//start = time.Now()
 	//
