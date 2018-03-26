@@ -124,10 +124,7 @@ func (l *Lexer) read() rune {
 	// Start off with the maximum amount of bytes we should be reading. If we have some previous
 	// bytes leftover from another read, then we should cut down the length of the next set of bytes
 	// that are going to be read (`bl`).
-	bl := maxBytes
-	if l.lbsl > 0 {
-		bl = bl - l.lbsl
-	}
+	bl := maxBytes - l.lbsl
 
 	// The length of leftover bytes (l.lbsl) and the length of this byte slice together should be as
 	// long as `maxBytes`.
