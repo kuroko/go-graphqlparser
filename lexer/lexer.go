@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"io"
 	"unicode/utf8"
 
@@ -43,7 +44,7 @@ func New(input io.Reader) *Lexer {
 }
 
 // Scan attempts
-func (l *Lexer) Scan() Token {
+func (l *Lexer) Scan() (Token, error) {
 	r := l.read()
 
 	switch {
@@ -51,6 +52,8 @@ func (l *Lexer) Scan() Token {
 		return l.scanName(r)
 	case r == '{' || r == '}':
 		return l.scanPunctuator(r)
+	case (r >= '0' && r <= '9') || r == '-':
+		return l.scanNumber(r)
 	// Ignore spaces...
 	case r == ' ':
 		return l.Scan()
@@ -60,10 +63,10 @@ func (l *Lexer) Scan() Token {
 		Type:     token.EOF,
 		Position: l.pos,
 		// TODO(seeruk): Line number.
-	}
+	}, nil
 }
 
-func (l *Lexer) scanName(r rune) Token {
+func (l *Lexer) scanName(r rune) (Token, error) {
 	start := l.rpos - 1
 
 	rs := []rune{r}
@@ -85,10 +88,10 @@ func (l *Lexer) scanName(r rune) Token {
 		Literal:  string(rs),
 		Position: start,
 		// TODO(seeruk): Line number.
-	}
+	}, nil
 }
 
-func (l *Lexer) scanPunctuator(r rune) Token {
+func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	start := l.rpos - 1
 
 	//r := l.read()
@@ -97,12 +100,80 @@ func (l *Lexer) scanPunctuator(r rune) Token {
 		Type:     token.Punctuator,
 		Literal:  string(r),
 		Position: start,
+	}, nil
+}
+
+func (l *Lexer) scanNumber(r rune) (Token, error) {
+	start := l.rpos - 1
+
+	var rs []rune
+	if r == '-' {
+		rs = append(rs, r)
+		r = l.read()
 	}
+
+	readDigits := func(r rune, l *Lexer, rs []rune) ([]rune, error) {
+		if !(r >= '0' && r <= '9') {
+			return nil, fmt.Errorf("Invalid number, expected digit but got: %v", r)
+		}
+		rs = append(rs, r)
+
+		var done bool
+		for !done {
+			r := l.read()
+
+			switch {
+			case (r >= '0' && r <= '9'):
+				rs = append(rs, r)
+			default:
+				done = true
+			}
+		}
+		return rs, nil
+	}
+
+	if r == '0' {
+		rs = append(rs, r)
+		r := l.read()
+		if r >= '0' && r <= '9' {
+			return Token{}, fmt.Errorf("Invalid number, unexpected digit after 0: %v", r)
+		}
+	}
+
+	rs, err := readDigits(r, l, rs)
+	if err != nil {
+		return Token{}, err
+	}
+
+	var float bool
+	r = l.read()
+	if r == '.' {
+		float = true
+		rs, err = readDigits(r, l, rs)
+		if err != nil {
+			return Token{}, err
+		}
+	}
+
+	if float {
+		return Token{
+			Type:     token.FloatValue,
+			Literal:  string(r),
+			Position: start,
+			// TODO(seeruk): Line number.
+		}, nil
+	}
+	return Token{
+		Type:     token.IntValue,
+		Literal:  string(r),
+		Position: start,
+		// TODO(seeruk): Line number.
+	}, nil
 }
 
 // Next will return true if there are more tokens yet to be scanned in this lexer's input.
 func (l *Lexer) Next() bool {
-	l.token = l.Scan()
+	l.token, _ = l.Scan() // err checking?
 	if l.token.Type == token.EOF {
 		return false
 	}
@@ -156,7 +227,7 @@ func (l *Lexer) read() rune {
 	l.rpos++
 
 	l.lbs = fbs[w:]
-	l.lbsl = 4 - w
+	l.lbsl = maxBytes - w
 
 	return r
 }
