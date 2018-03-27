@@ -31,8 +31,8 @@ type Lexer struct {
 	wid   int       // The width of the last rune read, in bytes.
 	token Token     // The last token that was lexed.
 
-	lbs  []byte
-	lbsl int
+	lbs  []byte // Last bytes read.
+	lbsl int    // Length of last bytes read.
 }
 
 // New returns a new lexer, for lexically analysing GraphQL queries from a given reader.
@@ -98,24 +98,6 @@ func (l *Lexer) scanPunctuator(r rune) Token {
 		Literal:  string(r),
 		Position: start,
 	}
-}
-
-// Next will return true if there are more tokens yet to be scanned in this lexer's input.
-func (l *Lexer) Next() bool {
-	l.token = l.Scan()
-	if l.token.Type == token.EOF {
-		return false
-	}
-	return true
-}
-
-// Token returns the last token that was lexed by this lexer.
-func (l *Lexer) Token() Token {
-	return l.token
-}
-
-func (l *Lexer) Read() rune {
-	return l.read()
 }
 
 // read attempts to read the next rune from the input. Returns the EOF rune if an error occurs. The
