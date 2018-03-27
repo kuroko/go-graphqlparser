@@ -158,20 +158,19 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 	if float {
 		return Token{
 			Type:     token.FloatValue,
-			Literal:  string(r),
+			Literal:  string(rs),
 			Position: start,
 			// TODO(seeruk): Line number.
 		}, nil
 	}
 	return Token{
 		Type:     token.IntValue,
-		Literal:  string(r),
+		Literal:  string(rs),
 		Position: start,
 		// TODO(seeruk): Line number.
 	}, nil
 }
 
-<<<<<<< HEAD
 // Next will return true if there are more tokens yet to be scanned in this lexer's input.
 func (l *Lexer) Next() bool {
 	l.token, _ = l.Scan() // err checking?
@@ -190,8 +189,6 @@ func (l *Lexer) Read() rune {
 	return l.read()
 }
 
-=======
->>>>>>> 891e764c4a521f51f1138b8c26828f1379f4160e
 // read attempts to read the next rune from the input. Returns the EOF rune if an error occurs. The
 // return values are the rune that was read, and it's width in bytes.
 func (l *Lexer) read() rune {
