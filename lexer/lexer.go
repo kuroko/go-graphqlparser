@@ -103,7 +103,8 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	}, nil
 }
 
-func (l *Lexer) scanNumber(r rune) (Token, error) {
+// TODO(Luke-Vear): test cases.
+func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 	start := l.rpos - 1
 
 	var rs []rune
@@ -136,39 +137,51 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 		rs = append(rs, r)
 		r := l.read()
 		if r >= '0' && r <= '9' {
-			return Token{}, fmt.Errorf("Invalid number, unexpected digit after 0: %v", r)
+			return t, fmt.Errorf("Invalid number, unexpected digit after 0: %v", r)
 		}
-	}
-
-	rs, err := readDigits(r, l, rs)
-	if err != nil {
-		return Token{}, err
+	} else {
+		rs, err = readDigits(r, l, rs)
+		if err != nil {
+			return t, err
+		}
+		r = l.read()
 	}
 
 	var float bool
-	r = l.read()
 	if r == '.' {
 		float = true
 		rs, err = readDigits(r, l, rs)
 		if err != nil {
-			return Token{}, err
+			return t, err
+		}
+		r = l.read()
+	}
+
+	if r == 'e' || r == 'E' {
+		float = true
+		rs = append(rs, r)
+
+		r = l.read()
+		if r == '+' || r == '-' {
+			rs = append(rs, r)
+			r = l.read()
+		}
+
+		rs, err = readDigits(r, l, rs)
+		if err != nil {
+			return t, err
 		}
 	}
 
+	// TODO(seeruk): Line number.
+	t.Literal = string(rs)
+	t.Position = start
+
+	t.Type = token.IntValue
 	if float {
-		return Token{
-			Type:     token.FloatValue,
-			Literal:  string(rs),
-			Position: start,
-			// TODO(seeruk): Line number.
-		}, nil
+		t.Type = token.FloatValue
 	}
-	return Token{
-		Type:     token.IntValue,
-		Literal:  string(rs),
-		Position: start,
-		// TODO(seeruk): Line number.
-	}, nil
+	return t, nil
 }
 
 // Next will return true if there are more tokens yet to be scanned in this lexer's input.
