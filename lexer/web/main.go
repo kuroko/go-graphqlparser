@@ -19,18 +19,26 @@ type Request struct {
 
 func main() {
 	r := chi.NewRouter()
-	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
-
+	r.Post("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		var req Request
+		var lxr *lexer.Lexer
 
-		err := json.NewDecoder(r.Body).Decode(&req)
-		if err != nil {
-			http.Error(w, "oops", http.StatusInternalServerError)
+		contentType := r.Header.Get("Content-Type")
+		switch contentType {
+		case "application/graphql":
+			lxr = lexer.New(r.Body)
+		case "application/json":
+			err := json.NewDecoder(r.Body).Decode(&req)
+			if err != nil {
+				http.Error(w, "oops", http.StatusInternalServerError)
+				return
+			}
+
+			lxr = lexer.New(strings.NewReader(req.Query))
+		default:
+			// TODO(seeruk): Invalid content type.
 			return
 		}
-
-		lxr := lexer.New(strings.NewReader(req.Query))
 
 		for {
 			tok := lxr.Scan()
