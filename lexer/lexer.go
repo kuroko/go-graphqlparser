@@ -103,7 +103,6 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	}, nil
 }
 
-// TODO(Luke-Vear): test cases.
 func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 	start := l.rpos - 1
 
@@ -113,61 +112,66 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		r = l.read()
 	}
 
-	readDigits := func(r rune, l *Lexer, rs []rune) ([]rune, error) {
+	readDigits := func(r rune, l *Lexer, rs []rune) (rune, []rune, error) {
 		if !(r >= '0' && r <= '9') {
-			return nil, fmt.Errorf("Invalid number, expected digit but got: %v", r)
+			return 0, nil, fmt.Errorf("Invalid number, expected digit but got: %q", r)
 		}
 		rs = append(rs, r)
 
 		var done bool
 		for !done {
-			r := l.read()
+			r = l.read()
 
 			switch {
-			case (r >= '0' && r <= '9'):
+			case r >= '0' && r <= '9':
 				rs = append(rs, r)
 			default:
 				done = true
 			}
 		}
-		return rs, nil
+		return r, rs, nil
 	}
 
 	if r == '0' {
 		rs = append(rs, r)
-		r := l.read()
+		r = l.read()
+
 		if r >= '0' && r <= '9' {
-			return t, fmt.Errorf("Invalid number, unexpected digit after 0: %v", r)
+			return t, fmt.Errorf("Invalid number, unexpected digit after 0: %q", r)
 		}
+
 	} else {
-		rs, err = readDigits(r, l, rs)
+		r, rs, err = readDigits(r, l, rs)
 		if err != nil {
 			return t, err
 		}
-		r = l.read()
 	}
 
 	var float bool
 	if r == '.' {
 		float = true
-		rs, err = readDigits(r, l, rs)
+
+		rs = append(rs, r)
+		r = l.read()
+
+		r, rs, err = readDigits(r, l, rs)
 		if err != nil {
 			return t, err
 		}
-		r = l.read()
 	}
 
 	if r == 'e' || r == 'E' {
 		float = true
-		rs = append(rs, r)
 
+		rs = append(rs, r)
 		r = l.read()
+
 		if r == '+' || r == '-' {
 			rs = append(rs, r)
 			r = l.read()
 		}
 
-		rs, err = readDigits(r, l, rs)
+		r, rs, err = readDigits(r, l, rs)
 		if err != nil {
 			return t, err
 		}
