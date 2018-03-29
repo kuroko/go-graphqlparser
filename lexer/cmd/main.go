@@ -12,9 +12,9 @@ import (
 )
 
 func main() {
-	//runtime.GOMAXPROCS(1)
+	runtime.GOMAXPROCS(4)
 
-	input := bytes.NewReader([]byte("query foo { name model foo bar baz qux }"))
+	input := bytes.NewReader([]byte("query 0.001 foo { name model foo bar baz qux }"))
 
 	//lxr := lexer.New(input)
 	//
