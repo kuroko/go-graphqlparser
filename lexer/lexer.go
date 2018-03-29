@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	// maxBytes is the max bytes to read at a time.
-	maxBytes = 4
 	// eof represents the end of input.
 	eof = rune(0)
+	// maxBytes is the max bytes to read at a time.
+	maxBytes = 4
 )
 
 // Token represents a small, easily categorisable data structure that is fed to the parser to
@@ -27,6 +27,7 @@ type Token struct {
 // Lexer holds the state of a state machine for lexically analysing GraphQL queries.
 type Lexer struct {
 	input io.Reader // The input query string.
+	line  int       // The current line number.
 	pos   int       // The start position of the last rune read, in bytes.
 	rpos  int       // The start position of the last rune read, in runes.
 	wid   int       // The width of the last rune read, in bytes.
@@ -45,7 +46,7 @@ func New(input io.Reader) *Lexer {
 
 // Scan attempts
 func (l *Lexer) Scan() (Token, error) {
-	r := l.read()
+	r := l.readNextSignificant()
 
 	switch {
 	case (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
@@ -54,15 +55,18 @@ func (l *Lexer) Scan() (Token, error) {
 		return l.scanPunctuator(r)
 	case (r >= '0' && r <= '9') || r == '-':
 		return l.scanNumber(r)
-	// Ignore spaces...
-	case r == ' ':
-		return l.Scan()
+	case r == eof:
+		return Token{
+			Type:     token.EOF,
+			Position: l.pos,
+			Line:     l.line,
+		}, nil
 	}
 
 	return Token{
-		Type:     token.EOF,
+		Type:     token.Illegal,
 		Position: l.pos,
-		// TODO(seeruk): Line number.
+		Line:     l.line,
 	}, nil
 }
 
@@ -87,19 +91,18 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 		Type:     token.Name,
 		Literal:  string(rs),
 		Position: start,
-		// TODO(seeruk): Line number.
+		Line:     l.line,
 	}, nil
 }
 
 func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	start := l.rpos - 1
 
-	//r := l.read()
-
 	return Token{
 		Type:     token.Punctuator,
 		Literal:  string(r),
 		Position: start,
+		Line:     l.line,
 	}, nil
 }
 
@@ -112,10 +115,11 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		r = l.read()
 	}
 
-	readDigits := func(r rune, l *Lexer, rs []rune) (rune, []rune, error) {
+	readDigits := func(r rune, rs []rune) (rune, []rune, error) {
 		if !(r >= '0' && r <= '9') {
-			return 0, nil, fmt.Errorf("Invalid number, expected digit but got: %q", r)
+			return 0, nil, fmt.Errorf("invalid number, expected digit but got: %q", r)
 		}
+
 		rs = append(rs, r)
 
 		var done bool
@@ -137,11 +141,11 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		r = l.read()
 
 		if r >= '0' && r <= '9' {
-			return t, fmt.Errorf("Invalid number, unexpected digit after 0: %q", r)
+			return t, fmt.Errorf("invalid number, unexpected digit after 0: %q", r)
 		}
 
 	} else {
-		r, rs, err = readDigits(r, l, rs)
+		r, rs, err = readDigits(r, rs)
 		if err != nil {
 			return t, err
 		}
@@ -154,7 +158,7 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		rs = append(rs, r)
 		r = l.read()
 
-		r, rs, err = readDigits(r, l, rs)
+		r, rs, err = readDigits(r, rs)
 		if err != nil {
 			return t, err
 		}
@@ -171,14 +175,14 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 			r = l.read()
 		}
 
-		r, rs, err = readDigits(r, l, rs)
+		r, rs, err = readDigits(r, rs)
 		if err != nil {
 			return t, err
 		}
 	}
 
-	// TODO(seeruk): Line number.
 	t.Literal = string(rs)
+	t.Line = l.line
 	t.Position = start
 
 	t.Type = token.IntValue
@@ -204,6 +208,41 @@ func (l *Lexer) Token() Token {
 
 func (l *Lexer) Read() rune {
 	return l.read()
+}
+
+func (l *Lexer) readNextSignificant() rune {
+	var done bool
+	var was000D bool
+
+	r := rune(-1)
+
+	for !done && r != eof {
+		r = l.read()
+
+		was000D = r == rune(0x000D)
+
+		switch {
+		case was000D:
+			// Carriage return, i.e. '\r'.
+			l.line++
+		case r == rune(0x000A):
+			// Line feed, i.e. '\n'.
+			if !was000D {
+				// \r\n is not 2 newlines, so we must check what the last rune was.
+				l.line++
+			}
+		case r == rune(0x0009) || r == rune(0x0020) || r == rune(0x002C) || r == rune(0xFEFF):
+			// 0x0009: Horizontal tab, literal '	'.
+			// 0x0020: Whitespace, literal ' '.
+			// 0x002C: Comma, literal ','.
+			// 0xFEFF: Unicode BOM.
+		default:
+			// Done, this run was significant.
+			done = true
+		}
+	}
+
+	return r
 }
 
 // read attempts to read the next rune from the input. Returns the EOF rune if an error occurs. The

@@ -43,7 +43,11 @@ func main() {
 			lxr := lexer.New(input)
 
 			for {
-				tok := lxr.Scan()
+				tok, err := lxr.Scan()
+				if err != nil {
+					panic(err)
+				}
+
 				if tok.Type == token.EOF {
 					break
 				}
@@ -74,7 +78,11 @@ func main() {
 				lxr := lexer.New(input)
 
 				for {
-					tok := lxr.Scan()
+					tok, err := lxr.Scan()
+					if err != nil {
+						panic(err)
+					}
+
 					if tok.Type == token.EOF {
 						break
 					}

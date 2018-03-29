@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"bytes"
-	"reflect"
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/token"
@@ -25,7 +24,6 @@ func BenchmarkLexer_Scan(b *testing.B) {
 	}
 }
 
-// TODO(seeruk): Line number.
 func TestLexerScanNumber(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -149,18 +147,22 @@ func TestLexerScanNumber(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bs := []byte(tt.input)
 			r := bytes.NewReader(bs)
 			l := New(r)
 			gotT, err := l.Scan()
-			if (err != nil) != tt.wantErr {
+			if !tt.wantErr && err != nil {
 				t.Errorf("Lexer.scanNumber() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(gotT, tt.wantToken) {
-				t.Errorf("Lexer.scanNumber() = %v, want %v", gotT, tt.wantToken)
+
+			isTypeMatch := gotT.Type == tt.wantToken.Type
+			isLiteralMatch := gotT.Literal == tt.wantToken.Literal
+			if !isTypeMatch || !isLiteralMatch {
+				t.Errorf("Lexer.scanNumber() = %+v, want %+v", gotT, tt.wantToken)
 			}
 		})
 	}

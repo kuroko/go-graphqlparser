@@ -41,7 +41,7 @@ func main() {
 		}
 
 		for {
-			tok := lxr.Scan()
+			tok, _ := lxr.Scan()
 			if tok.Type == token.EOF {
 				break
 			}
