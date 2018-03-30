@@ -37,7 +37,7 @@ type Lexer struct {
 	// Previously read information.
 	lbs  []byte // Last bytes read.
 	lbsl int    // Length of last bytes read.
-	ur   rune   // Unread rune, will be read as next rune if present.
+	ur   rune   // Unread rune, will be read as next rune if not equal to `ef`.
 }
 
 // New returns a new lexer, for lexically analysing GraphQL queries from a given reader.
@@ -49,7 +49,8 @@ func New(input io.Reader) *Lexer {
 	}
 }
 
-// Scan attempts
+// Scan attempts to read the next significant token from the input. Tokens that are not understood
+// will yield an "illegal" token.
 func (l *Lexer) Scan() (Token, error) {
 	r := l.readNextSignificant()
 
@@ -68,6 +69,7 @@ func (l *Lexer) Scan() (Token, error) {
 		}, nil
 	}
 
+	// TODO(seeruk): Should this just be an error really?
 	return Token{
 		Type:     token.Illegal,
 		Position: l.pos,
@@ -75,6 +77,7 @@ func (l *Lexer) Scan() (Token, error) {
 	}, nil
 }
 
+// scanName ...
 func (l *Lexer) scanName(r rune) (Token, error) {
 	start := l.pos
 
@@ -101,6 +104,7 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 	}, nil
 }
 
+// scanPunctuator ...
 func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	start := l.pos
 
@@ -112,6 +116,7 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	}, nil
 }
 
+// scanNumber ...
 func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 	start := l.pos
 
@@ -204,6 +209,10 @@ func (l *Lexer) Read() rune {
 	return l.read()
 }
 
+// readNextSignificant reads runes until a "significant" rune is read, i.e. a rune that could be a
+// significant token (not whitespace, not tabs, not newlines, not commas, not encoding-specific
+// characters, etc.). It also does part of the work for identifying when new lines are encountered
+// to increment the line counter.
 func (l *Lexer) readNextSignificant() rune {
 	var done bool
 	var was000D bool
