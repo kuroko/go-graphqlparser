@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	runtime.GOMAXPROCS(4)
+	runtime.GOMAXPROCS(8)
 
 	input := bytes.NewReader([]byte("query 0.001 foo { name model foo bar baz qux }"))
 
