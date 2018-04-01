@@ -9,18 +9,23 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-const query = `query foo {
-	name
-	model
-	1.423e-10
-	... foo
+var query = `
+# Mutation for liking a story.
+# Foo bar baz.
+mutation {
+  likeStory(storyID: 123.53e-10) {
+    story {
+      likeCount
+    }
+  }
 }`
 
 func main() {
-	ipt := strings.NewReader(query)
+	qry := strings.TrimSpace(query)
+	ipt := strings.NewReader(qry)
 	lxr := lexer.New(ipt)
 
-	fmt.Println(query)
+	fmt.Println(qry)
 	fmt.Println()
 
 	for {

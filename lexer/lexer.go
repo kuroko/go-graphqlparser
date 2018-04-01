@@ -15,6 +15,13 @@ const (
 	eof = rune(0)
 	// maxBytes is the max bytes to read at a time.
 	maxBytes = 4
+
+	cr  = rune(0x000D) // Literal '\r'.
+	lf  = rune(0x000A) // Literal '\n'.
+	tab = rune(0x0009) // Literal '	'.
+	ws  = rune(0x0020) // Literal ' '.
+	com = rune(0x002C) // Literal ','.
+	bom = rune(0xFEFF) // Unicode BOM.
 )
 
 // Token represents a small, easily categorisable data structure that is fed to the parser to
@@ -61,6 +68,8 @@ func (l *Lexer) Scan() (Token, error) {
 		return l.scanPunctuator(r)
 	case (r >= '0' && r <= '9') || r == '-':
 		return l.scanNumber(r)
+	case r == '#':
+		return l.scanComment(r)
 	case r == eof:
 		return Token{
 			Type:     token.EOF,
@@ -75,6 +84,51 @@ func (l *Lexer) Scan() (Token, error) {
 		Position: l.pos,
 		Line:     l.line,
 	}, nil
+}
+
+// scanComment ...
+func (l *Lexer) scanComment(r rune) (Token, error) {
+	var was000D bool
+
+	for {
+		r = l.read()
+
+		// If on the last iteration we saw a CR, then we should check if we just read an LF on this
+		// iteration. If we did, reset line position as the next character is still the start of the
+		// next line, then scan.
+		if was000D && r == lf {
+			l.pos = 0
+
+			return l.Scan()
+		}
+
+		// Otherwise, if we saw a CR, and this rune isn't an LF, then we have started reading the
+		// next line's runes, so unread the rune we read, and scan the next token.
+		if was000D && r != lf {
+			l.unread(r)
+
+			return l.Scan()
+		}
+
+		// If we encounter a CR at any point, this will be true.
+		was000D = r == cr
+		if was000D {
+			// Carriage return, i.e. '\r'.
+			l.line++
+			l.pos = 0
+			continue
+		}
+
+		// If we encounter a LF without a proceeding CR, this will be true.
+		if r == lf {
+			// Line feed, i.e. '\n'.
+			l.line++
+			l.pos = 0
+
+			return l.Scan()
+		}
+	}
+
 }
 
 // scanName ...
@@ -109,14 +163,9 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	start := l.pos
 
 	if r == '.' {
-		r = l.read()
-		if r != '.' {
-			return Token{}, fmt.Errorf("invalid puncuator, expected '.' but got: %q", r)
-		}
-
-		r = l.read()
-		if r != '.' {
-			return Token{}, fmt.Errorf("invalid puncuator, expected '.' but got: %q", r)
+		rs := []rune{r, l.read(), l.read()}
+		if rs[1] != '.' || rs[2] != '.' {
+			return Token{}, fmt.Errorf("invalid punctuator, expected \"...\" but got: %q", string(rs))
 		}
 
 		return Token{
@@ -237,25 +286,22 @@ func (l *Lexer) readNextSignificant() rune {
 	for !done && r != eof {
 		r = l.read()
 
-		was000D = r == rune(0x000D)
+		was000D = r == cr
 
 		switch {
 		case was000D:
 			// Carriage return, i.e. '\r'.
 			l.line++
 			l.pos = 0
-		case r == rune(0x000A):
+		case r == lf:
 			// Line feed, i.e. '\n'.
 			if !was000D {
 				// \r\n is not 2 newlines, so we must check what the last rune was.
 				l.line++
 				l.pos = 0
 			}
-		case runeIn(r, rune(0x0009), rune(0x0020), rune(0x002C), rune(0xFEFF)):
-			// 0x0009: Horizontal tab, literal '	'.
-			// 0x0020: Whitespace, literal ' '.
-			// 0x002C: Comma, literal ','.
-			// 0xFEFF: Unicode BOM.
+		case runeIn(r, tab, ws, com, bom):
+			// Skip!
 		default:
 			// Done, this run was significant.
 			done = true
@@ -272,6 +318,7 @@ func (l *Lexer) read() rune {
 	if l.ur != er {
 		ur := l.ur
 		l.ur = er
+		l.pos++
 		return ur
 	}
 
@@ -320,6 +367,7 @@ func (l *Lexer) read() rune {
 // Actually doing an unread would be trickier given the use of a reader...
 func (l *Lexer) unread(r rune) {
 	l.ur = r
+	l.pos--
 }
 
 // runeIn returns true if the rune `r` matches a code point in `rs`.

@@ -11,10 +11,21 @@ import (
 	"github.com/bucketd/go-graphqlparser/token"
 )
 
+var query = `
+# Mutation for liking a story.
+# Foo bar baz.
+mutation {
+  likeStory(storyID: 123.53e-10) {
+    story {
+      likeCount
+    }
+  }
+}`
+
 func main() {
 	runtime.GOMAXPROCS(4)
 
-	input := bytes.NewReader([]byte("query 0.001 foo { name model foo bar baz qux }"))
+	input := bytes.NewReader([]byte(query))
 
 	//lxr := lexer.New(input)
 	//
