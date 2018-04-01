@@ -13,6 +13,7 @@ const query = `query foo {
 	name
 	model
 	1.423e-10
+	... foo
 }`
 
 func main() {

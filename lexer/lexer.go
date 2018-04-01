@@ -57,7 +57,7 @@ func (l *Lexer) Scan() (Token, error) {
 	switch {
 	case (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
 		return l.scanName(r)
-	case r == '{' || r == '}':
+	case runeIn(r, '!', '$', '(', ')', '.', ':', '=', '@', '[', ']', '{', '|', '}'):
 		return l.scanPunctuator(r)
 	case (r >= '0' && r <= '9') || r == '-':
 		return l.scanNumber(r)
@@ -107,6 +107,25 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 // scanPunctuator ...
 func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	start := l.pos
+
+	if r == '.' {
+		r = l.read()
+		if r != '.' {
+			return Token{}, fmt.Errorf("invalid puncuator, expected '.' but got: %q", r)
+		}
+
+		r = l.read()
+		if r != '.' {
+			return Token{}, fmt.Errorf("invalid puncuator, expected '.' but got: %q", r)
+		}
+
+		return Token{
+			Type:     token.Punctuator,
+			Literal:  "...",
+			Position: start,
+			Line:     l.line,
+		}, nil
+	}
 
 	return Token{
 		Type:     token.Punctuator,
@@ -174,13 +193,13 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		}
 	}
 
-	if r == 'e' || r == 'E' {
+	if runeIn(r, 'e', 'E') {
 		float = true
 
 		rs = append(rs, r)
 		r = l.read()
 
-		if r == '+' || r == '-' {
+		if runeIn(r, '+', '-') {
 			rs = append(rs, r)
 			r = l.read()
 		}
@@ -203,10 +222,6 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 	}
 
 	return t, nil
-}
-
-func (l *Lexer) Read() rune {
-	return l.read()
 }
 
 // readNextSignificant reads runes until a "significant" rune is read, i.e. a rune that could be a
@@ -236,7 +251,7 @@ func (l *Lexer) readNextSignificant() rune {
 				l.line++
 				l.pos = 0
 			}
-		case r == rune(0x0009) || r == rune(0x0020) || r == rune(0x002C) || r == rune(0xFEFF):
+		case runeIn(r, rune(0x0009), rune(0x0020), rune(0x002C), rune(0xFEFF)):
 			// 0x0009: Horizontal tab, literal '	'.
 			// 0x0020: Whitespace, literal ' '.
 			// 0x002C: Comma, literal ','.
@@ -305,4 +320,15 @@ func (l *Lexer) read() rune {
 // Actually doing an unread would be trickier given the use of a reader...
 func (l *Lexer) unread(r rune) {
 	l.ur = r
+}
+
+// runeIn returns true if the rune `r` matches a code point in `rs`.
+func runeIn(r rune, rs ...rune) bool {
+	for _, cp := range rs {
+		if cp == r {
+			return true
+		}
+	}
+
+	return false
 }
