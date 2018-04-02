@@ -212,9 +212,11 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 }
 
 // scanNumber scans valid GraphQL integer and float value tokens.
-func (l *Lexer) scanNumber(r rune) (t Token, err error) {
+func (l *Lexer) scanNumber(r rune) (Token, error) {
 	byteStart := l.pos - 1
-	var float bool
+
+	var float bool // Ff true, number is float.
+	var err error  // So no shadowing of r.
 
 	if r == '-' {
 		r = l.read()
@@ -225,12 +227,12 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 
 		if r >= '0' && r <= '9' {
 			// TODO(seeruk): Unread here?
-			return t, fmt.Errorf("invalid number, unexpected digit after 0: %q", r)
+			return Token{}, fmt.Errorf("invalid number, unexpected digit after 0: %q", r)
 		}
 	} else {
 		r, err = l.readDigits(r)
 		if err != nil {
-			return t, err
+			return Token{}, err
 		}
 	}
 
@@ -241,7 +243,7 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 
 		r, err = l.readDigits(r)
 		if err != nil {
-			return t, err
+			return Token{}, err
 		}
 	}
 
@@ -256,7 +258,7 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 
 		r, err = l.readDigits(r)
 		if err != nil {
-			return t, err
+			return Token{}, err
 		}
 	}
 
@@ -264,9 +266,11 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		l.unread()
 	}
 
-	t.Literal = btos(l.input[byteStart:l.pos])
-	t.Line = l.line
-	t.Position = byteStart
+	t := Token{
+		Literal:  btos(l.input[byteStart:l.pos]),
+		Line:     l.line,
+		Position: byteStart,
+	}
 
 	t.Type = token.IntValue
 	if float {
@@ -364,7 +368,9 @@ func (l *Lexer) read() rune {
 	return r
 }
 
-// unread goes back one rune's worth of bytes in the input, changing the positions we keep track of.
+// unread goes back one rune's worth of bytes in the input, changing the
+// positions we keep track of.
+// Does not currently go back a line.
 func (l *Lexer) unread() {
 	l.pos -= l.lrw
 
@@ -382,6 +388,7 @@ func (l *Lexer) unread() {
 }
 
 // btos takes the given bytes, and turns them into a string.
+// Q: naming btos or bbtos? :D
 // TODO(seeruk): Is this actually portable then?
 func btos(bs []byte) string {
 	return *(*string)(unsafe.Pointer(&bs))

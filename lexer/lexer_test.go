@@ -38,7 +38,7 @@ func TestLexer_Scan(t *testing.T) {
 			// Happy inputs.
 			{
 				name:  "lone zero is valid",
-				input: "0",
+				input: "0 ",
 				wantToken: Token{
 					Type:    token.IntValue,
 					Literal: "0",
@@ -128,7 +128,7 @@ func TestLexer_Scan(t *testing.T) {
 			},
 			{
 				name:  "negative symbol with non digit after is invalid",
-				input: "-x",
+				input: "-界",
 				wantToken: Token{
 					Type: token.Illegal,
 				},
@@ -136,7 +136,7 @@ func TestLexer_Scan(t *testing.T) {
 			},
 			{
 				name:  "non digit after decimal point is invalid",
-				input: "1.x",
+				input: "1.界",
 				wantToken: Token{
 					Type: token.Illegal,
 				},
@@ -145,6 +145,14 @@ func TestLexer_Scan(t *testing.T) {
 			{
 				name:  "zero followed by number is invalid",
 				input: "01",
+				wantToken: Token{
+					Type: token.Illegal,
+				},
+				wantErr: true,
+			},
+			{
+				name:  "non digit after exponent",
+				input: "-1.1e界",
 				wantToken: Token{
 					Type: token.Illegal,
 				},
@@ -176,10 +184,67 @@ func TestLexer_Scan(t *testing.T) {
 	})
 
 	t.Run("scanPunctuator()", func(t *testing.T) {
+		tests := []struct {
+			name      string
+			input     string
+			wantToken Token
+			wantErr   bool
+		}{
+			// Happy inputs.
+			{
+				name:  "standard punctuation is valid",
+				input: " { ",
+				wantToken: Token{
+					Type:     token.Punctuator,
+					Literal:  "{",
+					Position: 2,
+					Line:     1,
+				},
 
+				wantErr: false,
+			},
+			{
+				name:  "ellipsis is valid",
+				input: " ... ",
+				wantToken: Token{
+					Type:     token.Punctuator,
+					Literal:  "...",
+					Position: 2,
+					Line:     1,
+				},
+
+				wantErr: false,
+			},
+			// Errorful inputs.
+			{
+				name:  " period followed by not two more periods is invalid",
+				input: " .界界 ",
+				wantToken: Token{
+					Type:    token.Illegal,
+					Literal: "",
+				},
+				wantErr: true,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				bs := []byte(tt.input)
+				l := New(bs)
+				gotT, err := l.Scan()
+				if !tt.wantErr && err != nil {
+					t.Errorf("Lexer.scanPunctuator() error = %+v, wantErr %+v", err, tt.wantErr)
+					return
+				}
+
+				if !reflect.DeepEqual(gotT, tt.wantToken) {
+					t.Errorf("Lexer.scanPunctuator() = %+v, want %+v", gotT, tt.wantToken)
+				}
+			})
+		}
 	})
 
-	t.Run("scanComment", func(t *testing.T) {
+	t.Run("scanComment()", func(t *testing.T) {
 		tests := []struct {
 			name      string
 			input     string
