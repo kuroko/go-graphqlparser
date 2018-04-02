@@ -153,11 +153,15 @@ func (l *Lexer) scanComment(r rune) (Token, error) {
 
 // scanName ...
 func (l *Lexer) scanName(r rune) (Token, error) {
-	start := l.pos - 1
+	byteStart := l.pos - 1
+	runeStart := l.lpos
 
 	var done bool
 	for !done {
 		r := l.read()
+		if r == eof {
+			break
+		}
 
 		switch {
 		case (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
@@ -170,8 +174,8 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 
 	return Token{
 		Type:     token.Name,
-		Literal:  string(l.input[start:l.pos]),
-		Position: l.lpos,
+		Literal:  string(l.input[byteStart:l.pos]),
+		Position: runeStart,
 		Line:     l.line,
 	}, nil
 }
