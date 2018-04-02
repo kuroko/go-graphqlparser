@@ -165,3 +165,53 @@ func TestLexerScanNumber(t *testing.T) {
 		})
 	}
 }
+
+func TestLexerScanComment(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     string
+		wantToken Token
+		wantErr   bool
+	}{
+		// {
+		// 	name: "single line comment valid",
+		// 	input: `# comment
+		// 	query
+		// 	`,
+		// 	wantToken: Token{
+		// 		Type:    token.Name,
+		// 		Literal: "query",
+		// 	},
+		// 	wantErr: false,
+		// },
+		{
+			name:  "single line comment valid",
+			input: "# comment" + string(lf) + "foo",
+			wantToken: Token{
+				Type:     token.Name,
+				Literal:  "foo",
+				Position: 4,
+				Line:     2,
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bs := []byte(tt.input)
+			l := New(bs)
+			gotT, err := l.Scan()
+			if !tt.wantErr && err != nil {
+				t.Errorf("Lexer.scanComment() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			isTypeMatch := gotT.Type == tt.wantToken.Type
+			isLiteralMatch := gotT.Literal == tt.wantToken.Literal
+			if !isTypeMatch || !isLiteralMatch {
+				t.Errorf("Lexer.scanComment() = %+v, want %+v", gotT, tt.wantToken)
+			}
+		})
+	}
+}
