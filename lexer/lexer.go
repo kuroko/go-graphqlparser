@@ -368,8 +368,13 @@ func (l *Lexer) read() rune {
 func (l *Lexer) unread() {
 	l.pos -= l.lrw
 
-	// update rune width for further rewind
-	_, l.lrw = utf8.DecodeRune(l.input[l.pos:])
+	if l.pos > 0 {
+		// update rune width for further rewind
+		_, l.lrw = utf8.DecodeLastRune(l.input[:l.pos])
+	} else {
+		// If we're already at the start, set this to so we don't end up with a negative position.
+		l.lrw = 0
+	}
 
 	if l.lpos > 0 {
 		l.lpos--

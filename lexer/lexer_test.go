@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -25,25 +26,6 @@ func BenchmarkLexer_Scan(b *testing.B) {
 		}
 	}
 }
-
-//func BenchmarkLexer_ScanExt(b *testing.B) {
-//	src := source.NewSource(&source.Source{
-//		Body: query,
-//	})
-//
-//	for i := 0; i < b.N; i++ {
-//		lxr := lexer.Lex(src)
-//
-//		for {
-//			tok, _ := lxr(0)
-//			if tok.Kind == lexer.EOF {
-//				break
-//			}
-//
-//			_ = tok
-//		}
-//	}
-//}
 
 func TestLexer_Scan(t *testing.T) {
 	t.Run("scanNumber()", func(t *testing.T) {
@@ -266,21 +248,21 @@ func TestLexer_Scan(t *testing.T) {
 }
 
 func TestLexerReadUnread(t *testing.T) {
-	bs := []byte("世界")
+	bs := []byte("世h界e界l界l界o")
 	l := New(bs)
 
 	r := l.read()
-	assert.Equal(t, r, '世')
+	assert.Equal(t, fmt.Sprintf("%q", r), fmt.Sprintf("%q", '世'))
 
 	r = l.read()
-	assert.Equal(t, r, '界')
+	assert.Equal(t, fmt.Sprintf("%q", r), fmt.Sprintf("%q", 'h'))
 
 	l.unread()
 	r = l.read()
-	assert.Equal(t, r, '界')
+	assert.Equal(t, fmt.Sprintf("%q", r), fmt.Sprintf("%q", 'h'))
 
 	l.unread()
 	l.unread()
 	r = l.read()
-	assert.Equal(t, r, '世')
+	assert.Equal(t, fmt.Sprintf("%q", r), fmt.Sprintf("%q", '世'))
 }
