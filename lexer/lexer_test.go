@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/token"
@@ -209,10 +210,20 @@ func TestLexer_Scan(t *testing.T) {
 				wantToken: Token{
 					Type:     token.Name,
 					Literal:  "foo",
-					Position: 4,
+					Position: 1,
 					Line:     2,
 				},
 				wantErr: false,
+			},
+			{
+				name:  "multi-line comment valid",
+				input: "# line 1" + string(lf) + "# line 2" + string(lf) + "query",
+				wantToken: Token{
+					Type:     token.Name,
+					Literal:  "query",
+					Position: 1,
+					Line:     3,
+				},
 			},
 		}
 
@@ -222,13 +233,11 @@ func TestLexer_Scan(t *testing.T) {
 				l := New(bs)
 				gotT, err := l.Scan()
 				if !tt.wantErr && err != nil {
-					t.Errorf("Lexer.scanComment() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("Lexer.scanComment() error = %+v, wantErr %+v", err, tt.wantErr)
 					return
 				}
 
-				isTypeMatch := gotT.Type == tt.wantToken.Type
-				isLiteralMatch := gotT.Literal == tt.wantToken.Literal
-				if !isTypeMatch || !isLiteralMatch {
+				if !reflect.DeepEqual(gotT, tt.wantToken) {
 					t.Errorf("Lexer.scanComment() = %+v, want %+v", gotT, tt.wantToken)
 				}
 			})
