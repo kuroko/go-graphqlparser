@@ -228,22 +228,22 @@ func TestLexer_Scan(t *testing.T) {
 				},
 			},
 			{
-				name:  "lf + cr only one extra line",
-				input: "# comment" + string(lf) + string(cr) + "foo",
-				wantToken: Token{
-					Type:     token.Name,
-					Literal:  "foo",
-					Position: 2,
-					Line:     2,
-				},
-			},
-			{
-				name:  "cr + lf two extra lines",
+				name:  "cr + lf only one extra line",
 				input: "# comment" + string(cr) + string(lf) + "foo",
 				wantToken: Token{
 					Type:     token.Name,
 					Literal:  "foo",
-					Position: 2,
+					Position: 1,
+					Line:     2,
+				},
+			},
+			{
+				name:  "lf + cr two extra lines",
+				input: "# comment" + string(lf) + string(cr) + "foo",
+				wantToken: Token{
+					Type:     token.Name,
+					Literal:  "foo",
+					Position: 1,
 					Line:     3,
 				},
 			},
