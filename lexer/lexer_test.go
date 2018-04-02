@@ -268,21 +268,21 @@ func TestLexer_Scan(t *testing.T) {
 }
 
 func TestLexerReadUnread(t *testing.T) {
-	bs := []byte("abcd")
+	bs := []byte("世界")
 	l := New(bs)
 
 	r := l.read()
-	assert.Equal(t, r, 'a')
+	assert.Equal(t, r, '世')
 
 	r = l.read()
-	assert.Equal(t, r, 'b')
+	assert.Equal(t, r, '界')
 
 	l.unread()
 	r = l.read()
-	assert.Equal(t, r, 'b')
+	assert.Equal(t, r, '界')
 
 	l.unread()
 	l.unread()
 	r = l.read()
-	assert.Equal(t, r, 'a')
+	assert.Equal(t, r, '世')
 }
