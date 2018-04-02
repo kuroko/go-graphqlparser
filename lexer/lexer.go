@@ -3,6 +3,7 @@ package lexer
 import (
 	"fmt"
 	"unicode/utf8"
+	"unsafe"
 
 	"github.com/bucketd/go-graphqlparser/token"
 )
@@ -106,12 +107,15 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 	return Token{}, nil
 }
 
-// scanComment ...
+// scanComment scans valid GraphQL comments.
 func (l *Lexer) scanComment(r rune) (Token, error) {
 	var was000D bool
 
 	for {
 		r = l.read()
+		if r == eof {
+			return l.Scan()
+		}
 
 		// If on the last iteration we saw a CR, then we should check if we just read an LF on this
 		// iteration. If we did, reset line position as the next character is still the start of the
@@ -148,10 +152,9 @@ func (l *Lexer) scanComment(r rune) (Token, error) {
 			return l.Scan()
 		}
 	}
-
 }
 
-// scanName ...
+// scanName scans valid GraphQL name tokens.
 func (l *Lexer) scanName(r rune) (Token, error) {
 	byteStart := l.pos - 1
 	runeStart := l.lpos
@@ -174,14 +177,15 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 
 	return Token{
 		Type:     token.Name,
-		Literal:  string(l.input[byteStart:l.pos]),
+		Literal:  btos(l.input[byteStart:l.pos]),
 		Position: runeStart,
 		Line:     l.line,
 	}, nil
 }
 
-// scanPunctuator ...
+// scanPunctuator scans valid GraphQL punctuation tokens.
 func (l *Lexer) scanPunctuator(r rune) (Token, error) {
+	byteStart := l.pos
 	runeStart := l.lpos
 
 	if r == '.' {
@@ -201,13 +205,13 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	// TODO(seeruk): Using other token types for each type of punctuation may actually be faster.
 	return Token{
 		Type:     token.Punctuator,
-		Literal:  string(r),
+		Literal:  btos(l.input[byteStart-l.lrw : byteStart]),
 		Position: runeStart,
 		Line:     l.line,
 	}, nil
 }
 
-// scanNumber ...
+// scanNumber scans valid GraphQL integer and float value tokens.
 func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 	byteStart := l.pos - 1
 	var float bool
@@ -260,7 +264,7 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		l.unread()
 	}
 
-	t.Literal = string(l.input[byteStart:l.pos])
+	t.Literal = btos(l.input[byteStart:l.pos])
 	t.Line = l.line
 	t.Position = byteStart
 
@@ -272,7 +276,7 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 	return t, nil
 }
 
-// readDigits ...
+// readDigits reads up until the next non-numeric character in the input.
 func (l *Lexer) readDigits(r rune) (rune, error) {
 	if !(r >= '0' && r <= '9') {
 		return eof, fmt.Errorf("invalid number, expected digit but got: %q", r)
@@ -281,11 +285,15 @@ func (l *Lexer) readDigits(r rune) (rune, error) {
 	var done bool
 	for !done {
 		r = l.read()
+		if r == eof {
+			break
+		}
 
 		switch {
 		case r >= '0' && r <= '9':
 			continue
 		default:
+			// No need to unread here. We actually want to read the character after the numbers.
 			done = true
 		}
 	}
@@ -331,7 +339,9 @@ func (l *Lexer) readNextSignificant() rune {
 	return r
 }
 
-// read ...
+// read moves forward in the input, and returns the next rune available. This function also updates
+// the position(s) that the lexer keeps track of in the input so the next read continues from where
+// the last left off. Returns the EOF rune if we hit the end of the input.
 func (l *Lexer) read() rune {
 	if l.pos >= l.inputLen {
 		return eof
@@ -354,7 +364,7 @@ func (l *Lexer) read() rune {
 	return r
 }
 
-// unread ...
+// unread goes back one rune's worth of bytes in the input, changing the positions we keep track of.
 func (l *Lexer) unread() {
 	l.pos -= l.lrw
 
@@ -364,4 +374,10 @@ func (l *Lexer) unread() {
 	if l.lpos > 0 {
 		l.lpos--
 	}
+}
+
+// btos takes the given bytes, and turns them into a string.
+// TODO(seeruk): Is this actually portable then?
+func btos(bs []byte) string {
+	return *(*string)(unsafe.Pointer(&bs))
 }

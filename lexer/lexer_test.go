@@ -7,8 +7,6 @@ import (
 	"github.com/seeruk/assert"
 
 	"github.com/bucketd/go-graphqlparser/token"
-	"github.com/graphql-go/graphql/language/lexer"
-	"github.com/graphql-go/graphql/language/source"
 )
 
 var query = []byte("query 0.001 foo { name 12.42e-10 }")
@@ -28,24 +26,24 @@ func BenchmarkLexer_Scan(b *testing.B) {
 	}
 }
 
-func BenchmarkLexer_ScanExt(b *testing.B) {
-	src := source.NewSource(&source.Source{
-		Body: query,
-	})
-
-	for i := 0; i < b.N; i++ {
-		lxr := lexer.Lex(src)
-
-		for {
-			tok, _ := lxr(0)
-			if tok.Kind == lexer.EOF {
-				break
-			}
-
-			_ = tok
-		}
-	}
-}
+//func BenchmarkLexer_ScanExt(b *testing.B) {
+//	src := source.NewSource(&source.Source{
+//		Body: query,
+//	})
+//
+//	for i := 0; i < b.N; i++ {
+//		lxr := lexer.Lex(src)
+//
+//		for {
+//			tok, _ := lxr(0)
+//			if tok.Kind == lexer.EOF {
+//				break
+//			}
+//
+//			_ = tok
+//		}
+//	}
+//}
 
 func TestLexer_Scan(t *testing.T) {
 	t.Run("scanNumber()", func(t *testing.T) {
