@@ -61,12 +61,25 @@ func (l *Lexer) Scan() (Token, error) {
 	switch {
 	case (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
 		return l.scanName(r)
+
 	case r == '!' || r == '$' || r == '(' || r == ')' || r == '.' || r == ':' || r == '=' || r == '@' || r == '[' || r == ']' || r == '{' || r == '|' || r == '}':
 		return l.scanPunctuator(r)
+
 	case (r >= '0' && r <= '9') || r == '-':
 		return l.scanNumber(r)
+
 	case r == '#':
 		return l.scanComment(r)
+
+	case r == '"':
+		rs := []rune{r, l.read(), l.read()}
+		if rs[1] == '"' || rs[2] == '"' {
+			return l.scanBlockString(r)
+		}
+		l.unread()
+		l.unread()
+		return l.scanString(r)
+
 	case r == eof:
 		return Token{
 			Type:     token.EOF,
@@ -81,6 +94,16 @@ func (l *Lexer) Scan() (Token, error) {
 		Position: l.lpos,
 		Line:     l.line,
 	}, nil
+}
+
+// scanString ...
+func (l *Lexer) scanString(r rune) (Token, error) {
+	return Token{}, nil
+}
+
+// scanBlockString ...
+func (l *Lexer) scanBlockString(r rune) (Token, error) {
+	return Token{}, nil
 }
 
 // scanComment ...
@@ -183,6 +206,7 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 // scanNumber ...
 func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 	byteStart := l.pos - 1
+	var float bool
 
 	if r == '-' {
 		r = l.read()
@@ -202,7 +226,6 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		}
 	}
 
-	var float bool
 	if r == '.' {
 		float = true
 
@@ -330,6 +353,9 @@ func (l *Lexer) read() rune {
 // unread ...
 func (l *Lexer) unread() {
 	l.pos -= l.lrw
+
+	// update rune width for further rewind
+	_, l.lrw = utf8.DecodeRune(l.input[l.pos:])
 
 	if l.lpos > 0 {
 		l.lpos--

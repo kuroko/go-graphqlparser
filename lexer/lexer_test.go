@@ -3,6 +3,8 @@ package lexer
 import (
 	"testing"
 
+	"github.com/seeruk/assert"
+
 	"github.com/bucketd/go-graphqlparser/token"
 	"github.com/graphql-go/graphql/language/lexer"
 	"github.com/graphql-go/graphql/language/source"
@@ -192,29 +194,46 @@ func TestLexerScanComment(t *testing.T) {
 		name      string
 		input     string
 		wantToken Token
-		wantErr   bool
 	}{
-		// {
-		// 	name: "single line comment valid",
-		// 	input: `# comment
-		// 	query
-		// 	`,
-		// 	wantToken: Token{
-		// 		Type:    token.Name,
-		// 		Literal: "query",
-		// 	},
-		// 	wantErr: false,
-		// },
 		{
-			name:  "single line comment valid",
+			name:  "single line comment",
 			input: "# comment" + string(lf) + "foo",
 			wantToken: Token{
 				Type:     token.Name,
 				Literal:  "foo",
-				Position: 4,
+				Position: 2,
 				Line:     2,
 			},
-			wantErr: false,
+		},
+		{
+			name:  "double line comment",
+			input: "# line1" + string(lf) + "# line2" + string(lf) + "foo",
+			wantToken: Token{
+				Type:     token.Name,
+				Literal:  "foo",
+				Position: 2,
+				Line:     3,
+			},
+		},
+		{
+			name:  "lf + cr only one extra line",
+			input: "# comment" + string(lf) + string(cr) + "foo",
+			wantToken: Token{
+				Type:     token.Name,
+				Literal:  "foo",
+				Position: 2,
+				Line:     2,
+			},
+		},
+		{
+			name:  "cr + lf two extra lines",
+			input: "# comment" + string(cr) + string(lf) + "foo",
+			wantToken: Token{
+				Type:     token.Name,
+				Literal:  "foo",
+				Position: 2,
+				Line:     3,
+			},
 		},
 	}
 
@@ -222,17 +241,34 @@ func TestLexerScanComment(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			bs := []byte(tt.input)
 			l := New(bs)
-			gotT, err := l.Scan()
-			if !tt.wantErr && err != nil {
-				t.Errorf("Lexer.scanComment() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			gotT, _ := l.Scan()
 
 			isTypeMatch := gotT.Type == tt.wantToken.Type
 			isLiteralMatch := gotT.Literal == tt.wantToken.Literal
+
 			if !isTypeMatch || !isLiteralMatch {
 				t.Errorf("Lexer.scanComment() = %+v, want %+v", gotT, tt.wantToken)
 			}
 		})
 	}
+}
+
+func TestLexerReadUnread(t *testing.T) {
+	bs := []byte("abcd")
+	l := New(bs)
+
+	r := l.read()
+	assert.Equal(t, r, 'a')
+
+	r = l.read()
+	assert.Equal(t, r, 'b')
+
+	l.unread()
+	r = l.read()
+	assert.Equal(t, r, 'b')
+
+	l.unread()
+	l.unread()
+	r = l.read()
+	assert.Equal(t, r, 'a')
 }
