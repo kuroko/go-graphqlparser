@@ -38,7 +38,6 @@ type Lexer struct {
 	// Positional information.
 	pos  int // The start position of the last rune read, in bytes.
 	lpos int // The start position of the last rune read, in runes, on the current line.
-	rpos int // The start position of the last rune read, in runes.
 	line int // The current line number.
 
 	// Previous read information.
@@ -131,7 +130,7 @@ func (l *Lexer) scanComment(r rune) (Token, error) {
 
 // scanName ...
 func (l *Lexer) scanName(r rune) (Token, error) {
-	start := l.pos
+	start := l.pos - 1
 
 	var done bool
 	for !done {
@@ -156,7 +155,7 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 
 // scanPunctuator ...
 func (l *Lexer) scanPunctuator(r rune) (Token, error) {
-	start := l.lpos
+	runeStart := l.lpos
 
 	if r == '.' {
 		rs := []rune{r, l.read(), l.read()}
@@ -167,7 +166,7 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 		return Token{
 			Type:     token.Punctuator,
 			Literal:  "...",
-			Position: start,
+			Position: runeStart,
 			Line:     l.line,
 		}, nil
 	}
@@ -175,14 +174,14 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	return Token{
 		Type:     token.Punctuator,
 		Literal:  string(r),
-		Position: start,
+		Position: runeStart,
 		Line:     l.line,
 	}, nil
 }
 
 // scanNumber ...
 func (l *Lexer) scanNumber(r rune) (t Token, err error) {
-	start := l.pos
+	byteStart := l.pos - 1
 
 	if r == '-' {
 		r = l.read()
@@ -212,6 +211,7 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		r = l.read()
 
 		if r >= '0' && r <= '9' {
+			// TODO(seeruk): Unread here?
 			return t, fmt.Errorf("invalid number, unexpected digit after 0: %q", r)
 		}
 	} else {
@@ -248,15 +248,13 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		}
 	}
 
-	l.unread()
+	if r != eof {
+		l.unread()
+	}
 
-	fmt.Println(start)
-	fmt.Println(l.pos)
-	fmt.Println(l.inputLen)
-
-	t.Literal = string(l.input[start:l.pos])
+	t.Literal = string(l.input[byteStart:l.pos])
 	t.Line = l.line
-	t.Position = start
+	t.Position = byteStart
 
 	t.Type = token.IntValue
 	if float {
@@ -304,6 +302,7 @@ func (l *Lexer) readNextSignificant() rune {
 	return r
 }
 
+// read ...
 func (l *Lexer) read() rune {
 	if l.pos >= l.inputLen {
 		return eof
@@ -313,22 +312,18 @@ func (l *Lexer) read() rune {
 
 	l.pos += w
 	l.lpos++
-	l.rpos++
 
 	l.lrw = w
 
 	return r
 }
 
+// unread ...
 func (l *Lexer) unread() {
 	l.pos -= l.lrw
 
 	if l.lpos > 0 {
 		l.lpos--
-	}
-
-	if l.rpos > 0 {
-		l.rpos--
 	}
 }
 

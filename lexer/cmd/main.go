@@ -22,13 +22,9 @@ mutation {
 }`
 
 func main() {
-	runtime.GOMAXPROCS(4)
+	runtime.GOMAXPROCS(1)
 
-<<<<<<< Updated upstream
-	input := bytes.NewReader([]byte(query))
-=======
 	input := []byte("query 0.001 foo { name model foo bar baz qux }")
->>>>>>> Stashed changes
 
 	//lxr := lexer.New(input)
 	//
