@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bucketd/go-graphqlparser/lexer"
 	"github.com/bucketd/go-graphqlparser/token"
@@ -20,13 +21,8 @@ mutation {
 }`
 
 func main() {
-<<<<<<< Updated upstream
-	qry := strings.TrimSpace(query)
-	ipt := strings.NewReader(qry)
-	lxr := lexer.New(ipt)
-=======
-	lxr := lexer.New([]byte(query))
->>>>>>> Stashed changes
+	qry := strings.TrimSpace("name")
+	lxr := lexer.New([]byte(qry))
 
 	fmt.Println(qry)
 	fmt.Println()
