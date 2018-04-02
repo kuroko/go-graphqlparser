@@ -61,7 +61,7 @@ func (l *Lexer) Scan() (Token, error) {
 	switch {
 	case (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
 		return l.scanName(r)
-	case runeIn(r, '!', '$', '(', ')', '.', ':', '=', '@', '[', ']', '{', '|', '}'):
+	case r == '!' || r == '$' || r == '(' || r == ')' || r == '.' || r == ':' || r == '=' || r == '@' || r == '[' || r == ']' || r == '{' || r == '|' || r == '}':
 		return l.scanPunctuator(r)
 	case (r >= '0' && r <= '9') || r == '-':
 		return l.scanNumber(r)
@@ -171,6 +171,7 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 		}, nil
 	}
 
+	// TODO(seeruk): Using other token types for each type of punctuation may actually be faster.
 	return Token{
 		Type:     token.Punctuator,
 		Literal:  string(r),
@@ -187,26 +188,6 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 		r = l.read()
 	}
 
-	readDigits := func(r rune) (rune, error) {
-		if !(r >= '0' && r <= '9') {
-			return eof, fmt.Errorf("invalid number, expected digit but got: %q", r)
-		}
-
-		var done bool
-		for !done {
-			r = l.read()
-
-			switch {
-			case r >= '0' && r <= '9':
-				continue
-			default:
-				done = true
-			}
-		}
-
-		return r, nil
-	}
-
 	if r == '0' {
 		r = l.read()
 
@@ -215,7 +196,7 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 			return t, fmt.Errorf("invalid number, unexpected digit after 0: %q", r)
 		}
 	} else {
-		r, err = readDigits(r)
+		r, err = l.readDigits(r)
 		if err != nil {
 			return t, err
 		}
@@ -227,22 +208,22 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 
 		r = l.read()
 
-		r, err = readDigits(r)
+		r, err = l.readDigits(r)
 		if err != nil {
 			return t, err
 		}
 	}
 
-	if runeIn(r, 'e', 'E') {
+	if r == 'e' || r == 'E' {
 		float = true
 
 		r = l.read()
 
-		if runeIn(r, '+', '-') {
+		if r == '+' || r == '-' {
 			r = l.read()
 		}
 
-		r, err = readDigits(r)
+		r, err = l.readDigits(r)
 		if err != nil {
 			return t, err
 		}
@@ -262,6 +243,27 @@ func (l *Lexer) scanNumber(r rune) (t Token, err error) {
 	}
 
 	return t, nil
+}
+
+// readDigits ...
+func (l *Lexer) readDigits(r rune) (rune, error) {
+	if !(r >= '0' && r <= '9') {
+		return eof, fmt.Errorf("invalid number, expected digit but got: %q", r)
+	}
+
+	var done bool
+	for !done {
+		r = l.read()
+
+		switch {
+		case r >= '0' && r <= '9':
+			continue
+		default:
+			done = true
+		}
+	}
+
+	return r, nil
 }
 
 // readNextSignificant reads runes until a "significant" rune is read, i.e. a rune that could be a
@@ -291,7 +293,7 @@ func (l *Lexer) readNextSignificant() rune {
 				l.line++
 				l.lpos = 0
 			}
-		case runeIn(r, tab, ws, com, bom):
+		case r == tab || r == ws || r == com || r == bom:
 			// Skip!
 		default:
 			// Done, this run was significant.
@@ -308,7 +310,14 @@ func (l *Lexer) read() rune {
 		return eof
 	}
 
-	r, w := utf8.DecodeRune(l.input[l.pos:])
+	var r rune
+	var w int
+	if sbr := l.input[l.pos]; sbr < utf8.RuneSelf {
+		r = rune(sbr)
+		w = 1
+	} else {
+		r, w = utf8.DecodeRune(l.input[l.pos:])
+	}
 
 	l.pos += w
 	l.lpos++
@@ -325,15 +334,4 @@ func (l *Lexer) unread() {
 	if l.lpos > 0 {
 		l.lpos--
 	}
-}
-
-// runeIn returns true if the rune `r` matches a code point in `rs`.
-func runeIn(r rune, rs ...rune) bool {
-	for _, cp := range rs {
-		if cp == r {
-			return true
-		}
-	}
-
-	return false
 }

@@ -22,7 +22,7 @@ mutation {
 }`
 
 func main() {
-	runtime.GOMAXPROCS(1)
+	runtime.GOMAXPROCS(4)
 
 	input := []byte("query 0.001 foo { name model foo bar baz qux }")
 
@@ -43,33 +43,22 @@ func main() {
 
 	start := time.Now()
 
-	var wg1 sync.WaitGroup
+	for j := 0; j < 5000000; j++ {
+		lxr := lexer.New(input)
 
-	wg1.Add(1)
-
-	go func() {
-		for j := 0; j < 5000000; j++ {
-
-			lxr := lexer.New(input)
-
-			for {
-				tok, err := lxr.Scan()
-				if err != nil {
-					panic(err)
-				}
-
-				if tok.Type == token.EOF {
-					break
-				}
-
-				_ = tok
+		for {
+			tok, err := lxr.Scan()
+			if err != nil {
+				panic(err)
 			}
+
+			if tok.Type == token.EOF {
+				break
+			}
+
+			_ = tok
 		}
-
-		wg1.Done()
-	}()
-
-	wg1.Wait()
+	}
 
 	fmt.Printf("    %s\n", time.Since(start))
 	fmt.Println("==> Multi-threaded, 5,000,000 iterations per core:")
