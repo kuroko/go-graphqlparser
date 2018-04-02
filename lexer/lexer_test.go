@@ -4,17 +4,38 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/token"
+	"github.com/graphql-go/graphql/language/lexer"
+	"github.com/graphql-go/graphql/language/source"
 )
 
-func BenchmarkLexer_Scan(b *testing.B) {
-	input := []byte("query 0.001 foo { name 12.42e-10 }")
+var query = []byte("query 0.001 foo { name 12.42e-10 }")
 
+func BenchmarkLexer_Scan(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		lxr := New(input)
+		lxr := New(query)
 
 		for {
 			tok, _ := lxr.Scan()
 			if tok.Type == token.EOF {
+				break
+			}
+
+			_ = tok
+		}
+	}
+}
+
+func BenchmarkLexer_ScanExt(b *testing.B) {
+	src := source.NewSource(&source.Source{
+		Body: query,
+	})
+
+	for i := 0; i < b.N; i++ {
+		lxr := lexer.Lex(src)
+
+		for {
+			tok, _ := lxr(0)
+			if tok.Kind == lexer.EOF {
 				break
 			}
 
