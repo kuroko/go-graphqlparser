@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"runtime"
 	"sync"
@@ -25,12 +24,16 @@ mutation {
 func main() {
 	runtime.GOMAXPROCS(4)
 
+<<<<<<< Updated upstream
 	input := bytes.NewReader([]byte(query))
+=======
+	input := []byte("query 0.001 foo { name model foo bar baz qux }")
+>>>>>>> Stashed changes
 
 	//lxr := lexer.New(input)
 	//
 	//for {
-	//	tok := lxr.Scan()
+	//	tok, _ := lxr.Scan()
 	//	if tok.Type == token.EOF {
 	//		break
 	//	}

@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/bucketd/go-graphqlparser/lexer"
 	"github.com/bucketd/go-graphqlparser/token"
@@ -12,7 +12,7 @@ import (
 )
 
 type Request struct {
-	Query         string                 `json:"query"`
+	Query         []byte                 `json:"query"`
 	OperationName string                 `json:"operationName,omitempty"`
 	Variables     map[string]interface{} `json:"variables"`
 }
@@ -26,7 +26,9 @@ func main() {
 		contentType := r.Header.Get("Content-Type")
 		switch contentType {
 		case "application/graphql":
-			lxr = lexer.New(r.Body)
+			bs, _ := ioutil.ReadAll(r.Body)
+
+			lxr = lexer.New(bs)
 		case "application/json":
 			err := json.NewDecoder(r.Body).Decode(&req)
 			if err != nil {
@@ -34,7 +36,7 @@ func main() {
 				return
 			}
 
-			lxr = lexer.New(strings.NewReader(req.Query))
+			lxr = lexer.New(req.Query)
 		default:
 			// TODO(seeruk): Invalid content type.
 			return

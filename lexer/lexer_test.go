@@ -1,14 +1,13 @@
 package lexer
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/token"
 )
 
 func BenchmarkLexer_Scan(b *testing.B) {
-	input := bytes.NewReader([]byte("query foo { name model }"))
+	input := []byte("query 0.001 foo { name 12.42e-10 }")
 
 	for i := 0; i < b.N; i++ {
 		lxr := New(input)
@@ -151,8 +150,7 @@ func TestLexerScanNumber(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bs := []byte(tt.input)
-			r := bytes.NewReader(bs)
-			l := New(r)
+			l := New(bs)
 			gotT, err := l.Scan()
 			if !tt.wantErr && err != nil {
 				t.Errorf("Lexer.scanNumber() error = %v, wantErr %v", err, tt.wantErr)
