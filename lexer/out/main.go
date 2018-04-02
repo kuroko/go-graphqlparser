@@ -21,7 +21,7 @@ mutation {
 }`
 
 func main() {
-	qry := strings.TrimSpace("name")
+	qry := strings.TrimSpace(query)
 	lxr := lexer.New([]byte(qry))
 
 	fmt.Println(qry)
