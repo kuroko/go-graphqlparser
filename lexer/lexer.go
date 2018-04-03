@@ -14,12 +14,13 @@ const (
 	// eof represents the end of input.
 	eof = rune(0)
 
+	bom = rune(0xFEFF) // Unicode BOM.
 	cr  = rune(0x000D) // Literal '\r'.
 	lf  = rune(0x000A) // Literal '\n'.
 	tab = rune(0x0009) // Literal '	'.
 	ws  = rune(0x0020) // Literal ' '.
 	com = rune(0x002C) // Literal ','.
-	bom = rune(0xFEFF) // Unicode BOM.
+	bsl = rune(0x005C) // Literal '\'.
 )
 
 // Token represents a small, easily categorisable data structure that is fed to the parser to
@@ -90,6 +91,7 @@ func (l *Lexer) Scan() (Token, error) {
 	}
 
 	// TODO(seeruk): Should this just be an error really?
+	// https://github.com/graphql/graphql-js/blob/master/src/language/lexer.js#L347
 	return Token{
 		Type:     token.Illegal,
 		Position: l.lpos,
@@ -98,13 +100,87 @@ func (l *Lexer) Scan() (Token, error) {
 }
 
 // scanString ...
+// TODO(Luke-Vear): finish logic and helper functions.
+// TODO(Luke-Vear): are appends needed?
 func (l *Lexer) scanString(r rune) (Token, error) {
-	return Token{}, nil
+	byteStart := l.pos - 1
+	runeStart := l.lpos
+	rs := []rune{r}
+
+	var done bool
+	for !done {
+		r = l.read()
+
+		switch {
+
+		case r == '"':
+			rs = append(rs, r)
+			return Token{
+				Type:     token.StringValue,
+				Literal:  string(rs),
+				Position: runeStart,
+				Line:     l.line,
+			}, nil
+
+		case r < ws && r != tab:
+			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+
+		case r == bsl:
+			r, err := escapedChar(l)
+			if err != nil {
+				return Token{}, err
+			}
+			rs = append(rs, r)
+
+		default:
+			rs = append(rs, r)
+		}
+	}
+
+	return Token{
+		Type:     token.StringValue,
+		Literal:  btos(l.input[byteStart:l.pos]),
+		Position: runeStart,
+		Line:     l.line,
+	}, nil
 }
 
 // scanBlockString ...
 func (l *Lexer) scanBlockString(r rune) (Token, error) {
 	return Token{}, nil
+}
+
+func escapedChar(l *Lexer) (rune, error) {
+	r := l.read()
+	switch r {
+	case '"':
+		return 0, nil
+	case '/':
+		return 0, nil
+	case '\\': // this is actually one backslash...
+		return 0, nil
+	case 'b':
+		return 0, nil
+	case 'f':
+		return 0, nil
+	case 'n':
+		return lf, nil
+	case 'r':
+		return 0, nil
+	case 't':
+		return 0, nil
+	case 'u':
+		cp, err := validRune([]rune{r, l.read(), l.read(), l.read()})
+		if err != nil {
+			return 0, nil
+		}
+		return cp, nil
+	}
+	return 0, fmt.Errorf("invalid character escape sequence: %s", "\\"+string(r))
+}
+
+func validRune(rs []rune) (rune, error) {
+	return 0, nil
 }
 
 // scanComment scans valid GraphQL comments.
@@ -165,7 +241,6 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 		r := l.read()
 
 		switch {
-		// Q: is eof not caught by the default case?
 		case r == eof:
 			done = true
 		case (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
@@ -219,17 +294,24 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 	var float bool // If true, number is float.
 	var err error  // So no shadowing of r.
 
+	// Check for preceeding minus sign
 	if r == '-' {
 		r = l.read()
 	}
 
+	// Check if digits begins with zero
 	if r == '0' {
 		r = l.read()
 
+		// If there is another digit after zero, error.
 		if r >= '0' && r <= '9' {
 			// TODO(seeruk): Unread here?
+			// LV: I think on error we hard stop processing.
 			return Token{}, fmt.Errorf("invalid number, unexpected digit after 0: %q", r)
 		}
+
+		// If number does not begin with zero, read the digits.
+		// If the first character is not a digit, error.
 	} else {
 		r, err = l.readDigits(r)
 		if err != nil {
@@ -237,26 +319,31 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 		}
 	}
 
+	// Check for a decimal place, if there is a decimal place this number is a float.
 	if r == '.' {
 		float = true
 
 		r = l.read()
 
+		// Read the digits after the decimal place if the first character is not a digit, error.
 		r, err = l.readDigits(r)
 		if err != nil {
 			return Token{}, err
 		}
 	}
 
+	// Check for exponent sign, if there is an exponent sign this number is a float.
 	if r == 'e' || r == 'E' {
 		float = true
 
 		r = l.read()
 
+		// Check for positive or negative symbol infront of the value.
 		if r == '+' || r == '-' {
 			r = l.read()
 		}
 
+		// Read the exponent digitas, if the first character is not a digit, error.
 		r, err = l.readDigits(r)
 		if err != nil {
 			return Token{}, err
@@ -292,9 +379,6 @@ func (l *Lexer) readDigits(r rune) (rune, error) {
 		r = l.read()
 
 		switch {
-		// Q: is eof not caught by the default case?
-		case r == eof:
-			done = true
 		case r >= '0' && r <= '9':
 			continue
 		default:
@@ -327,6 +411,7 @@ func (l *Lexer) readNextSignificant() rune {
 			l.line++
 			l.lpos = 0
 		case r == lf:
+			// Q: not hit by tests? can this code be reached?
 			// Line feed, i.e. '\n'.
 			if !was000D {
 				// \r\n is not 2 newlines, so we must check what the last rune was.

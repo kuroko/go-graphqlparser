@@ -321,6 +321,62 @@ func TestLexer_Scan(t *testing.T) {
 			})
 		}
 	})
+
+	t.Run("scanString()", func(t *testing.T) {
+		tests := []struct {
+			name      string
+			input     string
+			wantToken Token
+			wantErr   bool
+		}{
+			{
+				name:  "simple string",
+				input: `"simple"`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `"simple"`,
+					Position: 1,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "escaped lf",
+				input: `"line\nfeed"`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `"line` + string(lf) + `feed"`,
+					Position: 1,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "newline errors",
+				input: `"foo` + string(lf) + `"`,
+				wantToken: Token{
+					Type: token.Illegal,
+				},
+				wantErr: true,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				bs := []byte(tt.input)
+				l := New(bs)
+				gotT, err := l.Scan()
+				if !tt.wantErr && err != nil {
+					t.Errorf("Lexer.scanString() error = %+v, wantErr %+v", err, tt.wantErr)
+					return
+				}
+
+				if !reflect.DeepEqual(gotT, tt.wantToken) {
+					t.Errorf("Lexer.scanString() = %+v, want %+v", gotT, tt.wantToken)
+				}
+			})
+		}
+	})
 }
 
 func TestLexerReadUnread(t *testing.T) {
