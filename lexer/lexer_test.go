@@ -38,7 +38,7 @@ func TestLexer_Scan(t *testing.T) {
 			// Happy inputs.
 			{
 				name:  "lone zero is valid",
-				input: "0 ",
+				input: "0 ", // Q: padding ws for coverage?
 				wantToken: Token{
 					Type:    token.IntValue,
 					Literal: "0",
@@ -193,7 +193,7 @@ func TestLexer_Scan(t *testing.T) {
 			// Happy inputs.
 			{
 				name:  "standard punctuation is valid",
-				input: " { ",
+				input: " { ", // Q: padding ws for coverage?
 				wantToken: Token{
 					Type:     token.Punctuator,
 					Literal:  "{",
@@ -205,7 +205,7 @@ func TestLexer_Scan(t *testing.T) {
 			},
 			{
 				name:  "ellipsis is valid",
-				input: " ... ",
+				input: " ... ", // Q: padding ws for coverage?
 				wantToken: Token{
 					Type:     token.Punctuator,
 					Literal:  "...",
@@ -218,7 +218,7 @@ func TestLexer_Scan(t *testing.T) {
 			// Errorful inputs.
 			{
 				name:  " period followed by not two more periods is invalid",
-				input: " .界界 ",
+				input: " .界界 ", // Q: padding ws for coverage?
 				wantToken: Token{
 					Type:    token.Illegal,
 					Literal: "",
@@ -251,6 +251,17 @@ func TestLexer_Scan(t *testing.T) {
 			wantToken Token
 			wantErr   bool
 		}{
+			{
+				name:  "only comment, no newlines",
+				input: "# only comment",
+				wantToken: Token{
+					Type:     token.EOF,
+					Literal:  "",
+					Position: 14,
+					Line:     1,
+				},
+				wantErr: false,
+			},
 			{
 				name:  "single line comment valid",
 				input: "# comment" + string(lf) + "foo",

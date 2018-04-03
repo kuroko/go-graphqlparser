@@ -74,7 +74,7 @@ func (l *Lexer) Scan() (Token, error) {
 
 	case r == '"':
 		rs := []rune{r, l.read(), l.read()}
-		if rs[1] == '"' || rs[2] == '"' {
+		if rs[1] == '"' && rs[2] == '"' {
 			return l.scanBlockString(r)
 		}
 		l.unread()
@@ -128,6 +128,7 @@ func (l *Lexer) scanComment(r rune) (Token, error) {
 
 		// Otherwise, if we saw a CR, and this rune isn't an LF, then we have started reading the
 		// next line's runes, so unread the rune we read, and scan the next token.
+		// Q: not hit by tests? can this code be reached?
 		if was000D && r != lf {
 			l.unread()
 
@@ -162,11 +163,11 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 	var done bool
 	for !done {
 		r := l.read()
-		if r == eof {
-			break
-		}
 
 		switch {
+		// Q: is eof not caught by the default case?
+		case r == eof:
+			done = true
 		case (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
 			continue
 		default:
@@ -215,7 +216,7 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 func (l *Lexer) scanNumber(r rune) (Token, error) {
 	byteStart := l.pos - 1
 
-	var float bool // Ff true, number is float.
+	var float bool // If true, number is float.
 	var err error  // So no shadowing of r.
 
 	if r == '-' {
@@ -289,11 +290,11 @@ func (l *Lexer) readDigits(r rune) (rune, error) {
 	var done bool
 	for !done {
 		r = l.read()
-		if r == eof {
-			break
-		}
 
 		switch {
+		// Q: is eof not caught by the default case?
+		case r == eof:
+			done = true
 		case r >= '0' && r <= '9':
 			continue
 		default:
