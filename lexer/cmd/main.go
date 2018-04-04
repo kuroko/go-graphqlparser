@@ -24,7 +24,7 @@ mutation {
 func main() {
 	runtime.GOMAXPROCS(4)
 
-	input := []byte("query 0.001 foo { name model foo bar baz qux }")
+	input := []byte("query \"\u4e16\" 0.001 foo { name model foo bar baz qux }")
 
 	//lxr := lexer.New(input)
 	//

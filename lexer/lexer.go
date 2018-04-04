@@ -109,7 +109,6 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		r = l.read()
 
 		switch {
-
 		case r == '"':
 			return Token{
 				Type:     token.StringValue,
