@@ -13,7 +13,7 @@ var query = `
 # Mutation for liking a story.
 # Foo bar baz.
 mutation {
-  likeStory(storyID: 123.53e-10) {
+  likeStory(storyID: 123.53e-10, foo: "\u4e16") {
     story {
       likeCount
     }

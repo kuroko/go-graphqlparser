@@ -112,7 +112,6 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		r = l.read()
 
 		switch {
-
 		case r == '"':
 			rs = append(rs, r)
 			return Token{
