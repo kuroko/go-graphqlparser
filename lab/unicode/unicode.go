@@ -1,6 +1,9 @@
-package unicode
+package main
 
-import "fmt"
+import (
+	"fmt"
+	"unsafe"
+)
 
 func main() {
 	r1 := '4'
@@ -12,6 +15,30 @@ func main() {
 
 	fmt.Println(res)
 	fmt.Println(string(res))
+
+	fmt.Println(rtob(rune(0x4e16)))
+	fmt.Println()
+}
+
+func rtob(r rune) string {
+	//bs := make([]byte, utf8.RuneLen(r))
+	//_ = utf8.EncodeRune(bs, r)
+	//
+	// return bs
+
+	//buf := bytes.Buffer{}
+	//buf.WriteRune(r)
+	//
+	//return buf.Bytes()
+
+	return string(r)
+}
+
+// btos takes the given bytes, and turns them into a string.
+// Q: naming btos or bbtos? :D
+// TODO(seeruk): Is this actually portable then?
+func btos(bs []byte) string {
+	return *(*string)(unsafe.Pointer(&bs))
 }
 
 // TODO(seeruk): Here: https://github.com/graphql/graphql-js/blob/master/src/language/lexer.js#L689
