@@ -100,12 +100,9 @@ func (l *Lexer) Scan() (Token, error) {
 }
 
 // scanString ...
-// TODO(Luke-Vear): finish logic and helper functions.
-// TODO(Luke-Vear): are appends needed?
 func (l *Lexer) scanString(r rune) (Token, error) {
-	//byteStart := l.pos - 1
 	runeStart := l.lpos
-	rs := []rune{r}
+	var rs []rune
 
 	var done bool
 	for !done {
@@ -114,7 +111,6 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		switch {
 
 		case r == '"':
-			rs = append(rs, r)
 			return Token{
 				Type:     token.StringValue,
 				Literal:  string(rs),
@@ -137,6 +133,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		}
 	}
 
+	// Q: not hit by tests? can this code be reached?
 	return Token{
 		Type:     token.StringValue,
 		Literal:  string(rs),

@@ -335,7 +335,7 @@ func TestLexer_Scan(t *testing.T) {
 				input: `"simple"`,
 				wantToken: Token{
 					Type:     token.StringValue,
-					Literal:  `"simple"`,
+					Literal:  "simple",
 					Position: 1,
 					Line:     1,
 				},
@@ -346,7 +346,7 @@ func TestLexer_Scan(t *testing.T) {
 				input: `"line\nfeed"`,
 				wantToken: Token{
 					Type:     token.StringValue,
-					Literal:  `"line` + string(lf) + `feed"`,
+					Literal:  "line" + string(lf) + "feed",
 					Position: 1,
 					Line:     1,
 				},
@@ -357,7 +357,7 @@ func TestLexer_Scan(t *testing.T) {
 				input: `"\u4e16world"`,
 				wantToken: Token{
 					Type:     token.StringValue,
-					Literal:  `"世world"`,
+					Literal:  "世world",
 					Position: 1,
 					Line:     1,
 				},
