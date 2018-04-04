@@ -329,6 +329,7 @@ func TestLexer_Scan(t *testing.T) {
 			wantToken Token
 			wantErr   bool
 		}{
+			// Happy
 			{
 				name:  "simple string",
 				input: `"simple"`,
@@ -353,17 +354,6 @@ func TestLexer_Scan(t *testing.T) {
 			},
 			{
 				name:  "world",
-				input: `"\u4e16"`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  `"世"`,
-					Position: 1,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "world",
 				input: `"\u4e16world"`,
 				wantToken: Token{
 					Type:     token.StringValue,
@@ -373,9 +363,26 @@ func TestLexer_Scan(t *testing.T) {
 				},
 				wantErr: false,
 			},
+			// Errorful
 			{
-				name:  "errorful unicode",
+				name:  "no closing quote",
+				input: `"foo`,
+				wantToken: Token{
+					Type: token.Illegal,
+				},
+				wantErr: true,
+			},
+			{
+				name:  "invalid unicode",
 				input: `"\uAZ"`,
+				wantToken: Token{
+					Type: token.Illegal,
+				},
+				wantErr: true,
+			},
+			{
+				name:  "invalid escape",
+				input: `"\z"`,
 				wantToken: Token{
 					Type: token.Illegal,
 				},

@@ -172,10 +172,7 @@ func escapedChar(l *Lexer) (rune, error) {
 
 	case 'u':
 		rs := []rune{l.read(), l.read(), l.read(), l.read()}
-		fmt.Println(rs)
 		r := ucptor(rs)
-		fmt.Printf("%q\n", r)
-		fmt.Printf("\\\\u%04X\n", r)
 		if r < 0 {
 			return 0, fmt.Errorf("invalid character escape sequence: %s,", "\\u"+string(r))
 		}
@@ -186,11 +183,14 @@ func escapedChar(l *Lexer) (rune, error) {
 }
 
 // TODO(seeruk): Here: https://github.com/graphql/graphql-js/blob/master/src/language/lexer.js#L689
+// TODO(Luke-Vear): Discuss rename, I think ucptor isn't easy to grok.
 func ucptor(rs []rune) rune {
 	a, b, c, d := hexRuneToInt(rs[0]), hexRuneToInt(rs[1]), hexRuneToInt(rs[2]), hexRuneToInt(rs[3])
 	return rune(a<<12 | b<<8 | c<<4 | d<<0)
 }
 
+// hexRuneToInt changes a character into its integer value in hexadecimal. For example:
+// the character 'A' is 65 in decimal representation but its value is 10 in hexadecimal.
 func hexRuneToInt(r rune) int {
 	switch {
 	case r >= '0' && r <= '9':
