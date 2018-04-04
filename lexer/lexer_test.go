@@ -352,6 +352,36 @@ func TestLexer_Scan(t *testing.T) {
 				wantErr: false,
 			},
 			{
+				name:  "world",
+				input: `"\u4e16"`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `"世"`,
+					Position: 1,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "world",
+				input: `"\u4e16world"`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `"世world"`,
+					Position: 1,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "errorful unicode",
+				input: `"\uAZ"`,
+				wantToken: Token{
+					Type: token.Illegal,
+				},
+				wantErr: true,
+			},
+			{
 				name:  "newline errors",
 				input: `"foo` + string(lf) + `"`,
 				wantToken: Token{

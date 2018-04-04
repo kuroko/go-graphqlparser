@@ -20,7 +20,7 @@ const (
 	tab = rune(0x0009) // Literal '	'.
 	ws  = rune(0x0020) // Literal ' '.
 	com = rune(0x002C) // Literal ','.
-	bsl = rune(0x005C) // Literal '\'.
+	bsl = rune(0x005C) // Literal reverse solidus (backslash).
 )
 
 // Token represents a small, easily categorisable data structure that is fed to the parser to
@@ -153,36 +153,54 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 func escapedChar(l *Lexer) (rune, error) {
 	r := l.read()
 	switch r {
-	// case '"', '/', '\\', 'b', 'f', 'n', 'r', 't':
-	// 	return r, nil
 	case '"':
-		return 0, nil
+		return '"', nil
 	case '/':
-		return 0, nil
-	case '\\':
-		return 0, nil
+		return '/', nil
+	case bsl:
+		return bsl, nil
 	case 'b':
-		return 0, nil
+		return '\b', nil
 	case 'f':
-		return 0, nil
+		return '\f', nil
 	case 'n':
-		return lf, nil
+		return '\n', nil
 	case 'r':
-		return 0, nil
+		return '\r', nil
 	case 't':
-		return 0, nil
+		return '\t', nil
+
 	case 'u':
-		cp, err := validRune(r, l.read(), l.read(), l.read())
-		if err != nil {
-			return 0, nil
+		rs := []rune{l.read(), l.read(), l.read(), l.read()}
+		fmt.Println(rs)
+		r := ucptor(rs)
+		fmt.Printf("%q\n", r)
+		fmt.Printf("\\\\u%04X\n", r)
+		if r < 0 {
+			return 0, fmt.Errorf("invalid character escape sequence: %s,", "\\u"+string(r))
 		}
-		return cp, nil
+		return r, nil
 	}
+
 	return 0, fmt.Errorf("invalid character escape sequence: %s", "\\"+string(r))
 }
 
-func validRune(r1, r2, r3, r4 rune) (rune, error) {
-	return 0, nil
+// TODO(seeruk): Here: https://github.com/graphql/graphql-js/blob/master/src/language/lexer.js#L689
+func ucptor(rs []rune) rune {
+	a, b, c, d := hexRuneToInt(rs[0]), hexRuneToInt(rs[1]), hexRuneToInt(rs[2]), hexRuneToInt(rs[3])
+	return rune(a<<12 | b<<8 | c<<4 | d<<0)
+}
+
+func hexRuneToInt(r rune) int {
+	switch {
+	case r >= '0' && r <= '9':
+		return int(r - 48)
+	case r >= 'A' && r <= 'F':
+		return int(r - 55)
+	case r >= 'a' && r <= 'f':
+		return int(r - 87)
+	}
+	return -1
 }
 
 // scanComment scans valid GraphQL comments.
