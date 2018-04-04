@@ -20,21 +20,13 @@ func ucptor(a, b, c, d int) rune {
 }
 
 func hexRuneToInt(r rune) int {
-	isHexNum := r >= '0' && r <= '9'
-	isHexLCChar := r >= 'a' && r <= 'f'
-	isHexUCChar := r >= 'A' && r <= 'F'
-
-	if !(isHexNum || isHexLCChar || isHexUCChar) {
-		return -1
-	}
-
-	if isHexLCChar {
-		return int(r - 87)
-	} else if isHexUCChar {
-		return int(r - 55)
-	} else if isHexNum {
+	switch {
+	case r >= '0' && r <= '9':
 		return int(r - 48)
+	case r >= 'A' && r <= 'F':
+		return int(r - 55)
+	case r >= 'a' && r <= 'f':
+		return int(r - 87)
 	}
-
 	return -1
 }

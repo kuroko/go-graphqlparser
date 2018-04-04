@@ -103,7 +103,7 @@ func (l *Lexer) Scan() (Token, error) {
 // TODO(Luke-Vear): finish logic and helper functions.
 // TODO(Luke-Vear): are appends needed?
 func (l *Lexer) scanString(r rune) (Token, error) {
-	byteStart := l.pos - 1
+	//byteStart := l.pos - 1
 	runeStart := l.lpos
 	rs := []rune{r}
 
@@ -139,7 +139,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 
 	return Token{
 		Type:     token.StringValue,
-		Literal:  btos(l.input[byteStart:l.pos]),
+		Literal:  string(rs),
 		Position: runeStart,
 		Line:     l.line,
 	}, nil
@@ -153,11 +153,13 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 func escapedChar(l *Lexer) (rune, error) {
 	r := l.read()
 	switch r {
+	// case '"', '/', '\\', 'b', 'f', 'n', 'r', 't':
+	// 	return r, nil
 	case '"':
 		return 0, nil
 	case '/':
 		return 0, nil
-	case '\\': // this is actually one backslash...
+	case '\\':
 		return 0, nil
 	case 'b':
 		return 0, nil
@@ -170,7 +172,7 @@ func escapedChar(l *Lexer) (rune, error) {
 	case 't':
 		return 0, nil
 	case 'u':
-		cp, err := validRune([]rune{r, l.read(), l.read(), l.read()})
+		cp, err := validRune(r, l.read(), l.read(), l.read())
 		if err != nil {
 			return 0, nil
 		}
@@ -179,7 +181,7 @@ func escapedChar(l *Lexer) (rune, error) {
 	return 0, fmt.Errorf("invalid character escape sequence: %s", "\\"+string(r))
 }
 
-func validRune(rs []rune) (rune, error) {
+func validRune(r1, r2, r3, r4 rune) (rune, error) {
 	return 0, nil
 }
 
