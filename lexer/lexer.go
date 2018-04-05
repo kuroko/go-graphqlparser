@@ -143,7 +143,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		rc++
 
 		switch {
-		case r == '"' || r == eof:
+		case r == '"':
 			done = true
 
 		case r < ws && r != tab:
@@ -233,6 +233,80 @@ func encodeRune(r rune, cb func(a byte)) {
 
 // scanBlockString ...
 func (l *Lexer) scanBlockString(r rune) (Token, error) {
+	var w int
+
+	//byteStart := l.pos
+	runeStart := l.lpos
+
+	var bc int
+	var rc int
+
+	var done bool
+	for !done {
+		r, w = l.read()
+		bc += w
+		rc++
+
+		switch {
+		case r == '"' || r == eof:
+			done = true
+
+		case r < ws && r != tab:
+			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+
+		case r == bsl:
+			r, w = l.read()
+			bc += w
+			rc++
+
+			if r == 'u' {
+				_, w1 := l.read()
+				_, w2 := l.read()
+				_, w3 := l.read()
+				_, w4 := l.read()
+
+				bc += w1 + w2 + w3 + w4
+				rc += 4
+			}
+		}
+	}
+
+	// TODO(Luke-Vear): don't rewind, re-slice.
+	for i := 0; i < rc; i++ {
+		l.unread()
+	}
+
+	//bs := l.buf[0:]
+	bs := make([]byte, 0, bc)
+	for {
+		r, _ = l.read()
+
+		switch {
+		case r == '"' || r == eof:
+			return Token{
+				Type:     token.StringValue,
+				Literal:  btos(bs),
+				Position: runeStart,
+				Line:     l.line,
+			}, nil
+
+		case r == bsl:
+			r, err := escapedChar(l)
+			if err != nil {
+				return Token{}, err
+			}
+			//rs = append(rs, r)
+			encodeRune(r, func(b byte) {
+				bs = append(bs, b)
+			})
+
+		default:
+			//rs = append(rs, r)
+			encodeRune(r, func(b byte) {
+				bs = append(bs, b)
+			})
+		}
+	}
 	return Token{}, nil
 }
 
