@@ -103,7 +103,7 @@ func (l *Lexer) Scan() (Token, error) {
 func (l *Lexer) scanString(r rune) (Token, error) {
 	runeStart := l.lpos
 
-	var rl, rc int
+	var rc int
 	var done bool
 	for !done {
 		r = l.read()
@@ -133,7 +133,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		l.unread()
 	}
 
-	rs := make([]rune, 0, rl)
+	rs := make([]rune, 0, rc)
 	for {
 		r = l.read()
 
