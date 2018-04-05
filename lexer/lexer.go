@@ -74,8 +74,8 @@ func (l *Lexer) Scan() (Token, error) {
 		return l.scanComment(r)
 
 	case r == '"':
-		rs := []rune{r, l.read(), l.read()}
-		if rs[1] == '"' && rs[2] == '"' {
+		rs := []rune{l.read(), l.read()}
+		if rs[0] == '"' && rs[1] == '"' {
 			return l.scanBlockString(r)
 		}
 		l.unread()
@@ -102,10 +102,42 @@ func (l *Lexer) Scan() (Token, error) {
 // scanString ...
 func (l *Lexer) scanString(r rune) (Token, error) {
 	runeStart := l.lpos
-	var rs []rune
 
+	var rl, rc int
 	var done bool
 	for !done {
+		r = l.read()
+
+		switch {
+		case r == '"':
+			done = true
+
+		case r < ws && r != tab:
+			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+
+		case r == bsl:
+			r = l.read()
+			if r == 'u' {
+				l.read()
+				l.read()
+				l.read()
+				rc += 3
+			}
+			l.read()
+			rc += 3
+
+		default:
+			rc++
+		}
+	}
+
+	// TODO(Luke-Vear): don't rewind, reslice.
+	for i := 0; i <= rc; i++ {
+		l.unread()
+	}
+
+	rs := make([]rune, 0, rl)
+	for {
 		r = l.read()
 
 		switch {
@@ -116,9 +148,6 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 				Position: runeStart,
 				Line:     l.line,
 			}, nil
-
-		case r < ws && r != tab:
-			return Token{}, fmt.Errorf("invalid character within string: %q", r)
 
 		case r == bsl:
 			r, err := escapedChar(l)
@@ -131,14 +160,6 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 			rs = append(rs, r)
 		}
 	}
-
-	// Q: not hit by tests? can this code be reached?
-	return Token{
-		Type:     token.StringValue,
-		Literal:  string(rs),
-		Position: runeStart,
-		Line:     l.line,
-	}, nil
 }
 
 // scanBlockString ...
