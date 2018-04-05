@@ -135,13 +135,11 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 	runeStart := l.lpos
 
 	var bc int
-	var rc int
 
 	var done bool
 	for !done {
 		r, w = l.read()
 		bc += w
-		rc++
 
 		switch {
 		case r == '"':
@@ -152,17 +150,24 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 
 		case r == bsl:
 			r, w = l.read()
-			bc += w
-			rc++
+
+			// No need to increment bc here, if we hit backslash, we should already have incremented
+			// the counter by 1. That one byte increment should satisfy the width of any escape
+			// sequence other than unicode escape sequences when decoded as a rune. We handle the
+			// unicode escape sequence case further down.
+			//bc += w
 
 			if r == 'u' {
-				_, w1 := l.read()
-				_, w2 := l.read()
-				_, w3 := l.read()
-				_, w4 := l.read()
+				_, _ = l.read()
+				_, _ = l.read()
+				_, _ = l.read()
+				_, _ = l.read()
 
-				bc += w1 + w2 + w3 + w4
-				rc += 4
+				// Increment bc by 3, because we've already incremented by 1 above at the start of
+				// this loop iteration. We increment by 3 here because we want to have incremented
+				// by 4 in total. 4 bytes being the maximum width of a valid unicode escape sequence
+				// supported by GraphQL.
+				bc += 3
 			}
 		}
 	}
