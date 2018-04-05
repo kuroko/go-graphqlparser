@@ -66,8 +66,6 @@ type Lexer struct {
 
 	// Previous read information.
 	lrw int // The width of the last rune read.
-
-	//buf []byte
 }
 
 // New returns a new lexer, for lexically analysing GraphQL queries from a given reader.
@@ -76,7 +74,6 @@ func New(input []byte) *Lexer {
 		input:    input,
 		inputLen: len(input),
 		line:     1,
-		//buf:      make([]byte, 0, len(input)), // TODO(seeruk): len
 	}
 }
 
