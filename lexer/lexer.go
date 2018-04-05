@@ -25,24 +25,6 @@ const (
 	cr  = rune(0x000D) // '\r' carriage return.
 	tab = rune(0x0009) // '\t' horizontal tab.
 	bsl = rune(0x005C) // Literal reverse solidus (backslash).
-
-	rune1Max = 1<<7 - 1
-	rune2Max = 1<<11 - 1
-	rune3Max = 1<<16 - 1
-
-	maskx = 0x3F // 0011 1111
-
-	RuneError    = '\uFFFD'
-	MaxRune      = '\U0010FFFF'
-	surrogateMin = 0xD800
-	surrogateMax = 0xDFFF
-
-	t1 = 0x00 // 0000 0000
-	tx = 0x80 // 1000 0000
-	t2 = 0xC0 // 1100 0000
-	t3 = 0xE0 // 1110 0000
-	t4 = 0xF0 // 1111 0000
-	t5 = 0xF8 // 1111 1000
 )
 
 // Token represents a small, easily categorisable data structure that is fed to the parser to
@@ -149,7 +131,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 			return Token{}, fmt.Errorf("invalid character within string: %q", r)
 
 		case r == bsl:
-			r, w = l.read()
+			r, _ = l.read()
 
 			// No need to increment bc here, if we hit backslash, we should already have incremented
 			// the counter by 1. That one byte increment should satisfy the width of any escape
@@ -180,8 +162,9 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 	// Sadly, allocations cannot be avoided here unless we modify the input byte slice to make
 	// string scanning work. This is because we have to replace the escape sequences with their
 	// actual rune counterparts and use that as the token's literal value. To store that data, we
-	// need bytes to be allocated.
-	bs := make([]byte, 0, bc)
+	// need bytes to be allocated. In this case, in the form of a string - the compiler optimises it
+	// for us to help keep our code simple.
+	var str string
 	for {
 		r, _ = l.read()
 
@@ -189,9 +172,9 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		case r == '"' || r == eof:
 			return Token{
 				Type:     token.StringValue,
-				Literal:  btos(bs),
+				Literal:  str,
 				Position: runeStart,
-				Line:     l.line,
+				Line:     startLine,
 			}, nil
 
 		case r == bsl:
@@ -200,46 +183,11 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 				return Token{}, err
 			}
 
-			encodeRune(r, func(b byte) {
-				bs = append(bs, b)
-			})
+			str += string(r)
 
 		default:
-			encodeRune(r, func(b byte) {
-				bs = append(bs, b)
-			})
+			str += string(r)
 		}
-	}
-}
-
-// encodeRune is a copy of the utf8.EncodeRune function, but instead of passing in a byte slice as
-// the first argument, a callback is given. This callback may be called multiple times. This allows
-// individual bytes to be passed back to the caller, one at a time. This enables the caller to do
-// things like encode a rune into an existing byte slice.
-func encodeRune(r rune, cb func(a byte)) {
-	// Negative values are erroneous. Making it unsigned addresses the problem.
-	switch i := uint32(r); {
-	case i <= rune1Max:
-		cb(byte(r))
-		return
-	case i <= rune2Max:
-		cb(t2 | byte(r>>6))
-		cb(tx | byte(r)&maskx)
-		return
-	case i > MaxRune, surrogateMin <= i && i <= surrogateMax:
-		r = RuneError
-		fallthrough
-	case i <= rune3Max:
-		cb(t3 | byte(r>>12))
-		cb(tx | byte(r>>6)&maskx)
-		cb(tx | byte(r)&maskx)
-		return
-	default:
-		cb(t4 | byte(r>>18))
-		cb(tx | byte(r>>12)&maskx)
-		cb(tx | byte(r>>6)&maskx)
-		cb(tx | byte(r)&maskx)
-		return
 	}
 }
 
@@ -247,17 +195,19 @@ func encodeRune(r rune, cb func(a byte)) {
 func (l *Lexer) scanBlockString(r rune) (Token, error) {
 	var w int
 
-	//byteStart := l.pos
+	startPos := l.pos
+	startLPos := l.lpos
+	startLine := l.line
+	startLRW := l.lrw
+
 	runeStart := l.lpos
 
 	var bc int
-	var rc int
 
 	var done bool
 	for !done {
 		r, w = l.read()
 		bc += w
-		rc++
 
 		switch {
 		case r == '"' || r == eof:
@@ -267,29 +217,25 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 			return Token{}, fmt.Errorf("invalid character within string: %q", r)
 
 		case r == bsl:
-			r, w = l.read()
-			bc += w
-			rc++
+			r, _ = l.read()
 
 			if r == 'u' {
-				_, w1 := l.read()
-				_, w2 := l.read()
-				_, w3 := l.read()
-				_, w4 := l.read()
+				_, _ = l.read()
+				_, _ = l.read()
+				_, _ = l.read()
+				_, _ = l.read()
 
-				bc += w1 + w2 + w3 + w4
-				rc += 4
+				bc += 3
 			}
 		}
 	}
 
-	// TODO(Luke-Vear): don't rewind, re-slice.
-	for i := 0; i < rc; i++ {
-		l.unread()
-	}
+	l.pos = startPos
+	l.lpos = startLPos
+	l.line = startLine
+	l.lrw = startLRW
 
-	//bs := l.buf[0:]
-	bs := make([]byte, 0, bc)
+	var str string
 	for {
 		r, _ = l.read()
 
@@ -297,9 +243,9 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 		case r == '"' || r == eof:
 			return Token{
 				Type:     token.StringValue,
-				Literal:  btos(bs),
+				Literal:  str,
 				Position: runeStart,
-				Line:     l.line,
+				Line:     startLine,
 			}, nil
 
 		case r == bsl:
@@ -307,19 +253,12 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 			if err != nil {
 				return Token{}, err
 			}
-			//rs = append(rs, r)
-			encodeRune(r, func(b byte) {
-				bs = append(bs, b)
-			})
+			str += string(r)
 
 		default:
-			//rs = append(rs, r)
-			encodeRune(r, func(b byte) {
-				bs = append(bs, b)
-			})
+			str += string(r)
 		}
 	}
-	return Token{}, nil
 }
 
 func escapedChar(l *Lexer) (rune, error) {
