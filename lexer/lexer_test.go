@@ -5,9 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/seeruk/assert"
-
 	"github.com/bucketd/go-graphqlparser/token"
+	"github.com/seeruk/assert"
 )
 
 var query = []byte("query \"\u4e16\" 0.001 foo { name 12.42e-10 }")

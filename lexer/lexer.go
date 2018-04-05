@@ -130,7 +130,10 @@ func (l *Lexer) Scan() (Token, error) {
 func (l *Lexer) scanString(r rune) (Token, error) {
 	var w int
 
-	//byteStart := l.pos
+	startPos := l.pos
+	startLPos := l.lpos
+	startLine := l.line
+
 	runeStart := l.lpos
 
 	var bc int
@@ -166,12 +169,10 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		}
 	}
 
-	// TODO(Luke-Vear): don't rewind, re-slice.
-	for i := 0; i < rc; i++ {
-		l.unread()
-	}
+	l.pos = startPos
+	l.lpos = startLPos
+	l.line = startLine
 
-	//bs := l.buf[0:]
 	bs := make([]byte, 0, bc)
 	for {
 		r, _ = l.read()
@@ -190,13 +191,12 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 			if err != nil {
 				return Token{}, err
 			}
-			//rs = append(rs, r)
+
 			encodeRune(r, func(b byte) {
 				bs = append(bs, b)
 			})
 
 		default:
-			//rs = append(rs, r)
 			encodeRune(r, func(b byte) {
 				bs = append(bs, b)
 			})
@@ -204,6 +204,10 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 	}
 }
 
+// encodeRune is a copy of the utf8.EncodeRune function, but instead of passing in a byte slice as
+// the first argument, a callback is given. This callback may be called multiple times. This allows
+// individual bytes to be passed back to the caller, one at a time. This enables the caller to do
+// things like encode a rune into an existing byte slice.
 func encodeRune(r rune, cb func(a byte)) {
 	// Negative values are erroneous. Making it unsigned addresses the problem.
 	switch i := uint32(r); {
