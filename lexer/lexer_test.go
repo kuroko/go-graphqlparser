@@ -374,22 +374,22 @@ func TestLexer_Scan(t *testing.T) {
 				wantErr: false,
 			},
 			// Errorful
-			//{
-			//	name:  "no closing quote",
-			//	input: `"foo`,
-			//	wantToken: Token{
-			//		Type: token.Illegal,
-			//	},
-			//	wantErr: true,
-			//},
-			//{
-			//	name:  "invalid unicode",
-			//	input: `"\uAZ"`,
-			//	wantToken: Token{
-			//		Type: token.Illegal,
-			//	},
-			//	wantErr: true,
-			//},
+			{
+				name:  "no closing quote",
+				input: `"foo`,
+				wantToken: Token{
+					Type: token.Illegal,
+				},
+				wantErr: true,
+			},
+			{
+				name:  "invalid unicode",
+				input: `"\uAZ"`,
+				wantToken: Token{
+					Type: token.Illegal,
+				},
+				wantErr: true,
+			},
 			{
 				name:  "invalid escape",
 				input: `"\z"`,
