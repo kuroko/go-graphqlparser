@@ -21,6 +21,25 @@ const (
 	ws  = rune(0x0020) // Literal ' '.
 	com = rune(0x002C) // Literal ','.
 	bsl = rune(0x005C) // Literal reverse solidus (backslash).
+
+	rune1Max = 1<<7 - 1
+	rune2Max = 1<<11 - 1
+	rune3Max = 1<<16 - 1
+
+	maskx = 0x3F // 0011 1111
+
+	RuneError    = '\uFFFD'
+	MaxRune      = '\U0010FFFF'
+	surrogateMin = 0xD800
+	surrogateMax = 0xDFFF
+
+	t1 = 0x00 // 0000 0000
+	tx = 0x80 // 1000 0000
+	t2 = 0xC0 // 1100 0000
+	t3 = 0xE0 // 1110 0000
+	t4 = 0xF0 // 1111 0000
+	t5 = 0xF8 // 1111 1000
+
 )
 
 // Token represents a small, easily categorisable data structure that is fed to the parser to
@@ -44,6 +63,8 @@ type Lexer struct {
 
 	// Previous read information.
 	lrw int // The width of the last rune read.
+
+	//buf []byte
 }
 
 // New returns a new lexer, for lexically analysing GraphQL queries from a given reader.
@@ -52,6 +73,7 @@ func New(input []byte) *Lexer {
 		input:    input,
 		inputLen: len(input),
 		line:     1,
+		//buf:      make([]byte, 0, len(input)), // TODO(seeruk): len
 	}
 }
 
@@ -74,7 +96,9 @@ func (l *Lexer) Scan() (Token, error) {
 		return l.scanComment(r)
 
 	case r == '"':
-		rs := []rune{l.read(), l.read()}
+		r1, _ := l.read()
+		r2, _ := l.read()
+		rs := []rune{r1, r2}
 		if rs[0] == '"' && rs[1] == '"' {
 			return l.scanBlockString(r)
 		}
@@ -101,47 +125,59 @@ func (l *Lexer) Scan() (Token, error) {
 
 // scanString ...
 func (l *Lexer) scanString(r rune) (Token, error) {
+	var w int
+
+	//byteStart := l.pos
 	runeStart := l.lpos
 
+	var bc int
 	var rc int
+
 	var done bool
 	for !done {
-		r = l.read()
+		r, w = l.read()
+		bc += w
+		rc++
 
 		switch {
-		case r == '"':
+		case r == '"' || r == eof:
 			done = true
 
 		case r < ws && r != tab:
 			return Token{}, fmt.Errorf("invalid character within string: %q", r)
 
 		case r == bsl:
-			r = l.read()
+			r, w = l.read()
+			bc += w
+			rc++
+
 			if r == 'u' {
-				_, _, _, _ = l.read(), l.read(), l.read(), l.read()
+				_, w1 := l.read()
+				_, w2 := l.read()
+				_, w3 := l.read()
+				_, w4 := l.read()
+
+				bc += w1 + w2 + w3 + w4
 				rc += 4
 			}
-			rc += 2
-
-		default:
-			rc++
 		}
 	}
 
-	// TODO(Luke-Vear): don't rewind, reslice.
-	for i := 0; i <= rc; i++ {
+	// TODO(Luke-Vear): don't rewind, re-slice.
+	for i := 0; i < rc; i++ {
 		l.unread()
 	}
 
-	rs := make([]rune, 0, rc)
+	//bs := l.buf[0:]
+	bs := make([]byte, 0, bc)
 	for {
-		r = l.read()
+		r, _ = l.read()
 
 		switch {
-		case r == '"':
+		case r == '"' || r == eof:
 			return Token{
 				Type:     token.StringValue,
-				Literal:  string(rs),
+				Literal:  btos(bs),
 				Position: runeStart,
 				Line:     l.line,
 			}, nil
@@ -151,11 +187,44 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 			if err != nil {
 				return Token{}, err
 			}
-			rs = append(rs, r)
+			//rs = append(rs, r)
+			encodeRune(r, func(b byte) {
+				bs = append(bs, b)
+			})
 
 		default:
-			rs = append(rs, r)
+			//rs = append(rs, r)
+			encodeRune(r, func(b byte) {
+				bs = append(bs, b)
+			})
 		}
+	}
+}
+
+func encodeRune(r rune, cb func(a byte)) {
+	// Negative values are erroneous. Making it unsigned addresses the problem.
+	switch i := uint32(r); {
+	case i <= rune1Max:
+		cb(byte(r))
+		return
+	case i <= rune2Max:
+		cb(t2 | byte(r>>6))
+		cb(tx | byte(r)&maskx)
+		return
+	case i > MaxRune, surrogateMin <= i && i <= surrogateMax:
+		r = RuneError
+		fallthrough
+	case i <= rune3Max:
+		cb(t3 | byte(r>>12))
+		cb(tx | byte(r>>6)&maskx)
+		cb(tx | byte(r)&maskx)
+		return
+	default:
+		cb(t4 | byte(r>>18))
+		cb(tx | byte(r>>12)&maskx)
+		cb(tx | byte(r>>6)&maskx)
+		cb(tx | byte(r)&maskx)
+		return
 	}
 }
 
@@ -165,7 +234,7 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 }
 
 func escapedChar(l *Lexer) (rune, error) {
-	r := l.read()
+	r, _ := l.read()
 	switch r {
 	case '"':
 		return '"', nil
@@ -185,10 +254,15 @@ func escapedChar(l *Lexer) (rune, error) {
 		return '\t', nil
 
 	case 'u':
-		rs := []rune{l.read(), l.read(), l.read(), l.read()}
+		r1, _ := l.read()
+		r2, _ := l.read()
+		r3, _ := l.read()
+		r4, _ := l.read()
+
+		rs := []rune{r1, r2, r3, r4}
 		r := ucptor(rs)
 		if r < 0 {
-			return 0, fmt.Errorf("invalid character escape sequence: %s,", "\\u"+string(r))
+			return 0, fmt.Errorf("invalid character escape sequence: %s", "\\u"+string(r))
 		}
 		return r, nil
 	}
@@ -222,7 +296,7 @@ func (l *Lexer) scanComment(r rune) (Token, error) {
 	var was000D bool
 
 	for {
-		r = l.read()
+		r, _ = l.read()
 		if r == eof {
 			return l.Scan()
 		}
@@ -272,7 +346,7 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 
 	var done bool
 	for !done {
-		r := l.read()
+		r, _ := l.read()
 
 		switch {
 		case r == eof:
@@ -299,7 +373,10 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 	runeStart := l.lpos
 
 	if r == '.' {
-		rs := []rune{r, l.read(), l.read()}
+		r2, _ := l.read()
+		r3, _ := l.read()
+
+		rs := []rune{r, r2, r3}
 		if rs[1] != '.' || rs[2] != '.' {
 			return Token{}, fmt.Errorf("invalid punctuator, expected \"...\" but got: %q", string(rs))
 		}
@@ -330,12 +407,12 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 
 	// Check for preceeding minus sign
 	if r == '-' {
-		r = l.read()
+		r, _ = l.read()
 	}
 
 	// Check if digits begins with zero
 	if r == '0' {
-		r = l.read()
+		r, _ = l.read()
 
 		// If there is another digit after zero, error.
 		if r >= '0' && r <= '9' {
@@ -357,7 +434,7 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 	if r == '.' {
 		float = true
 
-		r = l.read()
+		r, _ = l.read()
 
 		// Read the digits after the decimal place if the first character is not a digit, error.
 		r, err = l.readDigits(r)
@@ -370,11 +447,11 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 	if r == 'e' || r == 'E' {
 		float = true
 
-		r = l.read()
+		r, _ = l.read()
 
 		// Check for positive or negative symbol infront of the value.
 		if r == '+' || r == '-' {
-			r = l.read()
+			r, _ = l.read()
 		}
 
 		// Read the exponent digitas, if the first character is not a digit, error.
@@ -410,7 +487,7 @@ func (l *Lexer) readDigits(r rune) (rune, error) {
 
 	var done bool
 	for !done {
-		r = l.read()
+		r, _ = l.read()
 
 		switch {
 		case r >= '0' && r <= '9':
@@ -435,7 +512,7 @@ func (l *Lexer) readNextSignificant() rune {
 	r := er
 
 	for !done && r != eof {
-		r = l.read()
+		r, _ = l.read()
 
 		was000D = r == cr
 
@@ -466,9 +543,9 @@ func (l *Lexer) readNextSignificant() rune {
 // read moves forward in the input, and returns the next rune available. This function also updates
 // the position(s) that the lexer keeps track of in the input so the next read continues from where
 // the last left off. Returns the EOF rune if we hit the end of the input.
-func (l *Lexer) read() rune {
+func (l *Lexer) read() (rune, int) {
 	if l.pos >= l.inputLen {
-		return eof
+		return eof, 0
 	}
 
 	var r rune
@@ -485,7 +562,7 @@ func (l *Lexer) read() rune {
 
 	l.lrw = w
 
-	return r
+	return r, w
 }
 
 // unread goes back one rune's worth of bytes in the input, changing the
