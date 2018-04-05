@@ -118,13 +118,10 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		case r == bsl:
 			r = l.read()
 			if r == 'u' {
-				l.read()
-				l.read()
-				l.read()
-				rc += 3
+				_, _, _, _ = l.read(), l.read(), l.read(), l.read()
+				rc += 4
 			}
-			l.read()
-			rc += 3
+			rc += 2
 
 		default:
 			rc++
