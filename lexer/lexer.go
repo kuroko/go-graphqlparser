@@ -177,6 +177,10 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 	l.line = startLine
 	l.lrw = startLRW
 
+	// Sadly, allocations cannot be avoided here unless we modify the input byte slice to make
+	// string scanning work. This is because we have to replace the escape sequences with their
+	// actual rune counterparts and use that as the token's literal value. To store that data, we
+	// need bytes to be allocated.
 	bs := make([]byte, 0, bc)
 	for {
 		r, _ = l.read()
