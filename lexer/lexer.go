@@ -15,12 +15,16 @@ const (
 	eof = rune(0)
 
 	bom = rune(0xFEFF) // Unicode BOM.
-	cr  = rune(0x000D) // Literal '\r'.
-	lf  = rune(0x000A) // Literal '\n'.
-	tab = rune(0x0009) // Literal '	'.
 	ws  = rune(0x0020) // Literal ' '.
 	com = rune(0x002C) // Literal ','.
-	bsl = rune(0x005C) // Literal reverse solidus (backslash).
+	dq  = rune(0x0022) // '\"' double quote.
+	bsl = rune(0x005C) // '\\' reverse solidus (back slash).
+	fsl = rune(0x002F) // '\/' solidus (forward slash).
+	bck = rune(0x0008) // '\b' backspace.
+	ff  = rune(0x000C) // '\f' form feed.
+	lf  = rune(0x000A) // '\n' line feed (new line).
+	cr  = rune(0x000D) // '\r' carriage return.
+	tab = rune(0x0009) // '\t' horizontal tab.
 )
 
 // Token represents a small, easily categorisable data structure that is fed to the parser to
@@ -168,27 +172,27 @@ func escapedChar(l *Lexer) (rune, error) {
 	r := l.read()
 	switch r {
 	case '"':
-		return '"', nil
+		return dq, nil
 	case '/':
-		return '/', nil
-	case bsl:
+		return fsl, nil
+	case '\\': // escaped single backslash '\' == U+005C
 		return bsl, nil
 	case 'b':
-		return '\b', nil
+		return bck, nil
 	case 'f':
-		return '\f', nil
+		return ff, nil
 	case 'n':
-		return '\n', nil
+		return lf, nil
 	case 'r':
-		return '\r', nil
+		return cr, nil
 	case 't':
-		return '\t', nil
+		return tab, nil
 
 	case 'u':
-		rs := []rune{l.read(), l.read(), l.read(), l.read()}
-		r := ucptor(rs)
+		a, b, c, d := l.read(), l.read(), l.read(), l.read()
+		r := ucptor(a, b, c, d)
 		if r < 0 {
-			return 0, fmt.Errorf("invalid character escape sequence: %s,", "\\u"+string(r))
+			return 0, fmt.Errorf("invalid character escape sequence: %s,", "\\u"+string(a+b+c+d))
 		}
 		return r, nil
 	}
@@ -198,9 +202,9 @@ func escapedChar(l *Lexer) (rune, error) {
 
 // TODO(seeruk): Here: https://github.com/graphql/graphql-js/blob/master/src/language/lexer.js#L689
 // TODO(Luke-Vear): Discuss rename, I think ucptor isn't easy to grok.
-func ucptor(rs []rune) rune {
-	a, b, c, d := hexRuneToInt(rs[0]), hexRuneToInt(rs[1]), hexRuneToInt(rs[2]), hexRuneToInt(rs[3])
-	return rune(a<<12 | b<<8 | c<<4 | d<<0)
+func ucptor(ar, br, cr, dr rune) rune {
+	ai, bi, ci, di := hexRuneToInt(ar), hexRuneToInt(br), hexRuneToInt(cr), hexRuneToInt(dr)
+	return rune(ai<<12 | bi<<8 | ci<<4 | di<<0)
 }
 
 // hexRuneToInt changes a character into its integer value in hexadecimal. For example:
@@ -238,7 +242,6 @@ func (l *Lexer) scanComment(r rune) (Token, error) {
 
 		// Otherwise, if we saw a CR, and this rune isn't an LF, then we have started reading the
 		// next line's runes, so unread the rune we read, and scan the next token.
-		// Q: not hit by tests? can this code be reached?
 		if was000D && r != lf {
 			l.unread()
 

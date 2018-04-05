@@ -263,8 +263,19 @@ func TestLexer_Scan(t *testing.T) {
 				wantErr: false,
 			},
 			{
-				name:  "single line comment valid",
+				name:  "single line comment valid + lf",
 				input: "# comment" + string(lf) + "foo",
+				wantToken: Token{
+					Type:     token.Name,
+					Literal:  "foo",
+					Position: 1,
+					Line:     2,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "single line comment valid + cr",
+				input: "# comment" + string(cr) + "foo",
 				wantToken: Token{
 					Type:     token.Name,
 					Literal:  "foo",
