@@ -130,6 +130,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 	startPos := l.pos
 	startLPos := l.lpos
 	startLine := l.line
+	startLRW := l.lrw
 
 	runeStart := l.lpos
 
@@ -169,6 +170,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 	l.pos = startPos
 	l.lpos = startLPos
 	l.line = startLine
+	l.lrw = startLRW
 
 	bs := make([]byte, 0, bc)
 	for {
