@@ -456,22 +456,59 @@ func TestLexer_Scan(t *testing.T) {
 				wantErr: false,
 			},
 			{
-				name:  "block string with nested quotes",
-				input: `"""nested "" quotes"""`,
+				name:  "block string escaped triple quotes",
+				input: `"""nested ` + string(bsl) + string(dq) + string(dq) + string(dq) + ` quotes"""`,
 				wantToken: Token{
 					Type:     token.StringValue,
-					Literal:  `nested "" quotes`,
+					Literal:  `nested """ quotes`,
 					Position: 3,
 					Line:     1,
 				},
 				wantErr: false,
 			},
 			{
-				name:  "block string escaped triple quotes",
-				input: `"""nested \\""" quotes"""`,
+				name:  "non trip quote escapes ignored",
+				input: `"""\t \u1234"""`,
 				wantToken: Token{
 					Type:     token.StringValue,
-					Literal:  `nested """ quotes`,
+					Literal:  `\t \u1234`,
+					Position: 3,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name: "ignore leading and trailing newlines",
+				input: `"""
+ignore leading and trailing newlines				
+"""`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `ignore leading and trailing newlines`,
+					Position: 3,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name: "ignore leading and trailing newlines and normal escapes",
+				input: `"""
+ignore \u1234 and leading and trailing newlines				
+"""`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `ignore \u1234 and leading and trailing newlines`,
+					Position: 3,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "empty triple quotes",
+				input: `""""""`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  "",
 					Position: 3,
 					Line:     1,
 				},
@@ -485,12 +522,12 @@ func TestLexer_Scan(t *testing.T) {
 				l := New(bs)
 				gotT, err := l.Scan()
 				if !tt.wantErr && err != nil {
-					t.Errorf("Lexer.scanString() error = %+v, wantErr %+v", err, tt.wantErr)
+					t.Errorf("Lexer.scanBlockString() error = %+v, wantErr %+v", err, tt.wantErr)
 					return
 				}
 
 				if !reflect.DeepEqual(gotT, tt.wantToken) {
-					t.Errorf("Lexer.scanString() = %+v, want %+v", gotT, tt.wantToken)
+					t.Errorf("Lexer.scanBlockString() = %+v, want %+v", gotT, tt.wantToken)
 				}
 			})
 		}

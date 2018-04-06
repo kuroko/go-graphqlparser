@@ -168,7 +168,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 				// this loop iteration. We increment by 3 here because we want to have incremented
 				// by 4 in total. 4 bytes being the maximum width of a valid unicode escape sequence
 				// supported by GraphQL.
-				bc += 3
+				bc += 3 // Q: is this not 4?
 			}
 		}
 	}
@@ -224,57 +224,139 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 
 // scanBlockString ...
 func (l *Lexer) scanBlockString(r rune) (Token, error) {
+	var w int
+
+	startPos := l.pos
+	startLPos := l.lpos
 	startLine := l.line
-	runeStart := l.lpos
-	var str string
+	startLRW := l.lrw
+
+	var bc int
+	var hasEscape bool
+
+	var done bool
+	for !done {
+		r, w = l.read()
+		bc += w
+
+		switch {
+		case r == '"':
+			if isTripQuotes(l) {
+				done = true
+			}
+
+		case r == eof:
+			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+
+		case r == bsl:
+			r, _ = l.read()
+			bc++
+			if r == '"' && isTripQuotes(l) {
+				hasEscape = true
+				bc += 3
+				continue
+			}
+
+			// No need to increment bc here, if we hit backslash, we should already have incremented
+			// the counter by 1. That one byte increment should satisfy the width of any escape
+			// sequence other than unicode escape sequences when decoded as a rune. We handle the
+			// unicode escape sequence case further down.
+			if r == 'u' {
+				_, _ = l.read()
+				_, _ = l.read()
+				_, _ = l.read()
+				_, _ = l.read()
+
+				// Increment bc by 3, because we've already incremented by 1 above at the start of
+				// this loop iteration. We increment by 3 here because we want to have incremented
+				// by 4 in total. 4 bytes being the maximum width of a valid unicode escape sequence
+				// supported by GraphQL.
+				bc += 3
+			}
+		}
+	}
+
+	endPos := l.pos - 3
+	endVal := l.input[endPos]
+	startVal := l.input[startPos]
+
+	// TODO(Luke-Vear): bool true if front and last char newlines.
+	if (rune(startVal) == lf || rune(startVal) == cr) && (rune(endVal) == lf || rune(endVal) == cr) {
+		startPos++
+		endPos--
+	}
+
+	if !hasEscape {
+		return Token{
+			Type:     token.StringValue,
+			Literal:  btos(l.input[startPos:endPos]),
+			Position: startLPos,
+			Line:     startLine,
+		}, nil
+	}
+
+	l.pos = startPos
+	l.lpos = startLPos
+	l.line = startLine
+	l.lrw = startLRW
+
+	bs := make([]byte, 0, bc)
 	for {
 		r, _ = l.read()
 
 		switch {
 		case r == '"':
-			r1, _ := l.read()
-			r2, _ := l.read()
-			if r1 == '"' && r2 == '"' {
+			if isTripQuotes(l) {
 				return Token{
 					Type:     token.StringValue,
-					Literal:  str,
-					Position: runeStart,
+					Literal:  btos(bs),
+					Position: startLPos,
 					Line:     startLine,
 				}, nil
 			}
-			str += string(r)
-			l.unread()
-			l.unread()
-
-		case r < ws && r != tab:
-			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+			encodeRune(r, func(b byte) {
+				bs = append(bs, b)
+			})
 
 		case r == bsl:
-			r1, _ := l.read()
-			r2, _ := l.read()
-			r3, _ := l.read()
-			if r1 == '"' && r2 == '"' && r3 == '"' {
-				return Token{
-					Type:     token.StringValue,
-					Literal:  str,
-					Position: runeStart,
-					Line:     startLine,
-				}, nil
+			r, _ := l.read()
+			if r == '"' && isTripQuotes(l) {
+				encodeRune(r, func(b byte) {
+					bs = append(bs, b)
+				})
+				encodeRune(r, func(b byte) {
+					bs = append(bs, b)
+				})
+				encodeRune(r, func(b byte) {
+					bs = append(bs, b)
+				})
+				continue
 			}
-			l.unread()
-			l.unread()
-
-			r, err := escapedChar(l)
-			if err != nil {
-				return Token{}, err
-			}
-
-			str += string(r)
+			encodeRune(bsl, func(b byte) {
+				bs = append(bs, b)
+			})
+			encodeRune(r, func(b byte) {
+				bs = append(bs, b)
+			})
 
 		default:
-			str += string(r)
+			encodeRune(r, func(b byte) {
+				bs = append(bs, b)
+			})
 		}
 	}
+}
+
+func isTripQuotes(l *Lexer) bool {
+	r1, _ := l.read()
+	r2, _ := l.read()
+	if r1 == '"' && r2 == '"' {
+		return true
+	}
+
+	l.unread()
+	l.unread()
+	return false
 }
 
 func escapedChar(l *Lexer) (rune, error) {
