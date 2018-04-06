@@ -9,7 +9,7 @@ import (
 	"github.com/seeruk/assert"
 )
 
-var query = []byte("query \"\u4e16\" 0.001 foo { name 12.42e-10 }")
+var query = []byte("query \"\\u4e16\" 0.001 foo { name 12.42e-10 }")
 
 func BenchmarkLexer_Scan(b *testing.B) {
 	for i := 0; i < b.N; i++ {
