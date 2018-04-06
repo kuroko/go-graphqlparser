@@ -250,29 +250,11 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 
 		case r == bsl:
 			r, _ = l.read()
-			bc++
 			if r == '"' && isTripQuotes(l) {
 				hasEscape = true
-				bc += 3
-				continue
+				bc += 2
 			}
-
-			// No need to increment bc here, if we hit backslash, we should already have incremented
-			// the counter by 1. That one byte increment should satisfy the width of any escape
-			// sequence other than unicode escape sequences when decoded as a rune. We handle the
-			// unicode escape sequence case further down.
-			if r == 'u' {
-				_, _ = l.read()
-				_, _ = l.read()
-				_, _ = l.read()
-				_, _ = l.read()
-
-				// Increment bc by 3, because we've already incremented by 1 above at the start of
-				// this loop iteration. We increment by 3 here because we want to have incremented
-				// by 4 in total. 4 bytes being the maximum width of a valid unicode escape sequence
-				// supported by GraphQL.
-				bc += 3
-			}
+			bc++
 		}
 	}
 
@@ -309,7 +291,7 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 			if isTripQuotes(l) {
 				return Token{
 					Type:     token.StringValue,
-					Literal:  btos(bs),
+					Literal:  btos(bs), // TODO(Luke-Vear): If leading and trailing newline, need some kind of end trimming...
 					Position: startLPos,
 					Line:     startLine,
 				}, nil
