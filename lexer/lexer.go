@@ -245,7 +245,7 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 				done = true
 			}
 
-		case r == eof:
+		case r < ws && r != tab && r != lf && r != cr:
 			return Token{}, fmt.Errorf("invalid character within string: %q", r)
 
 		case r == bsl:
