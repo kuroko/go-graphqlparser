@@ -107,57 +107,57 @@ func (l *Lexer) Scan() (Token, error) {
 
 // scanString ...
 func (l *Lexer) scanString(r rune) (Token, error) {
-	var w int
+	// var w int
 
-	startPos := l.pos
-	startLPos := l.lpos
+	// startPos := l.pos
+	// startLPos := l.lpos
 	startLine := l.line
-	startLRW := l.lrw
+	// startLRW := l.lrw
 
 	runeStart := l.lpos
 
-	var bc int
+	// var bc int
 
-	var done bool
-	for !done {
-		r, w = l.read()
-		bc += w
+	// var done bool
+	// for !done {
+	// 	r, w = l.read()
+	// 	bc += w
 
-		switch {
-		case r == '"':
-			done = true
+	// 	switch {
+	// 	case r == '"':
+	// 		done = true
 
-		case r < ws && r != tab:
-			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+	// 	case r < ws && r != tab:
+	// 		return Token{}, fmt.Errorf("invalid character within string: %q", r)
 
-		case r == bsl:
-			r, _ = l.read()
+	// 	case r == bsl:
+	// 		r, _ = l.read()
 
-			// No need to increment bc here, if we hit backslash, we should already have incremented
-			// the counter by 1. That one byte increment should satisfy the width of any escape
-			// sequence other than unicode escape sequences when decoded as a rune. We handle the
-			// unicode escape sequence case further down.
-			//bc += w
+	// 		// No need to increment bc here, if we hit backslash, we should already have incremented
+	// 		// the counter by 1. That one byte increment should satisfy the width of any escape
+	// 		// sequence other than unicode escape sequences when decoded as a rune. We handle the
+	// 		// unicode escape sequence case further down.
+	// 		//bc += w
 
-			if r == 'u' {
-				_, _ = l.read()
-				_, _ = l.read()
-				_, _ = l.read()
-				_, _ = l.read()
+	// 		if r == 'u' {
+	// 			_, _ = l.read()
+	// 			_, _ = l.read()
+	// 			_, _ = l.read()
+	// 			_, _ = l.read()
 
-				// Increment bc by 3, because we've already incremented by 1 above at the start of
-				// this loop iteration. We increment by 3 here because we want to have incremented
-				// by 4 in total. 4 bytes being the maximum width of a valid unicode escape sequence
-				// supported by GraphQL.
-				bc += 3
-			}
-		}
-	}
+	// 			// Increment bc by 3, because we've already incremented by 1 above at the start of
+	// 			// this loop iteration. We increment by 3 here because we want to have incremented
+	// 			// by 4 in total. 4 bytes being the maximum width of a valid unicode escape sequence
+	// 			// supported by GraphQL.
+	// 			bc += 3
+	// 		}
+	// 	}
+	// }
 
-	l.pos = startPos
-	l.lpos = startLPos
-	l.line = startLine
-	l.lrw = startLRW
+	// l.pos = startPos
+	// l.lpos = startLPos
+	// l.line = startLine
+	// l.lrw = startLRW
 
 	// Sadly, allocations cannot be avoided here unless we modify the input byte slice to make
 	// string scanning work. This is because we have to replace the escape sequences with their
@@ -169,13 +169,16 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 		r, _ = l.read()
 
 		switch {
-		case r == '"' || r == eof:
+		case r == '"':
 			return Token{
 				Type:     token.StringValue,
 				Literal:  str,
 				Position: runeStart,
 				Line:     startLine,
 			}, nil
+
+		case r < ws && r != tab:
+			return Token{}, fmt.Errorf("invalid character within string: %q", r)
 
 		case r == bsl:
 			r, err := escapedChar(l)
@@ -193,72 +196,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 
 // scanBlockString ...
 func (l *Lexer) scanBlockString(r rune) (Token, error) {
-	var w int
-
-	startPos := l.pos
-	startLPos := l.lpos
-	startLine := l.line
-	startLRW := l.lrw
-
-	runeStart := l.lpos
-
-	var bc int
-
-	var done bool
-	for !done {
-		r, w = l.read()
-		bc += w
-
-		switch {
-		case r == '"' || r == eof:
-			done = true
-
-		case r < ws && r != tab:
-			return Token{}, fmt.Errorf("invalid character within string: %q", r)
-
-		case r == bsl:
-			r, _ = l.read()
-
-			if r == 'u' {
-				_, _ = l.read()
-				_, _ = l.read()
-				_, _ = l.read()
-				_, _ = l.read()
-
-				bc += 3
-			}
-		}
-	}
-
-	l.pos = startPos
-	l.lpos = startLPos
-	l.line = startLine
-	l.lrw = startLRW
-
-	var str string
-	for {
-		r, _ = l.read()
-
-		switch {
-		case r == '"' || r == eof:
-			return Token{
-				Type:     token.StringValue,
-				Literal:  str,
-				Position: runeStart,
-				Line:     startLine,
-			}, nil
-
-		case r == bsl:
-			r, err := escapedChar(l)
-			if err != nil {
-				return Token{}, err
-			}
-			str += string(r)
-
-		default:
-			str += string(r)
-		}
-	}
+	return Token{}, nil
 }
 
 func escapedChar(l *Lexer) (rune, error) {
