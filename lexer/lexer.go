@@ -196,7 +196,57 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 
 // scanBlockString ...
 func (l *Lexer) scanBlockString(r rune) (Token, error) {
-	return Token{}, nil
+	startLine := l.line
+	runeStart := l.lpos
+	var str string
+	for {
+		r, _ = l.read()
+
+		switch {
+		case r == '"':
+			r1, _ := l.read()
+			r2, _ := l.read()
+			if r1 == '"' && r2 == '"' {
+				return Token{
+					Type:     token.StringValue,
+					Literal:  str,
+					Position: runeStart,
+					Line:     startLine,
+				}, nil
+			}
+			str += string(r)
+			l.unread()
+			l.unread()
+
+		case r < ws && r != tab:
+			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+
+		case r == bsl:
+			r1, _ := l.read()
+			r2, _ := l.read()
+			r3, _ := l.read()
+			if r1 == '"' && r2 == '"' && r3 == '"' {
+				return Token{
+					Type:     token.StringValue,
+					Literal:  str,
+					Position: runeStart,
+					Line:     startLine,
+				}, nil
+			}
+			l.unread()
+			l.unread()
+
+			r, err := escapedChar(l)
+			if err != nil {
+				return Token{}, err
+			}
+
+			str += string(r)
+
+		default:
+			str += string(r)
+		}
+	}
 }
 
 func escapedChar(l *Lexer) (rune, error) {

@@ -424,6 +424,77 @@ func TestLexer_Scan(t *testing.T) {
 			})
 		}
 	})
+
+	t.Run("scanBlockString()", func(t *testing.T) {
+		tests := []struct {
+			name      string
+			input     string
+			wantToken Token
+			wantErr   bool
+		}{
+			// Happy
+			{
+				name:  "simple block string",
+				input: `"""simple"""`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  "simple",
+					Position: 3,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "block string with nested quotes",
+				input: `"""nested "" quotes"""`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `nested "" quotes`,
+					Position: 3,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "block string with nested quotes",
+				input: `"""nested "" quotes"""`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `nested "" quotes`,
+					Position: 3,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "block string escaped triple quotes",
+				input: `"""nested \\""" quotes"""`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `nested """ quotes`,
+					Position: 3,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				bs := []byte(tt.input)
+				l := New(bs)
+				gotT, err := l.Scan()
+				if !tt.wantErr && err != nil {
+					t.Errorf("Lexer.scanString() error = %+v, wantErr %+v", err, tt.wantErr)
+					return
+				}
+
+				if !reflect.DeepEqual(gotT, tt.wantToken) {
+					t.Errorf("Lexer.scanString() = %+v, want %+v", gotT, tt.wantToken)
+				}
+			})
+		}
+	})
 }
 
 func TestLexerReadUnread(t *testing.T) {
