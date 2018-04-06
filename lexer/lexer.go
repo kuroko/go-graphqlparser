@@ -268,6 +268,7 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 		endPos--
 	}
 
+	// TODO(Luke-Vear): Check for not closing properly.
 	if !hasEscape {
 		return Token{
 			Type:     token.StringValue,
@@ -287,6 +288,9 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 		r, _ = l.read()
 
 		switch {
+		case r == eof:
+			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+
 		case r == '"':
 			if isTripQuotes(l) {
 				return Token{

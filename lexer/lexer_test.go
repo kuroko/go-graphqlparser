@@ -514,6 +514,14 @@ ignore \u1234 and leading and trailing newlines
 				},
 				wantErr: false,
 			},
+			// {
+			// 	name:  "not closing properly",
+			// 	input: `"""not closed properly""`,
+			// 	wantToken: Token{
+			// 		Type: token.Illegal,
+			// 	},
+			// 	wantErr: true,
+			// },
 		}
 
 		for _, tt := range tests {
