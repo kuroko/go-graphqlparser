@@ -98,8 +98,7 @@ func (l *Lexer) Scan() (Token, error) {
 	case r == '"':
 		r1, _ := l.read()
 		r2, _ := l.read()
-		rs := []rune{r1, r2}
-		if rs[0] == '"' && rs[1] == '"' {
+		if r1 == '"' && r2 == '"' {
 			return l.scanBlockString(r)
 		}
 		l.unread()
@@ -259,12 +258,20 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 	}
 
 	endPos := l.pos - 3
-	endVal := l.input[endPos]
+	endVal := l.input[endPos-1] // TODO(seeruk): Check that this is always safe.
 	startVal := l.input[startPos]
 
-	// TODO(Luke-Vear): bool true if front and last char newlines.
-	if (rune(startVal) == lf || rune(startVal) == cr) && (rune(endVal) == lf || rune(endVal) == cr) {
+	// If the first character in the string is a newline, ignore it.
+	if rune(startVal) == lf || rune(startVal) == cr {
+		// TODO(seeruk): If \r, check if next character is \n too? This still contributes to line
+		// numbers after all.
 		startPos++
+	}
+
+	// if the last character in the string is a newline, ignore it.
+	if rune(endVal) == lf || rune(endVal) == cr {
+		// TODO(seeruk): If \n, check if previous character is \r too? This still contributes to
+		// line numbers after all.
 		endPos--
 	}
 

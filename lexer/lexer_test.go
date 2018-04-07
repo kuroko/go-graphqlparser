@@ -480,7 +480,7 @@ func TestLexer_Scan(t *testing.T) {
 			{
 				name: "ignore leading and trailing newlines",
 				input: `"""
-ignore leading and trailing newlines				
+ignore leading and trailing newlines
 """`,
 				wantToken: Token{
 					Type:     token.StringValue,
@@ -493,7 +493,7 @@ ignore leading and trailing newlines
 			{
 				name: "ignore leading and trailing newlines and normal escapes",
 				input: `"""
-ignore \u1234 and leading and trailing newlines				
+ignore \u1234 and leading and trailing newlines
 """`,
 				wantToken: Token{
 					Type:     token.StringValue,
@@ -530,12 +530,12 @@ ignore \u1234 and leading and trailing newlines
 				l := New(bs)
 				gotT, err := l.Scan()
 				if !tt.wantErr && err != nil {
-					t.Errorf("Lexer.scanBlockString() error = %+v, wantErr %+v", err, tt.wantErr)
+					t.Errorf("Lexer.scanBlockString() error = %#v, wantErr %#v", err, tt.wantErr)
 					return
 				}
 
 				if !reflect.DeepEqual(gotT, tt.wantToken) {
-					t.Errorf("Lexer.scanBlockString() = %+v, want %+v", gotT, tt.wantToken)
+					t.Errorf("Lexer.scanBlockString() = %#v, want %#v", gotT, tt.wantToken)
 				}
 			})
 		}
