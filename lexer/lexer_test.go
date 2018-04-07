@@ -76,6 +76,7 @@ func BenchmarkLexer(b *testing.B) {
 	})
 
 	b.Run("github.com/graphql-gophers/graphql-go", func(b *testing.B) {
+		// This lib doesn't support block strings currently.
 		qry := strings.Replace(query, `"""`, `"`, -1)
 
 		for i := 0; i < b.N; i++ {
