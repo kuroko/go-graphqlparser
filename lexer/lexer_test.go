@@ -1,29 +1,109 @@
 package lexer
 
 import (
+	"flag"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/lexer/benchutil/graphql-gophers"
 	"github.com/bucketd/go-graphqlparser/token"
+	"github.com/graphql-go/graphql/language/lexer"
+	"github.com/graphql-go/graphql/language/source"
 	"github.com/seeruk/assert"
 )
 
-var query = []byte("query \"\\u4e16\" 0.001 foo { name 12.42e-10 }")
+var update = flag.Bool("update", false, "update golden record files?")
 
-func BenchmarkLexer_Scan(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		lxr := New(query)
-
-		for {
-			tok, _ := lxr.Scan()
-			if tok.Type == token.EOF {
-				break
-			}
-
-			_ = tok
+const (
+	// query is a valid GraphQL query that contains at least one of each token type. It's re-used to
+	// compare against other GraphQL libraries.
+	query = `
+		# Mutation for testing different token types.
+		mutation {
+			createPost(
+				id: 1024
+				title: "String Value"
+				content: """Block string value isn't supported by all libs."""
+				readTime: 2.742
+			)
 		}
-	}
+	`
+)
+
+func BenchmarkLexer(b *testing.B) {
+	qry := []byte(query)
+
+	b.Run("github.com/bucketd/go-graphqlparser", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			lxr := New(qry)
+
+			for {
+				tok, err := lxr.Scan()
+				if err != nil {
+					b.Fatal(err)
+				}
+
+				if tok.Type == token.EOF {
+					break
+				}
+
+				_ = tok
+			}
+		}
+	})
+
+	b.Run("github.com/graphql-go/graphql", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			lxr := lexer.Lex(source.NewSource(&source.Source{
+				Body: qry,
+			}))
+
+			for {
+				tok, err := lxr(0)
+				if err != nil {
+					b.Fatal(err)
+				}
+
+				if tok.Kind == lexer.EOF {
+					break
+				}
+
+				_ = tok
+			}
+		}
+	})
+
+	b.Run("github.com/graphql-gophers/graphql-go", func(b *testing.B) {
+		qry := strings.Replace(query, `"""`, `"`, -1)
+
+		for i := 0; i < b.N; i++ {
+			lxr := graphql_gophers.NewLexer(qry)
+			lxr.Consume()
+
+			// This lexer is a little more fiddly to bench, we have to know the expected structure
+			// of a query to call the right lexer methods in the right order:
+			_ = lxr.ConsumeIdent()   // mutation
+			lxr.ConsumeToken('{')    //
+			_ = lxr.ConsumeIdent()   // createPost
+			lxr.ConsumeToken('(')    //
+			_ = lxr.ConsumeIdent()   // id
+			lxr.ConsumeToken(':')    //
+			_ = lxr.ConsumeLiteral() // 1024
+			_ = lxr.ConsumeIdent()   // title
+			lxr.ConsumeToken(':')    //
+			_ = lxr.ConsumeLiteral() // "String Value"
+			_ = lxr.ConsumeIdent()   // content
+			lxr.ConsumeToken(':')    //
+			_ = lxr.ConsumeLiteral() // "Block string value isn't supported by everything."
+			_ = lxr.ConsumeIdent()   // readTime
+			lxr.ConsumeToken(':')    //
+			_ = lxr.ConsumeLiteral() // 2.742
+			lxr.ConsumeToken(')')    //
+			lxr.ConsumeToken('}')    //
+		}
+	})
 }
 
 func TestLexer_Scan(t *testing.T) {
@@ -543,6 +623,8 @@ ignore \u1234 and leading and trailing newlines
 }
 
 func TestLexerReadUnread(t *testing.T) {
+	// We need to test what happens when we have bytes containing runes of different lengths when we
+	// do reads and unreads, so we know we go backwards and forwards the right number of bytes.
 	bs := []byte("世h界e界l界l界o")
 	l := New(bs)
 
