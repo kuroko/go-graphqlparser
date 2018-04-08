@@ -109,21 +109,13 @@ func (l *Lexer) Scan() (Token, error) {
 		l.unread()
 		return l.scanString(r)
 
-	case r == eof:
+	default:
 		return Token{
 			Type:     token.EOF,
 			Position: l.lpos,
 			Line:     l.line,
 		}, nil
 	}
-
-	// TODO(seeruk): Should this just be an error really?
-	// https://github.com/graphql/graphql-js/blob/master/src/language/lexer.js#L347
-	return Token{
-		Type:     token.Illegal,
-		Position: l.lpos,
-		Line:     l.line,
-	}, nil
 }
 
 // scanString ...
