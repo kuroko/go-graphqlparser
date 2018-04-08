@@ -1,0 +1,90 @@
+{
+  "Input": " ! $ ( ) ... : = @ [ ] { | }",
+  "Tokens": [
+    {
+      "Type": 2,
+      "Literal": "!",
+      "Position": 2,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "$",
+      "Position": 4,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "(",
+      "Position": 6,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": ")",
+      "Position": 8,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "...",
+      "Position": 10,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": ":",
+      "Position": 14,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "=",
+      "Position": 16,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "@",
+      "Position": 18,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "[",
+      "Position": 20,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "]",
+      "Position": 22,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "{",
+      "Position": 24,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "|",
+      "Position": 26,
+      "Line": 1
+    },
+    {
+      "Type": 2,
+      "Literal": "}",
+      "Position": 28,
+      "Line": 1
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 28,
+      "Line": 1
+    }
+  ],
+  "Errors": null
+}

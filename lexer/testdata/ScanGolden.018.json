@@ -1,0 +1,12 @@
+{
+  "Input": "# only comment",
+  "Tokens": [
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 14,
+      "Line": 1
+    }
+  ],
+  "Errors": null
+}

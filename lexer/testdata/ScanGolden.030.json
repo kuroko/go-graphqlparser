@@ -1,0 +1,18 @@
+{
+  "Input": "\"\\\"\"",
+  "Tokens": [
+    {
+      "Type": 6,
+      "Literal": "\"",
+      "Position": 1,
+      "Line": 1
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 4,
+      "Line": 1
+    }
+  ],
+  "Errors": null
+}

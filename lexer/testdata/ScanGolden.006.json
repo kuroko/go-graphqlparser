@@ -1,0 +1,18 @@
+{
+  "Input": "10E99",
+  "Tokens": [
+    {
+      "Type": 5,
+      "Literal": "10E99",
+      "Position": 0,
+      "Line": 1
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 5,
+      "Line": 1
+    }
+  ],
+  "Errors": null
+}

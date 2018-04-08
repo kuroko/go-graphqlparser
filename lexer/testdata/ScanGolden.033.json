@@ -1,0 +1,18 @@
+{
+  "Input": "\"\\b\"",
+  "Tokens": [
+    {
+      "Type": 6,
+      "Literal": "\u0008",
+      "Position": 1,
+      "Line": 1
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 4,
+      "Line": 1
+    }
+  ],
+  "Errors": null
+}

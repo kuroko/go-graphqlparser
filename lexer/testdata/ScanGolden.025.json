@@ -1,0 +1,18 @@
+{
+  "Input": "# line 1\r\n# line 2\r\nquery",
+  "Tokens": [
+    {
+      "Type": 3,
+      "Literal": "query",
+      "Position": 1,
+      "Line": 3
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 5,
+      "Line": 3
+    }
+  ],
+  "Errors": null
+}

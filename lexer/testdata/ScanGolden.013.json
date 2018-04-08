@@ -1,0 +1,14 @@
+{
+  "Input": "01",
+  "Tokens": [
+    {
+      "Type": 0,
+      "Literal": "",
+      "Position": 0,
+      "Line": 0
+    }
+  ],
+  "Errors": [
+    "invalid number, unexpected digit after 0: '1'"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "Input": "\"foo \\n bar\"",
+  "Tokens": [
+    {
+      "Type": 6,
+      "Literal": "foo \n bar",
+      "Position": 1,
+      "Line": 1
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 12,
+      "Line": 1
+    }
+  ],
+  "Errors": null
+}

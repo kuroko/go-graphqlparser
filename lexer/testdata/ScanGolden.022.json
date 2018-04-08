@@ -1,0 +1,18 @@
+{
+  "Input": "# line 1\n\rfoo",
+  "Tokens": [
+    {
+      "Type": 3,
+      "Literal": "foo",
+      "Position": 1,
+      "Line": 3
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 3,
+      "Line": 3
+    }
+  ],
+  "Errors": null
+}

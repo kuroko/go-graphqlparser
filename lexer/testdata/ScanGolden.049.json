@@ -1,0 +1,18 @@
+{
+  "Input": "\"\"\"foo \\u1234 \" \\\"\"\"\"\"\"",
+  "Tokens": [
+    {
+      "Type": 6,
+      "Literal": "foo \\u1234 \" \"\"\"",
+      "Position": 3,
+      "Line": 1
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 23,
+      "Line": 1
+    }
+  ],
+  "Errors": null
+}

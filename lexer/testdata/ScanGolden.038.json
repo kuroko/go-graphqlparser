@@ -1,0 +1,14 @@
+{
+  "Input": "\"\\uAZ\"",
+  "Tokens": [
+    {
+      "Type": 0,
+      "Literal": "",
+      "Position": 0,
+      "Line": 0
+    }
+  ],
+  "Errors": [
+    "invalid character within string: '\\x00'"
+  ]
+}

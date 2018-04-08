@@ -1,9 +1,10 @@
 package lexer
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"reflect"
+	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/graphql-go/graphql/language/lexer"
 	"github.com/graphql-go/graphql/language/source"
 	"github.com/seeruk/assert"
+	tassert "github.com/stretchr/testify/assert"
 )
 
 var update = flag.Bool("update", false, "update golden record files?")
@@ -107,530 +109,133 @@ func BenchmarkLexer(b *testing.B) {
 	})
 }
 
-func TestLexer_Scan(t *testing.T) {
-	t.Run("scanNumber()", func(t *testing.T) {
-		tests := []struct {
-			name      string
-			input     string
-			wantToken Token
-			wantErr   bool
-		}{
-			// Happy inputs.
-			{
-				name:  "lone zero is valid",
-				input: "0 ", // Q: padding ws for coverage?
-				wantToken: Token{
-					Type:    token.IntValue,
-					Literal: "0",
-				},
-				wantErr: false,
-			},
-			{
-				name:  "positive int is valid",
-				input: "123456789",
-				wantToken: Token{
-					Type:    token.IntValue,
-					Literal: "123456789",
-				},
-				wantErr: false,
-			},
-			{
-				name:  "negative int is valid",
-				input: "-123456789",
-				wantToken: Token{
-					Type:    token.IntValue,
-					Literal: "-123456789",
-				},
-				wantErr: false,
-			},
-			{
-				name:  "positive float is valid",
-				input: "1.1",
-				wantToken: Token{
-					Type:    token.FloatValue,
-					Literal: "1.1",
-				},
-				wantErr: false,
-			},
-			{
-				name:  "negative float is valid",
-				input: "-1.1",
-				wantToken: Token{
-					Type:    token.FloatValue,
-					Literal: "-1.1",
-				},
-				wantErr: false,
-			},
-			{
-				name:  "exponent is valid",
-				input: "10E99",
-				wantToken: Token{
-					Type:    token.FloatValue,
-					Literal: "10E99",
-				},
-				wantErr: false,
-			},
-			{
-				name:  "negative exponent is valid",
-				input: "-10E99",
-				wantToken: Token{
-					Type:    token.FloatValue,
-					Literal: "-10E99",
-				},
-				wantErr: false,
-			},
-			{
-				name:  "float, positive exponent is valid",
-				input: "1.1e99",
-				wantToken: Token{
-					Type:    token.FloatValue,
-					Literal: "1.1e99",
-				},
-				wantErr: false,
-			},
-			{
-				name:  "float, negative exponent is valid",
-				input: "-1.1e-99",
-				wantToken: Token{
-					Type:    token.FloatValue,
-					Literal: "-1.1e-99",
-				},
-				wantErr: false,
-			},
-			// Errorful inputs.
-			{
-				name:  "negative symbol with no following digits is invalid",
-				input: "-",
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-			{
-				name:  "negative symbol with non digit after is invalid",
-				input: "-界",
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-			{
-				name:  "non digit after decimal point is invalid",
-				input: "1.界",
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-			{
-				name:  "zero followed by number is invalid",
-				input: "01",
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-			{
-				name:  "non digit after exponent",
-				input: "-1.1e界",
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-		}
+func TestLexer_ScanGolden(t *testing.T) {
+	tests := []struct {
+		index string
+		input string
+	}{
+		// scanNumber
+		{"001", "0"},
+		{"002", "123456789"},
+		{"003", "-123456789"},
+		{"004", "1.1"},
+		{"005", "-1.1"},
+		{"006", "10E99"},
+		{"007", "-10E99"},
+		{"008", "1.1e99"},
+		{"009", "-1.1e-99"},
+		{"010", "-"},
+		{"011", "-界"},
+		{"012", "1.界"},
+		{"013", "01"},
+		{"014", "-1.1e界"},
 
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				bs := []byte(tt.input)
-				l := New(bs)
-				gotT, err := l.Scan()
-				if !tt.wantErr && err != nil {
-					t.Errorf("Lexer.scanNumber() error = %v, wantErr %v", err, tt.wantErr)
-					return
+		// scanPunctuator
+		{"015", "!$()...:=@[]{|}"},
+		{"016", " ! $ ( ) ... : = @ [ ] { | }"},
+		{"017", ".界界"},
+
+		// scanComment
+		{"018", "# only comment"},
+		{"019", "# line 1" + string(cr) + "foo"},
+		{"020", "# line 1" + string(lf) + "foo"},
+		{"021", "# line 1" + string(cr) + string(lf) + "foo"},
+		{"022", "# line 1" + string(lf) + string(cr) + "foo"},
+		{"023", "# line 1" + string(cr) + "# line 2" + string(cr) + "query"},
+		{"024", "# line 1" + string(lf) + "# line 2" + string(lf) + "query"},
+		{"025", "# line 1" + string(cr) + string(lf) + "# line 2" + string(cr) + string(lf) + "query"},
+
+		// scanString
+		{"026", `"foo"`},
+		{"027", `"foo \n bar"`},
+		{"028", `"foo \u4e16"`},
+		{"029", `"foo`},
+		{"030", `"\""`},
+		{"031", `"\\"`},
+		{"032", `"\/"`},
+		{"033", `"\b"`},
+		{"034", `"\f"`},
+		{"035", `"\n"`},
+		{"036", `"\r"`},
+		{"037", `"\t"`},
+		{"038", `"\uAZ"`},
+		{"039", `"\z"`},
+		{"040", `"foo` + string(lf) + `"`},
+		{"041", `"foo` + string(cr) + string(lf) + `"`},
+
+		// scanBlockString
+		{"042", `""""""`},
+		{"043", `"""foo"""`},
+		{"044", `"""foo "" bar"""`},
+		{"045", `"""\t \u1234"""`},
+		{"046", `"""` + string(lf) + `foo` + string(lf) + `"""`},
+		{"047", `"""` + string(lf) + `\"""` + string(lf) + `"""`},
+		{"048", `"""foo \""" bar"""`},
+		{"049", `"""foo \u1234 " \""""""`},
+		{"050", `""""`},
+		{"051", `"""""`},
+
+		// Scan
+		{"999", query},
+	}
+
+	type record struct {
+		Input  string
+		Tokens []Token
+		Errors []string
+	}
+
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("%s", test.index), func(t *testing.T) {
+			lxr := New([]byte(test.input))
+			actual := record{
+				Input: test.input,
+			}
+
+			for {
+				tok, err := lxr.Scan()
+
+				actual.Tokens = append(actual.Tokens, tok)
+				if err != nil {
+					actual.Errors = append(actual.Errors, err.Error())
 				}
 
-				isTypeMatch := gotT.Type == tt.wantToken.Type
-				isLiteralMatch := gotT.Literal == tt.wantToken.Literal
-				if !isTypeMatch || !isLiteralMatch {
-					t.Errorf("Lexer.scanNumber() = %+v, want %+v", gotT, tt.wantToken)
+				if err != nil || tok.Type == token.EOF {
+					break
 				}
-			})
-		}
-	})
+			}
 
-	t.Run("scanName()", func(t *testing.T) {
+			goldenFileName := fmt.Sprintf("testdata/ScanGolden.%s.json", test.index)
 
-	})
-
-	t.Run("scanPunctuator()", func(t *testing.T) {
-		tests := []struct {
-			name      string
-			input     string
-			wantToken Token
-			wantErr   bool
-		}{
-			// Happy inputs.
-			{
-				name:  "standard punctuation is valid",
-				input: " { ", // Q: padding ws for coverage?
-				wantToken: Token{
-					Type:     token.Punctuator,
-					Literal:  "{",
-					Position: 2,
-					Line:     1,
-				},
-
-				wantErr: false,
-			},
-			{
-				name:  "ellipsis is valid",
-				input: " ... ", // Q: padding ws for coverage?
-				wantToken: Token{
-					Type:     token.Punctuator,
-					Literal:  "...",
-					Position: 2,
-					Line:     1,
-				},
-
-				wantErr: false,
-			},
-			// Errorful inputs.
-			{
-				name:  " period followed by not two more periods is invalid",
-				input: " .界界 ", // Q: padding ws for coverage?
-				wantToken: Token{
-					Type:    token.Illegal,
-					Literal: "",
-				},
-				wantErr: true,
-			},
-		}
-
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				bs := []byte(tt.input)
-				l := New(bs)
-				gotT, err := l.Scan()
-				if !tt.wantErr && err != nil {
-					t.Errorf("Lexer.scanPunctuator() error = %+v, wantErr %+v", err, tt.wantErr)
-					return
+			if *update {
+				bs, err := json.MarshalIndent(actual, "", "  ")
+				if err != nil {
+					t.Error(err)
 				}
 
-				if !reflect.DeepEqual(gotT, tt.wantToken) {
-					t.Errorf("Lexer.scanPunctuator() = %+v, want %+v", gotT, tt.wantToken)
-				}
-			})
-		}
-	})
-
-	t.Run("scanComment()", func(t *testing.T) {
-		tests := []struct {
-			name      string
-			input     string
-			wantToken Token
-			wantErr   bool
-		}{
-			{
-				name:  "only comment, no newlines",
-				input: "# only comment",
-				wantToken: Token{
-					Type:     token.EOF,
-					Literal:  "",
-					Position: 14,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "single line comment valid + lf",
-				input: "# comment" + string(lf) + "foo",
-				wantToken: Token{
-					Type:     token.Name,
-					Literal:  "foo",
-					Position: 1,
-					Line:     2,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "single line comment valid + cr",
-				input: "# comment" + string(cr) + "foo",
-				wantToken: Token{
-					Type:     token.Name,
-					Literal:  "foo",
-					Position: 1,
-					Line:     2,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "multi-line comment valid",
-				input: "# line 1" + string(lf) + "# line 2" + string(lf) + "query",
-				wantToken: Token{
-					Type:     token.Name,
-					Literal:  "query",
-					Position: 1,
-					Line:     3,
-				},
-			},
-			{
-				name:  "cr + lf only one extra line",
-				input: "# comment" + string(cr) + string(lf) + "foo",
-				wantToken: Token{
-					Type:     token.Name,
-					Literal:  "foo",
-					Position: 1,
-					Line:     2,
-				},
-			},
-			{
-				name:  "lf + cr two extra lines",
-				input: "# comment" + string(lf) + string(cr) + "foo",
-				wantToken: Token{
-					Type:     token.Name,
-					Literal:  "foo",
-					Position: 1,
-					Line:     3,
-				},
-			},
-		}
-
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				bs := []byte(tt.input)
-				l := New(bs)
-				gotT, err := l.Scan()
-				if !tt.wantErr && err != nil {
-					t.Errorf("Lexer.scanComment() error = %+v, wantErr %+v", err, tt.wantErr)
-					return
+				err = ioutil.WriteFile(goldenFileName, bs, 0666)
+				if err != nil {
+					t.Error(err)
 				}
 
-				if !reflect.DeepEqual(gotT, tt.wantToken) {
-					t.Errorf("Lexer.scanComment() = %+v, want %+v", gotT, tt.wantToken)
-				}
-			})
-		}
-	})
+				return
+			}
 
-	t.Run("scanString()", func(t *testing.T) {
-		tests := []struct {
-			name      string
-			input     string
-			wantToken Token
-			wantErr   bool
-		}{
-			// Happy
-			{
-				name:  "simple string",
-				input: `"simple"`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  "simple",
-					Position: 1,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "escaped lf",
-				input: `"line\nfeed"`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  "line" + string(lf) + "feed",
-					Position: 1,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "world",
-				input: `"\u4e16world"`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  "世world",
-					Position: 1,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			// Errorful
-			{
-				name:  "no closing quote",
-				input: `"foo`,
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-			{
-				name:  "invalid unicode",
-				input: `"\uAZ"`,
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-			{
-				name:  "invalid escape",
-				input: `"\z"`,
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-			{
-				name:  "newline errors",
-				input: `"foo` + string(lf) + `"`,
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-		}
+			goldenBs, err := ioutil.ReadFile(goldenFileName)
+			if err != nil {
+				t.Error(err)
+			}
 
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				bs := []byte(tt.input)
-				l := New(bs)
-				gotT, err := l.Scan()
-				if !tt.wantErr && err != nil {
-					t.Errorf("Lexer.scanString() error = %+v, wantErr %+v", err, tt.wantErr)
-					return
-				}
+			expected := record{}
 
-				if !reflect.DeepEqual(gotT, tt.wantToken) {
-					t.Errorf("Lexer.scanString() = %+v, want %+v", gotT, tt.wantToken)
-				}
-			})
-		}
-	})
+			err = json.Unmarshal(goldenBs, &expected)
+			if err != nil {
+				t.Error(err)
+			}
 
-	t.Run("scanBlockString()", func(t *testing.T) {
-		tests := []struct {
-			name      string
-			input     string
-			wantToken Token
-			wantErr   bool
-		}{
-			// Happy
-			{
-				name:  "simple block string",
-				input: `"""simple"""`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  "simple",
-					Position: 3,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "block string with nested quotes",
-				input: `"""nested "" quotes"""`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  `nested "" quotes`,
-					Position: 3,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "block string escaped triple quotes",
-				input: `"""nested ` + string(bsl) + string(dq) + string(dq) + string(dq) + ` quotes"""`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  `nested """ quotes`,
-					Position: 3,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "non trip quote escapes ignored",
-				input: `"""\t \u1234"""`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  `\t \u1234`,
-					Position: 3,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name: "ignore leading and trailing newlines",
-				input: `"""
-ignore leading and trailing newlines
-"""`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  `ignore leading and trailing newlines`,
-					Position: 3,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "escape sequences with escaped triple quotes",
-				input: `"""\u1234 " \""""""`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  `\u1234 " """`,
-					Position: 3,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "leading trailing newlines with escaped triple quotes",
-				input: `"""` + string(cr) + string(lf) + `\"""` + string(cr) + string(lf) + `"""`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  `"""`,
-					Position: 3,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			{
-				name:  "empty triple quotes",
-				input: `""""""`,
-				wantToken: Token{
-					Type:     token.StringValue,
-					Literal:  "",
-					Position: 3,
-					Line:     1,
-				},
-				wantErr: false,
-			},
-			// Errorful
-			{
-				name:  "not closing properly",
-				input: `"""""`,
-				wantToken: Token{
-					Type: token.Illegal,
-				},
-				wantErr: true,
-			},
-		}
-
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				bs := []byte(tt.input)
-				l := New(bs)
-				gotT, err := l.Scan()
-				if !tt.wantErr && err != nil {
-					t.Errorf("Lexer.scanBlockString() error = %#v, wantErr %#v", err, tt.wantErr)
-					return
-				}
-
-				if !reflect.DeepEqual(gotT, tt.wantToken) {
-					t.Errorf("Lexer.scanBlockString() = %#v, want %#v", gotT, tt.wantToken)
-				}
-			})
-		}
-	})
+			tassert.Equal(t, expected, actual)
+		})
+	}
 }
 
 func TestLexerReadUnread(t *testing.T) {

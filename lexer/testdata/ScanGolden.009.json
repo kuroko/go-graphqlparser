@@ -1,0 +1,18 @@
+{
+  "Input": "-1.1e-99",
+  "Tokens": [
+    {
+      "Type": 5,
+      "Literal": "-1.1e-99",
+      "Position": 0,
+      "Line": 1
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 8,
+      "Line": 1
+    }
+  ],
+  "Errors": null
+}

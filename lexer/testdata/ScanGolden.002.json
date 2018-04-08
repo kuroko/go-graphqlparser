@@ -1,0 +1,18 @@
+{
+  "Input": "123456789",
+  "Tokens": [
+    {
+      "Type": 4,
+      "Literal": "123456789",
+      "Position": 0,
+      "Line": 1
+    },
+    {
+      "Type": 1,
+      "Literal": "",
+      "Position": 9,
+      "Line": 1
+    }
+  ],
+  "Errors": null
+}
