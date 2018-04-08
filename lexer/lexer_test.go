@@ -12,8 +12,7 @@ import (
 	"github.com/bucketd/go-graphqlparser/token"
 	"github.com/graphql-go/graphql/language/lexer"
 	"github.com/graphql-go/graphql/language/source"
-	"github.com/seeruk/assert"
-	tassert "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 var update = flag.Bool("update", false, "update golden record files?")
@@ -242,7 +241,7 @@ func TestLexer_ScanGolden(t *testing.T) {
 				t.Error(err)
 			}
 
-			tassert.Equal(t, expected, actual)
+			assert.Equal(t, expected, actual)
 		})
 	}
 }
