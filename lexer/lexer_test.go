@@ -572,13 +572,22 @@ ignore leading and trailing newlines
 				wantErr: false,
 			},
 			{
-				name: "ignore leading and trailing newlines and normal escapes",
-				input: `"""
-ignore \u1234 and leading and trailing newlines
-"""`,
+				name:  "escape sequences with escaped triple quotes",
+				input: `"""\u1234 " \""""""`,
 				wantToken: Token{
 					Type:     token.StringValue,
-					Literal:  `ignore \u1234 and leading and trailing newlines`,
+					Literal:  `\u1234 " """`,
+					Position: 3,
+					Line:     1,
+				},
+				wantErr: false,
+			},
+			{
+				name:  "leading trailing newlines with escaped triple quotes",
+				input: `"""` + string(cr) + string(lf) + `\"""` + string(cr) + string(lf) + `"""`,
+				wantToken: Token{
+					Type:     token.StringValue,
+					Literal:  `"""`,
 					Position: 3,
 					Line:     1,
 				},
@@ -595,14 +604,15 @@ ignore \u1234 and leading and trailing newlines
 				},
 				wantErr: false,
 			},
-			// {
-			// 	name:  "not closing properly",
-			// 	input: `"""not closed properly""`,
-			// 	wantToken: Token{
-			// 		Type: token.Illegal,
-			// 	},
-			// 	wantErr: true,
-			// },
+			// Errorful
+			{
+				name:  "not closing properly",
+				input: `"""""`,
+				wantToken: Token{
+					Type: token.Illegal,
+				},
+				wantErr: true,
+			},
 		}
 
 		for _, tt := range tests {

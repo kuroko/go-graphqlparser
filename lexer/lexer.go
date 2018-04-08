@@ -26,17 +26,21 @@ const (
 	tab = rune(0x0009) // '\t' horizontal tab.
 	bsl = rune(0x005C) // Literal reverse solidus (backslash).
 
+	// nothing to see here
 	rune1Max = 1<<7 - 1
 	rune2Max = 1<<11 - 1
 	rune3Max = 1<<16 - 1
 
+	// nothing to see here
 	maskx = 0x3F // 0011 1111
 
-	RuneError    = '\uFFFD'
-	MaxRune      = '\U0010FFFF'
+	// nothing to see here
+	runeError    = '\uFFFD'
+	maxRune      = '\U0010FFFF'
 	surrogateMin = 0xD800
 	surrogateMax = 0xDFFF
 
+	// these are not the bytes you're looking for
 	t1 = 0x00 // 0000 0000
 	tx = 0x80 // 1000 0000
 	t2 = 0xC0 // 1100 0000
@@ -247,6 +251,9 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 		case r < ws && r != tab && r != lf && r != cr:
 			return Token{}, fmt.Errorf("invalid character within string: %q", r)
 
+		case r == eof:
+			return Token{}, fmt.Errorf("eof eof eof eof: %q", r)
+
 		case r == bsl:
 			r, _ = l.read()
 			if r == '"' && isTripQuotes(l) {
@@ -259,12 +266,12 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 
 	endPos := l.pos - 3
 	endVal := l.input[endPos-1] // TODO(seeruk): Check that this is always safe.
-	startVal := l.input[startPos]
 
 	// If the first character in the string is a newline, ignore it.
-	if rune(startVal) == lf || rune(startVal) == cr {
-		// TODO(seeruk): If \r, check if next character is \n too? This still contributes to line
-		// numbers after all.
+	if rune(l.input[startPos]) == cr {
+		startPos++
+	}
+	if rune(l.input[startPos]) == lf {
 		startPos++
 	}
 
@@ -295,14 +302,20 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 		r, _ = l.read()
 
 		switch {
-		case r == eof:
-			return Token{}, fmt.Errorf("invalid character within string: %q", r)
-
 		case r == '"':
 			if isTripQuotes(l) {
+				bsend := len(bs) - 1
+				// If the last character in the string is a newline, ignore it.
+				if rune(bs[bsend]) == lf {
+					bsend--
+				}
+				if rune(bs[bsend]) == cr {
+					bsend--
+				}
+
 				return Token{
 					Type:     token.StringValue,
-					Literal:  btos(bs), // TODO(Luke-Vear): If leading and trailing newline, need some kind of end trimming...
+					Literal:  btos(bs[:bsend+1]),
 					Position: startLPos,
 					Line:     startLine,
 				}, nil
@@ -316,19 +329,13 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 			if r == '"' && isTripQuotes(l) {
 				encodeRune(r, func(b byte) {
 					bs = append(bs, b)
-				})
-				encodeRune(r, func(b byte) {
 					bs = append(bs, b)
-				})
-				encodeRune(r, func(b byte) {
 					bs = append(bs, b)
 				})
 				continue
 			}
-			encodeRune(bsl, func(b byte) {
-				bs = append(bs, b)
-			})
 			encodeRune(r, func(b byte) {
+				bs = append(bs, byte(0x005C))
 				bs = append(bs, b)
 			})
 
@@ -347,8 +354,12 @@ func isTripQuotes(l *Lexer) bool {
 		return true
 	}
 
-	l.unread()
-	l.unread()
+	if r1 != eof {
+		l.unread()
+	}
+	if r2 != eof {
+		l.unread()
+	}
 	return false
 }
 
@@ -378,9 +389,7 @@ func escapedChar(l *Lexer) (rune, error) {
 		r3, _ := l.read()
 		r4, _ := l.read()
 
-		//rs := []rune{r1, r2, r3, r4}
 		r := ucptor(r1, r2, r3, r4)
-		//r := ucptor(rs[1], rs[2], rs[3], rs[4])
 		if r < 0 {
 			return 0, fmt.Errorf("invalid character escape sequence: %s", "\\u"+string([]rune{r1, r2, r3, r4}))
 		}
@@ -404,8 +413,8 @@ func encodeRune(r rune, cb func(a byte)) {
 		cb(t2 | byte(r>>6))
 		cb(tx | byte(r)&maskx)
 		return
-	case i > MaxRune, surrogateMin <= i && i <= surrogateMax:
-		r = RuneError
+	case i > maxRune, surrogateMin <= i && i <= surrogateMax:
+		r = runeError
 		fallthrough
 	case i <= rune3Max:
 		cb(t3 | byte(r>>12))
