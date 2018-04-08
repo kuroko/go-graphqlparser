@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -164,6 +165,11 @@ func TestLexer_ScanGolden(t *testing.T) {
 		{"314", `"\z"`},
 		{"315", `"foo` + slf + `"`},
 		{"316", `"foo` + scr + slf + `"`},
+		{"317", `"\uAzAz"`},
+		{"318", `"\u0080"`},
+		{"319", `"\uFFFF"`},
+		{"320", `"😀"`},
+		{"321", `"\uD800"`},
 
 		// scanBlockString
 		{"401", `""""""`},
@@ -182,6 +188,9 @@ func TestLexer_ScanGolden(t *testing.T) {
 		{"414", `"""foo \u1234 " \""""""`},
 		{"415", `""""`},
 		{"416", `"""""`},
+		{"417", `"""\"""""`},
+		{"418", `"""\u1234""`},
+		{"419", `"""😀"""`},
 
 		// Scan
 		{"999", query},
@@ -266,4 +275,28 @@ func TestLexerReadUnread(t *testing.T) {
 	l.unread()
 	r, _ = l.read()
 	assert.Equal(t, fmt.Sprintf("%q", r), fmt.Sprintf("%q", '世'))
+}
+
+func TestEncodeRune(t *testing.T) {
+	thing := '😀'
+
+	var counter int
+	var bs []byte
+
+	encodeRune(thing, func(b byte) {
+		counter++
+		bs = append(bs, b)
+	})
+	if counter != 4 {
+		t.Errorf("expected emoji triggers default case, counter should be 4, actual: %d\n", counter)
+	}
+
+	tbs := []byte(string(thing))
+	if !reflect.DeepEqual(bs, tbs) {
+		t.Errorf(
+			"\nexpected: %x %x %x %x\ngot: %x %x %x %x\n",
+			tbs[0], tbs[1], tbs[2], tbs[3],
+			bs[0], bs[1], bs[2], bs[3],
+		)
+	}
 }

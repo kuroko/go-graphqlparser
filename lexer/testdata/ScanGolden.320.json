@@ -1,16 +1,16 @@
 {
-  "Input": "\"\"\"\r\nfoo\r\n\"\"\"",
+  "Input": "\"😀\"",
   "Tokens": [
     {
       "Type": 6,
-      "Literal": "foo",
-      "Position": 3,
+      "Literal": "😀",
+      "Position": 1,
       "Line": 1
     },
     {
       "Type": 1,
       "Literal": "",
-      "Position": 13,
+      "Position": 3,
       "Line": 1
     }
   ],

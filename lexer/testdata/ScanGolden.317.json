@@ -1,5 +1,5 @@
 {
-  "Input": "\"\"\"\\\"\"\"\"\"",
+  "Input": "\"\\uAzAz\"",
   "Tokens": [
     {
       "Type": 0,
@@ -9,6 +9,6 @@
     }
   ],
   "Errors": [
-    "invalid character within string: '\\x00'"
+    "invalid character escape sequence: \\uAzAz"
   ]
 }

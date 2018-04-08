@@ -163,7 +163,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 				// this loop iteration. We increment by 3 here because we want to have incremented
 				// by 4 in total. 4 bytes being the maximum width of a valid unicode escape sequence
 				// supported by GraphQL.
-				bc += 3 // Q: is this not 4?
+				bc += 3
 			}
 		}
 	}
@@ -243,9 +243,6 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 		case r < ws && r != tab && r != lf && r != cr:
 			return Token{}, fmt.Errorf("invalid character within string: %q", r)
 
-		case r == eof:
-			return Token{}, fmt.Errorf("eof eof eof eof: %q", r)
-
 		case r == bsl:
 			r, _ = l.read()
 			if r == '"' && isTripQuotes(l) {
@@ -257,7 +254,6 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 	}
 
 	endPos := l.pos - 3
-	endVal := l.input[endPos-1] // TODO(seeruk): Check that this is always safe.
 
 	// If the first character in the string is a newline, ignore it.
 	if rune(l.input[startPos]) == cr {
@@ -267,14 +263,14 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 		startPos++
 	}
 
-	// if the last character in the string is a newline, ignore it.
-	if rune(endVal) == lf || rune(endVal) == cr {
-		// TODO(seeruk): If \n, check if previous character is \r too? This still contributes to
-		// line numbers after all.
+	// If the last character in the string is a newline, ignore it.
+	if rune(l.input[endPos-1]) == lf {
+		endPos--
+	}
+	if rune(l.input[endPos-1]) == cr {
 		endPos--
 	}
 
-	// TODO(Luke-Vear): Check for not closing properly.
 	if !hasEscape {
 		return Token{
 			Type:     token.StringValue,
@@ -381,7 +377,7 @@ func escapedChar(l *Lexer) (rune, error) {
 		r3, _ := l.read()
 		r4, _ := l.read()
 
-		r := ucptor(r1, r2, r3, r4)
+		r := unicodeCodePointToRune(r1, r2, r3, r4)
 		if r < 0 {
 			return 0, fmt.Errorf("invalid character escape sequence: %s", "\\u"+string([]rune{r1, r2, r3, r4}))
 		}
@@ -423,8 +419,7 @@ func encodeRune(r rune, cb func(a byte)) {
 }
 
 // TODO(seeruk): Here: https://github.com/graphql/graphql-js/blob/master/src/language/lexer.js#L689
-// TODO(Luke-Vear): Discuss rename, I think ucptor isn't easy to grok.
-func ucptor(ar, br, cr, dr rune) rune {
+func unicodeCodePointToRune(ar, br, cr, dr rune) rune {
 	ai, bi, ci, di := hexRuneToInt(ar), hexRuneToInt(br), hexRuneToInt(cr), hexRuneToInt(dr)
 	return rune(ai<<12 | bi<<8 | ci<<4 | di<<0)
 }
@@ -567,8 +562,6 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 
 		// If there is another digit after zero, error.
 		if r >= '0' && r <= '9' {
-			// TODO(seeruk): Unread here?
-			// LV: I think on error we hard stop processing.
 			return Token{}, fmt.Errorf("invalid number, unexpected digit after 0: %q", r)
 		}
 
@@ -673,7 +666,6 @@ func (l *Lexer) readNextSignificant() rune {
 			l.line++
 			l.lpos = 0
 		case r == lf:
-			// Q: not hit by tests? can this code be reached?
 			// Line feed, i.e. '\n'.
 			if !was000D {
 				// \r\n is not 2 newlines, so we must check what the last rune was.
