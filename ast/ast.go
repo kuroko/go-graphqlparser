@@ -4,12 +4,13 @@ package ast
 // http://facebook.github.io/graphql/October2016/#sec-Language.Query-Document
 
 type Document struct {
-	OperationDefinitions []OperationDefinition
-	FragmentDefinitions  []FragmentDefinition
+	Definitions []Definition
 }
 
 // 2.3 Operations
 // http://facebook.github.io/graphql/October2016/#sec-Language.Operations
+// 2.8 Fragments
+// http://facebook.github.io/graphql/October2016/#sec-Language.Fragments
 
 const (
 	OperationTypeQuery OperationType = iota
@@ -18,9 +19,18 @@ const (
 
 type OperationType int
 
-type OperationDefinition struct {
-	Type                OperationType
-	Name                string
+const (
+	DefinitionKindOperation DefinitionKind = iota
+	DefinitionKindFragment
+)
+
+type DefinitionKind int
+
+type Definition struct {
+	Kind                DefinitionKind
+	OperationType       OperationType
+	Name                string // but not "on" if is FragmentDefinition kind.
+	TypeCondition       TypeCondition
 	VariableDefinitions []VariableDefinition
 	Directives          []Directive
 	SelectionSet        []Selection
@@ -68,13 +78,6 @@ type Alias struct {
 type FragmentSpread struct {
 	Name       string // but not "on"
 	Directives []Directive
-}
-
-type FragmentDefinition struct {
-	Name          string // but not "on"
-	TypeCondition TypeCondition
-	Directives    []Directive
-	SelectionSet  []Selection
 }
 
 type TypeCondition struct {
