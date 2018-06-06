@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 // 2.2 Query Document
 // http://facebook.github.io/graphql/October2016/#sec-Language.Query-Document
 
@@ -18,6 +20,17 @@ const (
 )
 
 type OperationType int
+
+func (t OperationType) String() string {
+	switch t {
+	case OperationTypeQuery:
+		return fmt.Sprintf("query (%d)", t)
+	case OperationTypeMutation:
+		return fmt.Sprintf("mutation (%d)", t)
+	}
+
+	return fmt.Sprintf("invalid (%d)", t)
+}
 
 const (
 	DefinitionKindOperation DefinitionKind = iota

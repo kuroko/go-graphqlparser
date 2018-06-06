@@ -2,13 +2,13 @@
   "Input": "# line 1\r# line 2\rquery",
   "Tokens": [
     {
-      "Type": 3,
+      "Type": 2,
       "Literal": "query",
       "Position": 1,
       "Line": 3
     },
     {
-      "Type": 1,
+      "Type": 0,
       "Literal": "",
       "Position": 5,
       "Line": 3

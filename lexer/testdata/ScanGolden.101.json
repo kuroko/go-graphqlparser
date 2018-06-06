@@ -2,85 +2,85 @@
   "Input": "!$()...:=@[]{|}",
   "Tokens": [
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "!",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "$",
       "Position": 2,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "(",
       "Position": 3,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": ")",
       "Position": 4,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "...",
       "Position": 5,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": ":",
       "Position": 8,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "=",
       "Position": 9,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "@",
       "Position": 10,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "[",
       "Position": 11,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "]",
       "Position": 12,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "{",
       "Position": 13,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "|",
       "Position": 14,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "}",
       "Position": 15,
       "Line": 1
     },
     {
-      "Type": 1,
+      "Type": 0,
       "Literal": "",
       "Position": 15,
       "Line": 1

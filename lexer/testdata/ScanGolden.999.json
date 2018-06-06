@@ -2,115 +2,115 @@
   "Input": "\n\t\t# Mutation for testing different token types.\n\t\tmutation {\n\t\t\tcreatePost(\n\t\t\t\tid: 1024\n\t\t\t\ttitle: \"String Value\"\n\t\t\t\tcontent: \"\"\"Block string value isn't supported by all libs.\"\"\"\n\t\t\t\treadTime: 2.742\n\t\t\t)\n\t\t}\n\t",
   "Tokens": [
     {
-      "Type": 3,
+      "Type": 2,
       "Literal": "mutation",
       "Position": 3,
       "Line": 3
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "{",
       "Position": 12,
       "Line": 3
     },
     {
-      "Type": 3,
+      "Type": 2,
       "Literal": "createPost",
       "Position": 4,
       "Line": 4
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "(",
       "Position": 14,
       "Line": 4
     },
     {
-      "Type": 3,
+      "Type": 2,
       "Literal": "id",
       "Position": 5,
       "Line": 5
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": ":",
       "Position": 7,
       "Line": 5
     },
     {
-      "Type": 4,
+      "Type": 3,
       "Literal": "1024",
-      "Position": 85,
+      "Position": 9,
       "Line": 5
     },
     {
-      "Type": 3,
+      "Type": 2,
       "Literal": "title",
       "Position": 5,
       "Line": 6
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": ":",
       "Position": 10,
       "Line": 6
     },
     {
-      "Type": 6,
+      "Type": 5,
       "Literal": "String Value",
       "Position": 12,
       "Line": 6
     },
     {
-      "Type": 3,
+      "Type": 2,
       "Literal": "content",
       "Position": 5,
       "Line": 7
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": ":",
       "Position": 12,
       "Line": 7
     },
     {
-      "Type": 6,
+      "Type": 5,
       "Literal": "Block string value isn't supported by all libs.",
       "Position": 16,
       "Line": 7
     },
     {
-      "Type": 3,
+      "Type": 2,
       "Literal": "readTime",
       "Position": 5,
       "Line": 8
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": ":",
       "Position": 13,
       "Line": 8
     },
     {
-      "Type": 5,
+      "Type": 4,
       "Literal": "2.742",
-      "Position": 197,
+      "Position": 15,
       "Line": 8
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": ")",
       "Position": 4,
       "Line": 9
     },
     {
-      "Type": 2,
+      "Type": 1,
       "Literal": "}",
       "Position": 3,
       "Line": 10
     },
     {
-      "Type": 1,
+      "Type": 0,
       "Literal": "",
       "Position": 1,
       "Line": 11

@@ -9,9 +9,9 @@ import (
 
 func main() {
 	query := `query foo { bar baz }`
-	parser := parser.New([]byte(query))
+	psr := parser.New([]byte(query))
 
-	doc, err := parser.Parse()
+	doc, err := psr.Parse()
 	spew.Dump(doc)
 	if err != nil {
 		fmt.Println(err)

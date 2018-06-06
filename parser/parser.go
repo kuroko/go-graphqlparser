@@ -1,11 +1,13 @@
 package parser
 
 import (
-	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/lexer"
 	"github.com/bucketd/go-graphqlparser/token"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type Parser struct {
@@ -33,17 +35,14 @@ func (p *Parser) Parse() (ast.Document, error) {
 
 		document.Definitions = append(document.Definitions, definition)
 
-		done, err := p.skip(token.EOF)
-		if err != nil {
-			return document, err
+		if p.next(token.Illegal) {
+			return document, p.unexpected(p.token, token.EOF)
 		}
 
-		if done {
-			break
+		if p.next(token.EOF) {
+			return document, nil
 		}
 	}
-
-	return document, nil
 }
 
 func (p *Parser) parseDefinition() (ast.Definition, error) {
@@ -52,41 +51,38 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 
 	var definition ast.Definition
 
-	if p.assert(token.Name) {
-		isQuery := p.token.Literal == "query"
-		isMutation := p.token.Literal == "mutation"
-		if isQuery || isMutation {
-			return p.parseOperationDefinition()
-		}
-
-		if p.token.Literal == "fragment" {
-			// TODO(seeruk): siufhisuhdf
-		}
+	if p.next(token.Name, "query", "mutation") || p.next(token.Punctuator, "{") {
+		spew.Dump(p.token)
+		return p.parseOperationDefinition(p.token.Literal == "{")
 	}
 
-	if p.assert(token.Punctuator) && p.token.Literal == "{" {
-		return ast.Definition{
-			Kind:          ast.DefinitionKindOperation,
-			OperationType: ast.OperationTypeQuery,
-			// SelectionSet: ...
-			// TODO(seeruk): Location.
-		}, nil
+	if p.next(token.Name, "fragment") {
+		// TODO(seeruk): Implement.
 	}
 
-	return definition, errors.New("unexpected: todo")
+	return definition, p.unexpected(p.token, token.Name, "query", "mutation", "fragment")
 }
 
-func (p *Parser) parseOperationDefinition() (ast.Definition, error) {
+func (p *Parser) parseOperationDefinition(isQuery bool) (ast.Definition, error) {
 	var definition ast.Definition
 
-	opType, err := p.parseOperationType()
-	if err != nil {
-		return definition, err
+	var opType ast.OperationType
+	var name string
+	var err error
+
+	if !isQuery {
+		opType, err = p.parseOperationType()
+		if err != nil {
+			return definition, err
+		}
+
+		if tok, err := p.consume(token.Name); err == nil {
+			name = tok.Literal
+		}
 	}
 
-	var name string
-	if p.assert(token.Name) {
-		name = p.token.Literal
+	if _, err = p.consume(token.Punctuator, "{"); err != nil {
+		return definition, err
 	}
 
 	return ast.Definition{
@@ -101,51 +97,111 @@ func (p *Parser) parseOperationDefinition() (ast.Definition, error) {
 }
 
 func (p *Parser) parseOperationType() (ast.OperationType, error) {
-	token, err := p.expect(token.Name)
+	tok, err := p.consume(token.Name, "query", "mutation")
 	if err != nil {
-		// TODO(seeruk): More error context?
 		return -1, err
 	}
 
-	switch token.Literal {
-	case "query":
+	if tok.Literal == "query" {
 		return ast.OperationTypeQuery, nil
-	case "mutation":
-		return ast.OperationTypeMutation, nil
 	}
 
-	return -1, errors.New("unexpected: todo")
+	// Only other thing it can be at this point...
+	return ast.OperationTypeMutation, nil
 }
 
-func (p *Parser) assert(t token.Type) bool {
-	return p.token.Type == t
+// Parser utilities:
+
+func (p *Parser) expectAll(fns ...func() error) error {
+	for _, fn := range fns {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-func (p *Parser) expect(t token.Type) (lexer.Token, error) {
-	token := p.token
-	match, err := p.skip(t)
+func (p *Parser) consume(t token.Type, ls ...string) (lexer.Token, error) {
+	tok := p.token
+	if tok.Type != t {
+		return tok, p.unexpected(tok, t, ls...)
+	}
+
+	if len(ls) == 0 {
+		p.scan()
+		return tok, nil
+	}
+
+	for _, l := range ls {
+		if tok.Literal != l {
+			continue
+		}
+
+		p.scan()
+		return tok, nil
+	}
+
+	return tok, p.unexpected(tok, t, ls...)
+}
+
+func (p *Parser) expect(t token.Type, ls ...string) error {
+	if !p.next(t, ls...) {
+		return p.unexpected(p.token, t, ls...)
+	}
+
+	return nil
+}
+
+func (p *Parser) expectFn(t token.Type, l string) func() error {
+	return func() error {
+		return p.expect(t, l)
+	}
+}
+
+func (p *Parser) next(t token.Type, ls ...string) bool {
+	if p.token.Type != t {
+		return false
+	}
+
+	if len(ls) == 0 {
+		return true
+	}
+
+	for _, l := range ls {
+		if p.token.Literal == l {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p *Parser) skip(t token.Type, ls ...string) bool {
+	_, err := p.consume(t, ls...)
 	if err != nil {
-		return token, err
+		return false
 	}
 
-	if match {
-		return token, nil
-	}
-
-	return token, errors.New("syntax error: todo")
+	return true
 }
 
-func (p *Parser) scan() (err error) {
-	p.token, err = p.lexer.Scan()
-	return err
+func (p *Parser) scan() {
+	p.token = p.lexer.Scan()
 }
 
-func (p *Parser) skip(t token.Type) (bool, error) {
-	var err error
-	match := p.token.Type == t
-	if match {
-		p.token, err = p.lexer.Scan()
+func (p *Parser) unexpected(token lexer.Token, t token.Type, ls ...string) error {
+	if len(ls) == 0 {
+		ls = []string{"N/A"}
 	}
 
-	return match, err
+	return fmt.Errorf(
+		"parser error: unexpected token found: %s (%q). Wanted: %s (%q). Line: %d. Column: %d",
+		token.Type.String(),
+		token.Literal,
+		t.String(),
+		strings.Join(ls, "|"),
+		token.Line,
+		token.Position,
+	)
 }

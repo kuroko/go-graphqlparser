@@ -2,13 +2,13 @@
   "Input": "\"\\b\"",
   "Tokens": [
     {
-      "Type": 6,
+      "Type": 5,
       "Literal": "\u0008",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 1,
+      "Type": 0,
       "Literal": "",
       "Position": 4,
       "Line": 1

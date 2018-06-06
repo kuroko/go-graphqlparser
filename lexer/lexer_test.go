@@ -45,12 +45,12 @@ func BenchmarkLexer(b *testing.B) {
 			lxr := New(qry)
 
 			for {
-				tok, err := lxr.Scan()
-				if err != nil {
-					b.Fatal(err)
+				tok := lxr.Scan()
+				if tok.Type == token.Illegal {
+					b.Fatal(tok.Literal)
 				}
 
-				if tok.Type == token.EOF {
+				if tok.Type == token.EOF || tok.Type == token.Illegal {
 					break
 				}
 
@@ -193,6 +193,7 @@ func TestLexer_ScanGolden(t *testing.T) {
 		{"419", `"""😀"""`},
 
 		// Scan
+		{"998", `query foo ` + string(rune(128515)) + ` { bar baz }`},
 		{"999", query},
 	}
 
@@ -210,14 +211,14 @@ func TestLexer_ScanGolden(t *testing.T) {
 			}
 
 			for {
-				tok, err := lxr.Scan()
+				tok := lxr.Scan()
 
 				actual.Tokens = append(actual.Tokens, tok)
-				if err != nil {
-					actual.Errors = append(actual.Errors, err.Error())
+				if tok.Type == token.Illegal {
+					actual.Errors = append(actual.Errors, tok.Literal)
 				}
 
-				if err != nil || tok.Type == token.EOF {
+				if tok.Type == token.EOF || tok.Type == token.Illegal {
 					break
 				}
 			}

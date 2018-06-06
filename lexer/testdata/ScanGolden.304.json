@@ -2,10 +2,10 @@
   "Input": "\"foo",
   "Tokens": [
     {
-      "Type": 0,
-      "Literal": "",
-      "Position": 0,
-      "Line": 0
+      "Type": -1,
+      "Literal": "invalid character within string: '\\x00'",
+      "Position": 1,
+      "Line": 1
     }
   ],
   "Errors": [

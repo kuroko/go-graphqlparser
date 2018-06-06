@@ -83,7 +83,7 @@ func New(input []byte) *Lexer {
 
 // Scan attempts to read the next significant token from the input. Tokens that are not understood
 // will yield an "illegal" token.
-func (l *Lexer) Scan() (Token, error) {
+func (l *Lexer) Scan() Token {
 	r := l.readNextSignificant()
 
 	switch {
@@ -108,18 +108,25 @@ func (l *Lexer) Scan() (Token, error) {
 		l.unread()
 		l.unread()
 		return l.scanString(r)
-
-	default:
+	case r == eof:
 		return Token{
 			Type:     token.EOF,
 			Position: l.lpos,
 			Line:     l.line,
-		}, nil
+		}
+
+	default:
+		return Token{
+			Type:     token.Illegal,
+			Literal:  string(r),
+			Position: l.lpos,
+			Line:     l.line,
+		}
 	}
 }
 
 // scanString ...
-func (l *Lexer) scanString(r rune) (Token, error) {
+func (l *Lexer) scanString(r rune) Token {
 	var w int
 
 	startPos := l.pos
@@ -140,7 +147,12 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 			done = true
 
 		case r < ws && r != tab:
-			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+			return Token{
+				Type:     token.Illegal,
+				Literal:  fmt.Sprintf("invalid character within string: %q", r),
+				Position: startLPos,
+				Line:     startLine,
+			}
 
 		case r == bsl:
 			hasEscape = true
@@ -174,7 +186,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 			Literal:  btos(l.input[startPos : l.pos-1]),
 			Position: startLPos,
 			Line:     startLine,
-		}, nil
+		}
 	}
 
 	l.pos = startPos
@@ -197,12 +209,17 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 				Literal:  btos(bs),
 				Position: startLPos,
 				Line:     startLine,
-			}, nil
+			}
 
 		case r == bsl:
 			r, err := escapedChar(l)
 			if err != nil {
-				return Token{}, err
+				return Token{
+					Type:     token.Illegal,
+					Literal:  err.Error(),
+					Position: startLPos,
+					Line:     startLine,
+				}
 			}
 
 			encodeRune(r, func(b byte) {
@@ -218,7 +235,7 @@ func (l *Lexer) scanString(r rune) (Token, error) {
 }
 
 // scanBlockString ...
-func (l *Lexer) scanBlockString(r rune) (Token, error) {
+func (l *Lexer) scanBlockString(r rune) Token {
 	var w int
 
 	startPos := l.pos
@@ -241,7 +258,12 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 			}
 
 		case r < ws && r != tab && r != lf && r != cr:
-			return Token{}, fmt.Errorf("invalid character within string: %q", r)
+			return Token{
+				Type:     token.Illegal,
+				Literal:  fmt.Sprintf("invalid character within string: %q", r),
+				Position: startLPos,
+				Line:     startLine,
+			}
 
 		case r == bsl:
 			r, _ = l.read()
@@ -277,7 +299,7 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 			Literal:  btos(l.input[startPos:endPos]),
 			Position: startLPos,
 			Line:     startLine,
-		}, nil
+		}
 	}
 
 	l.pos = startPos
@@ -306,7 +328,7 @@ func (l *Lexer) scanBlockString(r rune) (Token, error) {
 					Literal:  btos(bs[:bsend+1]),
 					Position: startLPos,
 					Line:     startLine,
-				}, nil
+				}
 			}
 			encodeRune(r, func(b byte) {
 				bs = append(bs, b)
@@ -439,7 +461,7 @@ func hexRuneToInt(r rune) int {
 }
 
 // scanComment scans valid GraphQL comments.
-func (l *Lexer) scanComment(r rune) (Token, error) {
+func (l *Lexer) scanComment(r rune) Token {
 	var was000D bool
 
 	for {
@@ -486,7 +508,7 @@ func (l *Lexer) scanComment(r rune) (Token, error) {
 }
 
 // scanName scans valid GraphQL name tokens.
-func (l *Lexer) scanName(r rune) (Token, error) {
+func (l *Lexer) scanName(r rune) Token {
 	byteStart := l.pos - 1
 	runeStart := l.lpos
 
@@ -510,11 +532,11 @@ func (l *Lexer) scanName(r rune) (Token, error) {
 		Literal:  btos(l.input[byteStart:l.pos]),
 		Position: runeStart,
 		Line:     l.line,
-	}, nil
+	}
 }
 
 // scanPunctuator scans valid GraphQL punctuation tokens.
-func (l *Lexer) scanPunctuator(r rune) (Token, error) {
+func (l *Lexer) scanPunctuator(r rune) Token {
 	byteStart := l.pos
 	runeStart := l.lpos
 
@@ -524,7 +546,12 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 
 		rs := []rune{r, r2, r3}
 		if rs[1] != '.' || rs[2] != '.' {
-			return Token{}, fmt.Errorf("invalid punctuator, expected \"...\" but got: %q", string(rs))
+			return Token{
+				Type:     token.Illegal,
+				Literal:  fmt.Sprintf("invalid punctuator, expected \"...\" but got: %q", string(rs)),
+				Position: runeStart,
+				Line:     l.line,
+			}
 		}
 
 		return Token{
@@ -532,7 +559,7 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 			Literal:  "...",
 			Position: runeStart,
 			Line:     l.line,
-		}, nil
+		}
 	}
 
 	// TODO(seeruk): Using other token types for each type of punctuation may actually be faster.
@@ -541,12 +568,13 @@ func (l *Lexer) scanPunctuator(r rune) (Token, error) {
 		Literal:  btos(l.input[byteStart-l.lrw : byteStart]),
 		Position: runeStart,
 		Line:     l.line,
-	}, nil
+	}
 }
 
 // scanNumber scans valid GraphQL integer and float value tokens.
-func (l *Lexer) scanNumber(r rune) (Token, error) {
+func (l *Lexer) scanNumber(r rune) Token {
 	byteStart := l.pos - 1
+	runeStart := l.lpos
 
 	var float bool // If true, number is float.
 	var err error  // So no shadowing of r.
@@ -562,7 +590,12 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 
 		// If there is another digit after zero, error.
 		if r >= '0' && r <= '9' {
-			return Token{}, fmt.Errorf("invalid number, unexpected digit after 0: %q", r)
+			return Token{
+				Type:     token.Illegal,
+				Literal:  fmt.Sprintf("invalid number, unexpected digit after 0: %q", r),
+				Position: runeStart,
+				Line:     l.line,
+			}
 		}
 
 		// If number does not begin with zero, read the digits.
@@ -570,7 +603,12 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 	} else {
 		r, err = l.readDigits(r)
 		if err != nil {
-			return Token{}, err
+			return Token{
+				Type:     token.Illegal,
+				Literal:  err.Error(),
+				Position: runeStart,
+				Line:     l.line,
+			}
 		}
 	}
 
@@ -583,7 +621,12 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 		// Read the digits after the decimal place if the first character is not a digit, error.
 		r, err = l.readDigits(r)
 		if err != nil {
-			return Token{}, err
+			return Token{
+				Type:     token.Illegal,
+				Literal:  err.Error(),
+				Position: runeStart,
+				Line:     l.line,
+			}
 		}
 	}
 
@@ -601,7 +644,12 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 		// Read the exponent digitas, if the first character is not a digit, error.
 		r, err = l.readDigits(r)
 		if err != nil {
-			return Token{}, err
+			return Token{
+				Type:     token.Illegal,
+				Literal:  err.Error(),
+				Position: runeStart,
+				Line:     l.line,
+			}
 		}
 	}
 
@@ -612,7 +660,7 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 	t := Token{
 		Literal:  btos(l.input[byteStart:l.pos]),
 		Line:     l.line,
-		Position: byteStart,
+		Position: runeStart,
 	}
 
 	t.Type = token.IntValue
@@ -620,7 +668,7 @@ func (l *Lexer) scanNumber(r rune) (Token, error) {
 		t.Type = token.FloatValue
 	}
 
-	return t, nil
+	return t
 }
 
 // readDigits reads up until the next non-numeric character in the input.

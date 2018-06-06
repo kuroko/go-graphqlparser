@@ -15,7 +15,7 @@ package token
 // might suggest, as that might be too slow.
 
 const (
-	Illegal Type = iota
+	Illegal Type = iota - 1
 	EOF
 
 	// 2.1.6: Lexical Tokens.

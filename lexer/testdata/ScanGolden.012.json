@@ -2,10 +2,10 @@
   "Input": "1.界",
   "Tokens": [
     {
-      "Type": 0,
-      "Literal": "",
-      "Position": 0,
-      "Line": 0
+      "Type": -1,
+      "Literal": "invalid number, expected digit but got: '界'",
+      "Position": 1,
+      "Line": 1
     }
   ],
   "Errors": [
