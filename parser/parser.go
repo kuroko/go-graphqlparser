@@ -7,7 +7,6 @@ import (
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/lexer"
 	"github.com/bucketd/go-graphqlparser/token"
-	"github.com/davecgh/go-spew/spew"
 )
 
 type Parser struct {
@@ -24,7 +23,6 @@ func New(input []byte) *Parser {
 func (p *Parser) Parse() (ast.Document, error) {
 	var document ast.Document
 
-	// Read first token in before any expectations are set.
 	p.scan()
 
 	for {
@@ -52,7 +50,6 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 	var definition ast.Definition
 
 	if p.next(token.Name, "query", "mutation") || p.next(token.Punctuator, "{") {
-		spew.Dump(p.token)
 		return p.parseOperationDefinition(p.token.Literal == "{")
 	}
 
@@ -60,15 +57,21 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 		// TODO(seeruk): Implement.
 	}
 
+	// TODO(seeruk): We need unexpected to support multiple token types and literals. Maybe:
+	// func unexpected(tok lexer.Token, wants ...func(t token.Type, ls ...string) []lexer.Token) {}
+	//
+	// So in the case below, we need to support what is there now, and also a punctuator with the
+	// literal "{". The current error message doesn't highlight all of the things we might want.
 	return definition, p.unexpected(p.token, token.Name, "query", "mutation", "fragment")
 }
 
 func (p *Parser) parseOperationDefinition(isQuery bool) (ast.Definition, error) {
 	var definition ast.Definition
 
-	var opType ast.OperationType
 	var name string
 	var err error
+
+	opType := ast.OperationTypeQuery
 
 	if !isQuery {
 		opType, err = p.parseOperationType()
@@ -82,6 +85,12 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.Definition, error) 
 	}
 
 	if _, err = p.consume(token.Punctuator, "{"); err != nil {
+		return definition, err
+	}
+
+	// TODO(seeruk): parseSelectionSet.
+
+	if _, err = p.consume(token.Punctuator, "}"); err != nil {
 		return definition, err
 	}
 
