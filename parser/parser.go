@@ -162,9 +162,9 @@ func (p *Parser) expect(t token.Type, ls ...string) error {
 	return nil
 }
 
-func (p *Parser) expectFn(t token.Type, l string) func() error {
+func (p *Parser) expectFn(t token.Type, ls ...string) func() error {
 	return func() error {
-		return p.expect(t, l)
+		return p.expect(t, ls...)
 	}
 }
 
