@@ -1,7 +1,5 @@
 package ast
 
-import "fmt"
-
 // 2.2 Query Document
 // http://facebook.github.io/graphql/October2016/#sec-Language.Query-Document
 
@@ -24,12 +22,12 @@ type OperationType int
 func (t OperationType) String() string {
 	switch t {
 	case OperationTypeQuery:
-		return fmt.Sprintf("query (%d)", t)
+		return "query"
 	case OperationTypeMutation:
-		return fmt.Sprintf("mutation (%d)", t)
+		return "mutation"
 	}
 
-	return fmt.Sprintf("invalid (%d)", t)
+	return "invalid"
 }
 
 const (
@@ -153,15 +151,25 @@ type VariableDefinition struct {
 const (
 	TypeKindNamedType TypeKind = iota
 	TypeKindListType
-	TypeKindNonNullType
 )
 
 type TypeKind int
 
+func (k TypeKind) String() string {
+	switch k {
+	case TypeKindNamedType:
+		return "NamedType"
+	case TypeKindListType:
+		return "ListType"
+	}
+
+	return "InvalidType"
+}
+
 type Type struct {
 	Kind        TypeKind
 	NamedType   string
-	ListType    []Type
+	ListType    *Type
 	NonNullable bool
 }
 

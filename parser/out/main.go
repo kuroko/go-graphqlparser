@@ -8,7 +8,12 @@ import (
 )
 
 func main() {
-	query := `query foo {}`
+	query := `
+		query foo($bar: Boolean, $baz: [String!]) {
+			# ...
+		}
+	`
+
 	psr := parser.New([]byte(query))
 
 	doc, err := psr.Parse()

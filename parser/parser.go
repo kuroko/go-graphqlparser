@@ -87,6 +87,11 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.Definition, error) 
 		}
 	}
 
+	variableDefinitions, err := p.parseVariableDefinitions()
+	if err != nil {
+		return definition, err
+	}
+
 	if _, err = p.mustConsume(token.Punctuator, "{"); err != nil {
 		return definition, err
 	}
@@ -98,10 +103,10 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.Definition, error) 
 	}
 
 	return ast.Definition{
-		Kind:          ast.DefinitionKindOperation,
-		OperationType: opType,
-		Name:          name,
-		// VariableDefinitions: ...
+		Kind:                ast.DefinitionKindOperation,
+		OperationType:       opType,
+		Name:                name,
+		VariableDefinitions: variableDefinitions,
 		// Directives: ...
 		// SelectionSet: ...
 		// TODO(seeruk): Location.
@@ -120,6 +125,85 @@ func (p *Parser) parseOperationType() (ast.OperationType, error) {
 
 	// Only other thing it can be at this point...
 	return ast.OperationTypeMutation, nil
+}
+
+func (p *Parser) parseVariableDefinitions() ([]ast.VariableDefinition, error) {
+	var definitions []ast.VariableDefinition
+
+	if _, err := p.mustConsume(token.Punctuator, "("); err != nil {
+		return definitions, err
+	}
+
+	for {
+		if _, err := p.mustConsume(token.Punctuator, "$"); err != nil {
+			return definitions, err
+		}
+
+		tok, err := p.mustConsume(token.Name)
+		if err != nil {
+			return definitions, err
+		}
+
+		definition := ast.VariableDefinition{}
+		definition.Name = tok.Literal
+
+		if _, err := p.mustConsume(token.Punctuator, ":"); err != nil {
+			return definitions, err
+		}
+
+		astType, err := p.parseType()
+		if err != nil {
+			return definitions, err
+		}
+
+		definition.Type = astType
+		definitions = append(definitions, definition)
+
+		if p.peek(token.Punctuator, ")") {
+			break
+		}
+	}
+
+	if _, err := p.mustConsume(token.Punctuator, ")"); err != nil {
+		return definitions, err
+	}
+
+	return definitions, nil
+}
+
+func (p *Parser) parseType() (ast.Type, error) {
+	var astType ast.Type
+
+	// If we hit an opening square brace, we've got a list type, time to dive in.
+	if p.skip(token.Punctuator, "[") {
+		astType.Kind = ast.TypeKindListType
+
+		itemType, err := p.parseType()
+		if err != nil {
+			return astType, nil
+		}
+
+		astType.ListType = &itemType
+
+		if _, err := p.mustConsume(token.Punctuator, "]"); err != nil {
+			return astType, err
+		}
+	} else {
+		astType.Kind = ast.TypeKindNamedType
+
+		tok, err := p.mustConsume(token.Name)
+		if err != nil {
+			return astType, err
+		}
+
+		astType.NamedType = tok.Literal
+	}
+
+	if p.skip(token.Punctuator, "!") {
+		astType.NonNullable = true
+	}
+
+	return astType, nil
 }
 
 // Parser utilities:
@@ -150,7 +234,7 @@ func (p *Parser) consume(t token.Type, ls ...string) (lexer.Token, bool) {
 func (p *Parser) mustConsume(t token.Type, ls ...string) (lexer.Token, error) {
 	tok, ok := p.consume(t, ls...)
 	if !ok {
-		p.unexpected(tok, t, ls...)
+		return tok, p.unexpected(tok, t, ls...)
 	}
 
 	return tok, nil
@@ -204,13 +288,13 @@ func (p *Parser) unexpected(token lexer.Token, t token.Type, ls ...string) error
 	buf := bytes.Buffer{}
 	buf.WriteString("parser error: unexpected token found: ")
 	buf.WriteString(token.Type.String())
-	buf.WriteString(" (")
+	buf.WriteString(" '")
 	buf.WriteString(token.Literal)
-	buf.WriteString("). Wanted: ")
+	buf.WriteString("'. Wanted: ")
 	buf.WriteString(t.String())
-	buf.WriteString(" (")
+	buf.WriteString(" '")
 	buf.WriteString(strings.Join(ls, "|"))
-	buf.WriteString("). Line: ")
+	buf.WriteString("'. Line: ")
 	buf.WriteString(strconv.Itoa(token.Line))
 	buf.WriteString(". Column: ")
 	buf.WriteString(strconv.Itoa(token.Position))
