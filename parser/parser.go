@@ -156,6 +156,8 @@ func (p *Parser) parseVariableDefinitions() ([]ast.VariableDefinition, error) {
 			return definitions, err
 		}
 
+		// TODO(seeruk): Parse DefaultValue here.
+
 		definition.Type = astType
 		definitions = append(definitions, definition)
 
