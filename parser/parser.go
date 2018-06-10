@@ -1,8 +1,11 @@
 package parser
 
 import (
-	"fmt"
+	"bytes"
+	"errors"
+	"strconv"
 	"strings"
+	"unsafe"
 
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/lexer"
@@ -33,11 +36,11 @@ func (p *Parser) Parse() (ast.Document, error) {
 
 		document.Definitions = append(document.Definitions, definition)
 
-		if p.next(token.Illegal) {
+		if p.peek(token.Illegal) {
 			return document, p.unexpected(p.token, token.EOF)
 		}
 
-		if p.next(token.EOF) {
+		if p.peek(token.EOF) {
 			return document, nil
 		}
 	}
@@ -49,11 +52,11 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 
 	var definition ast.Definition
 
-	if p.next(token.Name, "query", "mutation") || p.next(token.Punctuator, "{") {
+	if p.peek(token.Name, "query", "mutation") || p.peek(token.Punctuator, "{") {
 		return p.parseOperationDefinition(p.token.Literal == "{")
 	}
 
-	if p.next(token.Name, "fragment") {
+	if p.peek(token.Name, "fragment") {
 		// TODO(seeruk): Implement.
 	}
 
@@ -79,18 +82,18 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.Definition, error) 
 			return definition, err
 		}
 
-		if tok, err := p.consume(token.Name); err == nil {
+		if tok, ok := p.consume(token.Name); ok {
 			name = tok.Literal
 		}
 	}
 
-	if _, err = p.consume(token.Punctuator, "{"); err != nil {
+	if _, err = p.mustConsume(token.Punctuator, "{"); err != nil {
 		return definition, err
 	}
 
 	// TODO(seeruk): parseSelectionSet.
 
-	if _, err = p.consume(token.Punctuator, "}"); err != nil {
+	if _, err = p.mustConsume(token.Punctuator, "}"); err != nil {
 		return definition, err
 	}
 
@@ -106,7 +109,7 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.Definition, error) 
 }
 
 func (p *Parser) parseOperationType() (ast.OperationType, error) {
-	tok, err := p.consume(token.Name, "query", "mutation")
+	tok, err := p.mustConsume(token.Name, "query", "mutation")
 	if err != nil {
 		return -1, err
 	}
@@ -121,25 +124,15 @@ func (p *Parser) parseOperationType() (ast.OperationType, error) {
 
 // Parser utilities:
 
-func (p *Parser) expectAll(fns ...func() error) error {
-	for _, fn := range fns {
-		if err := fn(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (p *Parser) consume(t token.Type, ls ...string) (lexer.Token, error) {
+func (p *Parser) consume(t token.Type, ls ...string) (lexer.Token, bool) {
 	tok := p.token
 	if tok.Type != t {
-		return tok, p.unexpected(tok, t, ls...)
+		return tok, false
 	}
 
 	if len(ls) == 0 {
 		p.scan()
-		return tok, nil
+		return tok, true
 	}
 
 	for _, l := range ls {
@@ -148,27 +141,22 @@ func (p *Parser) consume(t token.Type, ls ...string) (lexer.Token, error) {
 		}
 
 		p.scan()
-		return tok, nil
+		return tok, true
 	}
 
-	return tok, p.unexpected(tok, t, ls...)
+	return tok, false
 }
 
-func (p *Parser) expect(t token.Type, ls ...string) error {
-	if !p.next(t, ls...) {
-		return p.unexpected(p.token, t, ls...)
+func (p *Parser) mustConsume(t token.Type, ls ...string) (lexer.Token, error) {
+	tok, ok := p.consume(t, ls...)
+	if !ok {
+		p.unexpected(tok, t, ls...)
 	}
 
-	return nil
+	return tok, nil
 }
 
-func (p *Parser) expectFn(t token.Type, ls ...string) func() error {
-	return func() error {
-		return p.expect(t, ls...)
-	}
-}
-
-func (p *Parser) next(t token.Type, ls ...string) bool {
+func (p *Parser) peek(t token.Type, ls ...string) bool {
 	if p.token.Type != t {
 		return false
 	}
@@ -187,10 +175,12 @@ func (p *Parser) next(t token.Type, ls ...string) bool {
 }
 
 func (p *Parser) skip(t token.Type, ls ...string) bool {
-	_, err := p.consume(t, ls...)
-	if err != nil {
+	match := p.peek(t, ls...)
+	if !match {
 		return false
 	}
+
+	p.scan()
 
 	return true
 }
@@ -204,13 +194,33 @@ func (p *Parser) unexpected(token lexer.Token, t token.Type, ls ...string) error
 		ls = []string{"N/A"}
 	}
 
-	return fmt.Errorf(
-		"parser error: unexpected token found: %s (%q). Wanted: %s (%q). Line: %d. Column: %d",
-		token.Type.String(),
-		token.Literal,
-		t.String(),
-		strings.Join(ls, "|"),
-		token.Line,
-		token.Position,
-	)
+	// This is as nasty as I'm willing to make this right now. But this is the slowest function in
+	// the parser by far, because of the allocations it has to do, simply because it's generating
+	// this message.
+	// TODO(seeruk): Revisit this, it can almost definitely be improved.
+	// TODO(seeruk): Don't call unexpected when it's not absolutely necessary. We can not pass
+	// around errors if we don't need to (i.e. if we want to mustConsume without caring about the error,
+	// like if we just care about whether or not we did mustConsume something).
+	buf := bytes.Buffer{}
+	buf.WriteString("parser error: unexpected token found: ")
+	buf.WriteString(token.Type.String())
+	buf.WriteString(" (")
+	buf.WriteString(token.Literal)
+	buf.WriteString("). Wanted: ")
+	buf.WriteString(t.String())
+	buf.WriteString(" (")
+	buf.WriteString(strings.Join(ls, "|"))
+	buf.WriteString("). Line: ")
+	buf.WriteString(strconv.Itoa(token.Line))
+	buf.WriteString(". Column: ")
+	buf.WriteString(strconv.Itoa(token.Position))
+
+	return errors.New(btos(buf.Bytes()))
+}
+
+// btos takes the given bytes, and turns them into a string.
+// Q: naming btos or bbtos? :D
+// TODO(seeruk): Is this actually portable then?
+func btos(bs []byte) string {
+	return *(*string)(unsafe.Pointer(&bs))
 }
