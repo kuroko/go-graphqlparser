@@ -7,6 +7,15 @@ type Document struct {
 	Definitions []Definition
 }
 
+type Definition struct {
+	ExecutableDefinition ExecutableDefinition
+	TypeSystemDefinition TypeSystemDefinition
+	TypeSystemExtension  TypeSystemExtension
+}
+
+type TypeSystemDefinition struct{}
+type TypeSystemExtension struct{}
+
 // 2.3 Operations
 // http://facebook.github.io/graphql/October2016/#sec-Language.Operations
 // 2.8 Fragments
@@ -15,6 +24,7 @@ type Document struct {
 const (
 	OperationTypeQuery OperationType = iota
 	OperationTypeMutation
+	OperationTypeSubscription
 )
 
 type OperationType int
@@ -25,6 +35,8 @@ func (t OperationType) String() string {
 		return "query"
 	case OperationTypeMutation:
 		return "mutation"
+	case OperationTypeSubscription:
+		return "subscription"
 	}
 
 	return "invalid"
@@ -37,7 +49,7 @@ const (
 
 type DefinitionKind int
 
-type Definition struct {
+type ExecutableDefinition struct {
 	Kind                DefinitionKind
 	OperationType       OperationType
 	Name                string // but not "on" if is FragmentDefinition kind.
@@ -141,7 +153,7 @@ type ObjectField struct {
 type VariableDefinition struct {
 	Name         string
 	Type         Type
-	DefaultValue Value
+	DefaultValue *Value
 }
 
 // 2.11 Input Types

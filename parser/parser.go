@@ -47,15 +47,16 @@ func (p *Parser) Parse() (ast.Document, error) {
 }
 
 func (p *Parser) parseDefinition() (ast.Definition, error) {
-	// TODO(seeruk): parseTypeSystemDefinition things.
-	// TODO(seeruk): Maybe expand this to have parseExecutableDefinition?
-
 	var definition ast.Definition
+	var err error
 
-	if p.peek(token.Name, "query", "mutation") || p.peek(token.Punctuator, "{") {
-		return p.parseOperationDefinition(p.token.Literal == "{")
+	// ExecutableDefinition...
+	if p.peek(token.Name, "query", "mutation", "subscription") || p.peek(token.Punctuator, "{") {
+		definition.ExecutableDefinition, err = p.parseOperationDefinition(p.token.Literal == "{")
+		return definition, err
 	}
 
+	// ExecutableDefinition...
 	if p.peek(token.Name, "fragment") {
 		// TODO(seeruk): Implement.
 	}
@@ -68,8 +69,8 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 	return definition, p.unexpected(p.token, token.Name, "query", "mutation", "fragment")
 }
 
-func (p *Parser) parseOperationDefinition(isQuery bool) (ast.Definition, error) {
-	var definition ast.Definition
+func (p *Parser) parseOperationDefinition(isQuery bool) (ast.ExecutableDefinition, error) {
+	var definition ast.ExecutableDefinition
 
 	var name string
 	var err error
@@ -102,7 +103,7 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.Definition, error) 
 		return definition, err
 	}
 
-	return ast.Definition{
+	return ast.ExecutableDefinition{
 		Kind:                ast.DefinitionKindOperation,
 		OperationType:       opType,
 		Name:                name,
@@ -151,14 +152,16 @@ func (p *Parser) parseVariableDefinitions() ([]ast.VariableDefinition, error) {
 			return definitions, err
 		}
 
-		astType, err := p.parseType()
+		definition.Type, err = p.parseType()
 		if err != nil {
 			return definitions, err
 		}
 
-		// TODO(seeruk): Parse DefaultValue here.
+		definition.DefaultValue, err = p.parseDefaultValue()
+		if err != nil {
+			return definitions, err
+		}
 
-		definition.Type = astType
 		definitions = append(definitions, definition)
 
 		if p.peek(token.Punctuator, ")") {
@@ -171,6 +174,18 @@ func (p *Parser) parseVariableDefinitions() ([]ast.VariableDefinition, error) {
 	}
 
 	return definitions, nil
+}
+
+func (p *Parser) parseDefaultValue() (*ast.Value, error) {
+	if !p.skip(token.Punctuator, "=") {
+		return nil, nil
+	}
+
+	return p.parseValue()
+}
+
+func (p *Parser) parseValue() (*ast.Value, error) {
+	return nil, nil
 }
 
 func (p *Parser) parseType() (ast.Type, error) {

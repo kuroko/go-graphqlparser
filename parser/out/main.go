@@ -9,7 +9,7 @@ import (
 
 func main() {
 	query := `
-		query foo($bar: Boolean, $baz: [String!]) {
+		query foo($bar: Boolean =, $baz: [String!]) {
 			# ...
 		}
 	`
