@@ -181,11 +181,171 @@ func (p *Parser) parseDefaultValue() (*ast.Value, error) {
 		return nil, nil
 	}
 
-	return p.parseValue()
+	val, err := p.parseValue()
+	if err != nil {
+		return nil, err
+	}
+
+	return &val, nil
 }
 
-func (p *Parser) parseValue() (*ast.Value, error) {
-	return nil, nil
+func (p *Parser) parseValue() (ast.Value, error) {
+	if p.skip(token.Punctuator, "$") {
+		return p.parseVariableValue()
+	}
+
+	if tok, ok := p.consume(token.IntValue); ok {
+		return p.parseIntValue(tok)
+	}
+
+	if tok, ok := p.consume(token.FloatValue); ok {
+		return p.parseFloatValue(tok)
+	}
+
+	if tok, ok := p.consume(token.StringValue); ok {
+		return p.parseStringValue(tok)
+	}
+
+	if tok, ok := p.consume(token.Name, "true", "false"); ok {
+		return p.parseBooleanValue(tok)
+	}
+
+	if p.skip(token.Name, "null") {
+		return p.parseNullValue()
+	}
+
+	if tok, ok := p.consume(token.Name); ok {
+		return p.parseEnumValue(tok)
+	}
+
+	if p.skip(token.Punctuator, "[") {
+		return p.parseListValue()
+	}
+
+	if p.skip(token.Punctuator, "{") {
+		return p.parseObjectValue()
+	}
+
+	return ast.Value{}, errors.New("TODO: see `parseDefinition`")
+}
+
+func (p *Parser) parseVariableValue() (ast.Value, error) {
+	tok, err := p.mustConsume(token.Name)
+	if err != nil {
+		return ast.Value{}, err
+	}
+
+	return ast.Value{
+		Kind:          ast.ValueKindVariable,
+		VariableValue: tok.Literal,
+	}, nil
+}
+
+func (p *Parser) parseIntValue(tok lexer.Token) (ast.Value, error) {
+	iv, err := strconv.Atoi(tok.Literal)
+	if err != nil {
+		return ast.Value{}, err
+	}
+
+	return ast.Value{
+		Kind:     ast.ValueKindIntValue,
+		IntValue: iv,
+	}, nil
+}
+
+func (p *Parser) parseFloatValue(tok lexer.Token) (ast.Value, error) {
+	fv, err := strconv.ParseFloat(tok.Literal, 64)
+	if err != nil {
+		return ast.Value{}, err
+	}
+
+	return ast.Value{
+		Kind:       ast.ValueKindFloatValue,
+		FloatValue: fv,
+	}, nil
+}
+
+func (p *Parser) parseStringValue(tok lexer.Token) (ast.Value, error) {
+	return ast.Value{
+		Kind:        ast.ValueKindStringValue,
+		StringValue: tok.Literal,
+	}, nil
+}
+
+func (p *Parser) parseBooleanValue(tok lexer.Token) (ast.Value, error) {
+	return ast.Value{
+		Kind:         ast.ValueKindBooleanValue,
+		BooleanValue: tok.Literal == "true",
+	}, nil
+}
+
+func (p *Parser) parseNullValue() (ast.Value, error) {
+	return ast.Value{
+		Kind: ast.ValueKindNullValue,
+	}, nil
+}
+
+func (p *Parser) parseEnumValue(tok lexer.Token) (ast.Value, error) {
+	return ast.Value{
+		Kind:      ast.ValueKindEnumValue,
+		EnumValue: tok.Literal,
+	}, nil
+}
+
+func (p *Parser) parseListValue() (ast.Value, error) {
+	list := ast.Value{}
+	list.Kind = ast.ValueKindListValue
+
+	for !p.skip(token.Punctuator, "]") {
+		val, err := p.parseValue()
+		if err != nil {
+			return list, err
+		}
+
+		list.ListValue = append(list.ListValue, val)
+	}
+
+	return list, nil
+}
+
+func (p *Parser) parseObjectValue() (ast.Value, error) {
+	object := ast.Value{}
+	object.Kind = ast.ValueKindObjectValue
+
+	for !p.skip(token.Punctuator, "}") {
+		field, err := p.parseObjectField()
+		if err != nil {
+			return object, err
+		}
+
+		object.ObjectValue = append(object.ObjectValue, field)
+	}
+
+	return object, nil
+}
+
+func (p *Parser) parseObjectField() (ast.ObjectField, error) {
+	var field ast.ObjectField
+
+	tok, err := p.mustConsume(token.Name)
+	if err != nil {
+		return field, err
+	}
+
+	_, err = p.mustConsume(token.Punctuator, ":")
+	if err != nil {
+		return field, err
+	}
+
+	value, err := p.parseValue()
+	if err != nil {
+		return field, err
+	}
+
+	field.Name = tok.Literal
+	field.Value = value
+
+	return field, nil
 }
 
 func (p *Parser) parseType() (ast.Type, error) {

@@ -131,15 +131,41 @@ const (
 
 type ValueKind int
 
+func (k ValueKind) String() string {
+	switch k {
+	case ValueKindVariable:
+		return "variable value"
+	case ValueKindIntValue:
+		return "int value"
+	case ValueKindFloatValue:
+		return "float value"
+	case ValueKindStringValue:
+		return "string value"
+	case ValueKindBooleanValue:
+		return "boolean value"
+	case ValueKindNullValue:
+		return "null value"
+	case ValueKindEnumValue:
+		return "enum value"
+	case ValueKindListValue:
+		return "list value"
+	case ValueKindObjectValue:
+		return "object value"
+	}
+
+	return "unknown value"
+}
+
 type Value struct {
-	Kind         ValueKind
-	IntValue     int
-	FloatValue   float64
-	StringValue  string
-	BooleanValue bool
-	EnumValue    string // Name, but not `true`, `false`, or `null`.
-	ListValue    []Value
-	ObjectValue  []ObjectField
+	Kind          ValueKind
+	VariableValue string
+	IntValue      int
+	FloatValue    float64
+	StringValue   string
+	BooleanValue  bool
+	EnumValue     string // Name, but not `true`, `false`, or `null`.
+	ListValue     []Value
+	ObjectValue   []ObjectField
 }
 
 type ObjectField struct {
