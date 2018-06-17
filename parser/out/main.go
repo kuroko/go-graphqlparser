@@ -9,7 +9,7 @@ import (
 
 func main() {
 	query := `
-		query foo($bar: Boolean = {foo: [ENUM_VALUE, false, null], bar: 123, baz: $toplel}, $baz: [String!]) {
+		} foo($bar: Boolean = {foo: [ENUM_VALUE, false, null], bar: 123, baz: $toplel}, $baz: [String!]) {
 			# ...
 		}
 	`

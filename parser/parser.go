@@ -66,7 +66,49 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 	//
 	// So in the case below, we need to support what is there now, and also a punctuator with the
 	// literal "{". The current error message doesn't highlight all of the things we might want.
-	return definition, p.unexpected(p.token, token.Name, "query", "mutation", "fragment")
+	return definition, p.xpecto(p.token,
+		liltay(token.Name, "query", "mutation", "fragment"),
+		liltay(token.Punctuator, "{"),
+	)
+
+}
+
+// TODO(Luke-Vear): rename.
+func liltay(t token.Type, ls ...string) string {
+	buf := bytes.Buffer{}
+	buf.WriteString(t.String())
+	buf.WriteString(" '")
+	buf.WriteString(strings.Join(ls, "|"))
+	return buf.String()
+}
+
+// TODO(Luke-Vear): rename.
+// TODO(Luke-Vear): think over the readability of the puncuation and caps.
+func (p *Parser) xpecto(token lexer.Token, wants ...string) error {
+	if len(wants) == 0 {
+		wants = []string{"N/A"}
+	}
+
+	buf := bytes.Buffer{}
+	buf.WriteString("parser error: unexpected token found at ")
+	buf.WriteString("line: ")
+	buf.WriteString(strconv.Itoa(token.Line))
+	buf.WriteString(", column: ")
+	buf.WriteString(strconv.Itoa(token.Position))
+	buf.WriteString(". Found: ")
+	buf.WriteString(token.Type.String())
+	buf.WriteString(" '")
+	buf.WriteString(token.Literal)
+	buf.WriteString("'. Wanted: ")
+	for i, want := range wants {
+		buf.WriteString(want)
+		if i < len(wants)-1 {
+			buf.WriteString("' or ")
+		}
+	}
+	buf.WriteString("'.")
+
+	return errors.New(btos(buf.Bytes()))
 }
 
 func (p *Parser) parseOperationDefinition(isQuery bool) (ast.ExecutableDefinition, error) {
