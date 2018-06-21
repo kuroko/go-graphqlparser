@@ -37,7 +37,7 @@ func (p *Parser) Parse() (ast.Document, error) {
 		document.Definitions = append(document.Definitions, definition)
 
 		if p.peek(token.Illegal) {
-			return document, p.unexpected(p.token, token.EOF)
+			return document, p.unexpected(p.token, p.expected(token.EOF))
 		}
 
 		if p.peek(token.EOF) {
@@ -61,58 +61,17 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 		// TODO(seeruk): Implement.
 	}
 
-	// TODO(seeruk): We need unexpected to support multiple token types and literals. Maybe:
-	// func unexpected(tok lexer.Token, wants ...func(t token.Type, ls ...string) []lexer.Token) {}
-	//
-	// So in the case below, we need to support what is there now, and also a punctuator with the
-	// literal "{". The current error message doesn't highlight all of the things we might want.
-	return definition, p.xpecto(p.token,
-		liltay(token.Name, "query", "mutation", "fragment"),
-		liltay(token.Punctuator, "{"),
+	return definition, p.unexpected(p.token,
+		p.expected(token.Name, "query", "mutation", "fragment"),
+		p.expected(token.Punctuator, "{"),
 	)
 
 }
 
-// TODO(Luke-Vear): rename.
-func liltay(t token.Type, ls ...string) string {
-	buf := bytes.Buffer{}
-	buf.WriteString(t.String())
-	buf.WriteString(" '")
-	buf.WriteString(strings.Join(ls, "|"))
-	return buf.String()
-}
-
-// TODO(Luke-Vear): rename.
-// TODO(Luke-Vear): think over the readability of the puncuation and caps.
-func (p *Parser) xpecto(token lexer.Token, wants ...string) error {
-	if len(wants) == 0 {
-		wants = []string{"N/A"}
-	}
-
-	buf := bytes.Buffer{}
-	buf.WriteString("parser error: unexpected token found at ")
-	buf.WriteString("line: ")
-	buf.WriteString(strconv.Itoa(token.Line))
-	buf.WriteString(", column: ")
-	buf.WriteString(strconv.Itoa(token.Position))
-	buf.WriteString(". Found: ")
-	buf.WriteString(token.Type.String())
-	buf.WriteString(" '")
-	buf.WriteString(token.Literal)
-	buf.WriteString("'. Wanted: ")
-	for i, want := range wants {
-		buf.WriteString(want)
-		if i < len(wants)-1 {
-			buf.WriteString("' or ")
-		}
-	}
-	buf.WriteString("'.")
-
-	return errors.New(btos(buf.Bytes()))
-}
-
 func (p *Parser) parseOperationDefinition(isQuery bool) (ast.ExecutableDefinition, error) {
 	var definition ast.ExecutableDefinition
+	var variableDefinitions []ast.VariableDefinition
+	var directives []ast.Directive
 
 	var name string
 	var err error
@@ -128,20 +87,20 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.ExecutableDefinitio
 		if tok, ok := p.consume(token.Name); ok {
 			name = tok.Literal
 		}
+
+		variableDefinitions, err = p.parseVariableDefinitions()
+		if err != nil {
+			return definition, err
+		}
+
+		directives, err = p.parseDirectives()
+		if err != nil {
+			return definition, err
+		}
 	}
 
-	variableDefinitions, err := p.parseVariableDefinitions()
+	selectionSet, err := p.parseSelectionSet(false)
 	if err != nil {
-		return definition, err
-	}
-
-	if _, err = p.mustConsume(token.Punctuator, "{"); err != nil {
-		return definition, err
-	}
-
-	// TODO(seeruk): parseSelectionSet.
-
-	if _, err = p.mustConsume(token.Punctuator, "}"); err != nil {
 		return definition, err
 	}
 
@@ -150,9 +109,8 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.ExecutableDefinitio
 		OperationType:       opType,
 		Name:                name,
 		VariableDefinitions: variableDefinitions,
-		// Directives: ...
-		// SelectionSet: ...
-		// TODO(seeruk): Location.
+		Directives:          directives,
+		SelectionSet:        selectionSet,
 	}, nil
 }
 
@@ -216,6 +174,174 @@ func (p *Parser) parseVariableDefinitions() ([]ast.VariableDefinition, error) {
 	}
 
 	return definitions, nil
+}
+
+func (p *Parser) parseDirectives() ([]ast.Directive, error) {
+	var directives []ast.Directive
+
+	for p.peek(token.Punctuator, "@") {
+		directive, err := p.parseDirective()
+		if err != nil {
+			return directives, err
+		}
+
+		directives = append(directives, directive)
+	}
+
+	return directives, nil
+}
+
+func (p *Parser) parseDirective() (ast.Directive, error) {
+	var directive ast.Directive
+
+	_, err := p.mustConsume(token.Punctuator, "@")
+	if err != nil {
+		return directive, err
+	}
+
+	name, err := p.mustConsume(token.Name)
+	if err != nil {
+		return directive, err
+	}
+
+	args, err := p.parseArguments()
+	if err != nil {
+		return directive, err
+	}
+
+	directive.Name = name.Literal
+	directive.Arguments = args
+
+	return directive, nil
+}
+
+func (p *Parser) parseSelectionSet(optional bool) ([]ast.Selection, error) {
+	var selectionSet []ast.Selection
+
+	if optional && !p.skip(token.Punctuator, "{") {
+		return selectionSet, nil
+	}
+
+	if !optional && !p.skip(token.Punctuator, "{") {
+		return selectionSet, p.unexpected(p.token, p.expected(token.Name))
+	}
+
+	for {
+		selection, err := p.parseSelection()
+		if err != nil {
+			return selectionSet, err
+		}
+
+		selectionSet = append(selectionSet, selection)
+
+		if p.peek(token.Punctuator, "}") {
+			break
+		}
+	}
+
+	_, err := p.mustConsume(token.Punctuator, "}")
+	if err != nil {
+		return selectionSet, err
+	}
+
+	return selectionSet, nil
+}
+
+func (p *Parser) parseSelection() (ast.Selection, error) {
+	var selection ast.Selection
+
+	if p.peek(token.Punctuator, "...") {
+		return selection, p.unexpected(p.token, "not yet implemented")
+	}
+
+	field, err := p.parseField()
+	if err != nil {
+		return selection, err
+	}
+
+	selection.Field = field
+
+	return selection, nil
+}
+
+func (p *Parser) parseField() (ast.Field, error) {
+	var field ast.Field
+
+	name, err := p.mustConsume(token.Name)
+	if err != nil {
+		return field, err
+	}
+
+	if p.skip(token.Punctuator, ":") {
+		field.Alias = name.Literal
+
+		name, err = p.mustConsume(token.Name)
+		if err != nil {
+			return field, err
+		}
+	}
+
+	field.Name = name.Literal
+
+	field.Arguments, err = p.parseArguments()
+	if err != nil {
+		return field, err
+	}
+
+	field.Directives, err = p.parseDirectives()
+	if err != nil {
+		return field, err
+	}
+
+	field.SelectionSet, err = p.parseSelectionSet(true)
+	if err != nil {
+		return field, err
+	}
+
+	return field, nil
+}
+
+func (p *Parser) parseArguments() ([]ast.Argument, error) {
+	var arguments []ast.Argument
+
+	if !p.skip(token.Punctuator, "(") {
+		return arguments, nil
+	}
+
+	for !p.skip(token.Punctuator, ")") {
+		argument, err := p.parseArgument()
+		if err != nil {
+			return arguments, err
+		}
+
+		arguments = append(arguments, argument)
+	}
+
+	return arguments, nil
+}
+
+func (p *Parser) parseArgument() (ast.Argument, error) {
+	var argument ast.Argument
+
+	name, err := p.mustConsume(token.Name)
+	if err != nil {
+		return argument, err
+	}
+
+	_, err = p.mustConsume(token.Punctuator, ":")
+	if err != nil {
+		return argument, err
+	}
+
+	value, err := p.parseValue()
+	if err != nil {
+		return argument, err
+	}
+
+	argument.Name = name.Literal
+	argument.Value = value
+
+	return argument, nil
 }
 
 func (p *Parser) parseDefaultValue() (*ast.Value, error) {
@@ -453,7 +579,7 @@ func (p *Parser) consume(t token.Type, ls ...string) (lexer.Token, bool) {
 func (p *Parser) mustConsume(t token.Type, ls ...string) (lexer.Token, error) {
 	tok, ok := p.consume(t, ls...)
 	if !ok {
-		return tok, p.unexpected(tok, t, ls...)
+		return tok, p.unexpected(tok, p.expected(t, ls...))
 	}
 
 	return tok, nil
@@ -492,31 +618,38 @@ func (p *Parser) scan() {
 	p.token = p.lexer.Scan()
 }
 
-func (p *Parser) unexpected(token lexer.Token, t token.Type, ls ...string) error {
-	if len(ls) == 0 {
-		ls = []string{"N/A"}
+func (p *Parser) expected(t token.Type, ls ...string) string {
+	buf := bytes.Buffer{}
+	buf.WriteString(t.String())
+	buf.WriteString(" '")
+	buf.WriteString(strings.Join(ls, "|"))
+	return buf.String()
+}
+
+// TODO(Luke-Vear): think over the readability of the punctuation and caps.
+func (p *Parser) unexpected(token lexer.Token, wants ...string) error {
+	if len(wants) == 0 {
+		wants = []string{"N/A"}
 	}
 
-	// This is as nasty as I'm willing to make this right now. But this is the slowest function in
-	// the parser by far, because of the allocations it has to do, simply because it's generating
-	// this message.
-	// TODO(seeruk): Revisit this, it can almost definitely be improved.
-	// TODO(seeruk): Don't call unexpected when it's not absolutely necessary. We can not pass
-	// around errors if we don't need to (i.e. if we want to mustConsume without caring about the error,
-	// like if we just care about whether or not we did mustConsume something).
 	buf := bytes.Buffer{}
-	buf.WriteString("parser error: unexpected token found: ")
+	buf.WriteString("parser error: unexpected token found at ")
+	buf.WriteString("line: ")
+	buf.WriteString(strconv.Itoa(token.Line))
+	buf.WriteString(", column: ")
+	buf.WriteString(strconv.Itoa(token.Position))
+	buf.WriteString(". Found: ")
 	buf.WriteString(token.Type.String())
 	buf.WriteString(" '")
 	buf.WriteString(token.Literal)
 	buf.WriteString("'. Wanted: ")
-	buf.WriteString(t.String())
-	buf.WriteString(" '")
-	buf.WriteString(strings.Join(ls, "|"))
-	buf.WriteString("'. Line: ")
-	buf.WriteString(strconv.Itoa(token.Line))
-	buf.WriteString(". Column: ")
-	buf.WriteString(strconv.Itoa(token.Position))
+	for i, want := range wants {
+		buf.WriteString(want)
+		if i < len(wants)-1 {
+			buf.WriteString("' or ")
+		}
+	}
+	buf.WriteString("'.")
 
 	return errors.New(btos(buf.Bytes()))
 }

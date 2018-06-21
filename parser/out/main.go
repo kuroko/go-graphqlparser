@@ -9,8 +9,12 @@ import (
 
 func main() {
 	query := `
-		} foo($bar: Boolean = {foo: [ENUM_VALUE, false, null], bar: 123, baz: $toplel}, $baz: [String!]) {
-			# ...
+		query foo($bar: Boolean = true, $baz: [String!]) @skip(if: false) {
+			hello
+			earth: world(size: "zuck") @include(if: true) {
+				foo @skip(if: $bar)
+				bar
+			}
 		}
 	`
 

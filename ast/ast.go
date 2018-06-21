@@ -72,7 +72,7 @@ type Selection struct {
 // http://facebook.github.io/graphql/October2016/#sec-Language.Fields
 
 type Field struct {
-	Alias        Alias
+	Alias        string
 	Name         string
 	Arguments    []Argument
 	Directives   []Directive
@@ -86,13 +86,6 @@ type Field struct {
 type Argument struct {
 	Name  string
 	Value Value
-}
-
-// 2.7 Field Alias
-// http://facebook.github.io/graphql/October2016/#sec-Field-Alias
-
-type Alias struct {
-	Name string
 }
 
 // 2.8 Fragments

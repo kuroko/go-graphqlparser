@@ -53,6 +53,6 @@ var TypeNames = map[Type]string{
 type Type int
 
 // String returns the name of this type.
-func (t *Type) String() string {
-	return TypeNames[*t]
+func (t Type) String() string {
+	return TypeNames[t]
 }
