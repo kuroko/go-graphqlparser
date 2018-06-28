@@ -9,12 +9,21 @@ import (
 
 func main() {
 	query := `
-		query foo($bar: Boolean = true, $baz: [String!]) @skip(if: false) {
-			hello
-			earth: world(size: "zuck") @include(if: true) {
-				foo @skip(if: $bar)
-				bar
+		query withFragments {
+			user(id: 4) {
+				friends(first: 10) {
+					...friendFields
+				}
+				mutualFriends(first: 10) {
+					...friendFields
+				}
 			}
+		}
+
+		fragment friendFields on User {
+			id
+			name
+			profilePic(size: 50)
 		}
 	`
 

@@ -3,6 +3,8 @@ package parser
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"runtime"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -15,6 +17,9 @@ import (
 type Parser struct {
 	lexer *lexer.Lexer
 	token lexer.Token
+
+	// Stateful checks.
+	hasShorthandQuery bool
 }
 
 func New(input []byte) *Parser {
@@ -29,7 +34,11 @@ func (p *Parser) Parse() (ast.Document, error) {
 	p.scan()
 
 	for {
-		definition, err := p.parseDefinition()
+		if p.hasShorthandQuery {
+			return document, p.unexpected(p.token, p.expected(token.EOF))
+		}
+
+		definition, err := p.parseDefinition(document)
 		if err != nil {
 			return document, err
 		}
@@ -46,19 +55,23 @@ func (p *Parser) Parse() (ast.Document, error) {
 	}
 }
 
-func (p *Parser) parseDefinition() (ast.Definition, error) {
+func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) {
 	var definition ast.Definition
 	var err error
 
+	// We can only allow a shorthand query if it's the only definition.
+	p.hasShorthandQuery = len(document.Definitions) == 0 && p.token.Literal == "{"
+
 	// ExecutableDefinition...
 	if p.peek(token.Name, "query", "mutation", "subscription") || p.peek(token.Punctuator, "{") {
-		definition.ExecutableDefinition, err = p.parseOperationDefinition(p.token.Literal == "{")
+		definition.ExecutableDefinition, err = p.parseOperationDefinition(p.hasShorthandQuery)
 		return definition, err
 	}
 
 	// ExecutableDefinition...
 	if p.peek(token.Name, "fragment") {
-		// TODO(seeruk): Implement.
+		definition.ExecutableDefinition, err = p.parseFragmentDefinition()
+		return definition, err
 	}
 
 	return definition, p.unexpected(p.token,
@@ -115,24 +128,89 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.ExecutableDefinitio
 }
 
 func (p *Parser) parseOperationType() (ast.OperationType, error) {
-	tok, err := p.mustConsume(token.Name, "query", "mutation")
+	tok, err := p.mustConsume(token.Name, "query", "mutation", "subscription")
 	if err != nil {
 		return -1, err
 	}
 
-	if tok.Literal == "query" {
+	switch tok.Literal {
+	case "query":
 		return ast.OperationTypeQuery, nil
+	case "mutation":
+		return ast.OperationTypeMutation, nil
+	default:
+		return ast.OperationTypeSubscription, nil
+	}
+}
+
+func (p *Parser) parseFragmentDefinition() (ast.ExecutableDefinition, error) {
+	var definition ast.ExecutableDefinition
+
+	_, err := p.mustConsume(token.Name, "fragment")
+	if err != nil {
+		return definition, nil
 	}
 
-	// Only other thing it can be at this point...
-	return ast.OperationTypeMutation, nil
+	tok, err := p.mustConsume(token.Name)
+	if err != nil {
+		return definition, nil
+	}
+
+	if tok.Literal == "on" {
+		return definition, p.unexpected(p.token, p.expected(token.Name, "!on"))
+	}
+
+	condition, err := p.parseTypeCondition()
+	if err != nil {
+		return definition, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return definition, err
+	}
+
+	selections, err := p.parseSelectionSet(false)
+	if err != nil {
+		return definition, err
+	}
+
+	definition.Kind = ast.DefinitionKindFragment
+	definition.Name = tok.Literal
+	definition.TypeCondition = condition
+	definition.Directives = directives
+	definition.SelectionSet = selections
+
+	return definition, nil
+}
+
+func (p *Parser) parseTypeCondition() (ast.TypeCondition, error) {
+	var condition ast.TypeCondition
+
+	_, err := p.mustConsume(token.Name, "on")
+	if err != nil {
+		return condition, err
+	}
+
+	conType, err := p.parseType()
+	if err != nil {
+		return condition, err
+	}
+
+	if conType.Kind != ast.TypeKindNamedType {
+		return condition, p.unexpected(p.token, "NamedType")
+	}
+
+	condition.Type = conType
+
+	return condition, nil
 }
 
 func (p *Parser) parseVariableDefinitions() ([]ast.VariableDefinition, error) {
 	var definitions []ast.VariableDefinition
 
-	if _, err := p.mustConsume(token.Punctuator, "("); err != nil {
-		return definitions, err
+	if !p.skip(token.Punctuator, "(") {
+		return definitions, nil
 	}
 
 	for {
@@ -250,18 +328,76 @@ func (p *Parser) parseSelectionSet(optional bool) ([]ast.Selection, error) {
 func (p *Parser) parseSelection() (ast.Selection, error) {
 	var selection ast.Selection
 
-	if p.peek(token.Punctuator, "...") {
-		return selection, p.unexpected(p.token, "not yet implemented")
-	}
+	if p.skip(token.Punctuator, "...") {
+		if p.peek(token.Name) && p.token.Literal != "on" {
+			fragment, err := p.parseFragmentSpread()
+			if err != nil {
+				return selection, err
+			}
 
-	field, err := p.parseField()
-	if err != nil {
-		return selection, err
-	}
+			selection.FragmentSpread = fragment
+		} else {
+			fragment, err := p.parseInlineFragment()
+			if err != nil {
+				return selection, err
+			}
 
-	selection.Field = field
+			selection.InlineFragment = fragment
+		}
+	} else {
+		field, err := p.parseField()
+		if err != nil {
+			return selection, err
+		}
+
+		selection.Field = field
+	}
 
 	return selection, nil
+}
+
+func (p *Parser) parseFragmentSpread() (ast.FragmentSpread, error) {
+	var fragment ast.FragmentSpread
+
+	tok, err := p.mustConsume(token.Name)
+	if err != nil {
+		return fragment, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return fragment, err
+	}
+
+	fragment.Name = tok.Literal
+	fragment.Directives = directives
+
+	return fragment, nil
+}
+
+func (p *Parser) parseInlineFragment() (ast.InlineFragment, error) {
+	var fragment ast.InlineFragment
+
+	condition, err := p.parseTypeCondition()
+	if err != nil {
+		return fragment, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return fragment, err
+	}
+
+	selections, err := p.parseSelectionSet(false)
+	if err != nil {
+		return fragment, err
+	}
+
+	fragment.TypeCondition = condition
+	fragment.Directives = directives
+	fragment.SelectionSet = selections
+
+	return fragment, nil
 }
 
 func (p *Parser) parseField() (ast.Field, error) {
@@ -628,6 +764,9 @@ func (p *Parser) expected(t token.Type, ls ...string) string {
 
 // TODO(Luke-Vear): think over the readability of the punctuation and caps.
 func (p *Parser) unexpected(token lexer.Token, wants ...string) error {
+	_, file, line, _ := runtime.Caller(2)
+	fmt.Println(file, line)
+
 	if len(wants) == 0 {
 		wants = []string{"N/A"}
 	}

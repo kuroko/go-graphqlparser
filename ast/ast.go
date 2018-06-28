@@ -49,6 +49,17 @@ const (
 
 type DefinitionKind int
 
+func (k DefinitionKind) String() string {
+	switch k {
+	case DefinitionKindOperation:
+		return "operation"
+	case DefinitionKindFragment:
+		return "fragment"
+	}
+
+	return "invalid"
+}
+
 type ExecutableDefinition struct {
 	Kind                DefinitionKind
 	OperationType       OperationType
