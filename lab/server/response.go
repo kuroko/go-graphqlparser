@@ -58,6 +58,8 @@ func (v ResponseValue) MarshalGraphQL(buf *bytes.Buffer) error {
 	case ResponseValueKindNull:
 		buf.WriteString("null")
 	case ResponseValueKindArray:
+		buf.Write([]byte{91}) // 91 = [
+
 		for i, av := range v.ArrayValue {
 			if err := av.MarshalGraphQL(buf); err != nil {
 				return err
@@ -68,6 +70,8 @@ func (v ResponseValue) MarshalGraphQL(buf *bytes.Buffer) error {
 				buf.Write([]byte{44}) // 44 = ,
 			}
 		}
+
+		buf.Write([]byte{93}) // 93 = ]
 	case ResponseValueKindObject:
 		buf.Write([]byte{123}) // 123 = {
 

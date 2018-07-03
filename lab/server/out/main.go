@@ -31,6 +31,17 @@ func main() {
 						}},
 					},
 				}},
+				{Name: "f3", Value: server.ResponseValue{
+					Kind: server.ResponseValueKindArray,
+					ArrayValue: []server.ResponseValue{
+						{Kind: server.ResponseValueKindInt, IntValue: 123},
+						{Kind: server.ResponseValueKindFloat, FloatValue: 123.456},
+						{Kind: server.ResponseValueKindNull},
+						{Kind: server.ResponseValueKindBoolean, BooleanValue: true},
+						{Kind: server.ResponseValueKindBoolean, BooleanValue: false},
+						{Kind: server.ResponseValueKindString, StringValue: "test"},
+					},
+				}},
 			},
 		},
 	}
