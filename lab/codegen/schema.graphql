@@ -1,0 +1,52 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+enum Gender {
+    MALE
+    FEMALE
+}
+
+union SearchResult = Human | Droid
+
+type Query {
+    character(id: ID!): Character
+    search(input: String!): [SearchResult!]!
+}
+
+type Mutation {
+    createDroid(droid: DroidInput!): Droid
+}
+
+interface Character {
+    id: ID!w
+    name: String!
+    jobTitle: String
+    bestFriend(gender: Gender!): Character
+}
+
+input DroidInput {
+    name: String!
+    jobTitle: String
+    maleBestFriendID: ID
+    femaleBestFriendID: ID
+    primaryFunction: String!
+}
+
+type Droid implements Character {
+    id: ID!
+    name: String!
+    jobTitle: String
+    bestFriend(gender: Gender!): Character
+    primaryFunction: String!
+}
+
+type Human implements Character {
+    id: ID!
+    name: String!
+    jobTitle: String
+    bestFriend(gender: Gender!): Character
+    credits: Int!
+}
+

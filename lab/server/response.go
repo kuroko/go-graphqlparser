@@ -46,9 +46,9 @@ func (v ResponseValue) MarshalGraphQL(buf *bytes.Buffer) error {
 	case ResponseValueKindFloat:
 		buf.WriteString(strconv.FormatFloat(v.FloatValue, 'f', 5, 64))
 	case ResponseValueKindString:
-		buf.Write([]byte{34})
+		buf.WriteString(`"`)
 		buf.WriteString(v.StringValue)
-		buf.Write([]byte{34})
+		buf.WriteString(`"`)
 	case ResponseValueKindBoolean:
 		if v.BooleanValue {
 			buf.WriteString("true")
@@ -58,7 +58,7 @@ func (v ResponseValue) MarshalGraphQL(buf *bytes.Buffer) error {
 	case ResponseValueKindNull:
 		buf.WriteString("null")
 	case ResponseValueKindArray:
-		buf.Write([]byte{91}) // 91 = [
+		buf.WriteString("[")
 
 		for i, av := range v.ArrayValue {
 			if err := av.MarshalGraphQL(buf); err != nil {
@@ -67,31 +67,31 @@ func (v ResponseValue) MarshalGraphQL(buf *bytes.Buffer) error {
 
 			// @TODO: Optimise.
 			if i < len(v.ArrayValue)-1 {
-				buf.Write([]byte{44}) // 44 = ,
+				buf.WriteString(",") // 44 = ,
 			}
 		}
 
-		buf.Write([]byte{93}) // 93 = ]
+		buf.WriteString("]")
 	case ResponseValueKindObject:
-		buf.Write([]byte{123}) // 123 = {
+		buf.WriteString("{")
 
 		for i, ob := range v.ObjectValue {
 			// Write the name of the field...
-			buf.Write([]byte{34}) // 34 = "
+			buf.WriteString(`"`)
 			buf.WriteString(ob.Name)
-			buf.Write([]byte{34}) // 34 = "
-			buf.Write([]byte{58}) // 58 = :
+			buf.WriteString(`"`)
+			buf.WriteString(":")
 
 			if err := ob.Value.MarshalGraphQL(buf); err != nil {
 				return err
 			}
 
 			if i < len(v.ObjectValue)-1 {
-				buf.Write([]byte{44}) // 44 = ,
+				buf.WriteString(",")
 			}
 		}
 
-		buf.Write([]byte{125}) // 125 = }
+		buf.WriteString("}") // 125 = }
 	default:
 		return errors.New("TODO")
 	}
@@ -109,7 +109,7 @@ func (r Response) MarshalGraphQL() ([]byte, error) {
 
 	// @TODO: Handle errors portion of response.
 
-	buf.Write([]byte{123}) // 123 = {
+	buf.WriteString("{")
 	buf.WriteString(`"data":`)
 
 	// Data must either be an object, or null.
@@ -122,7 +122,7 @@ func (r Response) MarshalGraphQL() ([]byte, error) {
 		return nil, err
 	}
 
-	buf.Write([]byte{125}) // 125 = }
+	buf.WriteString("}")
 
 	return buf.Bytes(), nil
 }
