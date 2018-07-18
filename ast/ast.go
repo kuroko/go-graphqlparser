@@ -1,7 +1,7 @@
 package ast
 
-// 2.2 Query Document
-// http://facebook.github.io/graphql/October2016/#sec-Language.Query-Document
+// 2.2 Document
+// http://facebook.github.io/graphql/June2018/#sec-Language.Document
 
 type Document struct {
 	Definitions []Definition
@@ -17,9 +17,9 @@ type TypeSystemDefinition struct{}
 type TypeSystemExtension struct{}
 
 // 2.3 Operations
-// http://facebook.github.io/graphql/October2016/#sec-Language.Operations
+// http://facebook.github.io/graphql/June2018/#sec-Language.Operations
 // 2.8 Fragments
-// http://facebook.github.io/graphql/October2016/#sec-Language.Fragments
+// http://facebook.github.io/graphql/June2018/#sec-Language.Fragments
 
 const (
 	OperationTypeQuery OperationType = iota
@@ -71,7 +71,7 @@ type ExecutableDefinition struct {
 }
 
 // 2.4 Selection Sets
-// http://facebook.github.io/graphql/October2016/#sec-Selection-Sets
+// http://facebook.github.io/graphql/June2018/#sec-Selection-Sets
 
 type Selection struct {
 	Field          Field
@@ -80,7 +80,7 @@ type Selection struct {
 }
 
 // 2.5 Fields
-// http://facebook.github.io/graphql/October2016/#sec-Language.Fields
+// http://facebook.github.io/graphql/June2018/#sec-Language.Fields
 
 type Field struct {
 	Alias        string
@@ -91,7 +91,7 @@ type Field struct {
 }
 
 // 2.6 Arguments
-// http://facebook.github.io/graphql/October2016/#sec-Language.Arguments
+// http://facebook.github.io/graphql/June2018/#sec-Language.Arguments
 
 // Argument :
 type Argument struct {
@@ -100,7 +100,7 @@ type Argument struct {
 }
 
 // 2.8 Fragments
-// http://facebook.github.io/graphql/October2016/#sec-Language.Fragments
+// http://facebook.github.io/graphql/June2018/#sec-Language.Fragments
 
 type FragmentSpread struct {
 	Name       string // but not "on"
@@ -118,7 +118,7 @@ type InlineFragment struct {
 }
 
 // 2.9 Input Values
-// http://facebook.github.io/graphql/October2016/#sec-Input-Values
+// http://facebook.github.io/graphql/June2018/#sec-Input-Values
 
 // Value [Const] :
 const (
@@ -178,7 +178,7 @@ type ObjectField struct {
 }
 
 // 2.10 Variables
-// http://facebook.github.io/graphql/October2016/#sec-Language.Variables
+// http://facebook.github.io/graphql/June2018/#sec-Language.Variables
 
 type VariableDefinition struct {
 	Name         string
@@ -186,8 +186,8 @@ type VariableDefinition struct {
 	DefaultValue *Value
 }
 
-// 2.11 Input Types
-// http://facebook.github.io/graphql/October2016/#sec-Input-Types
+// 2.11 Type References
+// http://facebook.github.io/graphql/June2018/#sec-Type-References
 
 // Type :
 const (
@@ -216,7 +216,7 @@ type Type struct {
 }
 
 // 2.12 Directives
-// http://facebook.github.io/graphql/October2016/#sec-Language.Directives
+// http://facebook.github.io/graphql/June2018/#sec-Language.Directives
 
 // Directive :
 type Directive struct {
