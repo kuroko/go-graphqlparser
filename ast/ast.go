@@ -10,10 +10,14 @@ type Document struct {
 type Definition struct {
 	ExecutableDefinition ExecutableDefinition
 	TypeSystemDefinition TypeSystemDefinition
-	TypeSystemExtension  TypeSystemExtension
+
+	// TODO(seeruk): This may not be necessary.
+	TypeSystemExtension TypeSystemExtension
 }
 
 type TypeSystemDefinition struct{}
+
+// TODO(seeruk): This may not be necessary.
 type TypeSystemExtension struct{}
 
 // 2.3 Operations

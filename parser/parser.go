@@ -74,6 +74,9 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 		return definition, err
 	}
 
+	// TODO(seeruk): Is next token a string? Then we probably have a description, keep it handy to
+	// pass to function that parses the next token, e.g. schema, or scalar, or directive, etc.
+
 	return definition, p.unexpected(p.token,
 		p.expected(token.Name, "query", "mutation", "fragment"),
 		p.expected(token.Punctuator, "{"),
