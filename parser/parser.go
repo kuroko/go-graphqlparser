@@ -64,12 +64,14 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 
 	// ExecutableDefinition...
 	if p.peek(token.Name, "query", "mutation", "subscription") || p.peek(token.Punctuator, "{") {
+		definition.Kind = ast.DefinitionKindExecutable
 		definition.ExecutableDefinition, err = p.parseOperationDefinition(p.hasShorthandQuery)
 		return definition, err
 	}
 
 	// ExecutableDefinition...
 	if p.peek(token.Name, "fragment") {
+		definition.Kind = ast.DefinitionKindExecutable
 		definition.ExecutableDefinition, err = p.parseFragmentDefinition()
 		return definition, err
 	}
@@ -121,7 +123,7 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (ast.ExecutableDefinitio
 	}
 
 	return ast.ExecutableDefinition{
-		Kind:                ast.DefinitionKindOperation,
+		Kind:                ast.ExecutableDefinitionKindOperation,
 		OperationType:       opType,
 		Name:                name,
 		VariableDefinitions: variableDefinitions,
@@ -178,7 +180,7 @@ func (p *Parser) parseFragmentDefinition() (ast.ExecutableDefinition, error) {
 		return definition, err
 	}
 
-	definition.Kind = ast.DefinitionKindFragment
+	definition.Kind = ast.ExecutableDefinitionKindFragment
 	definition.Name = tok.Literal
 	definition.TypeCondition = condition
 	definition.Directives = directives
@@ -204,7 +206,7 @@ func (p *Parser) parseTypeCondition() (ast.TypeCondition, error) {
 		return condition, p.unexpected(p.token, "NamedType")
 	}
 
-	condition.Type = conType
+	condition.NamedType = conType
 
 	return condition, nil
 }

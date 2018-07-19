@@ -7,18 +7,29 @@ type Document struct {
 	Definitions []Definition
 }
 
-type Definition struct {
-	ExecutableDefinition ExecutableDefinition
-	TypeSystemDefinition TypeSystemDefinition
+const (
+	DefinitionKindExecutable DefinitionKind = iota
+	DefinitionKindTypeSystem
+)
 
-	// TODO(seeruk): This may not be necessary.
-	TypeSystemExtension TypeSystemExtension
+type DefinitionKind int
+
+func (k DefinitionKind) String() string {
+	switch k {
+	case DefinitionKindExecutable:
+		return "executable"
+	case DefinitionKindTypeSystem:
+		return "type system"
+	}
+
+	return "invalid"
 }
 
-type TypeSystemDefinition struct{}
-
-// TODO(seeruk): This may not be necessary.
-type TypeSystemExtension struct{}
+type Definition struct {
+	Kind                 DefinitionKind
+	ExecutableDefinition ExecutableDefinition
+	TypeSystemDefinition TypeSystemDefinition
+}
 
 // 2.3 Operations
 // http://facebook.github.io/graphql/June2018/#sec-Language.Operations
@@ -47,17 +58,17 @@ func (t OperationType) String() string {
 }
 
 const (
-	DefinitionKindOperation DefinitionKind = iota
-	DefinitionKindFragment
+	ExecutableDefinitionKindOperation ExecutableDefinitionKind = iota
+	ExecutableDefinitionKindFragment
 )
 
-type DefinitionKind int
+type ExecutableDefinitionKind int
 
-func (k DefinitionKind) String() string {
+func (k ExecutableDefinitionKind) String() string {
 	switch k {
-	case DefinitionKindOperation:
+	case ExecutableDefinitionKindOperation:
 		return "operation"
-	case DefinitionKindFragment:
+	case ExecutableDefinitionKindFragment:
 		return "fragment"
 	}
 
@@ -65,7 +76,7 @@ func (k DefinitionKind) String() string {
 }
 
 type ExecutableDefinition struct {
-	Kind                DefinitionKind
+	Kind                ExecutableDefinitionKind
 	OperationType       OperationType
 	Name                string // but not "on" if is FragmentDefinition kind.
 	TypeCondition       TypeCondition
@@ -112,7 +123,7 @@ type FragmentSpread struct {
 }
 
 type TypeCondition struct {
-	Type Type // Only allow "TypeKindNamedType" kind Type.
+	NamedType Type // Only allow "TypeKindNamedType" kind NamedType.
 }
 
 type InlineFragment struct {
@@ -193,7 +204,6 @@ type VariableDefinition struct {
 // 2.11 Type References
 // http://facebook.github.io/graphql/June2018/#sec-Type-References
 
-// Type :
 const (
 	TypeKindNamedType TypeKind = iota
 	TypeKindListType
@@ -226,4 +236,132 @@ type Type struct {
 type Directive struct {
 	Name      string
 	Arguments []Argument
+}
+
+// 3.0 NamedType System
+// http://facebook.github.io/graphql/June2018/#TypeSystemDefinition
+
+const (
+	TypeSystemDefinitionKindSchema TypeSystemDefinitionKind = iota
+	TypeSystemDefinitionKindType
+	TypeSystemDefinitionKindDirective
+)
+
+type TypeSystemDefinitionKind int
+
+func (k TypeSystemDefinitionKind) String() string {
+	switch k {
+	case TypeSystemDefinitionKindSchema:
+		return "schema"
+	case TypeSystemDefinitionKindType:
+		return "type"
+	case TypeSystemDefinitionKindDirective:
+		return "directive"
+	}
+
+	return "invalid"
+}
+
+type TypeSystemDefinition struct {
+	Kind                TypeSystemDefinitionKind
+	SchemaDefinition    SchemaDefinition
+	TypeDefinition      TypeDefinition
+	DirectiveDefinition DirectiveDefinition
+}
+
+// 3.2 Schema
+// http://facebook.github.io/graphql/June2018/#sec-Schema
+
+type SchemaDefinition struct {
+	Directives                   []Directive
+	RootOperationTypeDefinitions []RootOperationTypeDefinition
+}
+
+type RootOperationTypeDefinition struct {
+	OperationType OperationType
+	NamedType     Type // Only allow "TypeKindNamedType" kind NamedType.
+}
+
+// 3.4 Types
+// http://facebook.github.io/graphql/June2018/#sec-Types
+
+const (
+	TypeDefinitionKindScalar TypeDefinitionKind = iota
+	TypeDefinitionKindObject
+	TypeDefinitionKindInterface
+	TypeDefinitionKindUnion
+	TypeDefinitionKindEnum
+	TypeDefinitionKindInputObject
+)
+
+type TypeDefinitionKind int
+
+type TypeDefinition struct {
+	Kind                  TypeDefinitionKind
+	Description           string
+	Name                  string
+	Directives            []Directive
+	ImplementsInterface   []Type // Only allow "TypeKindNamedType" kind NamedType.
+	FieldsDefinition      []FieldDefinition
+	UnionMemberTypes      []Type // Only allow "TypeKindNamedType" kind NamedType.
+	EnumValuesDefinition  []EnumValueDefinition
+	InputFieldsDefinition []FieldDefinition
+}
+
+type FieldDefinition struct {
+	Description         string
+	Name                string
+	Directives          []Directive
+	Type                Type
+	ArgumentsDefinition []InputValueDefinition
+}
+
+type EnumValueDefinition struct {
+	Description string
+	Directives  []Directive
+	EnumValue   string // Name but not true or false or null.
+}
+
+// 3.6 Objects
+// http://facebook.github.io/graphql/June2018/#sec-Objects
+
+type InputValueDefinition struct {
+	Description  string
+	Name         string
+	Type         Type
+	Directives   []Directive
+	DefaultValue *Value
+}
+
+// 3.13 Directives
+// http://facebook.github.io/graphql/June2018/#sec-Type-System.Directives
+
+const (
+	DirectiveLocationQuery DirectiveLocation = iota
+	DirectiveLocationMutation
+	DirectiveLocationSubscription
+	DirectiveLocationField
+	DirectiveLocationFragmentDefinition
+	DirectiveLocationFragmentSpread
+	DirectiveLocationInlineFragment
+	DirectiveLocationSchema
+	DirectiveLocationScalar
+	DirectiveLocationObject
+	DirectiveLocationFieldDefinition
+	DirectiveLocationArgumentDefinition
+	DirectiveLocationInterface
+	DirectiveLocationUnion
+	DirectiveLocationEnum
+	DirectiveLocationEnumValue
+	DirectiveLocationInputObject
+	DirectiveLocationInputFieldDefinition
+)
+
+type DirectiveLocation int
+
+type DirectiveDefinition struct {
+	Description         string
+	Name                string
+	ArgumentsDefinition []InputValueDefinition
+	DirectiveLocations  []DirectiveLocation
 }
