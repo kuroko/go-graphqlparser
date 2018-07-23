@@ -9,6 +9,14 @@ import (
 
 func main() {
 	query := `
+		query {
+			hello
+			world
+			bar
+		}
+	`
+
+	query2 := `
 		query withFragments {
 			user(id: 4) {
 				friends(first: 10) {
@@ -26,6 +34,8 @@ func main() {
 			profilePic(size: 50)
 		}
 	`
+
+	_ = query2
 
 	psr := parser.New([]byte(query))
 

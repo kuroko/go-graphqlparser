@@ -4,7 +4,7 @@ package ast
 // http://facebook.github.io/graphql/June2018/#sec-Language.Document
 
 type Document struct {
-	Definitions []Definition
+	Definitions []*Definition
 }
 
 const (
@@ -82,7 +82,7 @@ type ExecutableDefinition struct {
 	TypeCondition       TypeCondition
 	VariableDefinitions []VariableDefinition
 	Directives          []Directive
-	SelectionSet        []Selection
+	SelectionSet        []*Selection
 }
 
 // 2.4 Selection Sets
@@ -102,7 +102,7 @@ type Field struct {
 	Name         string
 	Arguments    []Argument
 	Directives   []Directive
-	SelectionSet []Selection
+	SelectionSet []*Selection
 }
 
 // 2.6 Arguments
@@ -129,7 +129,7 @@ type TypeCondition struct {
 type InlineFragment struct {
 	TypeCondition TypeCondition
 	Directives    []Directive
-	SelectionSet  []Selection
+	SelectionSet  []*Selection
 }
 
 // 2.9 Input Values

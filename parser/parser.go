@@ -43,7 +43,7 @@ func (p *Parser) Parse() (ast.Document, error) {
 			return document, err
 		}
 
-		document.Definitions = append(document.Definitions, definition)
+		document.Definitions = append(document.Definitions, &definition)
 
 		if p.peek(token.Illegal) {
 			return document, p.unexpected(p.token, p.expected(token.EOF))
@@ -298,8 +298,8 @@ func (p *Parser) parseDirective() (ast.Directive, error) {
 	return directive, nil
 }
 
-func (p *Parser) parseSelectionSet(optional bool) ([]ast.Selection, error) {
-	var selectionSet []ast.Selection
+func (p *Parser) parseSelectionSet(optional bool) ([]*ast.Selection, error) {
+	var selectionSet []*ast.Selection
 
 	if optional && !p.skip(token.Punctuator, "{") {
 		return selectionSet, nil
@@ -315,7 +315,7 @@ func (p *Parser) parseSelectionSet(optional bool) ([]ast.Selection, error) {
 			return selectionSet, err
 		}
 
-		selectionSet = append(selectionSet, selection)
+		selectionSet = append(selectionSet, &selection)
 
 		if p.peek(token.Punctuator, "}") {
 			break
