@@ -2,21 +2,13 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/bucketd/go-graphqlparser/parser"
-	"github.com/davecgh/go-spew/spew"
 )
 
 func main() {
-	query := `
-		query {
-			hello
-			world
-			bar
-		}
-	`
-
-	query2 := `
+	query := []byte(`
 		query withFragments {
 			user(id: 4) {
 				friends(first: 10) {
@@ -33,15 +25,20 @@ func main() {
 			name
 			profilePic(size: 50)
 		}
-	`
+	`)
 
-	_ = query2
+	start := time.Now()
 
-	psr := parser.New([]byte(query))
+	for i := 0; i < 1000000; i++ {
+		psr := parser.New(query)
 
-	doc, err := psr.Parse()
-	spew.Dump(doc)
-	if err != nil {
-		fmt.Println(err)
+		doc, err := psr.Parse()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		_ = doc
 	}
+
+	fmt.Println(time.Since(start))
 }
