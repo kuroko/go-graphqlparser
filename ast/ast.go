@@ -27,8 +27,8 @@ func (k DefinitionKind) String() string {
 
 type Definition struct {
 	Kind                 DefinitionKind
-	ExecutableDefinition ExecutableDefinition
-	TypeSystemDefinition TypeSystemDefinition
+	ExecutableDefinition *ExecutableDefinition
+	TypeSystemDefinition *TypeSystemDefinition
 }
 
 // 2.3 Operations
@@ -79,19 +79,31 @@ type ExecutableDefinition struct {
 	Kind                ExecutableDefinitionKind
 	OperationType       OperationType
 	Name                string // but not "on" if is FragmentDefinition kind.
-	TypeCondition       TypeCondition
+	TypeCondition       *TypeCondition
 	VariableDefinitions []VariableDefinition
-	Directives          []Directive
+	Directives          []*Directive
 	SelectionSet        []*Selection
 }
 
 // 2.4 Selection Sets
 // http://facebook.github.io/graphql/June2018/#sec-Selection-Sets
 
+const (
+	SelectionKindField SelectionKind = iota
+	SelectionKindFragmentSpread
+	SelectionKindInlineFragment
+)
+
+type SelectionKind int
+
 type Selection struct {
-	Field          Field
-	FragmentSpread FragmentSpread
-	InlineFragment InlineFragment
+	Kind          SelectionKind
+	Name          string // but not "on"
+	Alias         string
+	TypeCondition *TypeCondition
+	Arguments     []*Argument
+	Directives    []*Directive
+	SelectionSet  []*Selection
 }
 
 // 2.5 Fields
@@ -100,8 +112,8 @@ type Selection struct {
 type Field struct {
 	Alias        string
 	Name         string
-	Arguments    []Argument
-	Directives   []Directive
+	Arguments    []*Argument
+	Directives   []*Directive
 	SelectionSet []*Selection
 }
 
@@ -117,20 +129,20 @@ type Argument struct {
 // 2.8 Fragments
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fragments
 
-type FragmentSpread struct {
-	Name       string // but not "on"
-	Directives []Directive
-}
+//type FragmentSpread struct {
+//	Name       string // but not "on"
+//	Directives []*Directive
+//}
 
 type TypeCondition struct {
 	NamedType Type // Only allow "TypeKindNamedType" kind NamedType.
 }
 
-type InlineFragment struct {
-	TypeCondition TypeCondition
-	Directives    []Directive
-	SelectionSet  []*Selection
-}
+//type InlineFragment struct {
+//	TypeCondition TypeCondition
+//	Directives    []*Directive
+//	SelectionSet  []*Selection
+//}
 
 // 2.9 Input Values
 // http://facebook.github.io/graphql/June2018/#sec-Input-Values
@@ -181,10 +193,10 @@ type Value struct {
 	IntValue      int
 	FloatValue    float64
 	StringValue   string
-	BooleanValue  bool
 	EnumValue     string // Name, but not `true`, `false`, or `null`.
 	ListValue     []Value
 	ObjectValue   []ObjectField
+	BooleanValue  bool
 }
 
 type ObjectField struct {
@@ -235,7 +247,7 @@ type Type struct {
 // Directive :
 type Directive struct {
 	Name      string
-	Arguments []Argument
+	Arguments []*Argument
 }
 
 // 3.0 NamedType System
@@ -273,7 +285,7 @@ type TypeSystemDefinition struct {
 // http://facebook.github.io/graphql/June2018/#sec-Schema
 
 type SchemaDefinition struct {
-	Directives                   []Directive
+	Directives                   []*Directive
 	RootOperationTypeDefinitions []RootOperationTypeDefinition
 }
 
@@ -300,7 +312,7 @@ type TypeDefinition struct {
 	Kind                  TypeDefinitionKind
 	Description           string
 	Name                  string
-	Directives            []Directive
+	Directives            []*Directive
 	ImplementsInterface   []Type // Only allow "TypeKindNamedType" kind NamedType.
 	FieldsDefinition      []FieldDefinition
 	UnionMemberTypes      []Type // Only allow "TypeKindNamedType" kind NamedType.
@@ -311,14 +323,14 @@ type TypeDefinition struct {
 type FieldDefinition struct {
 	Description         string
 	Name                string
-	Directives          []Directive
+	Directives          []*Directive
 	Type                Type
 	ArgumentsDefinition []InputValueDefinition
 }
 
 type EnumValueDefinition struct {
 	Description string
-	Directives  []Directive
+	Directives  []*Directive
 	EnumValue   string // Name but not true or false or null.
 }
 
@@ -329,7 +341,7 @@ type InputValueDefinition struct {
 	Description  string
 	Name         string
 	Type         Type
-	Directives   []Directive
+	Directives   []*Directive
 	DefaultValue *Value
 }
 
@@ -363,5 +375,5 @@ type DirectiveDefinition struct {
 	Description         string
 	Name                string
 	ArgumentsDefinition []InputValueDefinition
-	DirectiveLocations  []DirectiveLocation
+	DirectiveLocations  []*DirectiveLocation
 }
