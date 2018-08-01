@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/parser"
 )
 
@@ -83,10 +84,13 @@ fragment postFields on Subscription {
 
 	start := time.Now()
 
-	for i := 0; i < 1000000; i++ {
+	var doc ast.Document
+	var err error
+
+	for i := 0; i < 100; i++ {
 		psr := parser.New(query)
 
-		doc, err := psr.Parse()
+		doc, err = psr.Parse()
 		if err != nil {
 			fmt.Println(err)
 		}

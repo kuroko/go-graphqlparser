@@ -9,7 +9,7 @@ import (
 
 var (
 	normalQuery = []byte(`
-query first($foo: Boolean = true) {
+query first($foo: Boolean = true, $foo: Boolean = true) {
     # How about some comments too?
     user(id: "3931a3fc-d4f9-4faa-bcf5-882022617376") {
         ...userFields

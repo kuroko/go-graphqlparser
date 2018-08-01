@@ -80,7 +80,7 @@ type ExecutableDefinition struct {
 	OperationType       OperationType
 	Name                string // but not "on" if is FragmentDefinition kind.
 	TypeCondition       *TypeCondition
-	VariableDefinitions []VariableDefinition
+	VariableDefinitions []*VariableDefinition
 	Directives          []*Directive
 	SelectionSet        []*Selection
 }
@@ -95,6 +95,19 @@ const (
 )
 
 type SelectionKind int
+
+func (k SelectionKind) String() string {
+	switch k {
+	case SelectionKindField:
+		return "field"
+	case SelectionKindFragmentSpread:
+		return "fragment spread"
+	case SelectionKindInlineFragment:
+		return "inline fragment"
+	}
+
+	return "unknown"
+}
 
 type Selection struct {
 	Kind          SelectionKind

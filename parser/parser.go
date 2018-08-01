@@ -66,8 +66,7 @@ func (p *Parser) parseDefinition(document ast.Document) (*ast.Definition, error)
 	if p.peek(token.Name, "query", "mutation", "subscription") || p.peek(token.Punctuator, "{") {
 		definition := &ast.Definition{}
 		definition.Kind = ast.DefinitionKindExecutable
-
-		err = p.parseOperationDefinition(definition.ExecutableDefinition, p.hasShorthandQuery)
+		definition.ExecutableDefinition, err = p.parseOperationDefinition(p.hasShorthandQuery)
 
 		return definition, err
 	}
@@ -76,8 +75,7 @@ func (p *Parser) parseDefinition(document ast.Document) (*ast.Definition, error)
 	if p.peek(token.Name, "fragment") {
 		definition := &ast.Definition{}
 		definition.Kind = ast.DefinitionKindExecutable
-
-		err := p.parseFragmentDefinition(definition.ExecutableDefinition)
+		definition.ExecutableDefinition, err = p.parseFragmentDefinition()
 
 		return definition, err
 	}
@@ -92,8 +90,8 @@ func (p *Parser) parseDefinition(document ast.Document) (*ast.Definition, error)
 
 }
 
-func (p *Parser) parseOperationDefinition(definition *ast.ExecutableDefinition, isQuery bool) error {
-	var variableDefinitions []ast.VariableDefinition
+func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefinition, error) {
+	var variableDefinitions []*ast.VariableDefinition
 	var directives []*ast.Directive
 
 	var name string
@@ -104,7 +102,7 @@ func (p *Parser) parseOperationDefinition(definition *ast.ExecutableDefinition, 
 	if !isQuery {
 		opType, err = p.parseOperationType()
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if tok, ok := p.consume(token.Name); ok {
@@ -113,30 +111,28 @@ func (p *Parser) parseOperationDefinition(definition *ast.ExecutableDefinition, 
 
 		variableDefinitions, err = p.parseVariableDefinitions()
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		directives, err = p.parseDirectives()
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	selectionSet, err := p.parseSelectionSet(false)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	definition = &ast.ExecutableDefinition{
+	return &ast.ExecutableDefinition{
 		Kind:                ast.ExecutableDefinitionKindOperation,
 		OperationType:       opType,
 		Name:                name,
 		VariableDefinitions: variableDefinitions,
 		Directives:          directives,
 		SelectionSet:        selectionSet,
-	}
-
-	return nil
+	}, nil
 }
 
 func (p *Parser) parseOperationType() (ast.OperationType, error) {
@@ -155,68 +151,68 @@ func (p *Parser) parseOperationType() (ast.OperationType, error) {
 	}
 }
 
-func (p *Parser) parseFragmentDefinition(definition *ast.ExecutableDefinition) error {
+func (p *Parser) parseFragmentDefinition() (*ast.ExecutableDefinition, error) {
 	if !p.skip(token.Name, "fragment") {
-		return nil
+		return nil, nil
 	}
 
 	tok, ok := p.consume(token.Name)
 	if !ok {
-		return nil
+		return nil, nil
 	}
 
 	if tok.Literal == "on" {
-		return p.unexpected(p.token, p.expected(token.Name, "!on"))
+		return nil, p.unexpected(p.token, p.expected(token.Name, "!on"))
 	}
 
-	definition = &ast.ExecutableDefinition{}
-
-	err := p.parseTypeCondition(definition.TypeCondition)
+	condition, err := p.parseTypeCondition()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	directives, err := p.parseDirectives()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	selections, err := p.parseSelectionSet(false)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	definition := &ast.ExecutableDefinition{}
 	definition.Kind = ast.ExecutableDefinitionKindFragment
 	definition.Name = tok.Literal
+	definition.TypeCondition = condition
 	definition.Directives = directives
 	definition.SelectionSet = selections
 
-	return nil
+	return definition, nil
 }
 
-func (p *Parser) parseTypeCondition(condition *ast.TypeCondition) error {
+func (p *Parser) parseTypeCondition() (*ast.TypeCondition, error) {
 	_, err := p.mustConsume(token.Name, "on")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	conType, err := p.parseType()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if conType.Kind != ast.TypeKindNamedType {
-		return p.unexpected(p.token, "NamedType")
+		return nil, p.unexpected(p.token, "NamedType")
 	}
 
-	condition = &ast.TypeCondition{}
+	condition := &ast.TypeCondition{}
 	condition.NamedType = conType
 
-	return nil
+	return condition, nil
 }
 
-func (p *Parser) parseVariableDefinitions() ([]ast.VariableDefinition, error) {
-	var definitions []ast.VariableDefinition
+func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
+	var definitions []*ast.VariableDefinition
 
 	if !p.skip(token.Punctuator, "(") {
 		return definitions, nil
@@ -249,7 +245,7 @@ func (p *Parser) parseVariableDefinitions() ([]ast.VariableDefinition, error) {
 			return definitions, err
 		}
 
-		definitions = append(definitions, definition)
+		definitions = append(definitions, &definition)
 
 		if p.peek(token.Punctuator, ")") {
 			break
@@ -374,6 +370,7 @@ func (p *Parser) parseFragmentSpread(selection *ast.Selection) error {
 		return err
 	}
 
+	selection.Kind = ast.SelectionKindFragmentSpread
 	selection.Name = tok.Literal
 	selection.Directives = directives
 
@@ -381,8 +378,11 @@ func (p *Parser) parseFragmentSpread(selection *ast.Selection) error {
 }
 
 func (p *Parser) parseInlineFragment(selection *ast.Selection) error {
+	var condition *ast.TypeCondition
+	var err error
+
 	if p.peek(token.Name, "on") {
-		err := p.parseTypeCondition(selection.TypeCondition)
+		condition, err = p.parseTypeCondition()
 		if err != nil {
 			return err
 		}
@@ -398,6 +398,8 @@ func (p *Parser) parseInlineFragment(selection *ast.Selection) error {
 		return err
 	}
 
+	selection.Kind = ast.SelectionKindInlineFragment
+	selection.TypeCondition = condition
 	selection.Directives = directives
 	selection.SelectionSet = selections
 
