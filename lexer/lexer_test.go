@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/lexer/benchutil/graphql-gophers"
+	"github.com/bucketd/go-graphqlparser/benchutil/graphql-gophers/common"
 	"github.com/bucketd/go-graphqlparser/token"
 	"github.com/graphql-go/graphql/language/lexer"
 	"github.com/graphql-go/graphql/language/source"
@@ -85,7 +85,7 @@ func BenchmarkLexer(b *testing.B) {
 		qry := strings.Replace(query, `"""`, `"`, -1)
 
 		for i := 0; i < b.N; i++ {
-			lxr := graphql_gophers.NewLexer(qry)
+			lxr := common.NewLexer(qry)
 			lxr.Consume()
 
 			// This lexer is a little more fiddly to bench, we have to know the expected structure

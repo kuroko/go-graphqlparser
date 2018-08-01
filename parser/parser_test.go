@@ -1,10 +1,13 @@
 package parser
 
 import (
+	"strings"
 	"testing"
 
-	"github.com/graphql-go/graphql/language/parser"
-	"github.com/graphql-go/graphql/language/source"
+	goparser "github.com/graphql-go/graphql/language/parser"
+	gosource "github.com/graphql-go/graphql/language/source"
+
+	gophersquery "github.com/bucketd/go-graphqlparser/benchutil/graphql-gophers/query"
 )
 
 var (
@@ -101,6 +104,10 @@ func BenchmarkParser(b *testing.B) {
 			b.Run("github.com/graphql-go/graphql", func(b *testing.B) {
 				runGraphQLGoParser(b, t.query)
 			})
+
+			b.Run("github.com/graphql-gophers/graphql-go", func(b *testing.B) {
+				runGraphQLGophersParser(b, t.query)
+			})
 		})
 	}
 }
@@ -120,13 +127,37 @@ func runBucketdParser(b *testing.B, query []byte) {
 
 func runGraphQLGoParser(b *testing.B, query []byte) {
 	for i := 0; i < b.N; i++ {
-		params := parser.ParseParams{
-			Source: source.NewSource(&source.Source{
+		params := goparser.ParseParams{
+			Source: gosource.NewSource(&gosource.Source{
 				Body: query,
 			}),
 		}
 
-		ast, err := parser.Parse(params)
+		ast, err := goparser.Parse(params)
+		if err != nil {
+			b.Fatal(err)
+		}
+
+		_ = ast
+	}
+}
+
+func runGraphQLGophersParser(b *testing.B, query []byte) {
+	qry := string(query)
+	qry = strings.Replace(qry, `"""
+        Hello,
+            World!
+
+        Yours,
+            GraphQL
+    """`, `"Hello,\n    World!\n\nYours,    GraphQL"`, -1)
+
+	qry = strings.TrimSpace(qry)
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		ast, err := gophersquery.Parse(qry)
 		if err != nil {
 			b.Fatal(err)
 		}

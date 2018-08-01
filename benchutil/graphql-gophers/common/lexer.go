@@ -1,4 +1,4 @@
-package graphql_gophers
+package common
 
 import (
 	"fmt"
