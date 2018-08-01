@@ -331,18 +331,18 @@ func (p *Parser) parseSelectionSet(optional bool) ([]*ast.Selection, error) {
 }
 
 func (p *Parser) parseSelection() (*ast.Selection, error) {
-	selection := &ast.Selection{}
+	var selection *ast.Selection
 
 	if p.skip(token.Punctuator, "...") {
 		if p.peek(token.Name) && p.token.Literal != "on" {
-			err := p.parseFragmentSpread(selection)
+			selection, err := p.parseFragmentSpread()
 			if err != nil {
 				return nil, err
 			}
 
 			return selection, nil
 		} else {
-			err := p.parseInlineFragment(selection)
+			selection, err := p.parseInlineFragment()
 			if err != nil {
 				return nil, err
 			}
@@ -351,7 +351,7 @@ func (p *Parser) parseSelection() (*ast.Selection, error) {
 		}
 	}
 
-	err := p.parseField(selection)
+	selection, err := p.parseField()
 	if err != nil {
 		return nil, err
 	}
@@ -359,86 +359,101 @@ func (p *Parser) parseSelection() (*ast.Selection, error) {
 	return selection, nil
 }
 
-func (p *Parser) parseFragmentSpread(selection *ast.Selection) error {
+func (p *Parser) parseFragmentSpread() (*ast.Selection, error) {
 	tok, err := p.mustConsume(token.Name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	directives, err := p.parseDirectives()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	selection := &ast.Selection{}
 	selection.Kind = ast.SelectionKindFragmentSpread
 	selection.Name = tok.Literal
 	selection.Directives = directives
 
-	return nil
+	return selection, nil
 }
 
-func (p *Parser) parseInlineFragment(selection *ast.Selection) error {
+func (p *Parser) parseInlineFragment() (*ast.Selection, error) {
 	var condition *ast.TypeCondition
 	var err error
 
 	if p.peek(token.Name, "on") {
 		condition, err = p.parseTypeCondition()
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	directives, err := p.parseDirectives()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	selections, err := p.parseSelectionSet(false)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	selection := &ast.Selection{}
 	selection.Kind = ast.SelectionKindInlineFragment
 	selection.TypeCondition = condition
 	selection.Directives = directives
 	selection.SelectionSet = selections
 
-	return nil
+	return selection, nil
 }
 
-func (p *Parser) parseField(selection *ast.Selection) error {
-	name, err := p.mustConsume(token.Name)
+func (p *Parser) parseField() (*ast.Selection, error) {
+	var name string
+	var alias string
+
+	nameTok, err := p.mustConsume(token.Name)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	name = nameTok.Literal
 
 	if p.skip(token.Punctuator, ":") {
-		selection.Alias = name.Literal
+		alias = nameTok.Literal
 
-		name, err = p.mustConsume(token.Name)
+		nameTok, err = p.mustConsume(token.Name)
 		if err != nil {
-			return err
+			return nil, err
 		}
+
+		name = nameTok.Literal
 	}
 
-	selection.Name = name.Literal
-
-	selection.Arguments, err = p.parseArguments()
+	arguments, err := p.parseArguments()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	selection.Directives, err = p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	selection.SelectionSet, err = p.parseSelectionSet(true)
+	selections, err := p.parseSelectionSet(true)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	selection := &ast.Selection{}
+	selection.Kind = ast.SelectionKindField
+	selection.Name = name
+	selection.Alias = alias
+	selection.Arguments = arguments
+	selection.Directives = directives
+	selection.SelectionSet = selections
+
+	return selection, nil
 }
 
 func (p *Parser) parseArguments() ([]*ast.Argument, error) {
