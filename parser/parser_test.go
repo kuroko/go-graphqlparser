@@ -143,6 +143,7 @@ func runGraphQLGoParser(b *testing.B, query []byte) {
 }
 
 func runGraphQLGophersParser(b *testing.B, query []byte) {
+	// No multi-line string support in this parser...
 	qry := string(query)
 	qry = strings.Replace(qry, `"""
         Hello,
@@ -151,8 +152,6 @@ func runGraphQLGophersParser(b *testing.B, query []byte) {
         Yours,
             GraphQL
     """`, `"Hello,\n    World!\n\nYours,    GraphQL"`, -1)
-
-	qry = strings.TrimSpace(qry)
 
 	b.ResetTimer()
 
