@@ -34,6 +34,7 @@ func (p *Parser) Parse() (ast.Document, error) {
 	p.scan()
 
 	for {
+		// This should be set during the first iteration.
 		if p.hasShorthandQuery {
 			return document, p.unexpected(p.token, p.expected(token.EOF))
 		}
@@ -451,30 +452,31 @@ func (p *Parser) parseArguments() ([]*ast.Argument, error) {
 			return arguments, err
 		}
 
-		arguments = append(arguments, &argument)
+		arguments = append(arguments, argument)
 	}
 
 	return arguments, nil
 }
 
-func (p *Parser) parseArgument() (ast.Argument, error) {
-	var argument ast.Argument
+func (p *Parser) parseArgument() (*ast.Argument, error) {
+	var argument *ast.Argument
 
 	name, err := p.mustConsume(token.Name)
 	if err != nil {
-		return argument, err
+		return nil, err
 	}
 
 	_, err = p.mustConsume(token.Punctuator, ":")
 	if err != nil {
-		return argument, err
+		return nil, err
 	}
 
 	value, err := p.parseValue()
 	if err != nil {
-		return argument, err
+		return nil, err
 	}
 
+	argument = &ast.Argument{}
 	argument.Name = name.Literal
 	argument.Value = value
 
