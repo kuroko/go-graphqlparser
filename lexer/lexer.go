@@ -100,13 +100,13 @@ func (l *Lexer) Scan() Token {
 		return l.scanComment(r)
 
 	case r == '"':
-		r1, _ := l.read()
-		r2, _ := l.read()
+		r1, w1 := l.read()
+		r2, w2 := l.read()
 		if r1 == '"' && r2 == '"' {
 			return l.scanBlockString(r)
 		}
-		l.unread()
-		l.unread()
+		l.unread(w2)
+		l.unread(w1)
 		return l.scanString(r)
 	case r == eof:
 		return Token{
@@ -358,17 +358,17 @@ func (l *Lexer) scanBlockString(r rune) Token {
 }
 
 func isTripQuotes(l *Lexer) bool {
-	r1, _ := l.read()
-	r2, _ := l.read()
+	r1, w1 := l.read()
+	r2, w2 := l.read()
 	if r1 == '"' && r2 == '"' {
 		return true
 	}
 
 	if r1 != eof {
-		l.unread()
+		l.unread(w2)
 	}
 	if r2 != eof {
-		l.unread()
+		l.unread(w1)
 	}
 	return false
 }
@@ -463,9 +463,10 @@ func hexRuneToInt(r rune) int {
 // scanComment scans valid GraphQL comments.
 func (l *Lexer) scanComment(r rune) Token {
 	var was000D bool
+	var w int
 
 	for {
-		r, _ = l.read()
+		r, w = l.read()
 		if r == eof {
 			return l.Scan()
 		}
@@ -482,7 +483,7 @@ func (l *Lexer) scanComment(r rune) Token {
 		// Otherwise, if we saw a CR, and this rune isn't an LF, then we have started reading the
 		// next line's runes, so unread the rune we read, and scan the next token.
 		if was000D && r != lf {
-			l.unread()
+			l.unread(w)
 
 			return l.Scan()
 		}
@@ -512,18 +513,18 @@ func (l *Lexer) scanName(r rune) Token {
 	byteStart := l.pos - 1
 	runeStart := l.lpos
 
-	var done bool
-	for !done {
-		r, _ := l.read()
+Loop:
+	for {
+		r, w := l.read()
 
 		switch {
-		case r == eof:
-			done = true
 		case (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
 			continue
+		case r == eof:
+			break Loop
 		default:
-			l.unread()
-			done = true
+			l.unread(w)
+			break Loop
 		}
 	}
 
@@ -654,7 +655,7 @@ func (l *Lexer) scanNumber(r rune) Token {
 	}
 
 	if r != eof {
-		l.unread()
+		l.unread(1)
 	}
 
 	t := Token{
@@ -739,12 +740,8 @@ func (l *Lexer) read() (rune, int) {
 		return eof, 0
 	}
 
-	var r rune
-	var w int
-	if l.input[l.pos] < utf8.RuneSelf {
-		r = rune(l.input[l.pos])
-		w = 1
-	} else {
+	r, w := rune(l.input[l.pos]), 1
+	if r >= utf8.RuneSelf {
 		r, w = utf8.DecodeRune(l.input[l.pos:])
 	}
 
@@ -759,12 +756,12 @@ func (l *Lexer) read() (rune, int) {
 // unread goes back one rune's worth of bytes in the input, changing the
 // positions we keep track of.
 // Does not currently go back a line.
-func (l *Lexer) unread() {
+func (l *Lexer) unread(width int) {
 	l.pos -= l.lrw
 
-	if l.pos > 0 {
+	if l.pos == 0 {
 		// update rune width for further rewind
-		_, l.lrw = utf8.DecodeLastRune(l.input[:l.pos])
+		l.lrw = width
 	} else {
 		// If we're already at the start, set this to so we don't end up with a negative position.
 		l.lrw = 0

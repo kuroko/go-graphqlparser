@@ -12,7 +12,7 @@ const (
 	DefinitionKindTypeSystem
 )
 
-type DefinitionKind int
+type DefinitionKind int8
 
 func (k DefinitionKind) String() string {
 	switch k {
@@ -26,9 +26,9 @@ func (k DefinitionKind) String() string {
 }
 
 type Definition struct {
-	Kind                 DefinitionKind
 	ExecutableDefinition *ExecutableDefinition
 	TypeSystemDefinition *TypeSystemDefinition
+	Kind                 DefinitionKind
 }
 
 // 2.3 Operations
@@ -42,7 +42,7 @@ const (
 	OperationTypeSubscription
 )
 
-type OperationType int
+type OperationType int8
 
 func (t OperationType) String() string {
 	switch t {
@@ -62,7 +62,7 @@ const (
 	ExecutableDefinitionKindFragment
 )
 
-type ExecutableDefinitionKind int
+type ExecutableDefinitionKind int8
 
 func (k ExecutableDefinitionKind) String() string {
 	switch k {
@@ -76,13 +76,13 @@ func (k ExecutableDefinitionKind) String() string {
 }
 
 type ExecutableDefinition struct {
-	Kind                ExecutableDefinitionKind
-	OperationType       OperationType
 	Name                string // but not "on" if is FragmentDefinition kind.
 	TypeCondition       *TypeCondition
 	VariableDefinitions []*VariableDefinition
 	Directives          []*Directive
 	SelectionSet        []*Selection
+	OperationType       OperationType
+	Kind                ExecutableDefinitionKind
 }
 
 // 2.4 Selection Sets
@@ -94,7 +94,7 @@ const (
 	SelectionKindInlineFragment
 )
 
-type SelectionKind int
+type SelectionKind int8
 
 func (k SelectionKind) String() string {
 	switch k {
@@ -110,13 +110,13 @@ func (k SelectionKind) String() string {
 }
 
 type Selection struct {
-	Kind          SelectionKind
 	Name          string // but not "on"
 	Alias         string
 	TypeCondition *TypeCondition
 	Arguments     []*Argument
 	Directives    []*Directive
 	SelectionSet  []*Selection
+	Kind          SelectionKind
 }
 
 // 2.5 Fields
@@ -173,14 +173,14 @@ const (
 	ValueKindObjectValue // [?Const]
 )
 
-type ValueKind int
+type ValueKind int8
 
 func (k ValueKind) String() string {
 	switch k {
 	case ValueKindVariable:
 		return "variable value"
 	case ValueKindIntValue:
-		return "int value"
+		return "int8 value"
 	case ValueKindFloatValue:
 		return "float value"
 	case ValueKindStringValue:
@@ -201,7 +201,6 @@ func (k ValueKind) String() string {
 }
 
 type Value struct {
-	Kind          ValueKind
 	VariableValue string
 	IntValue      int
 	FloatValue    float64
@@ -210,6 +209,7 @@ type Value struct {
 	ListValue     []Value
 	ObjectValue   []ObjectField
 	BooleanValue  bool
+	Kind          ValueKind
 }
 
 type ObjectField struct {
@@ -234,7 +234,7 @@ const (
 	TypeKindListType
 )
 
-type TypeKind int
+type TypeKind int8
 
 func (k TypeKind) String() string {
 	switch k {
@@ -248,10 +248,10 @@ func (k TypeKind) String() string {
 }
 
 type Type struct {
-	Kind        TypeKind
 	NamedType   string
 	ListType    *Type
 	NonNullable bool
+	Kind        TypeKind
 }
 
 // 2.12 Directives
@@ -272,7 +272,7 @@ const (
 	TypeSystemDefinitionKindDirective
 )
 
-type TypeSystemDefinitionKind int
+type TypeSystemDefinitionKind int8
 
 func (k TypeSystemDefinitionKind) String() string {
 	switch k {
@@ -288,10 +288,10 @@ func (k TypeSystemDefinitionKind) String() string {
 }
 
 type TypeSystemDefinition struct {
-	Kind                TypeSystemDefinitionKind
 	SchemaDefinition    SchemaDefinition
 	TypeDefinition      TypeDefinition
 	DirectiveDefinition DirectiveDefinition
+	Kind                TypeSystemDefinitionKind
 }
 
 // 3.2 Schema
@@ -303,8 +303,8 @@ type SchemaDefinition struct {
 }
 
 type RootOperationTypeDefinition struct {
-	OperationType OperationType
 	NamedType     Type // Only allow "TypeKindNamedType" kind NamedType.
+	OperationType OperationType
 }
 
 // 3.4 Types
@@ -319,18 +319,18 @@ const (
 	TypeDefinitionKindInputObject
 )
 
-type TypeDefinitionKind int
+type TypeDefinitionKind int8
 
 type TypeDefinition struct {
-	Kind                  TypeDefinitionKind
 	Description           string
-	Name                  string
 	Directives            []*Directive
 	ImplementsInterface   []Type // Only allow "TypeKindNamedType" kind NamedType.
 	FieldsDefinition      []FieldDefinition
 	UnionMemberTypes      []Type // Only allow "TypeKindNamedType" kind NamedType.
 	EnumValuesDefinition  []EnumValueDefinition
 	InputFieldsDefinition []FieldDefinition
+	Name                  string
+	Kind                  TypeDefinitionKind
 }
 
 type FieldDefinition struct {
@@ -382,7 +382,7 @@ const (
 	DirectiveLocationInputFieldDefinition
 )
 
-type DirectiveLocation int
+type DirectiveLocation int8
 
 type DirectiveDefinition struct {
 	Description         string

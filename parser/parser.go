@@ -786,7 +786,7 @@ func (p *Parser) expected(t token.Type, ls ...string) string {
 	buf.WriteString(t.String())
 	buf.WriteString(" '")
 	buf.WriteString(strings.Join(ls, "|"))
-	return buf.String()
+	return btos(buf.Bytes())
 }
 
 // TODO(Luke-Vear): think over the readability of the punctuation and caps.
