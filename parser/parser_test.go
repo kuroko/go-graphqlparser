@@ -113,6 +113,8 @@ func BenchmarkParser(b *testing.B) {
 }
 
 func runBucketdParser(b *testing.B, query []byte) {
+	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		psr := New(query)
 
@@ -126,6 +128,8 @@ func runBucketdParser(b *testing.B, query []byte) {
 }
 
 func runGraphQLGoParser(b *testing.B, query []byte) {
+	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		params := goparser.ParseParams{
 			Source: gosource.NewSource(&gosource.Source{

@@ -741,8 +741,8 @@ func (l *Lexer) read() (rune, int) {
 
 	var r rune
 	var w int
-	if sbr := l.input[l.pos]; sbr < utf8.RuneSelf {
-		r = rune(sbr)
+	if l.input[l.pos] < utf8.RuneSelf {
+		r = rune(l.input[l.pos])
 		w = 1
 	} else {
 		r, w = utf8.DecodeRune(l.input[l.pos:])

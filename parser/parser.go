@@ -3,8 +3,6 @@ package parser
 import (
 	"bytes"
 	"errors"
-	"fmt"
-	"runtime"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -31,7 +29,7 @@ func New(input []byte) *Parser {
 func (p *Parser) Parse() (ast.Document, error) {
 	var document ast.Document
 
-	p.scan()
+	p.token = p.lexer.Scan()
 
 	for {
 		// This should be set during the first iteration.
@@ -46,11 +44,11 @@ func (p *Parser) Parse() (ast.Document, error) {
 
 		document.Definitions = append(document.Definitions, definition)
 
-		if p.peek(token.Illegal) {
+		if p.peek0(token.Illegal) {
 			return document, p.unexpected(p.token, p.expected(token.EOF))
 		}
 
-		if p.peek(token.EOF) {
+		if p.peek0(token.EOF) {
 			return document, nil
 		}
 	}
@@ -63,7 +61,7 @@ func (p *Parser) parseDefinition(document ast.Document) (*ast.Definition, error)
 	p.hasShorthandQuery = len(document.Definitions) == 0 && p.token.Literal == "{"
 
 	// ExecutableDefinition...
-	if p.peek(token.Name, "query", "mutation", "subscription") || p.peek(token.Punctuator, "{") {
+	if p.peekn(token.Name, "query", "mutation", "subscription") || p.peek1(token.Punctuator, "{") {
 		definition := &ast.Definition{}
 		definition.Kind = ast.DefinitionKindExecutable
 		definition.ExecutableDefinition, err = p.parseOperationDefinition(p.hasShorthandQuery)
@@ -72,7 +70,7 @@ func (p *Parser) parseDefinition(document ast.Document) (*ast.Definition, error)
 	}
 
 	// ExecutableDefinition...
-	if p.peek(token.Name, "fragment") {
+	if p.peek1(token.Name, "fragment") {
 		definition := &ast.Definition{}
 		definition.Kind = ast.DefinitionKindExecutable
 		definition.ExecutableDefinition, err = p.parseFragmentDefinition()
@@ -105,7 +103,7 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefiniti
 			return nil, err
 		}
 
-		if tok, ok := p.consume(token.Name); ok {
+		if tok, ok := p.consume0(token.Name); ok {
 			name = tok.Literal
 		}
 
@@ -136,7 +134,7 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefiniti
 }
 
 func (p *Parser) parseOperationType() (ast.OperationType, error) {
-	tok, err := p.mustConsume(token.Name, "query", "mutation", "subscription")
+	tok, err := p.mustConsumen(token.Name, "query", "mutation", "subscription")
 	if err != nil {
 		return -1, err
 	}
@@ -152,11 +150,11 @@ func (p *Parser) parseOperationType() (ast.OperationType, error) {
 }
 
 func (p *Parser) parseFragmentDefinition() (*ast.ExecutableDefinition, error) {
-	if !p.skip(token.Name, "fragment") {
+	if !p.skip1(token.Name, "fragment") {
 		return nil, nil
 	}
 
-	tok, ok := p.consume(token.Name)
+	tok, ok := p.consume0(token.Name)
 	if !ok {
 		return nil, nil
 	}
@@ -191,7 +189,7 @@ func (p *Parser) parseFragmentDefinition() (*ast.ExecutableDefinition, error) {
 }
 
 func (p *Parser) parseTypeCondition() (*ast.TypeCondition, error) {
-	_, err := p.mustConsume(token.Name, "on")
+	_, err := p.mustConsume1(token.Name, "on")
 	if err != nil {
 		return nil, err
 	}
@@ -214,24 +212,24 @@ func (p *Parser) parseTypeCondition() (*ast.TypeCondition, error) {
 func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
 	var definitions []*ast.VariableDefinition
 
-	if !p.skip(token.Punctuator, "(") {
+	if !p.skip1(token.Punctuator, "(") {
 		return definitions, nil
 	}
 
 	for {
-		if _, err := p.mustConsume(token.Punctuator, "$"); err != nil {
+		if _, err := p.mustConsume1(token.Punctuator, "$"); err != nil {
 			return definitions, err
 		}
 
-		tok, err := p.mustConsume(token.Name)
+		tok, err := p.mustConsume0(token.Name)
 		if err != nil {
 			return definitions, err
 		}
 
-		definition := ast.VariableDefinition{}
+		definition := &ast.VariableDefinition{}
 		definition.Name = tok.Literal
 
-		if _, err := p.mustConsume(token.Punctuator, ":"); err != nil {
+		if _, err := p.mustConsume1(token.Punctuator, ":"); err != nil {
 			return definitions, err
 		}
 
@@ -245,14 +243,14 @@ func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
 			return definitions, err
 		}
 
-		definitions = append(definitions, &definition)
+		definitions = append(definitions, definition)
 
-		if p.peek(token.Punctuator, ")") {
+		if p.peek1(token.Punctuator, ")") {
 			break
 		}
 	}
 
-	if _, err := p.mustConsume(token.Punctuator, ")"); err != nil {
+	if _, err := p.mustConsume1(token.Punctuator, ")"); err != nil {
 		return definitions, err
 	}
 
@@ -262,50 +260,40 @@ func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
 func (p *Parser) parseDirectives() ([]*ast.Directive, error) {
 	var directives []*ast.Directive
 
-	for p.peek(token.Punctuator, "@") {
-		directive, err := p.parseDirective()
+	for p.peek1(token.Punctuator, "@") {
+		_, err := p.mustConsume1(token.Punctuator, "@")
 		if err != nil {
-			return directives, err
+			return nil, err
 		}
 
-		directives = append(directives, &directive)
+		name, err := p.mustConsume0(token.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		args, err := p.parseArguments()
+		if err != nil {
+			return nil, err
+		}
+
+		directive := &ast.Directive{}
+		directive.Name = name.Literal
+		directive.Arguments = args
+
+		directives = append(directives, directive)
 	}
 
 	return directives, nil
 }
 
-func (p *Parser) parseDirective() (ast.Directive, error) {
-	var directive ast.Directive
-
-	_, err := p.mustConsume(token.Punctuator, "@")
-	if err != nil {
-		return directive, err
-	}
-
-	name, err := p.mustConsume(token.Name)
-	if err != nil {
-		return directive, err
-	}
-
-	args, err := p.parseArguments()
-	if err != nil {
-		return directive, err
-	}
-
-	directive.Name = name.Literal
-	directive.Arguments = args
-
-	return directive, nil
-}
-
 func (p *Parser) parseSelectionSet(optional bool) ([]*ast.Selection, error) {
 	var selectionSet []*ast.Selection
 
-	if optional && !p.skip(token.Punctuator, "{") {
+	if optional && !p.skip1(token.Punctuator, "{") {
 		return selectionSet, nil
 	}
 
-	if !optional && !p.skip(token.Punctuator, "{") {
+	if !optional && !p.skip1(token.Punctuator, "{") {
 		return selectionSet, p.unexpected(p.token, p.expected(token.Name))
 	}
 
@@ -317,12 +305,12 @@ func (p *Parser) parseSelectionSet(optional bool) ([]*ast.Selection, error) {
 
 		selectionSet = append(selectionSet, selection)
 
-		if p.peek(token.Punctuator, "}") {
+		if p.peek1(token.Punctuator, "}") {
 			break
 		}
 	}
 
-	_, err := p.mustConsume(token.Punctuator, "}")
+	_, err := p.mustConsume1(token.Punctuator, "}")
 	if err != nil {
 		return selectionSet, err
 	}
@@ -333,8 +321,8 @@ func (p *Parser) parseSelectionSet(optional bool) ([]*ast.Selection, error) {
 func (p *Parser) parseSelection() (*ast.Selection, error) {
 	var selection *ast.Selection
 
-	if p.skip(token.Punctuator, "...") {
-		if p.peek(token.Name) && p.token.Literal != "on" {
+	if p.skip1(token.Punctuator, "...") {
+		if p.peek0(token.Name) && p.token.Literal != "on" {
 			selection, err := p.parseFragmentSpread()
 			if err != nil {
 				return nil, err
@@ -360,7 +348,7 @@ func (p *Parser) parseSelection() (*ast.Selection, error) {
 }
 
 func (p *Parser) parseFragmentSpread() (*ast.Selection, error) {
-	tok, err := p.mustConsume(token.Name)
+	tok, err := p.mustConsume0(token.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -382,7 +370,7 @@ func (p *Parser) parseInlineFragment() (*ast.Selection, error) {
 	var condition *ast.TypeCondition
 	var err error
 
-	if p.peek(token.Name, "on") {
+	if p.peek1(token.Name, "on") {
 		condition, err = p.parseTypeCondition()
 		if err != nil {
 			return nil, err
@@ -412,17 +400,17 @@ func (p *Parser) parseField() (*ast.Selection, error) {
 	var name string
 	var alias string
 
-	nameTok, err := p.mustConsume(token.Name)
+	nameTok, err := p.mustConsume0(token.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	name = nameTok.Literal
 
-	if p.skip(token.Punctuator, ":") {
+	if p.skip1(token.Punctuator, ":") {
 		alias = nameTok.Literal
 
-		nameTok, err = p.mustConsume(token.Name)
+		nameTok, err = p.mustConsume0(token.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -459,15 +447,29 @@ func (p *Parser) parseField() (*ast.Selection, error) {
 func (p *Parser) parseArguments() ([]*ast.Argument, error) {
 	var arguments []*ast.Argument
 
-	if !p.skip(token.Punctuator, "(") {
+	if !p.skip1(token.Punctuator, "(") {
 		return arguments, nil
 	}
 
-	for !p.skip(token.Punctuator, ")") {
-		argument, err := p.parseArgument()
+	for !p.skip1(token.Punctuator, ")") {
+		name, err := p.mustConsume0(token.Name)
 		if err != nil {
-			return arguments, err
+			return nil, err
 		}
+
+		_, err = p.mustConsume1(token.Punctuator, ":")
+		if err != nil {
+			return nil, err
+		}
+
+		value, err := p.parseValue()
+		if err != nil {
+			return nil, err
+		}
+
+		argument := &ast.Argument{}
+		argument.Name = name.Literal
+		argument.Value = value
 
 		arguments = append(arguments, argument)
 	}
@@ -475,33 +477,8 @@ func (p *Parser) parseArguments() ([]*ast.Argument, error) {
 	return arguments, nil
 }
 
-func (p *Parser) parseArgument() (*ast.Argument, error) {
-	var argument *ast.Argument
-
-	name, err := p.mustConsume(token.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = p.mustConsume(token.Punctuator, ":")
-	if err != nil {
-		return nil, err
-	}
-
-	value, err := p.parseValue()
-	if err != nil {
-		return nil, err
-	}
-
-	argument = &ast.Argument{}
-	argument.Name = name.Literal
-	argument.Value = value
-
-	return argument, nil
-}
-
 func (p *Parser) parseDefaultValue() (*ast.Value, error) {
-	if !p.skip(token.Punctuator, "=") {
+	if !p.skip1(token.Punctuator, "=") {
 		return nil, nil
 	}
 
@@ -514,169 +491,123 @@ func (p *Parser) parseDefaultValue() (*ast.Value, error) {
 }
 
 func (p *Parser) parseValue() (ast.Value, error) {
-	if p.skip(token.Punctuator, "$") {
-		return p.parseVariableValue()
+	if p.skip1(token.Punctuator, "$") {
+		tok, err := p.mustConsume0(token.Name)
+		if err != nil {
+			return ast.Value{}, err
+		}
+
+		return ast.Value{
+			Kind:          ast.ValueKindVariable,
+			VariableValue: tok.Literal,
+		}, nil
 	}
 
-	if tok, ok := p.consume(token.IntValue); ok {
-		return p.parseIntValue(tok)
+	if tok, ok := p.consume0(token.IntValue); ok {
+		iv, err := strconv.Atoi(tok.Literal)
+		if err != nil {
+			return ast.Value{}, err
+		}
+
+		return ast.Value{
+			Kind:     ast.ValueKindIntValue,
+			IntValue: iv,
+		}, nil
 	}
 
-	if tok, ok := p.consume(token.FloatValue); ok {
-		return p.parseFloatValue(tok)
+	if tok, ok := p.consume0(token.FloatValue); ok {
+		fv, err := strconv.ParseFloat(tok.Literal, 64)
+		if err != nil {
+			return ast.Value{}, err
+		}
+
+		return ast.Value{
+			Kind:       ast.ValueKindFloatValue,
+			FloatValue: fv,
+		}, nil
 	}
 
-	if tok, ok := p.consume(token.StringValue); ok {
-		return p.parseStringValue(tok)
+	if tok, ok := p.consume0(token.StringValue); ok {
+		return ast.Value{
+			Kind:        ast.ValueKindStringValue,
+			StringValue: tok.Literal,
+		}, nil
 	}
 
-	if tok, ok := p.consume(token.Name, "true", "false"); ok {
-		return p.parseBooleanValue(tok)
+	if tok, ok := p.consumen(token.Name, "true", "false"); ok {
+		return ast.Value{
+			Kind:         ast.ValueKindBooleanValue,
+			BooleanValue: tok.Literal == "true",
+		}, nil
 	}
 
-	if p.skip(token.Name, "null") {
-		return p.parseNullValue()
+	if p.skip1(token.Name, "null") {
+		return ast.Value{
+			Kind: ast.ValueKindNullValue,
+		}, nil
 	}
 
-	if tok, ok := p.consume(token.Name); ok {
-		return p.parseEnumValue(tok)
+	if tok, ok := p.consume0(token.Name); ok {
+		return ast.Value{
+			Kind:      ast.ValueKindEnumValue,
+			EnumValue: tok.Literal,
+		}, nil
 	}
 
-	if p.skip(token.Punctuator, "[") {
-		return p.parseListValue()
+	if p.skip1(token.Punctuator, "[") {
+		list := ast.Value{}
+		list.Kind = ast.ValueKindListValue
+
+		for !p.skip1(token.Punctuator, "]") {
+			val, err := p.parseValue()
+			if err != nil {
+				return list, err
+			}
+
+			list.ListValue = append(list.ListValue, val)
+		}
+
+		return list, nil
 	}
 
-	if p.skip(token.Punctuator, "{") {
-		return p.parseObjectValue()
+	if p.skip1(token.Punctuator, "{") {
+		object := ast.Value{}
+		object.Kind = ast.ValueKindObjectValue
+
+		for !p.skip1(token.Punctuator, "}") {
+			tok, err := p.mustConsume0(token.Name)
+			if err != nil {
+				return object, err
+			}
+
+			_, err = p.mustConsume1(token.Punctuator, ":")
+			if err != nil {
+				return object, err
+			}
+
+			value, err := p.parseValue()
+			if err != nil {
+				return object, err
+			}
+
+			field := ast.ObjectField{}
+			field.Name = tok.Literal
+			field.Value = value
+
+			object.ObjectValue = append(object.ObjectValue, field)
+		}
+
+		return object, nil
 	}
 
 	return ast.Value{}, errors.New("TODO: see `parseDefinition`")
-}
-
-func (p *Parser) parseVariableValue() (ast.Value, error) {
-	tok, err := p.mustConsume(token.Name)
-	if err != nil {
-		return ast.Value{}, err
-	}
-
-	return ast.Value{
-		Kind:          ast.ValueKindVariable,
-		VariableValue: tok.Literal,
-	}, nil
-}
-
-func (p *Parser) parseIntValue(tok lexer.Token) (ast.Value, error) {
-	iv, err := strconv.Atoi(tok.Literal)
-	if err != nil {
-		return ast.Value{}, err
-	}
-
-	return ast.Value{
-		Kind:     ast.ValueKindIntValue,
-		IntValue: iv,
-	}, nil
-}
-
-func (p *Parser) parseFloatValue(tok lexer.Token) (ast.Value, error) {
-	fv, err := strconv.ParseFloat(tok.Literal, 64)
-	if err != nil {
-		return ast.Value{}, err
-	}
-
-	return ast.Value{
-		Kind:       ast.ValueKindFloatValue,
-		FloatValue: fv,
-	}, nil
-}
-
-func (p *Parser) parseStringValue(tok lexer.Token) (ast.Value, error) {
-	return ast.Value{
-		Kind:        ast.ValueKindStringValue,
-		StringValue: tok.Literal,
-	}, nil
-}
-
-func (p *Parser) parseBooleanValue(tok lexer.Token) (ast.Value, error) {
-	return ast.Value{
-		Kind:         ast.ValueKindBooleanValue,
-		BooleanValue: tok.Literal == "true",
-	}, nil
-}
-
-func (p *Parser) parseNullValue() (ast.Value, error) {
-	return ast.Value{
-		Kind: ast.ValueKindNullValue,
-	}, nil
-}
-
-func (p *Parser) parseEnumValue(tok lexer.Token) (ast.Value, error) {
-	return ast.Value{
-		Kind:      ast.ValueKindEnumValue,
-		EnumValue: tok.Literal,
-	}, nil
-}
-
-func (p *Parser) parseListValue() (ast.Value, error) {
-	list := ast.Value{}
-	list.Kind = ast.ValueKindListValue
-
-	for !p.skip(token.Punctuator, "]") {
-		val, err := p.parseValue()
-		if err != nil {
-			return list, err
-		}
-
-		list.ListValue = append(list.ListValue, val)
-	}
-
-	return list, nil
-}
-
-func (p *Parser) parseObjectValue() (ast.Value, error) {
-	object := ast.Value{}
-	object.Kind = ast.ValueKindObjectValue
-
-	for !p.skip(token.Punctuator, "}") {
-		field, err := p.parseObjectField()
-		if err != nil {
-			return object, err
-		}
-
-		object.ObjectValue = append(object.ObjectValue, field)
-	}
-
-	return object, nil
-}
-
-func (p *Parser) parseObjectField() (ast.ObjectField, error) {
-	var field ast.ObjectField
-
-	tok, err := p.mustConsume(token.Name)
-	if err != nil {
-		return field, err
-	}
-
-	_, err = p.mustConsume(token.Punctuator, ":")
-	if err != nil {
-		return field, err
-	}
-
-	value, err := p.parseValue()
-	if err != nil {
-		return field, err
-	}
-
-	field.Name = tok.Literal
-	field.Value = value
-
-	return field, nil
 }
 
 func (p *Parser) parseType() (ast.Type, error) {
 	var astType ast.Type
 
 	// If we hit an opening square brace, we've got a list type, time to dive in.
-	if p.skip(token.Punctuator, "[") {
+	if p.skip1(token.Punctuator, "[") {
 		astType.Kind = ast.TypeKindListType
 
 		itemType, err := p.parseType()
@@ -686,13 +617,13 @@ func (p *Parser) parseType() (ast.Type, error) {
 
 		astType.ListType = &itemType
 
-		if _, err := p.mustConsume(token.Punctuator, "]"); err != nil {
+		if _, err := p.mustConsume1(token.Punctuator, "]"); err != nil {
 			return astType, err
 		}
 	} else {
 		astType.Kind = ast.TypeKindNamedType
 
-		tok, err := p.mustConsume(token.Name)
+		tok, err := p.mustConsume0(token.Name)
 		if err != nil {
 			return astType, err
 		}
@@ -700,7 +631,7 @@ func (p *Parser) parseType() (ast.Type, error) {
 		astType.NamedType = tok.Literal
 	}
 
-	if p.skip(token.Punctuator, "!") {
+	if p.skip1(token.Punctuator, "!") {
 		astType.NonNullable = true
 	}
 
@@ -709,14 +640,36 @@ func (p *Parser) parseType() (ast.Type, error) {
 
 // Parser utilities:
 
-func (p *Parser) consume(t token.Type, ls ...string) (lexer.Token, bool) {
+func (p *Parser) consume0(t token.Type) (lexer.Token, bool) {
+	tok := p.token
+	ok := p.token.Type == t
+
+	if ok {
+		p.token = p.lexer.Scan()
+	}
+
+	return tok, ok
+}
+
+func (p *Parser) consume1(t token.Type, l string) (lexer.Token, bool) {
+	tok := p.token
+	ok := p.token.Type == t && p.token.Literal == l
+
+	if ok {
+		p.token = p.lexer.Scan()
+	}
+
+	return tok, ok
+}
+
+func (p *Parser) consumen(t token.Type, ls ...string) (lexer.Token, bool) {
 	tok := p.token
 	if tok.Type != t {
 		return tok, false
 	}
 
 	if len(ls) == 0 {
-		p.scan()
+		p.token = p.lexer.Scan()
 		return tok, true
 	}
 
@@ -725,15 +678,39 @@ func (p *Parser) consume(t token.Type, ls ...string) (lexer.Token, bool) {
 			continue
 		}
 
-		p.scan()
+		p.token = p.lexer.Scan()
 		return tok, true
 	}
 
 	return tok, false
 }
 
-func (p *Parser) mustConsume(t token.Type, ls ...string) (lexer.Token, error) {
-	tok, ok := p.consume(t, ls...)
+func (p *Parser) mustConsume0(t token.Type) (lexer.Token, error) {
+	tok := p.token
+
+	if p.token.Type != t {
+		return tok, p.unexpected(tok, p.expected(t))
+	}
+
+	p.token = p.lexer.Scan()
+
+	return tok, nil
+}
+
+func (p *Parser) mustConsume1(t token.Type, l string) (lexer.Token, error) {
+	tok := p.token
+
+	if p.token.Type != t || p.token.Literal != l {
+		return tok, p.unexpected(tok, p.expected(t, l))
+	}
+
+	p.token = p.lexer.Scan()
+
+	return tok, nil
+}
+
+func (p *Parser) mustConsumen(t token.Type, ls ...string) (lexer.Token, error) {
+	tok, ok := p.consumen(t, ls...)
 	if !ok {
 		return tok, p.unexpected(tok, p.expected(t, ls...))
 	}
@@ -741,7 +718,15 @@ func (p *Parser) mustConsume(t token.Type, ls ...string) (lexer.Token, error) {
 	return tok, nil
 }
 
-func (p *Parser) peek(t token.Type, ls ...string) bool {
+func (p *Parser) peek0(t token.Type) bool {
+	return p.token.Type == t
+}
+
+func (p *Parser) peek1(t token.Type, l string) bool {
+	return p.token.Type == t && p.token.Literal == l
+}
+
+func (p *Parser) peekn(t token.Type, ls ...string) bool {
 	if p.token.Type != t {
 		return false
 	}
@@ -759,13 +744,35 @@ func (p *Parser) peek(t token.Type, ls ...string) bool {
 	return false
 }
 
-func (p *Parser) skip(t token.Type, ls ...string) bool {
-	match := p.peek(t, ls...)
+func (p *Parser) skip0(t token.Type) bool {
+	match := p.peek0(t)
 	if !match {
 		return false
 	}
 
-	p.scan()
+	p.token = p.lexer.Scan()
+
+	return true
+}
+
+func (p *Parser) skip1(t token.Type, l string) bool {
+	match := p.peek1(t, l)
+	if !match {
+		return false
+	}
+
+	p.token = p.lexer.Scan()
+
+	return true
+}
+
+func (p *Parser) skip(t token.Type, ls ...string) bool {
+	match := p.peekn(t, ls...)
+	if !match {
+		return false
+	}
+
+	p.token = p.lexer.Scan()
 
 	return true
 }
@@ -775,7 +782,7 @@ func (p *Parser) scan() {
 }
 
 func (p *Parser) expected(t token.Type, ls ...string) string {
-	buf := bytes.Buffer{}
+	buf := &bytes.Buffer{}
 	buf.WriteString(t.String())
 	buf.WriteString(" '")
 	buf.WriteString(strings.Join(ls, "|"))
@@ -784,14 +791,14 @@ func (p *Parser) expected(t token.Type, ls ...string) string {
 
 // TODO(Luke-Vear): think over the readability of the punctuation and caps.
 func (p *Parser) unexpected(token lexer.Token, wants ...string) error {
-	_, file, line, _ := runtime.Caller(2)
-	fmt.Println(file, line)
+	//_, file, line, _ := runtime.Caller(2)
+	//fmt.Println(file, line)
 
 	if len(wants) == 0 {
 		wants = []string{"N/A"}
 	}
 
-	buf := bytes.Buffer{}
+	buf := &bytes.Buffer{}
 	buf.WriteString("parser error: unexpected token found at ")
 	buf.WriteString("line: ")
 	buf.WriteString(strconv.Itoa(token.Line))
