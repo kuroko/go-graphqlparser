@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 
@@ -11,11 +12,17 @@ import (
 )
 
 func BenchmarkParser(b *testing.B) {
+	ultraMegaQuery := bytes.Buffer{}
+	for i := 0; i < 10; i++ {
+		ultraMegaQuery.Write(monsterQuery)
+	}
+
 	tt := []struct {
 		name  string
 		query []byte
 	}{
-		{name: "monsterQuery", query: monsterQuery},
+		//{name: "ultraMegaQuery", query: ultraMegaQuery.Bytes()},
+		//{name: "monsterQuery", query: monsterQuery},
 		{name: "normalQuery", query: normalQuery},
 		{name: "tinyQuery", query: tinyQuery},
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/parser"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func main() {
@@ -27,7 +28,7 @@ query foo($foo: Boolean = 2) {
 	var doc ast.Document
 	var err error
 
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < 1; i++ {
 		psr := parser.New(query)
 
 		doc, err = psr.Parse()
@@ -39,4 +40,18 @@ query foo($foo: Boolean = 2) {
 	}
 
 	fmt.Println(time.Since(start))
+
+	for _, def := range doc.Definitions {
+		selections := def.ExecutableDefinition.SelectionSet
+		spew.Dump(selections)
+
+		for {
+			fmt.Println(selections.Data.Name)
+			if selections.Next == nil {
+				break
+			}
+
+			selections = selections.Next
+		}
+	}
 }
