@@ -745,8 +745,7 @@ func (p *Parser) peekn(t token.Type, ls ...string) bool {
 }
 
 func (p *Parser) skip0(t token.Type) bool {
-	match := p.peek0(t)
-	if !match {
+	if p.token.Type != t {
 		return false
 	}
 
@@ -756,8 +755,7 @@ func (p *Parser) skip0(t token.Type) bool {
 }
 
 func (p *Parser) skip1(t token.Type, l string) bool {
-	match := p.peek1(t, l)
-	if !match {
+	if p.token.Type != t || p.token.Literal != l {
 		return false
 	}
 

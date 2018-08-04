@@ -87,10 +87,10 @@ func (l *Lexer) Scan() Token {
 	r := l.readNextSignificant()
 
 	switch {
-	case (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
+	case (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || r == '_':
 		return l.scanName(r)
 
-	case r == '!' || r == '$' || r == '(' || r == ')' || r == '.' || r == ':' || r == '=' || r == '@' || r == '[' || r == ']' || r == '{' || r == '|' || r == '}':
+	case r == '{' || r == '}' || r == '[' || r == ']' || r == '!' || r == '$' || r == '(' || r == ')' || r == '.' || r == ':' || r == '=' || r == '@' || r == '|':
 		return l.scanPunctuator(r)
 
 	case (r >= '0' && r <= '9') || r == '-':
@@ -108,6 +108,7 @@ func (l *Lexer) Scan() Token {
 		l.unread(w2)
 		l.unread(w1)
 		return l.scanString(r)
+
 	case r == eof:
 		return Token{
 			Type:     token.EOF,
@@ -580,7 +581,7 @@ func (l *Lexer) scanNumber(r rune) Token {
 	var float bool // If true, number is float.
 	var err error  // So no shadowing of r.
 
-	// Check for preceeding minus sign
+	// Check for preceding minus sign
 	if r == '-' {
 		r, _ = l.read()
 	}
