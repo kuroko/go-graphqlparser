@@ -89,8 +89,8 @@ func (p *Parser) parseDefinition(document ast.Document) (*ast.Definition, error)
 }
 
 func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefinition, error) {
-	var variableDefinitions []*ast.VariableDefinition
-	var directives []*ast.Directive
+	var variableDefinitions *ast.VariableDefinitions
+	var directives *ast.Directives
 
 	var name string
 	var err error
@@ -209,41 +209,44 @@ func (p *Parser) parseTypeCondition() (*ast.TypeCondition, error) {
 	return condition, nil
 }
 
-func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
-	var definitions []*ast.VariableDefinition
-
+func (p *Parser) parseVariableDefinitions() (*ast.VariableDefinitions, error) {
 	if !p.skip1(token.Punctuator, "(") {
-		return definitions, nil
+		return nil, nil
 	}
+
+	var definitions *ast.VariableDefinitions
 
 	for {
 		if _, err := p.mustConsume1(token.Punctuator, "$"); err != nil {
-			return definitions, err
+			return nil, err
 		}
 
 		tok, err := p.mustConsume0(token.Name)
 		if err != nil {
-			return definitions, err
+			return nil, err
 		}
 
-		definition := &ast.VariableDefinition{}
+		definition := ast.VariableDefinition{}
 		definition.Name = tok.Literal
 
 		if _, err := p.mustConsume1(token.Punctuator, ":"); err != nil {
-			return definitions, err
+			return nil, err
 		}
 
 		definition.Type, err = p.parseType()
 		if err != nil {
-			return definitions, err
+			return nil, err
 		}
 
 		definition.DefaultValue, err = p.parseDefaultValue()
 		if err != nil {
-			return definitions, err
+			return nil, err
 		}
 
-		definitions = append(definitions, definition)
+		definitions = &ast.VariableDefinitions{
+			Data: definition,
+			Next: definitions,
+		}
 
 		if p.peek1(token.Punctuator, ")") {
 			break
@@ -251,14 +254,14 @@ func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
 	}
 
 	if _, err := p.mustConsume1(token.Punctuator, ")"); err != nil {
-		return definitions, err
+		return nil, err
 	}
 
 	return definitions, nil
 }
 
-func (p *Parser) parseDirectives() ([]*ast.Directive, error) {
-	var directives []*ast.Directive
+func (p *Parser) parseDirectives() (*ast.Directives, error) {
+	var directives *ast.Directives
 
 	for p.peek1(token.Punctuator, "@") {
 		_, err := p.mustConsume1(token.Punctuator, "@")
@@ -276,75 +279,139 @@ func (p *Parser) parseDirectives() ([]*ast.Directive, error) {
 			return nil, err
 		}
 
-		directive := &ast.Directive{}
+		directive := ast.Directive{}
 		directive.Name = name.Literal
 		directive.Arguments = args
 
-		directives = append(directives, directive)
+		directives = &ast.Directives{
+			Data: directive,
+			Next: directives,
+		}
 	}
 
 	return directives, nil
 }
 
-func (p *Parser) parseSelectionSet(optional bool) ([]*ast.Selection, error) {
-	var selectionSet []*ast.Selection
-
+func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
 	if optional && !p.skip1(token.Punctuator, "{") {
-		return selectionSet, nil
+		return nil, nil
 	}
 
 	if !optional && !p.skip1(token.Punctuator, "{") {
-		return selectionSet, p.unexpected(p.token, p.expected(token.Name))
+		return nil, p.unexpected(p.token, p.expected(token.Name))
 	}
 
+	var selections *ast.Selections
+	var err error
+
 	for {
-		selection, err := p.parseSelection()
-		if err != nil {
-			return selectionSet, err
+		var selection ast.Selection
+
+		if p.skip1(token.Punctuator, "...") {
+			if p.peek0(token.Name) && p.token.Literal != "on" {
+				tok, err := p.mustConsume0(token.Name)
+				if err != nil {
+					return nil, err
+				}
+
+				directives, err := p.parseDirectives()
+				if err != nil {
+					return nil, err
+				}
+
+				selection = ast.Selection{}
+				selection.Kind = ast.SelectionKindFragmentSpread
+				selection.Name = tok.Literal
+				selection.Directives = directives
+			} else {
+				var condition *ast.TypeCondition
+				var err error
+
+				if p.peek1(token.Name, "on") {
+					condition, err = p.parseTypeCondition()
+					if err != nil {
+						return nil, err
+					}
+				}
+
+				directives, err := p.parseDirectives()
+				if err != nil {
+					return nil, err
+				}
+
+				selections, err := p.parseSelectionSet(false)
+				if err != nil {
+					return nil, err
+				}
+
+				selection = ast.Selection{}
+				selection.Kind = ast.SelectionKindInlineFragment
+				selection.TypeCondition = condition
+				selection.Directives = directives
+				selection.SelectionSet = selections
+			}
+		} else {
+			var name string
+			var alias string
+
+			nameTok, err := p.mustConsume0(token.Name)
+			if err != nil {
+				return nil, err
+			}
+
+			name = nameTok.Literal
+
+			if p.skip1(token.Punctuator, ":") {
+				alias = nameTok.Literal
+
+				nameTok, err = p.mustConsume0(token.Name)
+				if err != nil {
+					return nil, err
+				}
+
+				name = nameTok.Literal
+			}
+
+			arguments, err := p.parseArguments()
+			if err != nil {
+				return nil, err
+			}
+
+			directives, err := p.parseDirectives()
+			if err != nil {
+				return nil, err
+			}
+
+			selections, err := p.parseSelectionSet(true)
+			if err != nil {
+				return nil, err
+			}
+
+			selection := ast.Selection{}
+			selection.Kind = ast.SelectionKindField
+			selection.Name = name
+			selection.Alias = alias
+			selection.Arguments = arguments
+			selection.Directives = directives
+			selection.SelectionSet = selections
 		}
 
-		selectionSet = append(selectionSet, selection)
+		selections = &ast.Selections{
+			Data: selection,
+			Next: selections,
+		}
 
 		if p.peek1(token.Punctuator, "}") {
 			break
 		}
 	}
 
-	_, err := p.mustConsume1(token.Punctuator, "}")
-	if err != nil {
-		return selectionSet, err
-	}
-
-	return selectionSet, nil
-}
-
-func (p *Parser) parseSelection() (*ast.Selection, error) {
-	var selection *ast.Selection
-
-	if p.skip1(token.Punctuator, "...") {
-		if p.peek0(token.Name) && p.token.Literal != "on" {
-			selection, err := p.parseFragmentSpread()
-			if err != nil {
-				return nil, err
-			}
-
-			return selection, nil
-		} else {
-			selection, err := p.parseInlineFragment()
-			if err != nil {
-				return nil, err
-			}
-
-			return selection, nil
-		}
-	}
-
-	selection, err := p.parseField()
+	_, err = p.mustConsume1(token.Punctuator, "}")
 	if err != nil {
 		return nil, err
 	}
 
-	return selection, nil
+	return selections, nil
 }
 
 func (p *Parser) parseFragmentSpread() (*ast.Selection, error) {
@@ -444,12 +511,12 @@ func (p *Parser) parseField() (*ast.Selection, error) {
 	return selection, nil
 }
 
-func (p *Parser) parseArguments() ([]*ast.Argument, error) {
-	var arguments []*ast.Argument
-
+func (p *Parser) parseArguments() (*ast.Arguments, error) {
 	if !p.skip1(token.Punctuator, "(") {
-		return arguments, nil
+		return nil, nil
 	}
+
+	var arguments *ast.Arguments
 
 	for !p.skip1(token.Punctuator, ")") {
 		name, err := p.mustConsume0(token.Name)
@@ -467,11 +534,14 @@ func (p *Parser) parseArguments() ([]*ast.Argument, error) {
 			return nil, err
 		}
 
-		argument := &ast.Argument{}
+		argument := ast.Argument{}
 		argument.Name = name.Literal
 		argument.Value = value
 
-		arguments = append(arguments, argument)
+		arguments = &ast.Arguments{
+			Data: argument,
+			Next: arguments,
+		}
 	}
 
 	return arguments, nil

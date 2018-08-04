@@ -78,9 +78,9 @@ func (k ExecutableDefinitionKind) String() string {
 type ExecutableDefinition struct {
 	Name                string // but not "on" if is FragmentDefinition kind.
 	TypeCondition       *TypeCondition
-	VariableDefinitions []*VariableDefinition
-	Directives          []*Directive
-	SelectionSet        []*Selection
+	VariableDefinitions *VariableDefinitions
+	Directives          *Directives
+	SelectionSet        *Selections
 	OperationType       OperationType
 	Kind                ExecutableDefinitionKind
 }
@@ -113,22 +113,27 @@ type Selection struct {
 	Name          string // but not "on"
 	Alias         string
 	TypeCondition *TypeCondition
-	Arguments     []*Argument
-	Directives    []*Directive
-	SelectionSet  []*Selection
+	Arguments     *Arguments
+	Directives    *Directives
+	SelectionSet  *Selections
 	Kind          SelectionKind
+}
+
+type Selections struct {
+	Data Selection
+	Next *Selections
 }
 
 // 2.5 Fields
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fields
 
-type Field struct {
-	Alias        string
-	Name         string
-	Arguments    []*Argument
-	Directives   []*Directive
-	SelectionSet []*Selection
-}
+//type Field struct {
+//	Alias        string
+//	Name         string
+//	Arguments    []*Argument
+//	Directives   *Directives
+//	SelectionSet *Selections
+//}
 
 // 2.6 Arguments
 // http://facebook.github.io/graphql/June2018/#sec-Language.Arguments
@@ -139,12 +144,18 @@ type Argument struct {
 	Value Value
 }
 
+// Arguments ...
+type Arguments struct {
+	Data Argument
+	Next *Arguments
+}
+
 // 2.8 Fragments
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fragments
 
 //type FragmentSpread struct {
 //	Name       string // but not "on"
-//	Directives []*Directive
+//	Directives *Directives
 //}
 
 type TypeCondition struct {
@@ -153,8 +164,8 @@ type TypeCondition struct {
 
 //type InlineFragment struct {
 //	TypeCondition TypeCondition
-//	Directives    []*Directive
-//	SelectionSet  []*Selection
+//	Directives    *Directives
+//	SelectionSet  *Selections
 //}
 
 // 2.9 Input Values
@@ -203,7 +214,7 @@ func (k ValueKind) String() string {
 type Value struct {
 	IntValue   int
 	FloatValue float64
-	// Also covers variables and enums, enums are names, but not `true`, `false`, or `null`.
+	// StringValue covers variables and enums, enums are names, but not `true`, `false`, or `null`.
 	StringValue  string
 	ListValue    []Value
 	ObjectValue  []ObjectField
@@ -223,6 +234,11 @@ type VariableDefinition struct {
 	Name         string
 	Type         Type
 	DefaultValue *Value
+}
+
+type VariableDefinitions struct {
+	Data VariableDefinition
+	Next *VariableDefinitions
 }
 
 // 2.11 Type References
@@ -259,7 +275,12 @@ type Type struct {
 // Directive :
 type Directive struct {
 	Name      string
-	Arguments []*Argument
+	Arguments *Arguments
+}
+
+type Directives struct {
+	Data Directive
+	Next *Directives
 }
 
 // 3.0 NamedType System
@@ -297,7 +318,7 @@ type TypeSystemDefinition struct {
 // http://facebook.github.io/graphql/June2018/#sec-Schema
 
 type SchemaDefinition struct {
-	Directives                   []*Directive
+	Directives                   *Directives
 	RootOperationTypeDefinitions []RootOperationTypeDefinition
 }
 
@@ -322,7 +343,7 @@ type TypeDefinitionKind int8
 
 type TypeDefinition struct {
 	Description           string
-	Directives            []*Directive
+	Directives            *Directives
 	ImplementsInterface   []Type // Only allow "TypeKindNamedType" kind NamedType.
 	FieldsDefinition      []FieldDefinition
 	UnionMemberTypes      []Type // Only allow "TypeKindNamedType" kind NamedType.
@@ -335,14 +356,14 @@ type TypeDefinition struct {
 type FieldDefinition struct {
 	Description         string
 	Name                string
-	Directives          []*Directive
+	Directives          *Directives
 	Type                Type
 	ArgumentsDefinition []InputValueDefinition
 }
 
 type EnumValueDefinition struct {
 	Description string
-	Directives  []*Directive
+	Directives  *Directives
 	EnumValue   string // Name but not true or false or null.
 }
 
@@ -353,7 +374,7 @@ type InputValueDefinition struct {
 	Description  string
 	Name         string
 	Type         Type
-	Directives   []*Directive
+	Directives   *Directives
 	DefaultValue *Value
 }
 
