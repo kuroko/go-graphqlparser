@@ -201,15 +201,14 @@ func (k ValueKind) String() string {
 }
 
 type Value struct {
-	VariableValue string
-	IntValue      int
-	FloatValue    float64
-	StringValue   string
-	EnumValue     string // Name, but not `true`, `false`, or `null`.
-	ListValue     []Value
-	ObjectValue   []ObjectField
-	BooleanValue  bool
-	Kind          ValueKind
+	IntValue   int
+	FloatValue float64
+	// Also covers variables and enums, enums are names, but not `true`, `false`, or `null`.
+	StringValue  string
+	ListValue    []Value
+	ObjectValue  []ObjectField
+	BooleanValue bool
+	Kind         ValueKind
 }
 
 type ObjectField struct {

@@ -498,8 +498,8 @@ func (p *Parser) parseValue() (ast.Value, error) {
 		}
 
 		return ast.Value{
-			Kind:          ast.ValueKindVariable,
-			VariableValue: tok.Literal,
+			Kind:        ast.ValueKindVariable,
+			StringValue: tok.Literal,
 		}, nil
 	}
 
@@ -549,8 +549,8 @@ func (p *Parser) parseValue() (ast.Value, error) {
 
 	if tok, ok := p.consume0(token.Name); ok {
 		return ast.Value{
-			Kind:      ast.ValueKindEnumValue,
-			EnumValue: tok.Literal,
+			Kind:        ast.ValueKindEnumValue,
+			StringValue: tok.Literal,
 		}, nil
 	}
 
