@@ -124,6 +124,19 @@ type Selections struct {
 	Next *Selections
 }
 
+func ReverseSelections(selections *Selections) *Selections {
+	current := selections
+	var prev *Selections
+	for current != nil {
+		next := current.Next
+		current.Next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
+}
+
 // 2.5 Fields
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fields
 
@@ -148,6 +161,19 @@ type Argument struct {
 type Arguments struct {
 	Data Argument
 	Next *Arguments
+}
+
+func ReverseArguments(arguments *Arguments) *Arguments {
+	current := arguments
+	var prev *Arguments
+	for current != nil {
+		next := current.Next
+		current.Next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // 2.8 Fragments
@@ -241,6 +267,19 @@ type VariableDefinitions struct {
 	Next *VariableDefinitions
 }
 
+func ReverseVariableDefinitions(variableDefinitions *VariableDefinitions) *VariableDefinitions {
+	current := variableDefinitions
+	var prev *VariableDefinitions
+	for current != nil {
+		next := current.Next
+		current.Next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
+}
+
 // 2.11 Type References
 // http://facebook.github.io/graphql/June2018/#sec-Type-References
 
@@ -281,6 +320,19 @@ type Directive struct {
 type Directives struct {
 	Data Directive
 	Next *Directives
+}
+
+func ReverseDirectives(directives *Directives) *Directives {
+	current := directives
+	var prev *Directives
+	for current != nil {
+		next := current.Next
+		current.Next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // 3.0 NamedType System

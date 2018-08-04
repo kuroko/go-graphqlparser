@@ -215,7 +215,6 @@ func (p *Parser) parseVariableDefinitions() (*ast.VariableDefinitions, error) {
 	}
 
 	var definitions *ast.VariableDefinitions
-	var definitionsHead *ast.VariableDefinitions
 
 	for {
 		if _, err := p.mustConsume1(token.Punctuator, "$"); err != nil {
@@ -249,10 +248,6 @@ func (p *Parser) parseVariableDefinitions() (*ast.VariableDefinitions, error) {
 			Next: definitions,
 		}
 
-		if definitionsHead == nil {
-			definitionsHead = definitions
-		}
-
 		if p.peek1(token.Punctuator, ")") {
 			break
 		}
@@ -262,12 +257,11 @@ func (p *Parser) parseVariableDefinitions() (*ast.VariableDefinitions, error) {
 		return nil, err
 	}
 
-	return definitionsHead, nil
+	return ast.ReverseVariableDefinitions(definitions), nil
 }
 
 func (p *Parser) parseDirectives() (*ast.Directives, error) {
 	var directives *ast.Directives
-	var directivesHead *ast.Directives
 
 	for p.peek1(token.Punctuator, "@") {
 		_, err := p.mustConsume1(token.Punctuator, "@")
@@ -293,14 +287,9 @@ func (p *Parser) parseDirectives() (*ast.Directives, error) {
 			Data: directive,
 			Next: directives,
 		}
-
-		// Need to return the head of the list, not the tail.
-		if directivesHead == nil {
-			directivesHead = directives
-		}
 	}
 
-	return directivesHead, nil
+	return ast.ReverseDirectives(directives), nil
 }
 
 func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
@@ -347,21 +336,12 @@ func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
 		}
 	}
 
-	current := selections
-	var prev *ast.Selections
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
 	_, err := p.mustConsume1(token.Punctuator, "}")
 	if err != nil {
 		return nil, err
 	}
 
-	return prev, nil
+	return ast.ReverseSelections(selections), nil
 }
 
 func (p *Parser) parseFragmentSpread() (ast.Selection, error) {
@@ -468,7 +448,6 @@ func (p *Parser) parseArguments() (*ast.Arguments, error) {
 	}
 
 	var arguments *ast.Arguments
-	var argumentsHead *ast.Arguments
 
 	for !p.skip1(token.Punctuator, ")") {
 		name, err := p.mustConsume0(token.Name)
@@ -494,14 +473,9 @@ func (p *Parser) parseArguments() (*ast.Arguments, error) {
 			Data: argument,
 			Next: arguments,
 		}
-
-		// Need to return the head of the list, not the tail.
-		if argumentsHead == nil {
-			argumentsHead = arguments
-		}
 	}
 
-	return argumentsHead, nil
+	return ast.ReverseArguments(arguments), nil
 }
 
 func (p *Parser) parseDefaultValue() (*ast.Value, error) {
