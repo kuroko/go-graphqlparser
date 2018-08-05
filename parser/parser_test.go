@@ -13,7 +13,7 @@ import (
 
 func BenchmarkParser(b *testing.B) {
 	ultraMegaQuery := bytes.Buffer{}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
 		ultraMegaQuery.Write(monsterQuery)
 	}
 
@@ -21,8 +21,8 @@ func BenchmarkParser(b *testing.B) {
 		name  string
 		query []byte
 	}{
-		//{name: "ultraMegaQuery", query: ultraMegaQuery.Bytes()},
-		//{name: "monsterQuery", query: monsterQuery},
+		{name: "ultraMegaQuery", query: ultraMegaQuery.Bytes()},
+		{name: "monsterQuery", query: monsterQuery},
 		{name: "normalQuery", query: normalQuery},
 		{name: "tinyQuery", query: tinyQuery},
 	}
