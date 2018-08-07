@@ -14,6 +14,8 @@ import (
 	"github.com/graphql-go/graphql/language/lexer"
 	"github.com/graphql-go/graphql/language/source"
 	"github.com/stretchr/testify/assert"
+	"github.com/vektah/gqlparser/ast"
+	lexer2 "github.com/vektah/gqlparser/lexer"
 )
 
 var update = flag.Bool("update", false, "update golden record files?")
@@ -108,6 +110,32 @@ func BenchmarkLexer(b *testing.B) {
 			_ = lxr.ConsumeLiteral() // 2.742
 			lxr.ConsumeToken(')')    //
 			lxr.ConsumeToken('}')    //
+		}
+	})
+
+	b.Run("github.com/vektah/gqlparser", func(b *testing.B) {
+		input := string(qry)
+
+		b.ResetTimer()
+
+		for i := 0; i < b.N; i++ {
+			lxr := lexer2.New(&ast.Source{
+				Name:  "bench",
+				Input: input,
+			})
+
+			for {
+				tok, err := lxr.ReadToken()
+				if err != nil {
+					b.Fatal(err)
+				}
+
+				if tok.Kind == lexer2.EOF {
+					break
+				}
+
+				_ = tok
+			}
 		}
 	})
 }
@@ -262,20 +290,20 @@ func TestLexerReadUnread(t *testing.T) {
 	bs := []byte("世h界e界l界l界o")
 	l := New(bs)
 
-	r, _ := l.read()
-	assert.Equal(t, fmt.Sprintf("%q", r), fmt.Sprintf("%q", '世'))
+	r, w1 := l.read()
+	assert.Equal(t, fmt.Sprintf("%q", '世'), fmt.Sprintf("%q", r))
 
-	r, _ = l.read()
-	assert.Equal(t, fmt.Sprintf("%q", r), fmt.Sprintf("%q", 'h'))
+	r, w2 := l.read()
+	assert.Equal(t, fmt.Sprintf("%q", 'h'), fmt.Sprintf("%q", r))
 
-	l.unread()
-	r, _ = l.read()
-	assert.Equal(t, fmt.Sprintf("%q", r), fmt.Sprintf("%q", 'h'))
+	l.unread(w2)
+	r, w2 = l.read()
+	assert.Equal(t, fmt.Sprintf("%q", 'h'), fmt.Sprintf("%q", r))
 
-	l.unread()
-	l.unread()
+	l.unread(w2)
+	l.unread(w1)
 	r, _ = l.read()
-	assert.Equal(t, fmt.Sprintf("%q", r), fmt.Sprintf("%q", '世'))
+	assert.Equal(t, fmt.Sprintf("%q", '世'), fmt.Sprintf("%q", r))
 }
 
 func TestEncodeRune(t *testing.T) {

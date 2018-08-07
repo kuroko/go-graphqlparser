@@ -67,9 +67,6 @@ type Lexer struct {
 	pos  int // The start position of the last rune read, in bytes.
 	lpos int // The start position of the last rune read, in runes, on the current line.
 	line int // The current line number.
-
-	// Previous read information.
-	lrw int // The width of the last rune read.
 }
 
 // New returns a new lexer, for lexically analysing GraphQL queries from a given reader.
@@ -84,14 +81,14 @@ func New(input []byte) *Lexer {
 // Scan attempts to read the next significant token from the input. Tokens that are not understood
 // will yield an "illegal" token.
 func (l *Lexer) Scan() Token {
-	r := l.readNextSignificant()
+	r, w := l.readNextSignificant()
 
 	switch {
 	case (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || r == '_':
 		return l.scanName(r)
 
 	case r == '{' || r == '}' || r == '[' || r == ']' || r == '!' || r == '$' || r == '(' || r == ')' || r == '.' || r == ':' || r == '=' || r == '@' || r == '|':
-		return l.scanPunctuator(r)
+		return l.scanPunctuator(r, w)
 
 	case (r >= '0' && r <= '9') || r == '-':
 		return l.scanNumber(r)
@@ -107,6 +104,7 @@ func (l *Lexer) Scan() Token {
 		}
 		l.unread(w2)
 		l.unread(w1)
+
 		return l.scanString(r)
 
 	case r == eof:
@@ -133,7 +131,6 @@ func (l *Lexer) scanString(r rune) Token {
 	startPos := l.pos
 	startLPos := l.lpos
 	startLine := l.line
-	startLRW := l.lrw
 
 	var bc int
 	var hasEscape bool
@@ -193,7 +190,6 @@ func (l *Lexer) scanString(r rune) Token {
 	l.pos = startPos
 	l.lpos = startLPos
 	l.line = startLine
-	l.lrw = startLRW
 
 	// Sadly, allocations cannot be avoided here unless we modify the input byte slice to make
 	// string scanning work. This is because we have to replace the escape sequences with their
@@ -242,7 +238,6 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	startPos := l.pos
 	startLPos := l.lpos
 	startLine := l.line
-	startLRW := l.lrw
 
 	var bc int
 	var hasEscape bool
@@ -306,7 +301,6 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	l.pos = startPos
 	l.lpos = startLPos
 	l.line = startLine
-	l.lrw = startLRW
 
 	bs := make([]byte, 0, bc)
 	for {
@@ -538,7 +532,7 @@ Loop:
 }
 
 // scanPunctuator scans valid GraphQL punctuation tokens.
-func (l *Lexer) scanPunctuator(r rune) Token {
+func (l *Lexer) scanPunctuator(r rune, w int) Token {
 	byteStart := l.pos
 	runeStart := l.lpos
 
@@ -567,7 +561,7 @@ func (l *Lexer) scanPunctuator(r rune) Token {
 	// TODO(seeruk): Using other token types for each type of punctuation may actually be faster.
 	return Token{
 		Type:     token.Punctuator,
-		Literal:  btos(l.input[byteStart-l.lrw : byteStart]),
+		Literal:  btos(l.input[byteStart-w : byteStart]),
 		Position: runeStart,
 		Line:     l.line,
 	}
@@ -655,6 +649,7 @@ func (l *Lexer) scanNumber(r rune) Token {
 		}
 	}
 
+	// TODO(seeruk): This may not be correct.
 	if r != eof {
 		l.unread(1)
 	}
@@ -699,14 +694,15 @@ func (l *Lexer) readDigits(r rune) (rune, error) {
 // significant token (not whitespace, not tabs, not newlines, not commas, not encoding-specific
 // characters, etc.). It also does part of the work for identifying when new lines are encountered
 // to increment the line counter.
-func (l *Lexer) readNextSignificant() rune {
+func (l *Lexer) readNextSignificant() (rune, int) {
 	var done bool
 	var was000D bool
 
 	r := er
+	w := 0
 
 	for !done && r != eof {
-		r, _ = l.read()
+		r, w = l.read()
 
 		was000D = r == cr
 
@@ -730,7 +726,7 @@ func (l *Lexer) readNextSignificant() rune {
 		}
 	}
 
-	return r
+	return r, w
 }
 
 // read moves forward in the input, and returns the next rune available. This function also updates
@@ -749,8 +745,6 @@ func (l *Lexer) read() (rune, int) {
 	l.pos += w
 	l.lpos++
 
-	l.lrw = w
-
 	return r, w
 }
 
@@ -758,15 +752,7 @@ func (l *Lexer) read() (rune, int) {
 // positions we keep track of.
 // Does not currently go back a line.
 func (l *Lexer) unread(width int) {
-	l.pos -= l.lrw
-
-	if l.pos == 0 {
-		// update rune width for further rewind
-		l.lrw = width
-	} else {
-		// If we're already at the start, set this to so we don't end up with a negative position.
-		l.lrw = 0
-	}
+	l.pos -= width
 
 	if l.lpos > 0 {
 		l.lpos--
