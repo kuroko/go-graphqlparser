@@ -36,6 +36,7 @@ type Definitions struct {
 	Next *Definitions
 }
 
+// TODO(seeruk): Is this optimal?
 func (d *Definitions) Length() int {
 	if d == nil {
 		return 0
@@ -114,8 +115,8 @@ func (k ExecutableDefinitionKind) String() string {
 }
 
 type ExecutableDefinition struct {
-	Name                string // but not "on" if is FragmentDefinition kind.
-	TypeCondition       *TypeCondition
+	Name                string         // but not "on" if is FragmentDefinition kind.
+	TypeCondition       *TypeCondition // not on operation definition.
 	VariableDefinitions *VariableDefinitions
 	Directives          *Directives
 	SelectionSet        *Selections
@@ -498,5 +499,5 @@ type DirectiveDefinition struct {
 	Description         string
 	Name                string
 	ArgumentsDefinition []InputValueDefinition
-	DirectiveLocations  []*DirectiveLocation
+	DirectiveLocations  []DirectiveLocation
 }
