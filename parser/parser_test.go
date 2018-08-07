@@ -7,6 +7,8 @@ import (
 
 	goparser "github.com/graphql-go/graphql/language/parser"
 	gosource "github.com/graphql-go/graphql/language/source"
+	ast2 "github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/parser"
 
 	gophersquery "github.com/bucketd/go-graphqlparser/benchutil/graphql-gophers/query"
 )
@@ -39,6 +41,10 @@ func BenchmarkParser(b *testing.B) {
 
 			b.Run("github.com/graphql-gophers/graphql-go", func(b *testing.B) {
 				runGraphQLGophersParser(b, t.query)
+			})
+
+			b.Run("github.com/vektah/gqlparser", func(b *testing.B) {
+				runVektahGQLParser(b, t.query)
 			})
 		})
 	}
@@ -93,6 +99,26 @@ func runGraphQLGophersParser(b *testing.B, query []byte) {
 
 	for i := 0; i < b.N; i++ {
 		ast, err := gophersquery.Parse(qry)
+		if err != nil {
+			b.Fatal(err)
+		}
+
+		_ = ast
+	}
+}
+
+func runVektahGQLParser(b *testing.B, query []byte) {
+	qry := string(query)
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		source := ast2.Source{
+			Name:  "bench",
+			Input: qry,
+		}
+
+		ast, err := parser.ParseQuery(&source)
 		if err != nil {
 			b.Fatal(err)
 		}

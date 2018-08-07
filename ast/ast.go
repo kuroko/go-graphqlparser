@@ -4,7 +4,7 @@ package ast
 // http://facebook.github.io/graphql/June2018/#sec-Language.Document
 
 type Document struct {
-	Definitions []*Definition
+	Definitions *Definitions
 }
 
 const (
@@ -29,6 +29,44 @@ type Definition struct {
 	ExecutableDefinition *ExecutableDefinition
 	TypeSystemDefinition *TypeSystemDefinition
 	Kind                 DefinitionKind
+}
+
+type Definitions struct {
+	Data Definition
+	Next *Definitions
+}
+
+func (d *Definitions) Length() int {
+	if d == nil {
+		return 0
+	}
+
+	var length int
+
+	current := d
+	for {
+		length++
+		if current.Next == nil {
+			break
+		}
+
+		current = current.Next
+	}
+
+	return length
+}
+
+func ReverseDefinitions(definitions *Definitions) *Definitions {
+	current := definitions
+	var prev *Definitions
+	for current != nil {
+		next := current.Next
+		current.Next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // 2.3 Operations

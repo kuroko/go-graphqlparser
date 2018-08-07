@@ -31,38 +31,47 @@ func (p *Parser) Parse() (ast.Document, error) {
 
 	p.token = p.lexer.Scan()
 
+	var definitions *ast.Definitions
+
 	for {
 		// This should be set during the first iteration.
 		if p.hasShorthandQuery {
-			return document, p.unexpected(p.token, p.expected(token.EOF))
+			return ast.Document{}, p.unexpected(p.token, p.expected(token.EOF))
 		}
 
 		definition, err := p.parseDefinition(document)
 		if err != nil {
-			return document, err
+			return ast.Document{}, err
 		}
 
-		document.Definitions = append(document.Definitions, definition)
+		definitions = &ast.Definitions{
+			Data: definition,
+			Next: definitions,
+		}
 
 		if p.peek0(token.Illegal) {
-			return document, p.unexpected(p.token, p.expected(token.EOF))
+			return ast.Document{}, p.unexpected(p.token, p.expected(token.EOF))
 		}
 
 		if p.peek0(token.EOF) {
-			return document, nil
+			break
 		}
 	}
+
+	ast.ReverseDefinitions(definitions)
+
+	return document, nil
 }
 
-func (p *Parser) parseDefinition(document ast.Document) (*ast.Definition, error) {
+func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) {
 	var err error
 
 	// We can only allow a shorthand query if it's the only definition.
-	p.hasShorthandQuery = len(document.Definitions) == 0 && p.token.Literal == "{"
+	p.hasShorthandQuery = document.Definitions.Length() == 0 && p.token.Literal == "{"
 
 	// ExecutableDefinition...
 	if p.peekn(token.Name, "query", "mutation", "subscription") || p.peek1(token.Punctuator, "{") {
-		definition := &ast.Definition{}
+		definition := ast.Definition{}
 		definition.Kind = ast.DefinitionKindExecutable
 		definition.ExecutableDefinition, err = p.parseOperationDefinition(p.hasShorthandQuery)
 
@@ -71,7 +80,7 @@ func (p *Parser) parseDefinition(document ast.Document) (*ast.Definition, error)
 
 	// ExecutableDefinition...
 	if p.peek1(token.Name, "fragment") {
-		definition := &ast.Definition{}
+		definition := ast.Definition{}
 		definition.Kind = ast.DefinitionKindExecutable
 		definition.ExecutableDefinition, err = p.parseFragmentDefinition()
 
@@ -81,7 +90,7 @@ func (p *Parser) parseDefinition(document ast.Document) (*ast.Definition, error)
 	// TODO(seeruk): Is next token a string? Then we probably have a description, keep it handy to
 	// pass to function that parses the next token, e.g. schema, or scalar, or directive, etc.
 
-	return nil, p.unexpected(p.token,
+	return ast.Definition{}, p.unexpected(p.token,
 		p.expected(token.Name, "query", "mutation", "fragment"),
 		p.expected(token.Punctuator, "{"),
 	)
