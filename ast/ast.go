@@ -31,45 +31,6 @@ type Definition struct {
 	Kind                 DefinitionKind
 }
 
-type Definitions struct {
-	Data Definition
-	Next *Definitions
-}
-
-// TODO(seeruk): Is this optimal?
-func (d *Definitions) Length() int {
-	if d == nil {
-		return 0
-	}
-
-	var length int
-
-	current := d
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-func ReverseDefinitions(definitions *Definitions) *Definitions {
-	current := definitions
-	var prev *Definitions
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // 2.3 Operations
 // http://facebook.github.io/graphql/June2018/#sec-Language.Operations
 // 2.8 Fragments
@@ -158,24 +119,6 @@ type Selection struct {
 	Kind          SelectionKind
 }
 
-type Selections struct {
-	Data Selection
-	Next *Selections
-}
-
-func ReverseSelections(selections *Selections) *Selections {
-	current := selections
-	var prev *Selections
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // 2.5 Fields
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fields
 
@@ -194,25 +137,6 @@ func ReverseSelections(selections *Selections) *Selections {
 type Argument struct {
 	Name  string
 	Value Value
-}
-
-// Arguments ...
-type Arguments struct {
-	Data Argument
-	Next *Arguments
-}
-
-func ReverseArguments(arguments *Arguments) *Arguments {
-	current := arguments
-	var prev *Arguments
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
 }
 
 // 2.8 Fragments
@@ -236,17 +160,17 @@ type TypeCondition struct {
 // 2.9 Input Values
 // http://facebook.github.io/graphql/June2018/#sec-Input-Values
 
-// Value [Const] :
+// Value :
 const (
-	ValueKindVariable ValueKind = iota // [~Const]
+	ValueKindVariable ValueKind = iota
 	ValueKindIntValue
 	ValueKindFloatValue
 	ValueKindStringValue
 	ValueKindBooleanValue
 	ValueKindNullValue
 	ValueKindEnumValue
-	ValueKindListValue   // [?Const]
-	ValueKindObjectValue // [?Const]
+	ValueKindListValue
+	ValueKindObjectValue
 )
 
 type ValueKind int8
@@ -301,24 +225,6 @@ type VariableDefinition struct {
 	DefaultValue *Value
 }
 
-type VariableDefinitions struct {
-	Data VariableDefinition
-	Next *VariableDefinitions
-}
-
-func ReverseVariableDefinitions(variableDefinitions *VariableDefinitions) *VariableDefinitions {
-	current := variableDefinitions
-	var prev *VariableDefinitions
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // 2.11 Type References
 // http://facebook.github.io/graphql/June2018/#sec-Type-References
 
@@ -354,24 +260,6 @@ type Type struct {
 type Directive struct {
 	Name      string
 	Arguments *Arguments
-}
-
-type Directives struct {
-	Data Directive
-	Next *Directives
-}
-
-func ReverseDirectives(directives *Directives) *Directives {
-	current := directives
-	var prev *Directives
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
 }
 
 // 3.0 NamedType System

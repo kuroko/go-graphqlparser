@@ -58,7 +58,7 @@ func (p *Parser) Parse() (ast.Document, error) {
 		}
 	}
 
-	ast.ReverseDefinitions(definitions)
+	document.Definitions = definitions.Reverse()
 
 	return document, nil
 }
@@ -67,7 +67,7 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 	var err error
 
 	// We can only allow a shorthand query if it's the only definition.
-	p.hasShorthandQuery = document.Definitions.Length() == 0 && p.token.Literal == "{"
+	p.hasShorthandQuery = document.Definitions.Len() == 0 && p.token.Literal == "{"
 
 	// ExecutableDefinition...
 	if p.peekn(token.Name, "query", "mutation", "subscription") || p.peek1(token.Punctuator, "{") {
@@ -266,7 +266,7 @@ func (p *Parser) parseVariableDefinitions() (*ast.VariableDefinitions, error) {
 		return nil, err
 	}
 
-	return ast.ReverseVariableDefinitions(definitions), nil
+	return definitions.Reverse(), nil
 }
 
 func (p *Parser) parseDirectives() (*ast.Directives, error) {
@@ -298,7 +298,7 @@ func (p *Parser) parseDirectives() (*ast.Directives, error) {
 		}
 	}
 
-	return ast.ReverseDirectives(directives), nil
+	return directives.Reverse(), nil
 }
 
 func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
@@ -350,7 +350,7 @@ func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
 		return nil, err
 	}
 
-	return ast.ReverseSelections(selections), nil
+	return selections.Reverse(), nil
 }
 
 func (p *Parser) parseFragmentSpread() (ast.Selection, error) {
@@ -484,7 +484,7 @@ func (p *Parser) parseArguments() (*ast.Arguments, error) {
 		}
 	}
 
-	return ast.ReverseArguments(arguments), nil
+	return arguments.Reverse(), nil
 }
 
 func (p *Parser) parseDefaultValue() (*ast.Value, error) {
