@@ -72,7 +72,7 @@ func (d *dumper) dumpExecutableDefinition(def *ExecutableDefinition) {
 	case ExecutableDefinitionKindOperation:
 		d.dumpOperationExecutableDefinition(def)
 	case ExecutableDefinitionKindFragment:
-		// TODO
+		d.dumpFragmentExecutableDefinition(def)
 	}
 }
 
@@ -237,6 +237,28 @@ func (d *dumper) dumpArgument(arg Argument) {
 	io.WriteString(d.w, ": ")
 
 	d.dumpValue(arg.Value)
+}
+
+// dumpFragmentExecutableDefinition ...
+// http://facebook.github.io/graphql/June2018/#FragmentDefinition
+func (d *dumper) dumpFragmentExecutableDefinition(def *ExecutableDefinition) {
+	io.WriteString(d.w, "fragment")
+	io.WriteString(d.w, " ")
+
+	io.WriteString(d.w, def.Name)
+	io.WriteString(d.w, " ")
+
+	io.WriteString(d.w, "on")
+	io.WriteString(d.w, " ")
+	io.WriteString(d.w, def.TypeCondition.NamedType.NamedType)
+
+	if def.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(def.Directives)
+	}
+
+	io.WriteString(d.w, " ")
+	d.dumpSelections(def.SelectionSet)
 }
 
 // dumpValue ...
