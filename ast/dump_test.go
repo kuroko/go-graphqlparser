@@ -51,6 +51,20 @@ query Selections {
   }
 }
 
+query Frags {
+  ...userFields
+  ... on User @exclude(not: $noInfo) {
+    pals: friends {
+      count
+    }
+  }
+  ... @include(if: $expandedInfo) {
+    firstName
+    lastName
+    birthday
+  }
+}
+
 fragment userFields on User {
   firstName
   lastName

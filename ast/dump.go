@@ -70,14 +70,14 @@ func (d *dumper) dumpDefinition(definition Definition) {
 func (d *dumper) dumpExecutableDefinition(def *ExecutableDefinition) {
 	switch def.Kind {
 	case ExecutableDefinitionKindOperation:
-		d.dumpOperationExecutableDefinition(def)
+		d.dumpOperationDefinition(def)
 	case ExecutableDefinitionKindFragment:
-		d.dumpFragmentExecutableDefinition(def)
+		d.dumpFragmentDefinition(def)
 	}
 }
 
-// dumpOperationExecutableDefinition ...
-func (d *dumper) dumpOperationExecutableDefinition(def *ExecutableDefinition) {
+// dumpOperationDefinition ...
+func (d *dumper) dumpOperationDefinition(def *ExecutableDefinition) {
 	var shorthand bool
 	if d.defs == 1 {
 		shorthand = true
@@ -178,9 +178,9 @@ func (d *dumper) dumpSelection(selection Selection) {
 	case SelectionKindField:
 		d.dumpFieldSelection(selection)
 	case SelectionKindFragmentSpread:
-		// TODO
+		d.dumpFragmentSpread(selection)
 	case SelectionKindInlineFragment:
-		// TODO
+		d.dumpInlineFragment(selection)
 	}
 
 	d.depth--
@@ -239,9 +239,47 @@ func (d *dumper) dumpArgument(arg Argument) {
 	d.dumpValue(arg.Value)
 }
 
-// dumpFragmentExecutableDefinition ...
-// http://facebook.github.io/graphql/June2018/#FragmentDefinition
-func (d *dumper) dumpFragmentExecutableDefinition(def *ExecutableDefinition) {
+// dumpFragmentSpread ...
+func (d *dumper) dumpFragmentSpread(selection Selection) {
+	indent := strings.Repeat(indentation, d.depth)
+
+	io.WriteString(d.w, indent)
+
+	io.WriteString(d.w, "...")
+	io.WriteString(d.w, selection.Name)
+
+	if selection.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(selection.Directives)
+	}
+}
+
+// dumpInlineFragment ...
+func (d *dumper) dumpInlineFragment(selection Selection) {
+	indent := strings.Repeat(indentation, d.depth)
+
+	io.WriteString(d.w, indent)
+
+	io.WriteString(d.w, "...")
+
+	if selection.TypeCondition != nil {
+		io.WriteString(d.w, " ")
+		io.WriteString(d.w, "on")
+		io.WriteString(d.w, " ")
+		io.WriteString(d.w, selection.TypeCondition.NamedType.NamedType)
+	}
+
+	if selection.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(selection.Directives)
+	}
+
+	io.WriteString(d.w, " ")
+	d.dumpSelections(selection.SelectionSet)
+}
+
+// dumpFragmentDefinition ...
+func (d *dumper) dumpFragmentDefinition(def *ExecutableDefinition) {
 	io.WriteString(d.w, "fragment")
 	io.WriteString(d.w, " ")
 
