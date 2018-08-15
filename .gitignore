@@ -15,3 +15,7 @@
 .glide/
 lexer/cmd/cmd
 lexer/out/out
+
+# Third-party dependencies
+node_modules/
+vendor/

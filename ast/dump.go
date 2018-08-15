@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 // Fdump ...
@@ -310,9 +311,41 @@ func (d *dumper) dumpValue(value Value) {
 	case ValueKindFloatValue:
 		io.WriteString(d.w, fmt.Sprintf("%g", value.FloatValue))
 	case ValueKindStringValue:
-		io.WriteString(d.w, `"`)
-		io.WriteString(d.w, value.StringValue)
-		io.WriteString(d.w, `"`)
+		hasLF := strings.Contains(value.StringValue, "\n")
+		hasCR := strings.Contains(value.StringValue, "\r")
+
+		// If the string contains a new line, we'll print it out as a multi-line string.
+		if hasLF || hasCR {
+			indent := strings.Repeat(indentation, d.depth)
+
+			escaped := escapeGraphQLBlockString(value.StringValue)
+			lines := strings.Split(escaped, "\n")
+
+			buf := bytes.Buffer{}
+			for i, line := range lines {
+				buf.WriteString(indent)
+				buf.WriteString(indentation)
+				buf.WriteString(line)
+
+				if i != len(lines) - 1 {
+					buf.WriteRune('\n')
+				}
+			}
+
+			io.WriteString(d.w, `"`)
+			io.WriteString(d.w, `"`)
+			io.WriteString(d.w, "\"\n")
+			io.WriteString(d.w, buf.String())
+			io.WriteString(d.w, indent)
+			io.WriteString(d.w, "\n\"")
+			io.WriteString(d.w, `"`)
+			io.WriteString(d.w, `"`)
+		} else {
+			io.WriteString(d.w, `"`)
+			io.WriteString(d.w, escapeGraphQLString(value.StringValue))
+			io.WriteString(d.w, `"`)
+		}
+
 	case ValueKindBooleanValue:
 		if value.BooleanValue {
 			io.WriteString(d.w, "true")
@@ -391,4 +424,42 @@ func (d *dumper) dumpDirective(directive Directive) {
 	io.WriteString(d.w, directive.Name)
 
 	d.dumpArguments(directive.Arguments)
+}
+
+// escapeGraphQLString takes a single-line GraphQL string and escapes all special characters that
+// need to be escapes in it, returning the result.
+func escapeGraphQLString(in string) string {
+	buf := bytes.Buffer{}
+
+	for _, r := range in {
+		switch {
+		case r >= utf8.RuneSelf && r <= '\uFFFF':
+			escUni := fmt.Sprintf(`%x`, r)
+			padding := strings.Repeat("0", utf8.UTFMax - len(escUni))
+
+			buf.WriteString(fmt.Sprintf(`\u%s`, padding + escUni))
+		case r == '"':
+			buf.WriteString(`\"`)
+		case r == '\\':
+			buf.WriteString(`\\`)
+		case r == '/':
+			buf.WriteString(`\/`)
+		case r == '\b':
+			buf.WriteString(`\b`)
+		case r == '\f':
+			buf.WriteString(`\f`)
+		case r == '\t':
+			buf.WriteString(`\t`)
+		default:
+			buf.WriteRune(r)
+		}
+	}
+
+	return buf.String()
+}
+
+// escapeGraphQLBlockString takes a GraphQL block string and escapes all special characters that
+// need to be escapes in it, returning the result.
+func escapeGraphQLBlockString(in string) string {
+	return in
 }

@@ -10,6 +10,7 @@ import (
 )
 
 var (
+
 	wipTest = strings.TrimSpace(`
 query Var($v: Int! = $var) {
   selection
@@ -65,6 +66,23 @@ query Frags {
   }
 }
 
+mutation second($variable: String = "test") {
+  sendEmail(message: """
+Hello,
+  World!
+
+Yours,
+  GraphQL
+  """)
+  sendEmail2(message: "Hello, World!\tYours, \u0080 \u754c 😀 \" \\ \/ \b \f \t GraphQL.")
+  intVal(foo: 12345)
+  floatVal(bar: 123.456)
+  floatVal2(bar: 1.23456e+10)
+  boolVal(bool: false)
+  listVal(list: [1, 2, 3])
+  variableVal(var: $variable)
+}
+
 fragment userFields on User {
   firstName
   lastName
@@ -88,7 +106,6 @@ fragment postFields on Subscription @skip(if: $bar, do: $not) {
   content
 }
 `)
-
 	wipTest2 = strings.TrimSpace(`
 query first($foo: Boolean = true, $foo: Boolean = true) {
     # How about some comments too?

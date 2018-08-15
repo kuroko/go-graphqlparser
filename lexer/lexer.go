@@ -274,6 +274,7 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	endPos := l.pos - 3
 
 	// If the first character in the string is a newline, ignore it.
+	// TODO(seeruk): What about CRLF?
 	if rune(l.input[startPos]) == cr {
 		startPos++
 	}
@@ -282,6 +283,7 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	}
 
 	// If the last character in the string is a newline, ignore it.
+	// TODO(seeruk): What about CRLF?
 	if rune(l.input[endPos-1]) == lf {
 		endPos--
 	}
