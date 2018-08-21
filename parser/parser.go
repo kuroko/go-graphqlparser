@@ -797,7 +797,6 @@ func (p *Parser) expected(t token.Type, ls ...string) string {
 	return btos(buf.Bytes())
 }
 
-// TODO(Luke-Vear): think over the readability of the punctuation and caps.
 func (p *Parser) unexpected(token lexer.Token, wants ...string) error {
 	//_, file, line, _ := runtime.Caller(2)
 	//fmt.Println(file, line)
@@ -830,7 +829,6 @@ func (p *Parser) unexpected(token lexer.Token, wants ...string) error {
 
 // btos takes the given bytes, and turns them into a string.
 // Q: naming btos or bbtos? :D
-// TODO(seeruk): Is this actually portable then?
 func btos(bs []byte) string {
 	return *(*string)(unsafe.Pointer(&bs))
 }
