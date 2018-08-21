@@ -11,10 +11,10 @@
 *.out
 *.svg
 
-# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
-.glide/
 lexer/cmd/cmd
 lexer/out/out
+lab/block/block
+lab/generics/generics
 
 # Third-party dependencies
 node_modules/
