@@ -3,17 +3,6 @@
 // can be found at http://facebook.github.io/graphql/October2016.
 package token
 
-// TODO(elliot): Go strings are UTF-8, but reading a file actually allows us to read bytes. For now,
-// let's just assume that everything is UTF-8, otherwise it's going to be far more complex. Given
-// that each character should be a UTF-8 character, runes are an easy choice for the tokens below.
-// Each `\uXXXX` value can easily be made into a rune by using `rune(0xXXXX)`.
-
-// TODO(elliot): Each token will likely start off just reading the first character. If for example,
-// there was just a `$` on it's own, we'd instantly know that a punctuator was being read. On the
-// other hand, if a `4` was read, then we'd have to keep reading it until we knew if it was an int
-// value or a float value. This will not use regular expressions though, like the comments below
-// might suggest, as that might be too slow.
-
 const (
 	Illegal Type = iota - 1
 	EOF
