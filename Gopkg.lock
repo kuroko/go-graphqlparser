@@ -103,6 +103,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/davecgh/go-spew/spew",
     "github.com/graph-gophers/graphql-go/errors",
     "github.com/graph-gophers/graphql-go/internal/common",
     "github.com/graph-gophers/graphql-go/internal/query",
