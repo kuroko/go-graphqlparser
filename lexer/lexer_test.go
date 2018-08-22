@@ -9,7 +9,11 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/token"
+	"github.com/graphql-go/graphql/language/lexer"
+	"github.com/graphql-go/graphql/language/source"
 	"github.com/stretchr/testify/assert"
+	"github.com/vektah/gqlparser/ast"
+	lexer2 "github.com/vektah/gqlparser/lexer"
 )
 
 var update = flag.Bool("update", false, "update golden record files?")
@@ -102,53 +106,53 @@ func BenchmarkLexer(b *testing.B) {
 			}
 		}
 	})
-	//
-	//b.Run("github.com/graphql-go/graphql", func(b *testing.B) {
-	//	for i := 0; i < b.N; i++ {
-	//		lxr := lexer.Lex(source.NewSource(&source.Source{
-	//			Body: qry,
-	//		}))
-	//
-	//		for {
-	//			tok, err := lxr(0)
-	//			if err != nil {
-	//				b.Fatal(err)
-	//			}
-	//
-	//			if tok.Kind == lexer.EOF {
-	//				break
-	//			}
-	//
-	//			_ = tok
-	//		}
-	//	}
-	//})
-	//
-	//b.Run("github.com/vektah/gqlparser", func(b *testing.B) {
-	//	input := string(qry)
-	//
-	//	b.ResetTimer()
-	//
-	//	for i := 0; i < b.N; i++ {
-	//		lxr := lexer2.New(&ast.Source{
-	//			Name:  "bench",
-	//			Input: input,
-	//		})
-	//
-	//		for {
-	//			tok, err := lxr.ReadToken()
-	//			if err != nil {
-	//				b.Fatal(err)
-	//			}
-	//
-	//			if tok.Kind == lexer2.EOF {
-	//				break
-	//			}
-	//
-	//			_ = tok
-	//		}
-	//	}
-	//})
+
+	b.Run("github.com/graphql-go/graphql", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			lxr := lexer.Lex(source.NewSource(&source.Source{
+				Body: qry,
+			}))
+
+			for {
+				tok, err := lxr(0)
+				if err != nil {
+					b.Fatal(err)
+				}
+
+				if tok.Kind == lexer.EOF {
+					break
+				}
+
+				_ = tok
+			}
+		}
+	})
+
+	b.Run("github.com/vektah/gqlparser", func(b *testing.B) {
+		input := string(qry)
+
+		b.ResetTimer()
+
+		for i := 0; i < b.N; i++ {
+			lxr := lexer2.New(&ast.Source{
+				Name:  "bench",
+				Input: input,
+			})
+
+			for {
+				tok, err := lxr.ReadToken()
+				if err != nil {
+					b.Fatal(err)
+				}
+
+				if tok.Kind == lexer2.EOF {
+					break
+				}
+
+				_ = tok
+			}
+		}
+	})
 }
 
 func TestLexer_ScanGolden(t *testing.T) {
