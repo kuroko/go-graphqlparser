@@ -1,15 +1,12 @@
 package lexer
 
 import (
+	"bytes"
 	"fmt"
+	"math"
+	"strings"
 	"unicode/utf8"
 	"unsafe"
-
-	"math"
-
-	"strings"
-
-	"bytes"
 
 	"github.com/bucketd/go-graphqlparser/token"
 )
