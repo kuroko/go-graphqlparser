@@ -14,26 +14,36 @@ query foo($foo: Boolean = 2) {
 
 const query2 = `
 query {
-    foo(message: """
-    
-    
-        Hello,
-            World
-
-        From,
-            GraphQL
-            
-            
-    """)
+	foo(content: """
+		Hello,
+	
+			Welcome to GraphQL. \\""" \t
+			Lets make this string a little bigger then. Because the larger this string
+			becomes, the more efficient our lexer should look...
+	
+			Welcome to GraphQL.
+			Lets make this string a little bigger then. Because the larger this string
+			becomes, the more efficient our lexer should look...
+	
+			Welcome to GraphQL.
+			Lets make this string a little bigger then. Because the larger this string
+			becomes, the more efficient our lexer should look...
+	
+			Welcome to GraphQL.
+			Lets make this string a little bigger then. Because the larger this string
+			becomes, the more efficient our lexer should look...
+	
+		From, Bucketd
+	""")
 }
 `;
 
 let ast = parser(query2);
 
-console.log(util.inspect(ast, {showHidden: false, depth: null}))
+console.log(util.inspect(ast, {showHidden: false, depth: null}));
 
 process.exit(1);
-//
+
 // var start = process.hrtime();
 //
 // let ast;

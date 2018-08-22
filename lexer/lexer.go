@@ -5,6 +5,12 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
+	"math"
+
+	"strings"
+
+	"bytes"
+
 	"github.com/bucketd/go-graphqlparser/token"
 )
 
@@ -100,7 +106,7 @@ func (l *Lexer) Scan() Token {
 		r1, w1 := l.read()
 		r2, w2 := l.read()
 		if r1 == '"' && r2 == '"' {
-			return l.scanBlockString(r)
+			return l.scanBlockString2(r)
 		}
 		l.unread(w2)
 		l.unread(w1)
@@ -231,7 +237,130 @@ func (l *Lexer) scanString(r rune) Token {
 	}
 }
 
-// scanBlockString ...
+func (l *Lexer) scanBlockString2(r rune) Token {
+	startLPos := l.lpos
+	startLine := l.line
+
+	var wasCR bool
+
+	buf := bytes.Buffer{}
+
+	for {
+		r, _ = l.read()
+
+		// Check for end of input.
+		if r == cr {
+			wasCR = true
+
+			// Replaces all CR characters with LF characters.
+			buf.WriteRune(lf)
+			continue
+		} else if r == bsl {
+			// Handle escaped sequences appropriately.
+			r, _ = l.read()
+
+			if r == '"' && isTripQuotes(l) {
+				buf.WriteString(`"""`)
+			} else {
+				buf.WriteRune(bsl)
+				buf.WriteRune(r)
+			}
+			continue
+		} else if r == eof {
+			return Token{
+				Type:     token.Illegal,
+				Literal:  "unexpected eof, probably unclosed block string",
+				Position: startLPos,
+				Line:     startLine,
+			}
+		} else if r == lf && !wasCR {
+			buf.WriteRune(r)
+			continue
+		} else if r == '"' && isTripQuotes(l) {
+			break
+		} else if r < ws && r != tab && r != lf && r != cr {
+			return Token{
+				Type:     token.Illegal,
+				Literal:  fmt.Sprintf("invalid character within block string: %q", r),
+				Position: startLPos,
+				Line:     startLine,
+			}
+		}
+
+		wasCR = false
+		buf.WriteRune(r)
+	}
+
+	return Token{
+		Type:     token.StringValue,
+		Literal:  blockStringLiteral(btos(buf.Bytes())),
+		Position: startLPos,
+		Line:     startLine,
+	}
+}
+
+// blockStringLiteral ...
+func blockStringLiteral(raw string) string {
+	lines := strings.Split(raw, "\n")
+
+	commonIndent := math.MaxInt64
+	for i, line := range lines {
+		if i == 0 && len(lines) > 1 {
+			continue
+		}
+
+		indent := leadingWhitespace(line)
+		if indent < len(line) && indent < commonIndent {
+			commonIndent = indent
+			if commonIndent == 0 {
+				break
+			}
+		}
+	}
+
+	if commonIndent != math.MaxInt64 && len(lines) > 0 {
+		for i := 1; i < len(lines); i++ {
+			if len(lines[i]) < commonIndent {
+				lines[i] = ""
+			} else {
+				lines[i] = lines[i][commonIndent:]
+			}
+		}
+	}
+
+	start := 0
+	end := len(lines)
+
+	for start < end && leadingWhitespace(lines[start]) == math.MaxInt64 {
+		start++
+	}
+
+	for start < end && leadingWhitespace(lines[end-1]) == math.MaxInt64 {
+		end--
+	}
+
+	return strings.Join(lines[start:end], "\n")
+}
+
+// leadingWhitespace ...
+func leadingWhitespace(str string) int {
+	for i, r := range str {
+		if r != ' ' && r != '\t' {
+			return i
+		}
+	}
+
+	return math.MaxInt64
+}
+
+// scanBlockString is used to scan block strings. It should only ever allocate once, and the amount
+// of bytes allocated should only be as many as is needed to produce the final string (+- a few
+// bytes maybe). It achieves this by looping over the input bytes twice, once to prepare some
+// information (e.g. common indent, and the amount of bytes to allocate), then looping again to
+// build the resulting string value, substituting escaped sequences appropriately.
+//
+// NOTE(seeruk): I'd call this implementation fairly non-standard...
+// TODO(seeruk): Line numbers.
 func (l *Lexer) scanBlockString(r rune) Token {
 	var w int
 
@@ -239,96 +368,205 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	startLPos := l.lpos
 	startLine := l.line
 
-	var bc int
-	var hasEscape bool
+	indent := 0
+	commonIndent := math.MaxInt64
 
-	var done bool
-	for !done {
+	var bc int
+	var wasCR bool
+	var hadLineChar bool
+	var hadNewLine bool
+
+	for {
 		r, w = l.read()
 		bc += w
 
-		switch {
-		case r == '"':
-			if isTripQuotes(l) {
-				done = true
-			}
-
-		case r < ws && r != tab && r != lf && r != cr:
+		// Check for end of input.
+		if r == eof {
 			return Token{
 				Type:     token.Illegal,
-				Literal:  fmt.Sprintf("invalid character within string: %q", r),
+				Literal:  "unexpected eof, probably unclosed block string",
 				Position: startLPos,
 				Line:     startLine,
 			}
+		}
 
-		case r == bsl:
-			r, _ = l.read()
-			if r == '"' && isTripQuotes(l) {
-				hasEscape = true
-				bc += 2
+		// Escape from the loop as early as possible, if we've hit the end of the block string.
+		if r == '"' && isTripQuotes(l) {
+			if hadNewLine && hadLineChar && indent < commonIndent {
+				commonIndent = indent
 			}
-			bc++
+
+			break
 		}
-	}
 
-	endPos := l.pos - 3
-
-	// If the first character in the string is a newline, ignore it.
-	// TODO(seeruk): What about CRLF?
-	if rune(l.input[startPos]) == cr {
-		startPos++
-	}
-	if rune(l.input[startPos]) == lf {
-		startPos++
-	}
-
-	// If the last character in the string is a newline, ignore it.
-	// TODO(seeruk): What about CRLF?
-	if rune(l.input[endPos-1]) == lf {
-		endPos--
-	}
-	if rune(l.input[endPos-1]) == cr {
-		endPos--
-	}
-
-	if !hasEscape {
-		return Token{
-			Type:     token.StringValue,
-			Literal:  btos(l.input[startPos:endPos]),
-			Position: startLPos,
-			Line:     startLine,
+		// Check for invalid characters in the block string, bail early.
+		if r < ws && r != tab && r != lf && r != cr {
+			return Token{
+				Type:     token.Illegal,
+				Literal:  fmt.Sprintf("invalid character within block string: %q", r),
+				Position: startLPos,
+				Line:     startLine,
+			}
 		}
-	}
 
-	l.pos = startPos
-	l.lpos = startLPos
-	l.line = startLine
+		// Check that escape sequences in this block string are valid.
+		if r == bsl {
+			r, w = l.read()
+			bc += w
 
-	bs := make([]byte, 0, bc)
-	for {
-		r, _ = l.read()
-
-		switch {
-		case r == '"':
-			if isTripQuotes(l) {
-				bsend := len(bs) - 1
-				// If the last character in the string is a newline, ignore it.
-				if rune(bs[bsend]) == lf {
-					bsend--
-				}
-				if rune(bs[bsend]) == cr {
-					bsend--
-				}
-
+			if r == '"' && isTripQuotes(l) {
+				bc += 2
+			} else {
 				return Token{
-					Type:     token.StringValue,
-					Literal:  btos(bs[:bsend+1]),
+					Type:     token.Illegal,
+					Literal:  "invalid escape sequence within block string",
 					Position: startLPos,
 					Line:     startLine,
 				}
 			}
+
+			continue
+		}
+
+		// If we saw a CR last loop, and the character we're reading now isn't a line feed, we want
+		// reset our `wasCR` value so that if we encounter another CR we can do this check again, or
+		// if any other character is found, we'll continue as normal.
+		if wasCR && r != lf {
+			wasCR = false
+		}
+
+		// If we see a "WhiteSpace" character, and we haven't yet seen any other non-whitespace
+		// characters, increment the indent, until the next new line.
+		if !hadLineChar && (r == ws || r == tab) {
+			indent++
+		}
+
+		// If we hit a CR, we need to be aware of it for the next iteration.
+		if r == cr {
+			wasCR = true
+		}
+
+		// If we saw a CR, or a LF that was not following a CR, then we've hit a _new_ new line. In
+		// that case, we should set the common indent to our current indent value for the line.
+		if r == cr || (r == lf && !wasCR) {
+			if hadNewLine && hadLineChar && indent < commonIndent {
+				commonIndent = indent
+			}
+		}
+
+		// If r > ws then it's a significant character.
+		if r > ws {
+			hadLineChar = true
+		}
+
+		if r == cr || r == lf {
+			hadLineChar = false
+			hadNewLine = true
+			indent = 0
+		}
+	}
+
+	// If we weren't able to determine a common indent, we should assume there isn't one, rather
+	// there being a math.MaxInt64 sized indent, which is far less likely...
+	if commonIndent == math.MaxInt64 {
+		commonIndent = 0
+	}
+
+	// Reset the lexer state so that we can loop over the tokens once more, building the result.
+	l.pos = startPos
+	l.lpos = startLPos
+	l.line = startLine
+
+	// Reset function state, because we re-use these variables below.
+	indent = 0
+	hadLineChar = false
+	hadNewLine = false
+
+	firstSignificant := math.MaxInt64
+
+	var significantTmp int
+	var significantInc int
+	var lastSignificant int
+
+	// Allocate the result bytes, this should never need to grow.
+	bs := make([]byte, 0, bc)
+
+	// Loop over the runes again, building the result, storing it in `bs`.
+	for {
+		significantInc = 0
+
+		r, _ = l.read()
+
+		if !hadLineChar && r == ws || r == tab {
+			indent++
+
+			if hadNewLine && indent <= commonIndent {
+				continue
+			}
+		}
+
+		if r == cr || r == lf {
+			indent = 0
+			hadLineChar = false
+			hadNewLine = true
+		}
+
+		if r > ws && !hadLineChar {
+			if !hadLineChar {
+				hadLineChar = true
+			}
+		}
+
+		switch {
+		case r == '"':
+			if isTripQuotes(l) {
+				var literal string
+
+				// If we got any significant input, create the literal value of the token.
+				if firstSignificant != math.MaxInt64 {
+					// Calculate position of start of string. The beginning of the string is the
+					// start of the first line with any significant characters on it. We initially
+					// store the position of the first significant character, so we want to go back
+					// to the start of the line that's on:
+					for i := firstSignificant - significantInc; i >= 0; i-- {
+						b := bs[i]
+
+						if b == byte(lf) || b == byte(cr) {
+							break
+						}
+
+						if firstSignificant > 0 {
+							firstSignificant--
+						}
+					}
+
+					// Calculate position of end of string. Similar to above, but in the other
+					// direction, we want all characters up to the next newline from the last
+					// significant character.
+					for _, b := range bs[lastSignificant:] {
+						if b == byte(lf) || b == byte(cr) {
+							break
+						}
+
+						lastSignificant++
+					}
+
+					// Take that selection from `bs`.
+					literal = btos(bs[firstSignificant:lastSignificant])
+				}
+
+				return Token{
+					Type:     token.StringValue,
+					Literal:  literal,
+					Position: startLPos,
+					Line:     startLine,
+				}
+			}
+
 			encodeRune(r, func(b byte) {
 				bs = append(bs, b)
+				significantInc += 1
+				significantTmp += 1
 			})
 
 		case r == bsl:
@@ -338,18 +576,34 @@ func (l *Lexer) scanBlockString(r rune) Token {
 					bs = append(bs, b)
 					bs = append(bs, b)
 					bs = append(bs, b)
+					significantInc += 3
+					significantTmp += 3
 				})
 				continue
 			}
+
 			encodeRune(r, func(b byte) {
 				bs = append(bs, byte(0x005C))
 				bs = append(bs, b)
+				significantInc += 2
+				significantTmp += 2
 			})
 
 		default:
 			encodeRune(r, func(b byte) {
 				bs = append(bs, b)
+				significantInc += 1
+				significantTmp += 1
 			})
+		}
+
+		// This needs to happen at the end, because we set the required variables just above.
+		if r > ws {
+			if firstSignificant == math.MaxInt64 {
+				firstSignificant = significantTmp - significantInc
+			}
+
+			lastSignificant = significantTmp
 		}
 	}
 }
@@ -409,7 +663,7 @@ func escapedChar(l *Lexer) (rune, error) {
 // encodeRune is a copy of the utf8.EncodeRune function, but instead of passing in a byte slice as
 // the first argument, a callback is given. This callback may be called multiple times. This allows
 // individual bytes to be passed back to the caller, one at a time. This enables the caller to do
-// things like encode a rune into an existing byte slice.
+// things like encode a rune into an existing byte slice, instead of allocating a new one.
 func encodeRune(r rune, cb func(a byte)) {
 	// Negative values are erroneous. Making it unsigned addresses the problem.
 	switch i := uint32(r); {
