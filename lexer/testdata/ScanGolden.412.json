@@ -3,14 +3,14 @@
   "Tokens": [
     {
       "Type": 5,
-      "Literal": "\r\"\"\"\n",
+      "Literal": "\"\"\"",
       "Position": 3,
       "Line": 1
     },
     {
       "Type": 0,
       "Literal": "",
-      "Position": 13,
+      "Position": 14,
       "Line": 1
     }
   ],

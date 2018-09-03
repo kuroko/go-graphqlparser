@@ -3,12 +3,12 @@
   "Tokens": [
     {
       "Type": -1,
-      "Literal": "invalid character within string: '\\x00'",
+      "Literal": "invalid character within block string: '\\x00'",
       "Position": 3,
       "Line": 1
     }
   ],
   "Errors": [
-    "invalid character within string: '\\x00'"
+    "invalid character within block string: '\\x00'"
   ]
 }

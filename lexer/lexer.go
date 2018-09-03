@@ -235,12 +235,62 @@ func (l *Lexer) scanString(r rune) Token {
 }
 
 func (l *Lexer) scanBlockString2(r rune) Token {
+	startPos := l.pos
 	startLPos := l.lpos
 	startLine := l.line
 
+	var bc int
+	var w int
+
+	// This loop counts up the number of bytes we should need to store the block string, meaning we
+	// avoid many unnecessary allocations.
+	for {
+		r, w = l.read()
+		bc += w
+
+		// Check that escape sequences in this block string are valid.
+		if r == bsl {
+			r, w = l.read()
+			bc += w
+
+			if r == '"' && isTripQuotes(l) {
+				bc += 2
+			}
+		}
+
+		// Check for invalid characters in the block string, bail early.
+		if r < ws && r != tab && r != lf && r != cr {
+			return Token{
+				Type:     token.Illegal,
+				Literal:  fmt.Sprintf("invalid character within block string: %q", r),
+				Position: startLPos,
+				Line:     startLine,
+			}
+		}
+
+		// Escape from the loop as early as possible, if we've hit the end of the block string.
+		if r == '"' && isTripQuotes(l) {
+			break
+		}
+
+		// Check for end of input.
+		if r == eof {
+			return Token{
+				Type:     token.Illegal,
+				Literal:  "unexpected eof, probably unclosed block string",
+				Position: startLPos,
+				Line:     startLine,
+			}
+		}
+	}
+
+	l.pos = startPos
+	l.lpos = startLPos
+	l.line = startLine
+
 	var wasCR bool
 
-	buf := bytes.Buffer{}
+	buf := bytes.NewBuffer(make([]byte, 0, bc))
 
 	for {
 		r, _ = l.read()
@@ -359,8 +409,6 @@ func leadingWhitespace(str string) int {
 // NOTE(seeruk): I'd call this implementation fairly non-standard...
 // TODO(seeruk): Line numbers.
 func (l *Lexer) scanBlockString(r rune) Token {
-	var w int
-
 	startPos := l.pos
 	startLPos := l.lpos
 	startLine := l.line
@@ -369,6 +417,7 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	commonIndent := math.MaxInt64
 
 	var bc int
+	var w int
 	var wasCR bool
 	var hadLineChar bool
 	var hadNewLine bool

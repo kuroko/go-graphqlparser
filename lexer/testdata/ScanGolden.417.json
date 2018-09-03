@@ -3,12 +3,12 @@
   "Tokens": [
     {
       "Type": -1,
-      "Literal": "invalid character within string: '\\x00'",
+      "Literal": "unexpected eof, probably unclosed block string",
       "Position": 3,
       "Line": 1
     }
   ],
   "Errors": [
-    "invalid character within string: '\\x00'"
+    "unexpected eof, probably unclosed block string"
   ]
 }

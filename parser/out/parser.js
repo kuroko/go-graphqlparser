@@ -14,6 +14,7 @@ query foo($foo: Boolean = 2) {
 
 const query2 = `
 query {
+    bar(foo: """\\""""")
 	foo(content: """
 		Hello,
 	

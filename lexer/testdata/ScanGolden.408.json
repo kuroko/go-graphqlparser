@@ -3,7 +3,7 @@
   "Tokens": [
     {
       "Type": 5,
-      "Literal": "\rfoo\n",
+      "Literal": "foo",
       "Position": 3,
       "Line": 1
     },
