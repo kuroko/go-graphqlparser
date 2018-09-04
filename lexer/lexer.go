@@ -243,7 +243,8 @@ func (l *Lexer) scanBlockString2(r rune) Token {
 	var w int
 
 	// This loop counts up the number of bytes we should need to store the block string, meaning we
-	// avoid many unnecessary allocations.
+	// avoid many unnecessary allocations. It does slow us down overall, but cuts down memory usage
+	// quite a lot.
 	for {
 		r, w = l.read()
 		bc += w
@@ -288,20 +289,16 @@ func (l *Lexer) scanBlockString2(r rune) Token {
 	l.lpos = startLPos
 	l.line = startLine
 
-	var wasCR bool
-
 	buf := bytes.NewBuffer(make([]byte, 0, bc))
 
 	for {
 		r, _ = l.read()
 
-		// Check for end of input.
-		if r == cr {
-			wasCR = true
-
+		if r == lf {
+			buf.WriteRune(r)
+		} else if r == cr && l.input[l.pos+1] != byte(lf) {
 			// Replaces all CR characters with LF characters.
 			buf.WriteRune(lf)
-			continue
 		} else if r == bsl {
 			// Handle escaped sequences appropriately.
 			r, _ = l.read()
@@ -312,7 +309,6 @@ func (l *Lexer) scanBlockString2(r rune) Token {
 				buf.WriteRune(bsl)
 				buf.WriteRune(r)
 			}
-			continue
 		} else if r == eof {
 			return Token{
 				Type:     token.Illegal,
@@ -320,10 +316,8 @@ func (l *Lexer) scanBlockString2(r rune) Token {
 				Position: startLPos,
 				Line:     startLine,
 			}
-		} else if r == lf && !wasCR {
-			buf.WriteRune(r)
-			continue
 		} else if r == '"' && isTripQuotes(l) {
+			// Escape from the loop if we've hit the end of the block string.
 			break
 		} else if r < ws && r != tab && r != lf && r != cr {
 			return Token{
@@ -332,10 +326,10 @@ func (l *Lexer) scanBlockString2(r rune) Token {
 				Position: startLPos,
 				Line:     startLine,
 			}
+		} else {
+			// Write everything else to the buffer.
+			buf.WriteRune(r)
 		}
-
-		wasCR = false
-		buf.WriteRune(r)
 	}
 
 	return Token{
