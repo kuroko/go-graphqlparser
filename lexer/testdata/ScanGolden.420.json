@@ -1,18 +1,18 @@
 {
   "Input": "\"\"\"\\\"\"a\"\"\"",
   "Tokens": [
-      {
-          "Type": 5,
-          "Literal": "\\\"\"a",
-          "Position": 3,
-          "Line": 1
-      },
-      {
-          "Type": 0,
-          "Literal": "",
-          "Position": 10,
-          "Line": 1
-      }
+    {
+      "Type": 5,
+      "Literal": "\\\"\"a",
+      "Position": 3,
+      "Line": 1
+    },
+    {
+      "Type": 0,
+      "Literal": "",
+      "Position": 10,
+      "Line": 1
+    }
   ],
   "Errors": null
 }
