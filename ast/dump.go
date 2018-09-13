@@ -121,9 +121,6 @@ func (d *dumper) dumpOperationDefinition(def *ExecutableDefinition) {
 // dumpVariableDefinitions ...
 func (d *dumper) dumpVariableDefinitions(definitions *VariableDefinitions) {
 	definitionsLen := definitions.Len()
-	if definitionsLen == 0 {
-		return
-	}
 
 	io.WriteString(d.w, "(")
 
@@ -155,11 +152,6 @@ func (d *dumper) dumpVariableDefinition(definition VariableDefinition) {
 
 // dumpSelections ...
 func (d *dumper) dumpSelections(selections *Selections) {
-	selectionsLen := selections.Len()
-	if selectionsLen == 0 {
-		return
-	}
-
 	io.WriteString(d.w, "{\n")
 
 	selections.ForEach(func(selection Selection, i int) {
@@ -312,10 +304,9 @@ func (d *dumper) dumpValue(value Value) {
 		io.WriteString(d.w, fmt.Sprintf("%g", value.FloatValue))
 	case ValueKindStringValue:
 		hasLF := strings.Contains(value.StringValue, "\n")
-		hasCR := strings.Contains(value.StringValue, "\r")
 
 		// If the string contains a new line, we'll print it out as a multi-line string.
-		if hasLF || hasCR {
+		if hasLF {
 			indent := strings.Repeat(indentation, d.depth)
 
 			escaped := escapeGraphQLBlockString(value.StringValue)
@@ -324,22 +315,20 @@ func (d *dumper) dumpValue(value Value) {
 			buf := bytes.Buffer{}
 			for i, line := range lines {
 				buf.WriteString(indent)
-				buf.WriteString(indentation)
+				buf.WriteString(indentation) // Add one more level of indentation.
 				buf.WriteString(line)
 
-				if i != len(lines) - 1 {
+				if i != len(lines)-1 {
 					buf.WriteRune('\n')
 				}
 			}
 
-			io.WriteString(d.w, `"`)
-			io.WriteString(d.w, `"`)
-			io.WriteString(d.w, "\"\n")
+			io.WriteString(d.w, `"""`)
+			io.WriteString(d.w, "\n")
 			io.WriteString(d.w, buf.String())
+			io.WriteString(d.w, "\n")
 			io.WriteString(d.w, indent)
-			io.WriteString(d.w, "\n\"")
-			io.WriteString(d.w, `"`)
-			io.WriteString(d.w, `"`)
+			io.WriteString(d.w, `"""`)
 		} else {
 			io.WriteString(d.w, `"`)
 			io.WriteString(d.w, escapeGraphQLString(value.StringValue))
@@ -404,11 +393,6 @@ func (d *dumper) dumpType(astType Type) {
 
 // dumpDirectives ...
 func (d *dumper) dumpDirectives(directives *Directives) {
-	directivesLen := directives.Len()
-	if directivesLen == 0 {
-		return
-	}
-
 	directives.ForEach(func(directive Directive, i int) {
 		if i != 0 {
 			io.WriteString(d.w, " ")
@@ -435,9 +419,9 @@ func escapeGraphQLString(in string) string {
 		switch {
 		case r >= utf8.RuneSelf && r <= '\uFFFF':
 			escUni := fmt.Sprintf(`%x`, r)
-			padding := strings.Repeat("0", utf8.UTFMax - len(escUni))
+			padding := strings.Repeat("0", utf8.UTFMax-len(escUni))
 
-			buf.WriteString(fmt.Sprintf(`\u%s`, padding + escUni))
+			buf.WriteString(fmt.Sprintf(`\u%s`, padding+escUni))
 		case r == '"':
 			buf.WriteString(`\"`)
 		case r == '\\':
@@ -461,5 +445,5 @@ func escapeGraphQLString(in string) string {
 // escapeGraphQLBlockString takes a GraphQL block string and escapes all special characters that
 // need to be escapes in it, returning the result.
 func escapeGraphQLBlockString(in string) string {
-	return in
+	return strings.Replace(in, `"""`, `\"""`, -1)
 }

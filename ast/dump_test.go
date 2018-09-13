@@ -10,8 +10,13 @@ import (
 )
 
 var (
-
-	wipTest = strings.TrimSpace(`
+	shorthandTest = strings.TrimSpace(`
+{
+  hello
+  world
+}
+`)
+	exhaustiveTest = strings.TrimSpace(`
 query Var($v: Int! = $var) {
   selection
 }
@@ -53,7 +58,7 @@ query Selections {
 }
 
 query Frags {
-  ...userFields
+  ...userFields @testytesty
   ... on User @exclude(not: $noInfo) {
     pals: friends {
       count
@@ -68,11 +73,13 @@ query Frags {
 
 mutation second($variable: String = "test") {
   sendEmail(message: """
-Hello,
-  World!
-
-Yours,
-  GraphQL
+    Hello,
+      World! \"""
+    
+    \u0080 \u754c 😀 \"
+    
+    Yours,
+      GraphQL
   """)
   sendEmail2(message: "Hello, World!\tYours, \u0080 \u754c 😀 \" \\ \/ \b \f \t GraphQL.")
   intVal(foo: 12345)
@@ -105,70 +112,22 @@ fragment postFields on Subscription @skip(if: $bar, do: $not) {
   }
   content
 }
-`)
-	wipTest2 = strings.TrimSpace(`
+
 query first($foo: Boolean = true, $foo: Boolean = true) {
-    # How about some comments too?
-    user(id: "3931a3fc-d4f9-4faa-bcf5-882022617376") {
-        ...userFields
-    }
-    # Do comments even slow us down?
-    post(id: "489c9250-50b9-4612-b930-56dc4e1ae44e") {
-        ...postFields
-    }
-    # Directives
-    fooa: foo @include(if: $foo)
-    bara: bar @skip(if: $bar)
-    baza: baz @gt(val: $baz)
-    # Inline fragments
-    ... @include(if: $expandedInfo) {
-        firstName
-        lastName
-        birthday
-    }
-}
-
-mutation second($variable: String = "test") {
-    sendEmail(message: """
-        Hello,
-            World!
-
-        Yours,
-            GraphQL
-    """)
-    sendEmail2(message: "Hello\n,  World!\n\nYours,\n  GraphQL.")
-    intVal(foo: 12345)
-    floatVal(bar: 123.456)
-    floatVal2(bar: 123.456e10)
-    boolVal(bool: false)
-    listVal(list: [1, 2, 3])
-    variableVal(var: $variable)
-}
-
-fragment userFields on User {
+  user(id: "3931a3fc-d4f9-4faa-bcf5-882022617376") {
+    ...userFields
+  }
+  post(id: "489c9250-50b9-4612-b930-56dc4e1ae44e") {
+    ...postFields
+  }
+  fooa: foo @include(if: $foo)
+  bara: bar @skip(if: $bar)
+  baza: baz @gt(val: $baz)
+  ... @include(if: $expandedInfo) {
     firstName
     lastName
-    title
-    company {
-        name
-        slug
-    }
-    email
-    mobile
-}
-
-fragment postFields on Subscription {
-    title
-    subtitle
-    slug
-    author {
-        ...userFields
-    }
-    category {
-        name
-        slug
-    }
-    content
+    birthday
+  }
 }
 `)
 )
@@ -178,8 +137,8 @@ func TestSdump(t *testing.T) {
 		descr string
 		query string
 	}{
-		{descr: "wip test", query: wipTest},
-		//{descr: "wip test2", query: wipTest2},
+		{descr: "shorthand test", query: shorthandTest},
+		{descr: "exhaustive test", query: exhaustiveTest},
 	}
 
 	for _, tc := range tt {
@@ -190,6 +149,6 @@ func TestSdump(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, tc.query, ast.Sdump(doc))
+		assert.Equal(t, ast.Sdump(doc), tc.query)
 	}
 }
