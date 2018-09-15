@@ -675,12 +675,30 @@ func (p *Parser) parseType() (ast.Type, error) {
 func (p *Parser) parseTypeSystemDefinition(description string) (*ast.TypeSystemDefinition, error) {
 	// definition.SchemaDefinition
 	if p.peek1(token.Name, "schema") {
-		return p.parseSchemaDefinition()
+		schemaDef, err := p.parseSchemaDefinition()
+		if err != nil {
+			return nil, err
+		}
+
+		tsDefinition := &ast.TypeSystemDefinition{}
+		tsDefinition.Kind = ast.TypeSystemDefinitionKindSchema
+		tsDefinition.SchemaDefinition = schemaDef
+
+		return tsDefinition, nil
 	}
 
 	// definition.DirectiveDefinition
 	if p.peek1(token.Name, "directive") {
+		directiveDef, err := p.parseDirectiveDefinition(description)
+		if err != nil {
+			return nil, err
+		}
 
+		tsDefinition := &ast.TypeSystemDefinition{}
+		tsDefinition.Kind = ast.TypeSystemDefinitionKindDirective
+		tsDefinition.DirectiveDefinition = directiveDef
+
+		return tsDefinition, nil
 	}
 
 	// definition.TypeDefinition
@@ -691,11 +709,7 @@ func (p *Parser) parseTypeSystemDefinition(description string) (*ast.TypeSystemD
 	return &ast.TypeSystemDefinition{}, nil
 }
 
-func (p *Parser) parseSchemaDefinition() (*ast.TypeSystemDefinition, error) {
-	if !p.skip1(token.Name, "schema") {
-		return nil, nil
-	}
-
+func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
@@ -744,12 +758,37 @@ func (p *Parser) parseSchemaDefinition() (*ast.TypeSystemDefinition, error) {
 		return nil, err
 	}
 
-	return &ast.TypeSystemDefinition{
-		Kind: ast.TypeSystemDefinitionKindSchema,
-		SchemaDefinition: &ast.SchemaDefinition{
-			Directives:                   directives,
-			RootOperationTypeDefinitions: rootOperationTypeDefinitions.Reverse(),
-		},
+	return &ast.SchemaDefinition{
+		Directives:                   directives,
+		RootOperationTypeDefinitions: rootOperationTypeDefinitions.Reverse(),
+	}, nil
+}
+
+func (p *Parser) parseDirectiveDefinition(description string) (*ast.DirectiveDefinition, error) {
+	if !p.skip1(token.Name, "directive") {
+		return nil, nil
+	}
+
+	if !p.skip1(token.Punctuator, "@") {
+		return nil, p.unexpected(p.token, p.expected(token.Punctuator, "@"))
+	}
+
+	nameTok, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO(elliot): parseArgumentsDefinition
+
+	if !p.skip1(token.Name, "on") {
+		return nil, p.unexpected(p.token, p.expected(token.Name, "on"))
+	}
+
+	// TODO(elliot): parseDirectiveLocations
+
+	return &ast.DirectiveDefinition{
+		Description: description,
+		Name:        nameTok.Literal,
 	}, nil
 }
 
