@@ -287,9 +287,9 @@ func (k TypeSystemDefinitionKind) String() string {
 }
 
 type TypeSystemDefinition struct {
-	SchemaDefinition    SchemaDefinition
-	TypeDefinition      TypeDefinition
-	DirectiveDefinition DirectiveDefinition
+	SchemaDefinition    *SchemaDefinition
+	TypeDefinition      *TypeDefinition
+	DirectiveDefinition *DirectiveDefinition
 	Kind                TypeSystemDefinitionKind
 }
 
@@ -298,7 +298,7 @@ type TypeSystemDefinition struct {
 
 type SchemaDefinition struct {
 	Directives                   *Directives
-	RootOperationTypeDefinitions []RootOperationTypeDefinition
+	RootOperationTypeDefinitions *RootOperationTypeDefinitions
 }
 
 type RootOperationTypeDefinition struct {
@@ -323,11 +323,11 @@ type TypeDefinitionKind int8
 type TypeDefinition struct {
 	Description           string
 	Directives            *Directives
-	ImplementsInterface   []Type // Only allow "TypeKindNamedType" kind NamedType.
-	FieldsDefinition      []FieldDefinition
-	UnionMemberTypes      []Type // Only allow "TypeKindNamedType" kind NamedType.
-	EnumValuesDefinition  []EnumValueDefinition
-	InputFieldsDefinition []FieldDefinition
+	ImplementsInterface   *Types // Only allow "TypeKindNamedType" kind NamedType.
+	FieldsDefinition      *FieldDefinitions
+	UnionMemberTypes      *Types // Only allow "TypeKindNamedType" kind NamedType.
+	EnumValuesDefinition  *EnumValueDefinitions
+	InputFieldsDefinition *FieldDefinitions
 	Name                  string
 	Kind                  TypeDefinitionKind
 }
@@ -337,7 +337,7 @@ type FieldDefinition struct {
 	Name                string
 	Directives          *Directives
 	Type                Type
-	ArgumentsDefinition []InputValueDefinition
+	ArgumentsDefinition *InputValueDefinitions
 }
 
 type EnumValueDefinition struct {
@@ -386,6 +386,6 @@ type DirectiveLocation int8
 type DirectiveDefinition struct {
 	Description         string
 	Name                string
-	ArgumentsDefinition []InputValueDefinition
-	DirectiveLocations  []DirectiveLocation
+	ArgumentsDefinition *InputValueDefinitions
+	DirectiveLocations  *DirectiveLocations
 }

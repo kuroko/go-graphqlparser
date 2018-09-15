@@ -28,8 +28,13 @@ func main() {
 	sort.Strings(tns)
 
 	for _, tn := range tns {
+		typeNameLCF := lcfirst(tn)
+		if typeNameLCF == "type" {
+			typeNameLCF = "t"
+		}
+
 		linkedList.Execute(os.Stdout, map[string]string{
-			"TypeNameLCF": lcfirst(tn),
+			"TypeNameLCF": typeNameLCF,
 			"TypeName":    tn,
 		})
 	}
