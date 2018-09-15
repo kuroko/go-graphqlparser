@@ -87,8 +87,28 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 		return definition, err
 	}
 
-	// TODO(seeruk): Is next token a string? Then we probably have a description, keep it handy to
-	// pass to function that parses the next token, e.g. schema, or scalar, or directive, etc.
+	var description string
+
+	// If we have a description, then we should encounter a `scalar`, a `type`, a `interface`, a
+	// `union`, an `enum`, an `input`, or a `directive`.
+	if tok, ok := p.consume0(token.StringValue); ok {
+		description = tok.Literal
+	}
+
+	typeDefLits := make([]string, 0, 8)
+	typeDefLits = append(typeDefLits, "scalar", "type", "interface", "union", "enum", "input", "directive")
+
+	if description == "" {
+		typeDefLits = append(typeDefLits, "schema")
+	}
+
+	if p.peekn(token.Name, typeDefLits...) {
+		definition := ast.Definition{}
+		definition.Kind = ast.DefinitionKindTypeSystem
+		definition.TypeSystemDefinition, err = p.parseTypeSystemDefinition(description)
+
+		return definition, err
+	}
 
 	return ast.Definition{}, p.unexpected(p.token,
 		p.expected(token.Name, "query", "mutation", "fragment"),
@@ -298,7 +318,11 @@ func (p *Parser) parseDirectives() (*ast.Directives, error) {
 		}
 	}
 
-	return directives.Reverse(), nil
+	if directives != nil {
+		return directives.Reverse(), nil
+	}
+
+	return nil, nil
 }
 
 func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
@@ -307,7 +331,7 @@ func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
 	}
 
 	if !optional && !p.skip1(token.Punctuator, "{") {
-		return nil, p.unexpected(p.token, p.expected(token.Name))
+		return nil, p.unexpected(p.token, p.expected(token.Punctuator, "{"))
 	}
 
 	var selections *ast.Selections
@@ -340,7 +364,7 @@ func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
 			Next: selections,
 		}
 
-		if p.peek1(token.Punctuator, "}") {
+		if p.peek1(token.Punctuator, "}") || p.peek0(token.EOF) {
 			break
 		}
 	}
@@ -646,6 +670,87 @@ func (p *Parser) parseType() (ast.Type, error) {
 	}
 
 	return astType, nil
+}
+
+func (p *Parser) parseTypeSystemDefinition(description string) (*ast.TypeSystemDefinition, error) {
+	// definition.SchemaDefinition
+	if p.peek1(token.Name, "schema") {
+		return p.parseSchemaDefinition()
+	}
+
+	// definition.DirectiveDefinition
+	if p.peek1(token.Name, "directive") {
+
+	}
+
+	// definition.TypeDefinition
+	if p.peekn(token.Name, "scalar", "type", "interface", "union", "enum", "input") {
+
+	}
+
+	return &ast.TypeSystemDefinition{}, nil
+}
+
+func (p *Parser) parseSchemaDefinition() (*ast.TypeSystemDefinition, error) {
+	if !p.skip1(token.Name, "schema") {
+		return nil, nil
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+
+	if !p.skip1(token.Punctuator, "{") {
+		return nil, p.unexpected(p.token, p.expected(token.Punctuator, "{"))
+	}
+
+	var rootOperationTypeDefinitions *ast.RootOperationTypeDefinitions
+
+	for {
+		opType, err := p.parseOperationType()
+		if err != nil {
+			return nil, err
+		}
+
+		if !p.skip1(token.Punctuator, ":") {
+			return nil, p.unexpected(p.token, p.expected(token.Punctuator, ":"))
+		}
+
+		namedType, err := p.parseType()
+		if err != nil {
+			return nil, err
+		}
+
+		if namedType.Kind != ast.TypeKindNamedType {
+			return nil, p.unexpected(p.token, "NamedType")
+		}
+
+		rootOperationTypeDefinitions = &ast.RootOperationTypeDefinitions{
+			Data: ast.RootOperationTypeDefinition{
+				OperationType: opType,
+				NamedType:     namedType,
+			},
+			Next: rootOperationTypeDefinitions,
+		}
+
+		if p.peek1(token.Punctuator, "}") || p.peek0(token.EOF) {
+			break
+		}
+	}
+
+	_, err = p.mustConsume1(token.Punctuator, "}")
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.TypeSystemDefinition{
+		Kind: ast.TypeSystemDefinitionKindSchema,
+		SchemaDefinition: &ast.SchemaDefinition{
+			Directives:                   directives,
+			RootOperationTypeDefinitions: rootOperationTypeDefinitions.Reverse(),
+		},
+	}, nil
 }
 
 // Parser utilities:
