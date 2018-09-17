@@ -710,6 +710,10 @@ func (p *Parser) parseTypeSystemDefinition(description string) (*ast.TypeSystemD
 }
 
 func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
+	if !p.skip1(token.Name, "schema") {
+		return nil, p.unexpected(p.token, p.expected(token.Name, "schema"))
+	}
+
 	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
