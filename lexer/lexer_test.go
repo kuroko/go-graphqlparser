@@ -22,64 +22,24 @@ const (
 	// query is a valid GraphQL query that contains at least one of each token type. It's re-used to
 	// compare against other GraphQL libraries.
 	query = `
-		# Mutation for testing different token types.
-		mutation {
-			createPost(
-				id: 1024
-				title: "String Value"
-				content: """
-					Hello,
+        # Mutation for testing different token types.
+        mutation {
+            createPost(
+                id: 1024
+                title: "String Value"
+                content: """
+                    Hello,
 
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
+                        Welcome to GraphQL.
+                        Let's make this string a little bigger then. Because the larger this string
+                        becomes, the more efficient our lexer should look...
 
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-						Welcome to GraphQL.
-						Let's make this string a little bigger then. Because the larger this string
-						becomes, the more efficient our lexer should look...
-
-					From, Bucketd
-				"""
-				readTime: 2.742
-			)
-		}
-	`
+                    From, Bucketd
+                """
+                readTime: 2.742
+            ) @async(bar: $baz)
+        }
+    `
 
 	scr = string(cr)
 	slf = string(lf)

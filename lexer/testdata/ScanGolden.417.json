@@ -4,7 +4,7 @@
     {
       "Type": -1,
       "Literal": "unexpected eof, probably unclosed block string",
-      "Position": 3,
+      "Position": 1,
       "Line": 1
     }
   ],

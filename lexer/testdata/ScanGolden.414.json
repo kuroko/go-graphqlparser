@@ -4,13 +4,13 @@
     {
       "Type": 5,
       "Literal": "foo \\u1234 \" \"\"\"",
-      "Position": 3,
+      "Position": 1,
       "Line": 1
     },
     {
       "Type": 0,
       "Literal": "",
-      "Position": 23,
+      "Position": 24,
       "Line": 1
     }
   ],

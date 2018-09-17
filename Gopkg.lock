@@ -2,32 +2,15 @@
 
 
 [[projects]]
-  digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   pruneopts = "UT"
-  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
-  version = "v1.1.0"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:9513069d46196aab5e37c26ee2311229615d44b86eed411ab9d440fe4747928d"
-  name = "github.com/graph-gophers/graphql-go"
-  packages = [
-    "errors",
-    "internal/common",
-    "internal/query",
-    "internal/schema",
-    "internal/validation",
-    "introspection",
-    "log",
-    "trace",
-  ]
-  pruneopts = "UT"
-  revision = "94da0f0031f9d30a1d56cd4b56e40852516c3301"
-
-[[projects]]
-  digest = "1:eb4f8cef1fcb6d7d9f94ec4e4d4afeccc3b75244068ea7285686a1c353bad93f"
+  digest = "1:3c76995e54de935a870ecfc7147b68ac36a80a7112f9877cd4c46fc88ef42db9"
   name = "github.com/graphql-go/graphql"
   packages = [
     "gqlerrors",
@@ -39,20 +22,8 @@
     "language/source",
   ]
   pruneopts = "UT"
-  revision = "1e23489041ba90a66f317fe0deccb236a2fff3cb"
-  version = "v0.7.5"
-
-[[projects]]
-  digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
-  name = "github.com/opentracing/opentracing-go"
-  packages = [
-    ".",
-    "ext",
-    "log",
-  ]
-  pruneopts = "UT"
-  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
-  version = "v1.0.2"
+  revision = "5c1be0872a56fba73b279434ea95dfda735abedd"
+  version = "v0.7.6"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -80,7 +51,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3b4077a3ed66ee719de89b7058999a1010b1c074ba5adfa42b4351fa8df90edb"
+  digest = "1:5a532cff0f66f18654db75b726670da38b98496f0766e51ac069039146a8aaa6"
   name = "github.com/vektah/gqlparser"
   packages = [
     "ast",
@@ -89,29 +60,13 @@
     "parser",
   ]
   pruneopts = "UT"
-  revision = "04021c23cb3810632117e34c3e0e3d415a202c63"
-
-[[projects]]
-  branch = "master"
-  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
-  name = "golang.org/x/net"
-  packages = ["context"]
-  pruneopts = "UT"
-  revision = "c39426892332e1bb5ec0a434a079bf82f5d30c54"
+  revision = "14e83ae06ec152e6d0afb9766a00e0c0918aa8fc"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/davecgh/go-spew/spew",
-    "github.com/graph-gophers/graphql-go/errors",
-    "github.com/graph-gophers/graphql-go/internal/common",
-    "github.com/graph-gophers/graphql-go/internal/query",
-    "github.com/graph-gophers/graphql-go/internal/schema",
-    "github.com/graph-gophers/graphql-go/internal/validation",
-    "github.com/graph-gophers/graphql-go/introspection",
-    "github.com/graph-gophers/graphql-go/log",
-    "github.com/graph-gophers/graphql-go/trace",
     "github.com/graphql-go/graphql/language/lexer",
     "github.com/graphql-go/graphql/language/parser",
     "github.com/graphql-go/graphql/language/source",

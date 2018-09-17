@@ -2,15 +2,12 @@ package parser
 
 import (
 	"bytes"
-	"strings"
 	"testing"
 
 	goparser "github.com/graphql-go/graphql/language/parser"
 	gosource "github.com/graphql-go/graphql/language/source"
 	ast2 "github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/parser"
-
-	gophersquery "github.com/bucketd/go-graphqlparser/benchutil/graphql-gophers/query"
 )
 
 var tsQuery = []byte(`
@@ -70,10 +67,6 @@ func BenchmarkParser(b *testing.B) {
 				runGraphQLGoParser(b, t.query)
 			})
 
-			b.Run("github.com/graphql-gophers/graphql-go", func(b *testing.B) {
-				runGraphQLGophersParser(b, t.query)
-			})
-
 			b.Run("github.com/vektah/gqlparser", func(b *testing.B) {
 				runVektahGQLParser(b, t.query)
 			})
@@ -107,29 +100,6 @@ func runGraphQLGoParser(b *testing.B, query []byte) {
 		}
 
 		ast, err := goparser.Parse(params)
-		if err != nil {
-			b.Fatal(err)
-		}
-
-		_ = ast
-	}
-}
-
-func runGraphQLGophersParser(b *testing.B, query []byte) {
-	// No multi-line string support in this parser...
-	qry := string(query)
-	qry = strings.Replace(qry, `"""
-        Hello,
-            World!
-
-        Yours,
-            GraphQL
-    """`, `"Hello,\n    World!\n\nYours,    GraphQL"`, -1)
-
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		ast, err := gophersquery.Parse(qry)
 		if err != nil {
 			b.Fatal(err)
 		}

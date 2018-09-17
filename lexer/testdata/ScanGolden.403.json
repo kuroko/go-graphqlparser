@@ -4,13 +4,13 @@
     {
       "Type": 5,
       "Literal": "foo \"\" bar",
-      "Position": 3,
+      "Position": 1,
       "Line": 1
     },
     {
       "Type": 0,
       "Literal": "",
-      "Position": 16,
+      "Position": 17,
       "Line": 1
     }
   ],

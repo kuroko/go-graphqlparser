@@ -4,13 +4,13 @@
     {
       "Type": 5,
       "Literal": "\\t \\u1234",
-      "Position": 3,
+      "Position": 1,
       "Line": 1
     },
     {
       "Type": 0,
       "Literal": "",
-      "Position": 15,
+      "Position": 16,
       "Line": 1
     }
   ],

@@ -26,12 +26,8 @@
 
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/graph-gophers/graphql-go"
-
-[[constraint]]
   name = "github.com/graphql-go/graphql"
-  version = "0.7.5"
+  version = "0.7.6"
 
 [[constraint]]
   name = "github.com/seeruk/assert"

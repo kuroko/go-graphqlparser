@@ -4,14 +4,14 @@
     {
       "Type": 5,
       "Literal": "foo",
-      "Position": 3,
+      "Position": 1,
       "Line": 1
     },
     {
       "Type": 0,
       "Literal": "",
-      "Position": 13,
-      "Line": 1
+      "Position": 14,
+      "Line": 5
     }
   ],
   "Errors": null

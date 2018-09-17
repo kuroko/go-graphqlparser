@@ -1,119 +1,167 @@
 {
-  "Input": "\n\t\t# Mutation for testing different token types.\n\t\tmutation {\n\t\t\tcreatePost(\n\t\t\t\tid: 1024\n\t\t\t\ttitle: \"String Value\"\n\t\t\t\tcontent: \"\"\"\n\t\t\t\t\tHello,\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\t\tWelcome to GraphQL.\n\t\t\t\t\t\tLet's make this string a little bigger then. Because the larger this string\n\t\t\t\t\t\tbecomes, the more efficient our lexer should look...\n\n\t\t\t\t\tFrom, Bucketd\n\t\t\t\t\"\"\"\n\t\t\t\treadTime: 2.742\n\t\t\t)\n\t\t}\n\t",
+  "Input": "\n        # Mutation for testing different token types.\n        mutation {\n            createPost(\n                id: 1024\n                title: \"String Value\"\n                content: \"\"\"\n                    Hello,\n\n                        Welcome to GraphQL.\n                        Let's make this string a little bigger then. Because the larger this string\n                        becomes, the more efficient our lexer should look...\n\n                    From, Bucketd\n                \"\"\"\n                readTime: 2.742\n            ) @async(bar: $baz)\n        }\n    ",
   "Tokens": [
     {
       "Type": 2,
       "Literal": "mutation",
-      "Position": 3,
+      "Position": 9,
       "Line": 3
     },
     {
       "Type": 1,
       "Literal": "{",
-      "Position": 12,
+      "Position": 18,
       "Line": 3
     },
     {
       "Type": 2,
       "Literal": "createPost",
-      "Position": 4,
+      "Position": 13,
       "Line": 4
     },
     {
       "Type": 1,
       "Literal": "(",
-      "Position": 14,
+      "Position": 23,
       "Line": 4
     },
     {
       "Type": 2,
       "Literal": "id",
-      "Position": 5,
+      "Position": 17,
       "Line": 5
     },
     {
       "Type": 1,
       "Literal": ":",
-      "Position": 7,
+      "Position": 19,
       "Line": 5
     },
     {
       "Type": 3,
       "Literal": "1024",
-      "Position": 9,
+      "Position": 21,
       "Line": 5
     },
     {
       "Type": 2,
       "Literal": "title",
-      "Position": 5,
+      "Position": 17,
       "Line": 6
     },
     {
       "Type": 1,
       "Literal": ":",
-      "Position": 10,
+      "Position": 22,
       "Line": 6
     },
     {
       "Type": 5,
       "Literal": "String Value",
-      "Position": 12,
+      "Position": 24,
       "Line": 6
     },
     {
       "Type": 2,
       "Literal": "content",
-      "Position": 5,
+      "Position": 17,
       "Line": 7
     },
     {
       "Type": 1,
       "Literal": ":",
-      "Position": 12,
+      "Position": 24,
       "Line": 7
     },
     {
       "Type": 5,
-      "Literal": "Hello,\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\n\tWelcome to GraphQL.\n\tLet's make this string a little bigger then. Because the larger this string\n\tbecomes, the more efficient our lexer should look...\n\nFrom, Bucketd",
-      "Position": 16,
+      "Literal": "Hello,\n\n    Welcome to GraphQL.\n    Let's make this string a little bigger then. Because the larger this string\n    becomes, the more efficient our lexer should look...\n\nFrom, Bucketd",
+      "Position": 26,
       "Line": 7
     },
     {
       "Type": 2,
       "Literal": "readTime",
-      "Position": 5,
-      "Line": 8
+      "Position": 17,
+      "Line": 16
     },
     {
       "Type": 1,
       "Literal": ":",
-      "Position": 13,
-      "Line": 8
+      "Position": 25,
+      "Line": 16
     },
     {
       "Type": 4,
       "Literal": "2.742",
-      "Position": 15,
-      "Line": 8
+      "Position": 27,
+      "Line": 16
     },
     {
       "Type": 1,
       "Literal": ")",
-      "Position": 4,
-      "Line": 9
+      "Position": 13,
+      "Line": 17
+    },
+    {
+      "Type": 1,
+      "Literal": "@",
+      "Position": 15,
+      "Line": 17
+    },
+    {
+      "Type": 2,
+      "Literal": "async",
+      "Position": 16,
+      "Line": 17
+    },
+    {
+      "Type": 1,
+      "Literal": "(",
+      "Position": 21,
+      "Line": 17
+    },
+    {
+      "Type": 2,
+      "Literal": "bar",
+      "Position": 22,
+      "Line": 17
+    },
+    {
+      "Type": 1,
+      "Literal": ":",
+      "Position": 25,
+      "Line": 17
+    },
+    {
+      "Type": 1,
+      "Literal": "$",
+      "Position": 27,
+      "Line": 17
+    },
+    {
+      "Type": 2,
+      "Literal": "baz",
+      "Position": 28,
+      "Line": 17
+    },
+    {
+      "Type": 1,
+      "Literal": ")",
+      "Position": 31,
+      "Line": 17
     },
     {
       "Type": 1,
       "Literal": "}",
-      "Position": 3,
-      "Line": 10
+      "Position": 9,
+      "Line": 18
     },
     {
       "Type": 0,
       "Literal": "",
-      "Position": 1,
-      "Line": 11
+      "Position": 5,
+      "Line": 19
     }
   ],
   "Errors": null
