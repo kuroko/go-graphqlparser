@@ -3,23 +3,24 @@
 // can be found at http://facebook.github.io/graphql/October2016.
 package token
 
+// All different lexical token types.
 const (
 	Illegal Type = iota - 1
 	EOF
 
-	// 2.1.6: Lexical Tokens.
-	Punctuator  // One of: !, $, (, ), ..., :, =, @, [, ], {, |, }
-	Name        // Regex: /[_A-Za-z][_0-9A-Za-z]*/
-	IntValue    // Regex: /^[+-]?(0|[1-9]+)$/
-	FloatValue  // Regex: /^[+-]?(0|[1-9]+)(\.[0-9]+)?([eE][+-]?[0-9]+)?$/
-	StringValue // Trickier: "", "some string", "\u1234", "\b\f\n\r\t", "this\nis_a%$string\u0020"
+	// Lexical Tokens.
+	Punctuator
+	Name
+	IntValue
+	FloatValue
+	StringValue
 
-	// 2.1.7: Ignored Tokens
-	UnicodeBOM     // Unicode: "\uFEFF"
-	WhiteSpace     // Unicode: "\u0009" || "\u0020". Only significant in strings
-	LineTerminator // Unicode: "\u000A", "\u000D". Only significant in strings
-	Comment        // Literal: "#". Consume up to next LineTerminator
-	Comma          // Literal: ","
+	// Ignored tokens.
+	UnicodeBOM
+	WhiteSpace
+	LineTerminator
+	Comment
+	Comma
 )
 
 // TypeNames is a map of token types to their names as strings.

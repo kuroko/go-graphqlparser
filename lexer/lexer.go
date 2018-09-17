@@ -127,7 +127,7 @@ func (l *Lexer) Scan() Token {
 	}
 }
 
-// scanString ...
+// scanString scans a valid GraphQL string.
 func (l *Lexer) scanString(r rune) Token {
 	var w int
 
@@ -234,6 +234,7 @@ func (l *Lexer) scanString(r rune) Token {
 	}
 }
 
+// scanBlockString scans a valid GraphQL block string.
 func (l *Lexer) scanBlockString(r rune) Token {
 	startPos := l.pos
 	startLPos := l.lpos
@@ -340,7 +341,8 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	}
 }
 
-// blockStringLiteral ...
+// blockStringLiteral takes a raw block string value, trims empty lines of the start and end, and
+// removes the common indent from the start of each line.
 func (l *Lexer) blockStringLiteral(raw string) string {
 	lines := strings.Split(raw, "\n")
 	lineCount := len(lines)
@@ -386,7 +388,8 @@ func (l *Lexer) blockStringLiteral(raw string) string {
 	return strings.Join(lines[start:end], "\n")
 }
 
-// leadingWhitespace ...
+// leadingWhitespace returns the index in the given string where the first non-whitespace character
+// is found, or returns math.MaxInt64 if there are no non-whitespace characters found.
 func leadingWhitespace(str string) int {
 	for i, r := range str {
 		if r != ' ' && r != '\t' {
@@ -397,6 +400,9 @@ func leadingWhitespace(str string) int {
 	return math.MaxInt64
 }
 
+// isTripQuotes is used if we've just scanned a double-quote and want to test if the next 2
+// characters are also double-quotes, returning true if that means we've scanned 3 triple quotes in
+// a row, or false otherwise.
 func isTripQuotes(l *Lexer) bool {
 	r1, w1 := l.read()
 	r2, w2 := l.read()
@@ -413,6 +419,7 @@ func isTripQuotes(l *Lexer) bool {
 	return false
 }
 
+// escapedChar returns the rune that corresponds to an escape sequence that is scanned.
 func escapedChar(l *Lexer) (rune, error) {
 	r, _ := l.read()
 	switch r {
@@ -480,7 +487,11 @@ func encodeRune(r rune, cb func(a byte)) {
 	}
 }
 
-// TODO(seeruk): Here: https://github.com/graphql/graphql-js/blob/master/src/language/lexer.js#L689
+// unicodeCodePointToRune converts 4 hexadecimal characters represented as runes (from read) to a
+// single rune that has the value of the unicode code point represented by the 4 hexadecimal
+// characters.
+//
+// See: https://github.com/graphql/graphql-js/blob/84d05fc5c288f2c20df20cf7f60ee356fa6a2cdb/src/language/lexer.js#L689
 func unicodeCodePointToRune(ar, br, cr, dr rune) rune {
 	ai, bi, ci, di := hexRuneToInt(ar), hexRuneToInt(br), hexRuneToInt(cr), hexRuneToInt(dr)
 	return rune(ai<<12 | bi<<8 | ci<<4 | di<<0)
@@ -603,7 +614,6 @@ func (l *Lexer) scanPunctuator(r rune, w int) Token {
 		}
 	}
 
-	// TODO(seeruk): Using other token types for each type of punctuation may actually be faster.
 	return Token{
 		Type:     token.Punctuator,
 		Literal:  btos(l.input[byteStart-w : byteStart]),
@@ -620,14 +630,16 @@ func (l *Lexer) scanNumber(r rune) Token {
 	var float bool // If true, number is float.
 	var err error  // So no shadowing of r.
 
+	var w int
+
 	// Check for preceding minus sign
 	if r == '-' {
-		r, _ = l.read()
+		r, w = l.read()
 	}
 
 	// Check if digits begins with zero
 	if r == '0' {
-		r, _ = l.read()
+		r, w = l.read()
 
 		// If there is another digit after zero, error.
 		if r >= '0' && r <= '9' {
@@ -642,7 +654,7 @@ func (l *Lexer) scanNumber(r rune) Token {
 		// If number does not begin with zero, read the digits.
 		// If the first character is not a digit, error.
 	} else {
-		r, err = l.readDigits(r)
+		r, w, err = l.readDigits(r)
 		if err != nil {
 			return Token{
 				Type:     token.Illegal,
@@ -657,10 +669,10 @@ func (l *Lexer) scanNumber(r rune) Token {
 	if r == '.' {
 		float = true
 
-		r, _ = l.read()
+		r, w = l.read()
 
 		// Read the digits after the decimal place if the first character is not a digit, error.
-		r, err = l.readDigits(r)
+		r, w, err = l.readDigits(r)
 		if err != nil {
 			return Token{
 				Type:     token.Illegal,
@@ -675,15 +687,15 @@ func (l *Lexer) scanNumber(r rune) Token {
 	if r == 'e' || r == 'E' {
 		float = true
 
-		r, _ = l.read()
+		r, w = l.read()
 
-		// Check for positive or negative symbol infront of the value.
+		// Check for positive or negative symbol in front of the value.
 		if r == '+' || r == '-' {
-			r, _ = l.read()
+			r, w = l.read()
 		}
 
-		// Read the exponent digitas, if the first character is not a digit, error.
-		r, err = l.readDigits(r)
+		// Read the exponent digits, if the first character is not a digit, error.
+		r, w, err = l.readDigits(r)
 		if err != nil {
 			return Token{
 				Type:     token.Illegal,
@@ -694,9 +706,8 @@ func (l *Lexer) scanNumber(r rune) Token {
 		}
 	}
 
-	// TODO(seeruk): This may not be correct.
 	if r != eof {
-		l.unread(1)
+		l.unread(w)
 	}
 
 	t := Token{
@@ -714,14 +725,16 @@ func (l *Lexer) scanNumber(r rune) Token {
 }
 
 // readDigits reads up until the next non-numeric character in the input.
-func (l *Lexer) readDigits(r rune) (rune, error) {
+func (l *Lexer) readDigits(r rune) (rune, int, error) {
 	if !(r >= '0' && r <= '9') {
-		return eof, fmt.Errorf("invalid number, expected digit but got: %q", r)
+		return eof, 0, fmt.Errorf("invalid number, expected digit but got: %q", r)
 	}
+
+	var w int
 
 	var done bool
 	for !done {
-		r, _ = l.read()
+		r, w = l.read()
 
 		switch {
 		case r >= '0' && r <= '9':
@@ -732,7 +745,7 @@ func (l *Lexer) readDigits(r rune) (rune, error) {
 		}
 	}
 
-	return r, nil
+	return r, w, nil
 }
 
 // readNextSignificant reads runes until a "significant" rune is read, i.e. a rune that could be a
@@ -805,8 +818,6 @@ func (l *Lexer) unread(width int) {
 }
 
 // btos takes the given bytes, and turns them into a string.
-// Q: naming btos or bbtos? :D
-// TODO(seeruk): Is this actually portable then?
 func btos(bs []byte) string {
 	return *(*string)(unsafe.Pointer(&bs))
 }
