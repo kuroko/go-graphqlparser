@@ -20,7 +20,7 @@ func main() {
 	flag.StringVar(&typeNames, "types", "", "Comma separated names of types to generate.")
 	flag.Parse()
 
-	fmt.Fprintln(os.Stdout, "// THIS CODE IS GENERATED, DO NOT EDIT MANUALLY")
+	fmt.Fprintf(os.Stdout, "// Package %s - THIS CODE IS GENERATED, DO NOT EDIT MANUALLY\n", packageName)
 	fmt.Fprintf(os.Stdout, "package %s\n", packageName)
 
 	tns := strings.Split(typeNames, ",")

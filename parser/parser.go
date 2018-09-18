@@ -12,6 +12,7 @@ import (
 	"github.com/bucketd/go-graphqlparser/token"
 )
 
+// Parser is a parser for GraphQL documents.
 type Parser struct {
 	lexer *lexer.Lexer
 	token lexer.Token
@@ -20,12 +21,16 @@ type Parser struct {
 	hasShorthandQuery bool
 }
 
+// New takes the raw bytes input of the GraphQL document to be lexed and parsed
+// and returns a *Parser.
 func New(input []byte) *Parser {
 	return &Parser{
 		lexer: lexer.New(input),
 	}
 }
 
+// Parse loops over the lexagraphical tokens lexed from the raw bytes input and
+// parses them into an AST of the GraphQL Document which it returns.
 func (p *Parser) Parse() (ast.Document, error) {
 	var document ast.Document
 

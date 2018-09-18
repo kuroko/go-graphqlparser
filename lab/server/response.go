@@ -22,7 +22,7 @@ const (
 // identify which field it should use for it's value.
 type ResponseValueKind int
 
-// ResponseValue represents part of a response body.
+// ResponseValue is a pseudo union type that represents part of a response body.
 type ResponseValue struct {
 	Kind         ResponseValueKind
 	IntValue     int
@@ -39,6 +39,10 @@ type ResponseObjectField struct {
 	Value ResponseValue
 }
 
+// MarshalGraphQL is a GraphQL Marshaller that uses case statements and
+// verbosity to efficiently marshal the ResponseValueKinds, coupled with
+// pseudo union types this method provides significant performance gains
+// over using interfaces.
 func (v ResponseValue) MarshalGraphQL(buf *bytes.Buffer) error {
 	switch v.Kind {
 	case ResponseValueKindInt:
@@ -99,11 +103,13 @@ func (v ResponseValue) MarshalGraphQL(buf *bytes.Buffer) error {
 	return nil
 }
 
+// Response is a server response.
 type Response struct {
 	Data   ResponseValue
 	Errors []error // @TODO: This is not the right type.
 }
 
+// MarshalGraphQL marshalls the server response.
 func (r Response) MarshalGraphQL() ([]byte, error) {
 	buf := &bytes.Buffer{}
 

@@ -1,4 +1,4 @@
-// THIS CODE IS GENERATED, DO NOT EDIT MANUALLY
+// Package ast - THIS CODE IS GENERATED, DO NOT EDIT MANUALLY
 package ast
 
 // Arguments is a linked list that contains Argument values.
