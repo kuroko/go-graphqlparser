@@ -129,6 +129,16 @@ query first($foo: Boolean = true, $foo: Boolean = true) {
     birthday
   }
 }
+
+schema @foo @bar {
+  query: Query
+  mutation: Mutation
+}
+
+"""
+sdiofhsidufhiusdhfuihsuidf
+"""
+directive @foo on QUERY
 `)
 )
 

@@ -293,7 +293,7 @@ type TypeSystemDefinition struct {
 	Kind                TypeSystemDefinitionKind
 }
 
-// 3.2 Schema
+// 3.2 Schemam
 // http://facebook.github.io/graphql/June2018/#sec-Schema
 
 type SchemaDefinition struct {
@@ -382,6 +382,49 @@ const (
 )
 
 type DirectiveLocation int8
+
+func (l DirectiveLocation) String() string {
+	switch l {
+	case DirectiveLocationQuery:
+		return "QUERY"
+	case DirectiveLocationMutation:
+		return "MUTATION"
+	case DirectiveLocationSubscription:
+		return "SUBSCRIPTION"
+	case DirectiveLocationField:
+		return "FIELD"
+	case DirectiveLocationFragmentDefinition:
+		return "FRAGMENT_DEFINITION"
+	case DirectiveLocationFragmentSpread:
+		return "FRAGMENT_SPREAD"
+	case DirectiveLocationInlineFragment:
+		return "INLINE_FRAGMENT"
+	case DirectiveLocationSchema:
+		return "SCHEMA"
+	case DirectiveLocationScalar:
+		return "SCALAR"
+	case DirectiveLocationObject:
+		return "OBJECT"
+	case DirectiveLocationFieldDefinition:
+		return "FIELD_DEFINITION"
+	case DirectiveLocationArgumentDefinition:
+		return "ARGUMENT_DEFINITION"
+	case DirectiveLocationInterface:
+		return "INTERFACE"
+	case DirectiveLocationUnion:
+		return "UNION"
+	case DirectiveLocationEnum:
+		return "ENUM"
+	case DirectiveLocationEnumValue:
+		return "ENUM_VALUE"
+	case DirectiveLocationInputObject:
+		return "INPUT_OBJECT"
+	case DirectiveLocationInputFieldDefinition:
+		return "INPUT_FIELD_DEFINITION"
+	}
+
+	return "invalid"
+}
 
 type DirectiveDefinition struct {
 	Description         string

@@ -39,6 +39,22 @@ query {
 }
 	`)
 
+	query = []byte(`
+schema @foo @bar {
+	query: Query
+}
+
+directive @foo on SCHEMA | SCALAR
+directive @bar on SCHEMA | QUERY
+
+directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+directive @example on
+  | FIELD
+  | FRAGMENT_SPREAD
+  | INLINE_FRAGMENT
+`)
+
 	start := time.Now()
 
 	var doc ast.Document

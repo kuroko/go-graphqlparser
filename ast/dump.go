@@ -63,7 +63,7 @@ func (d *dumper) dumpDefinition(definition Definition) {
 	case DefinitionKindExecutable:
 		d.dumpExecutableDefinition(definition.ExecutableDefinition)
 	case DefinitionKindTypeSystem:
-		// TODO
+		d.dumpTypeSystemDefinition(definition.TypeSystemDefinition)
 	}
 }
 
@@ -87,15 +87,12 @@ func (d *dumper) dumpOperationDefinition(def *ExecutableDefinition) {
 	switch def.OperationType {
 	case OperationTypeQuery:
 		if !shorthand || def.Name != "" {
-			io.WriteString(d.w, "query")
-			io.WriteString(d.w, " ")
+			io.WriteString(d.w, "query ")
 		}
 	case OperationTypeMutation:
-		io.WriteString(d.w, "mutation")
-		io.WriteString(d.w, " ")
+		io.WriteString(d.w, "mutation ")
 	case OperationTypeSubscription:
-		io.WriteString(d.w, "subscription")
-		io.WriteString(d.w, " ")
+		io.WriteString(d.w, "subscription ")
 	}
 
 	if def.Name != "" {
@@ -154,7 +151,7 @@ func (d *dumper) dumpVariableDefinition(definition VariableDefinition) {
 func (d *dumper) dumpSelections(selections *Selections) {
 	io.WriteString(d.w, "{\n")
 
-	selections.ForEach(func(selection Selection, i int) {
+	selections.ForEach(func(selection Selection, _ int) {
 		d.dumpSelection(selection)
 		io.WriteString(d.w, "\n")
 	})
@@ -408,6 +405,66 @@ func (d *dumper) dumpDirective(directive Directive) {
 	io.WriteString(d.w, directive.Name)
 
 	d.dumpArguments(directive.Arguments)
+}
+
+// dumpTypeSystemDefinition ...
+func (d *dumper) dumpTypeSystemDefinition(def *TypeSystemDefinition) {
+	switch def.Kind {
+	case TypeSystemDefinitionKindSchema:
+		d.dumpSchemaDefinition(def)
+	case TypeSystemDefinitionKindType:
+		d.dumpTypeDefinition(def)
+	case TypeSystemDefinitionKindDirective:
+		d.dumpDirectiveDefinition(def)
+	}
+}
+
+// dumpSchemaDefinition ...
+func (d *dumper) dumpSchemaDefinition(def *TypeSystemDefinition) {
+	io.WriteString(d.w, "schema ")
+
+	if def.SchemaDefinition.Directives != nil {
+		d.dumpDirectives(def.SchemaDefinition.Directives)
+		io.WriteString(d.w, " ")
+	}
+
+	io.WriteString(d.w, "{\n")
+	d.depth++
+
+	def.SchemaDefinition.RootOperationTypeDefinitions.ForEach(func(opTypeDef RootOperationTypeDefinition, _ int) {
+		d.dumpRootOperationTypeDefinition(opTypeDef)
+		io.WriteString(d.w, "\n")
+	})
+
+	d.depth--
+	io.WriteString(d.w, "}")
+}
+
+// dumpRootOperationTypeDefinition ...
+func (d *dumper) dumpRootOperationTypeDefinition(opTypeDef RootOperationTypeDefinition) {
+	indent := strings.Repeat(indentation, d.depth)
+
+	io.WriteString(d.w, indent)
+	io.WriteString(d.w, opTypeDef.OperationType.String())
+	io.WriteString(d.w, ": ")
+
+	d.dumpType(opTypeDef.NamedType)
+}
+
+// dumpTypeDefinition ...
+func (d *dumper) dumpTypeDefinition(def *TypeSystemDefinition) {
+	// TODO(seeruk): Not done parser for this yet.
+}
+
+// dumpDirectiveDefinition ...
+func (d *dumper) dumpDirectiveDefinition(def *TypeSystemDefinition) {
+	if def.DirectiveDefinition.Description != "" {
+		io.WriteString(d.w, "\"\"\"\n")
+		io.WriteString(d.w, def.DirectiveDefinition.Description)
+		io.WriteString(d.w, "\n\"\"\"\n")
+	}
+
+	// TODO(seeruk): Rest of this.
 }
 
 // escapeGraphQLString takes a single-line GraphQL string and escapes all special characters that

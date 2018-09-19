@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/davecgh/go-spew/spew"
+
 	goparser "github.com/graphql-go/graphql/language/parser"
 	gosource "github.com/graphql-go/graphql/language/source"
 	ast2 "github.com/vektah/gqlparser/ast"
@@ -14,6 +17,9 @@ var tsQuery = []byte(`
 schema @foo @bar {
 	query: Query
 }
+
+directive @foo on SCHEMA
+directive @bar on SCHEMA
 `)
 
 func BenchmarkTypeSystemParser(b *testing.B) {
@@ -77,16 +83,20 @@ func BenchmarkParser(b *testing.B) {
 func runBucketdParser(b *testing.B, query []byte) {
 	b.ResetTimer()
 
+	var doc ast.Document
+
 	for i := 0; i < b.N; i++ {
 		psr := New(query)
 
-		ast, err := psr.Parse()
+		doc, err := psr.Parse()
 		if err != nil {
 			b.Fatal(err)
 		}
 
-		_ = ast
+		_ = doc
 	}
+
+	b.Log(spew.Sdump(doc))
 }
 
 func runGraphQLGoParser(b *testing.B, query []byte) {

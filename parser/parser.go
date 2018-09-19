@@ -21,16 +21,15 @@ type Parser struct {
 	hasShorthandQuery bool
 }
 
-// New takes the raw bytes input of the GraphQL document to be lexed and parsed
-// and returns a *Parser.
+// New returns a new Parser instance.
 func New(input []byte) *Parser {
 	return &Parser{
 		lexer: lexer.New(input),
 	}
 }
 
-// Parse loops over the lexagraphical tokens lexed from the raw bytes input and
-// parses them into an AST of the GraphQL Document which it returns.
+// Parse loops over the lexically analysed tokens produced by the lexer from the raw bytes of input
+// and parses them into an AST of the GraphQL Document which it returns.
 func (p *Parser) Parse() (ast.Document, error) {
 	var document ast.Document
 
@@ -55,7 +54,7 @@ func (p *Parser) Parse() (ast.Document, error) {
 		}
 
 		if p.peek0(token.Illegal) {
-			return ast.Document{}, p.unexpected(p.token, p.expected(token.EOF))
+			return ast.Document{}, p.unexpected(p.token)
 		}
 
 		if p.peek0(token.EOF) {
@@ -68,6 +67,7 @@ func (p *Parser) Parse() (ast.Document, error) {
 	return document, nil
 }
 
+// parseDefinition ...
 func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) {
 	var err error
 
@@ -122,6 +122,7 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 
 }
 
+// parseOperationDefinition ...
 func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefinition, error) {
 	var variableDefinitions *ast.VariableDefinitions
 	var directives *ast.Directives
@@ -167,6 +168,7 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefiniti
 	}, nil
 }
 
+// parseOperationType ...
 func (p *Parser) parseOperationType() (ast.OperationType, error) {
 	tok, err := p.mustConsumen(token.Name, "query", "mutation", "subscription")
 	if err != nil {
@@ -183,6 +185,7 @@ func (p *Parser) parseOperationType() (ast.OperationType, error) {
 	}
 }
 
+// parseFragmentDefinition ...
 func (p *Parser) parseFragmentDefinition() (*ast.ExecutableDefinition, error) {
 	if !p.skip1(token.Name, "fragment") {
 		return nil, nil
@@ -222,6 +225,7 @@ func (p *Parser) parseFragmentDefinition() (*ast.ExecutableDefinition, error) {
 	return definition, nil
 }
 
+// parseTypeCondition ...
 func (p *Parser) parseTypeCondition() (*ast.TypeCondition, error) {
 	_, err := p.mustConsume1(token.Name, "on")
 	if err != nil {
@@ -243,6 +247,7 @@ func (p *Parser) parseTypeCondition() (*ast.TypeCondition, error) {
 	return condition, nil
 }
 
+// parseVariableDefinitions ...
 func (p *Parser) parseVariableDefinitions() (*ast.VariableDefinitions, error) {
 	if !p.skip1(token.Punctuator, "(") {
 		return nil, nil
@@ -294,6 +299,7 @@ func (p *Parser) parseVariableDefinitions() (*ast.VariableDefinitions, error) {
 	return definitions.Reverse(), nil
 }
 
+// parseDirectives ...
 func (p *Parser) parseDirectives() (*ast.Directives, error) {
 	var directives *ast.Directives
 
@@ -330,6 +336,7 @@ func (p *Parser) parseDirectives() (*ast.Directives, error) {
 	return nil, nil
 }
 
+// parseSelectionSet ...
 func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
 	if optional && !p.skip1(token.Punctuator, "{") {
 		return nil, nil
@@ -382,6 +389,7 @@ func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
 	return selections.Reverse(), nil
 }
 
+// parseFragmentSpread ...
 func (p *Parser) parseFragmentSpread() (ast.Selection, error) {
 	var selection ast.Selection
 
@@ -402,6 +410,7 @@ func (p *Parser) parseFragmentSpread() (ast.Selection, error) {
 	return selection, nil
 }
 
+// parseInlineFragment ...
 func (p *Parser) parseInlineFragment() (ast.Selection, error) {
 	var selection ast.Selection
 	var condition *ast.TypeCondition
@@ -432,6 +441,7 @@ func (p *Parser) parseInlineFragment() (ast.Selection, error) {
 	return selection, nil
 }
 
+// parseField ...
 func (p *Parser) parseField() (ast.Selection, error) {
 	var selection ast.Selection
 	var name string
@@ -480,6 +490,7 @@ func (p *Parser) parseField() (ast.Selection, error) {
 	return selection, nil
 }
 
+// parseArguments ...
 func (p *Parser) parseArguments() (*ast.Arguments, error) {
 	if !p.skip1(token.Punctuator, "(") {
 		return nil, nil
@@ -516,6 +527,7 @@ func (p *Parser) parseArguments() (*ast.Arguments, error) {
 	return arguments.Reverse(), nil
 }
 
+// parseDefaultValue ...
 func (p *Parser) parseDefaultValue() (*ast.Value, error) {
 	if !p.skip1(token.Punctuator, "=") {
 		return nil, nil
@@ -529,6 +541,7 @@ func (p *Parser) parseDefaultValue() (*ast.Value, error) {
 	return &val, nil
 }
 
+// parseValue ...
 func (p *Parser) parseValue() (ast.Value, error) {
 	if p.skip1(token.Punctuator, "$") {
 		tok, err := p.mustConsume0(token.Name)
@@ -642,6 +655,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 	return ast.Value{}, errors.New("TODO: see `parseDefinition`")
 }
 
+// parseType ...
 func (p *Parser) parseType() (ast.Type, error) {
 	var astType ast.Type
 
@@ -677,6 +691,7 @@ func (p *Parser) parseType() (ast.Type, error) {
 	return astType, nil
 }
 
+// parseTypeSystemDefinition ...
 func (p *Parser) parseTypeSystemDefinition(description string) (*ast.TypeSystemDefinition, error) {
 	// definition.SchemaDefinition
 	if p.peek1(token.Name, "schema") {
@@ -714,6 +729,7 @@ func (p *Parser) parseTypeSystemDefinition(description string) (*ast.TypeSystemD
 	return &ast.TypeSystemDefinition{}, nil
 }
 
+// parseSchemaDefinition ...
 func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 	if !p.skip1(token.Name, "schema") {
 		return nil, p.unexpected(p.token, p.expected(token.Name, "schema"))
@@ -773,6 +789,78 @@ func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 	}, nil
 }
 
+// parseArgumentsDefinition ...
+func (p *Parser) parseArgumentsDefinition() (*ast.InputValueDefinitions, error) {
+	var defs *ast.InputValueDefinitions
+
+	if !p.skip1(token.Punctuator, "(") {
+		return nil, nil
+	}
+
+	for {
+		def, err := p.parseInputValueDefinition()
+		if err != nil {
+			return nil, err
+		}
+
+		defs = &ast.InputValueDefinitions{
+			Data: def,
+			Next: defs,
+		}
+
+		if p.skip1(token.Punctuator, ")") {
+			return nil, nil
+		}
+	}
+
+	return defs.Reverse(), nil
+}
+
+// parseInputValueDefinition ...
+func (p *Parser) parseInputValueDefinition() (ast.InputValueDefinition, error) {
+	var description string
+
+	descriptionTok, ok := p.consume0(token.StringValue)
+	if ok {
+		description = descriptionTok.Literal
+	}
+
+	nameTok, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return ast.InputValueDefinition{}, err
+	}
+
+	if !p.skip1(token.Punctuator, ":") {
+		return ast.InputValueDefinition{}, p.unexpected(p.token, p.expected(token.Punctuator, ":"))
+	}
+
+	inputValType, err := p.parseType()
+	if err != nil {
+		return ast.InputValueDefinition{}, err
+	}
+
+	defVal, err := p.parseDefaultValue()
+	if err != nil {
+		return ast.InputValueDefinition{}, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return ast.InputValueDefinition{}, err
+	}
+
+	def := ast.InputValueDefinition{
+		Description:  description,
+		Name:         nameTok.Literal,
+		Type:         inputValType,
+		DefaultValue: defVal,
+		Directives:   directives,
+	}
+
+	return def, nil
+}
+
+// parseDirectiveDefinition ...
 func (p *Parser) parseDirectiveDefinition(description string) (*ast.DirectiveDefinition, error) {
 	if !p.skip1(token.Name, "directive") {
 		return nil, nil
@@ -787,22 +875,98 @@ func (p *Parser) parseDirectiveDefinition(description string) (*ast.DirectiveDef
 		return nil, err
 	}
 
-	// TODO(elliot): parseArgumentsDefinition
+	arguments, err := p.parseArgumentsDefinition()
+	if err != nil {
+		return nil, err
+	}
 
 	if !p.skip1(token.Name, "on") {
 		return nil, p.unexpected(p.token, p.expected(token.Name, "on"))
 	}
 
-	// TODO(elliot): parseDirectiveLocations
+	locations, err := p.parseDirectiveLocations()
+	if err != nil {
+		return nil, err
+	}
 
 	return &ast.DirectiveDefinition{
-		Description: description,
-		Name:        nameTok.Literal,
+		Description:         description,
+		Name:                nameTok.Literal,
+		DirectiveLocations:  locations,
+		ArgumentsDefinition: arguments,
 	}, nil
+}
+
+var directiveLocations = []string{
+	"QUERY",
+	"MUTATION",
+	"SUBSCRIPTION",
+	"FIELD",
+	"FRAGMENT_DEFINITION",
+	"FRAGMENT_SPREAD",
+	"INLINE_FRAGMENT",
+	"SCHEMA",
+	"SCALAR",
+	"OBJECT",
+	"FIELD_DEFINITION",
+	"ARGUMENT_DEFINITION",
+	"INTERFACE",
+	"UNION",
+	"ENUM",
+	"ENUM_VALUE",
+	"INPUT_OBJECT",
+	"INPUT_FIELD_DEFINITION",
+}
+
+var directiveLocationsMap = map[string]ast.DirectiveLocation{
+	"QUERY":                  ast.DirectiveLocationQuery,
+	"MUTATION":               ast.DirectiveLocationMutation,
+	"SUBSCRIPTION":           ast.DirectiveLocationSubscription,
+	"FIELD":                  ast.DirectiveLocationField,
+	"FRAGMENT_DEFINITION":    ast.DirectiveLocationFragmentDefinition,
+	"FRAGMENT_SPREAD":        ast.DirectiveLocationFragmentSpread,
+	"INLINE_FRAGMENT":        ast.DirectiveLocationInlineFragment,
+	"SCHEMA":                 ast.DirectiveLocationSchema,
+	"SCALAR":                 ast.DirectiveLocationScalar,
+	"OBJECT":                 ast.DirectiveLocationObject,
+	"FIELD_DEFINITION":       ast.DirectiveLocationFieldDefinition,
+	"ARGUMENT_DEFINITION":    ast.DirectiveLocationArgumentDefinition,
+	"INTERFACE":              ast.DirectiveLocationInterface,
+	"UNION":                  ast.DirectiveLocationUnion,
+	"ENUM":                   ast.DirectiveLocationEnum,
+	"ENUM_VALUE":             ast.DirectiveLocationEnumValue,
+	"INPUT_OBJECT":           ast.DirectiveLocationInputObject,
+	"INPUT_FIELD_DEFINITION": ast.DirectiveLocationInputFieldDefinition,
+}
+
+// parseDirectiveLocations ...
+func (p *Parser) parseDirectiveLocations() (*ast.DirectiveLocations, error) {
+	p.skip1(token.Punctuator, "|") // this one is optional
+
+	var locs *ast.DirectiveLocations
+
+	for {
+		tok, err := p.mustConsumen(token.Name, directiveLocations...)
+		if err != nil {
+			return nil, p.unexpected(p.token, p.expected(token.Name, directiveLocations...))
+		}
+
+		locs = &ast.DirectiveLocations{
+			Data: directiveLocationsMap[tok.Literal],
+			Next: locs,
+		}
+
+		if !p.skip1(token.Punctuator, "|") {
+			break
+		}
+	}
+
+	return locs.Reverse(), nil
 }
 
 // Parser utilities:
 
+// consume0 ...
 func (p *Parser) consume0(t token.Type) (lexer.Token, bool) {
 	tok := p.token
 	ok := p.token.Type == t
@@ -814,6 +978,7 @@ func (p *Parser) consume0(t token.Type) (lexer.Token, bool) {
 	return tok, ok
 }
 
+// consume1 ...
 func (p *Parser) consume1(t token.Type, l string) (lexer.Token, bool) {
 	tok := p.token
 	ok := p.token.Type == t && p.token.Literal == l
@@ -825,6 +990,7 @@ func (p *Parser) consume1(t token.Type, l string) (lexer.Token, bool) {
 	return tok, ok
 }
 
+// consumen ...
 func (p *Parser) consumen(t token.Type, ls ...string) (lexer.Token, bool) {
 	tok := p.token
 	if tok.Type != t {
@@ -848,6 +1014,7 @@ func (p *Parser) consumen(t token.Type, ls ...string) (lexer.Token, bool) {
 	return tok, false
 }
 
+// mustConsume0 ...
 func (p *Parser) mustConsume0(t token.Type) (lexer.Token, error) {
 	tok := p.token
 
@@ -860,6 +1027,7 @@ func (p *Parser) mustConsume0(t token.Type) (lexer.Token, error) {
 	return tok, nil
 }
 
+// mustConsume1 ...
 func (p *Parser) mustConsume1(t token.Type, l string) (lexer.Token, error) {
 	tok := p.token
 
@@ -872,6 +1040,7 @@ func (p *Parser) mustConsume1(t token.Type, l string) (lexer.Token, error) {
 	return tok, nil
 }
 
+// mustConsumen ...
 func (p *Parser) mustConsumen(t token.Type, ls ...string) (lexer.Token, error) {
 	tok, ok := p.consumen(t, ls...)
 	if !ok {
@@ -881,14 +1050,17 @@ func (p *Parser) mustConsumen(t token.Type, ls ...string) (lexer.Token, error) {
 	return tok, nil
 }
 
+// peek0 ...
 func (p *Parser) peek0(t token.Type) bool {
 	return p.token.Type == t
 }
 
+// peek1 ...
 func (p *Parser) peek1(t token.Type, l string) bool {
 	return p.token.Type == t && p.token.Literal == l
 }
 
+// peekn ...
 func (p *Parser) peekn(t token.Type, ls ...string) bool {
 	if p.token.Type != t {
 		return false
@@ -907,6 +1079,7 @@ func (p *Parser) peekn(t token.Type, ls ...string) bool {
 	return false
 }
 
+// skip0 ...
 func (p *Parser) skip0(t token.Type) bool {
 	if p.token.Type != t {
 		return false
@@ -917,6 +1090,7 @@ func (p *Parser) skip0(t token.Type) bool {
 	return true
 }
 
+// skip1 ...
 func (p *Parser) skip1(t token.Type, l string) bool {
 	if p.token.Type != t || p.token.Literal != l {
 		return false
@@ -927,6 +1101,7 @@ func (p *Parser) skip1(t token.Type, l string) bool {
 	return true
 }
 
+// skip ...
 func (p *Parser) skip(t token.Type, ls ...string) bool {
 	match := p.peekn(t, ls...)
 	if !match {
@@ -938,25 +1113,25 @@ func (p *Parser) skip(t token.Type, ls ...string) bool {
 	return true
 }
 
+// scan ...
 func (p *Parser) scan() {
 	p.token = p.lexer.Scan()
 }
 
+// expected ...
 func (p *Parser) expected(t token.Type, ls ...string) string {
 	buf := &bytes.Buffer{}
 	buf.WriteString(t.String())
 	buf.WriteString(" '")
 	buf.WriteString(strings.Join(ls, "|"))
+	buf.WriteString("'")
 	return btos(buf.Bytes())
 }
 
+// unexpected ...
 func (p *Parser) unexpected(token lexer.Token, wants ...string) error {
 	//_, file, line, _ := runtime.Caller(2)
 	//fmt.Println(file, line)
-
-	if len(wants) == 0 {
-		wants = []string{"N/A"}
-	}
 
 	buf := &bytes.Buffer{}
 	buf.WriteString("parser error: unexpected token found at ")
@@ -968,20 +1143,23 @@ func (p *Parser) unexpected(token lexer.Token, wants ...string) error {
 	buf.WriteString(token.Type.String())
 	buf.WriteString(" '")
 	buf.WriteString(token.Literal)
-	buf.WriteString("'. Wanted: ")
-	for i, want := range wants {
-		buf.WriteString(want)
-		if i < len(wants)-1 {
-			buf.WriteString("' or ")
-		}
-	}
 	buf.WriteString("'.")
+
+	if len(wants) > 0 {
+		buf.WriteString(" Wanted: ")
+		for i, want := range wants {
+			buf.WriteString(want)
+			if i < len(wants)-1 {
+				buf.WriteString(" or ")
+			}
+		}
+		buf.WriteString(".")
+	}
 
 	return errors.New(btos(buf.Bytes()))
 }
 
 // btos takes the given bytes, and turns them into a string.
-// Q: naming btos or bbtos? :D
 func btos(bs []byte) string {
 	return *(*string)(unsafe.Pointer(&bs))
 }
