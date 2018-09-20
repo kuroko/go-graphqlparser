@@ -407,31 +407,33 @@ func (d *dumper) dumpDirective(directive Directive) {
 	d.dumpArguments(directive.Arguments)
 }
 
+// 3.1
 // dumpTypeSystemDefinition ...
 func (d *dumper) dumpTypeSystemDefinition(def *TypeSystemDefinition) {
 	switch def.Kind {
 	case TypeSystemDefinitionKindSchema:
-		d.dumpSchemaDefinition(def)
+		d.dumpSchemaDefinition(def.SchemaDefinition)
 	case TypeSystemDefinitionKindType:
-		d.dumpTypeDefinition(def)
+		d.dumpTypeDefinition(def.TypeDefinition)
 	case TypeSystemDefinitionKindDirective:
-		d.dumpDirectiveDefinition(def)
+		d.dumpDirectiveDefinition(def.DirectiveDefinition)
 	}
 }
 
+// 3.2
 // dumpSchemaDefinition ...
-func (d *dumper) dumpSchemaDefinition(def *TypeSystemDefinition) {
+func (d *dumper) dumpSchemaDefinition(def *SchemaDefinition) {
 	io.WriteString(d.w, "schema ")
 
-	if def.SchemaDefinition.Directives != nil {
-		d.dumpDirectives(def.SchemaDefinition.Directives)
+	if def.Directives != nil {
+		d.dumpDirectives(def.Directives)
 		io.WriteString(d.w, " ")
 	}
 
 	io.WriteString(d.w, "{\n")
 	d.depth++
 
-	def.SchemaDefinition.RootOperationTypeDefinitions.ForEach(func(opTypeDef RootOperationTypeDefinition, _ int) {
+	def.RootOperationTypeDefinitions.ForEach(func(opTypeDef RootOperationTypeDefinition, _ int) {
 		d.dumpRootOperationTypeDefinition(opTypeDef)
 		io.WriteString(d.w, "\n")
 	})
@@ -440,6 +442,7 @@ func (d *dumper) dumpSchemaDefinition(def *TypeSystemDefinition) {
 	io.WriteString(d.w, "}")
 }
 
+// 3.2.1
 // dumpRootOperationTypeDefinition ...
 func (d *dumper) dumpRootOperationTypeDefinition(opTypeDef RootOperationTypeDefinition) {
 	indent := strings.Repeat(indentation, d.depth)
@@ -451,18 +454,143 @@ func (d *dumper) dumpRootOperationTypeDefinition(opTypeDef RootOperationTypeDefi
 	d.dumpType(opTypeDef.NamedType)
 }
 
-// dumpTypeDefinition ...
-func (d *dumper) dumpTypeDefinition(def *TypeSystemDefinition) {
-	// TODO(seeruk): Not done parser for this yet.
-}
-
-// dumpDirectiveDefinition ...
-func (d *dumper) dumpDirectiveDefinition(def *TypeSystemDefinition) {
-	if def.DirectiveDefinition.Description != "" {
+// 3.3
+// dumpDescription ...
+func (d *dumper) dumpDescription(description string) {
+	if description != "" {
 		io.WriteString(d.w, "\"\"\"\n")
-		io.WriteString(d.w, def.DirectiveDefinition.Description)
+		io.WriteString(d.w, description)
 		io.WriteString(d.w, "\n\"\"\"\n")
 	}
+}
+
+// 3.4
+// dumpTypeDefinition ...
+func (d *dumper) dumpTypeDefinition(td *TypeDefinition) {
+	switch td.Kind {
+	case TypeDefinitionKindScalar:
+		d.dumpTypeDefinitionScalar(td)
+	case TypeDefinitionKindObject:
+		d.dumpTypeDefinitionObject(td)
+	case TypeDefinitionKindInterface:
+		d.dumpTypeDefinitionInterface(td)
+	case TypeDefinitionKindUnion:
+		d.dumpTypeDefinitionUnion(td)
+	case TypeDefinitionKindEnum:
+		d.dumpTypeDefinitionEnum(td)
+	case TypeDefinitionKindInputObject:
+		d.dumpTypeDefinitionInputObject(td)
+	}
+}
+
+// 3.5
+func (d *dumper) dumpTypeDefinitionScalar(td *TypeDefinition) {
+	d.dumpDescription(td.Description)
+
+	io.WriteString(d.w, "scalar ")
+	io.WriteString(d.w, td.Name)
+
+	if td.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(td.Directives)
+	}
+}
+
+// 3.6
+func (d *dumper) dumpTypeDefinitionObject(td *TypeDefinition) {
+	d.dumpDescription(td.Description)
+
+	io.WriteString(d.w, "type ")
+	io.WriteString(d.w, td.Name)
+
+	// TODO(Luke-Vear): ImplementsInterfaces
+
+	if td.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(td.Directives)
+	}
+
+	if td.FieldsDefinition != nil {
+		io.WriteString(d.w, " ")
+		d.dumpFieldsDefinition(td.FieldsDefinition)
+	}
+}
+
+func (d *dumper) dumpFieldsDefinition(fields *FieldDefinitions) {
+	io.WriteString(d.w, "{\n")
+	d.depth++
+
+	fields.ForEach(func(field FieldDefinition, _ int) {
+		d.dumpFieldDefinition(field)
+		io.WriteString(d.w, "\n")
+	})
+
+	d.depth--
+	io.WriteString(d.w, "}")
+}
+
+func (d *dumper) dumpFieldDefinition(field FieldDefinition) {
+	d.dumpDescription(field.Description)
+
+	io.WriteString(d.w, field.Name)
+
+	if field.ArgumentsDefinition != nil {
+		io.WriteString(d.w, " ")
+		d.dumpArgumentsDefinition(field.ArgumentsDefinition)
+	}
+
+	io.WriteString(d.w, " : ")
+	io.WriteString(d.w, field.Type.Kind.String())
+
+	if field.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(field.Directives)
+	}
+}
+
+// 3.6.1
+func (d *dumper) dumpArgumentsDefinition(arguments *InputValueDefinitions) {
+	if arguments != nil {
+		io.WriteString(d.w, "(")
+
+		arguments.ForEach(func(ivd InputValueDefinition, i int) {
+			if i > 0 {
+				io.WriteString(d.w, ", ")
+			}
+			d.dumpInputValueDefinition(ivd)
+		})
+
+		io.WriteString(d.w, ")")
+	}
+}
+
+func (d *dumper) dumpInputValueDefinition(ivd InputValueDefinition) {
+	d.dumpDescription(ivd.Description)
+
+	io.WriteString(d.w, ivd.Name)
+	io.WriteString(d.w, " : ")
+	io.WriteString(d.w, ivd.Type.Kind.String())
+
+	if ivd.DefaultValue != nil {
+		io.WriteString(d.w, " = ")
+		d.dumpValue(*ivd.DefaultValue)
+	}
+
+	if ivd.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(ivd.Directives)
+	}
+}
+
+// TODO(Luke-Vear): dumpTypeDefinition*
+func (d *dumper) dumpTypeDefinitionInterface(td *TypeDefinition)   {}
+func (d *dumper) dumpTypeDefinitionUnion(td *TypeDefinition)       {}
+func (d *dumper) dumpTypeDefinitionEnum(td *TypeDefinition)        {}
+func (d *dumper) dumpTypeDefinitionInputObject(td *TypeDefinition) {}
+
+// dumpDirectiveDefinition ...
+func (d *dumper) dumpDirectiveDefinition(def *DirectiveDefinition) {
+	d.dumpDescription(def.Description)
 
 	// TODO(seeruk): Rest of this.
 }

@@ -323,9 +323,9 @@ type TypeDefinitionKind int8
 type TypeDefinition struct {
 	Description           string
 	Directives            *Directives
-	ImplementsInterface   *Types // Only allow "TypeKindNamedType" kind NamedType.
-	FieldsDefinition      *FieldDefinitions
-	UnionMemberTypes      *Types // Only allow "TypeKindNamedType" kind NamedType.
+	ImplementsInterface   *Types            // Only allow "TypeKindNamedType" kind NamedType.
+	FieldsDefinition      *FieldDefinitions // Not a typo.
+	UnionMemberTypes      *Types            // Only allow "TypeKindNamedType" kind NamedType.
 	EnumValuesDefinition  *EnumValueDefinitions
 	InputFieldsDefinition *FieldDefinitions
 	Name                  string
