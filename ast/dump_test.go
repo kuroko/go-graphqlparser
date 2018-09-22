@@ -139,6 +139,42 @@ schema @foo @bar {
 sdiofhsidufhiusdhfuihsuidf
 """
 directive @foo on QUERY
+
+interface NamedEntity {
+  name: String
+}
+
+interface ValuedEntity {
+  value: Int
+}
+
+type Person implements NamedEntity {
+  name: String
+  age: Int
+}
+
+type Business implements NamedEntity & ValuedEntity {
+  name: String
+  value: Int
+  employeeCount: Int
+}
+
+union SearchResult =
+  | Photo
+  | Person
+  | Plate
+
+enum Direction {
+  NORTH
+  EAST
+  SOUTH
+  WEST
+}
+
+input Point2D {
+  x: Float
+  y: Float
+}
 `)
 )
 

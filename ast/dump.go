@@ -465,7 +465,6 @@ func (d *dumper) dumpDescription(description string) {
 }
 
 // 3.4
-// dumpTypeDefinition ...
 func (d *dumper) dumpTypeDefinition(td *TypeDefinition) {
 	switch td.Kind {
 	case TypeDefinitionKindScalar:
@@ -503,7 +502,10 @@ func (d *dumper) dumpTypeDefinitionObject(td *TypeDefinition) {
 	io.WriteString(d.w, "type ")
 	io.WriteString(d.w, td.Name)
 
-	// TODO(Luke-Vear): ImplementsInterfaces
+	if td.ImplementsInterface != nil {
+		io.WriteString(d.w, " ")
+		d.dumpImplementsInterfaces(td.ImplementsInterface)
+	}
 
 	if td.Directives != nil {
 		io.WriteString(d.w, " ")
@@ -514,6 +516,17 @@ func (d *dumper) dumpTypeDefinitionObject(td *TypeDefinition) {
 		io.WriteString(d.w, " ")
 		d.dumpFieldsDefinition(td.FieldsDefinition)
 	}
+}
+
+func (d *dumper) dumpImplementsInterfaces(ii *Types) {
+	io.WriteString(d.w, "implements ")
+
+	ii.ForEach(func(t Type, i int) {
+		if i > 0 {
+			io.WriteString(d.w, "& ")
+		}
+		io.WriteString(d.w, t.NamedType)
+	})
 }
 
 func (d *dumper) dumpFieldsDefinition(fields *FieldDefinitions) {
@@ -550,18 +563,16 @@ func (d *dumper) dumpFieldDefinition(field FieldDefinition) {
 
 // 3.6.1
 func (d *dumper) dumpArgumentsDefinition(arguments *InputValueDefinitions) {
-	if arguments != nil {
-		io.WriteString(d.w, "(")
+	io.WriteString(d.w, "(")
 
-		arguments.ForEach(func(ivd InputValueDefinition, i int) {
-			if i > 0 {
-				io.WriteString(d.w, ", ")
-			}
-			d.dumpInputValueDefinition(ivd)
-		})
+	arguments.ForEach(func(ivd InputValueDefinition, i int) {
+		if i > 0 {
+			io.WriteString(d.w, ", ")
+		}
+		d.dumpInputValueDefinition(ivd)
+	})
 
-		io.WriteString(d.w, ")")
-	}
+	io.WriteString(d.w, ")")
 }
 
 func (d *dumper) dumpInputValueDefinition(ivd InputValueDefinition) {
@@ -569,7 +580,7 @@ func (d *dumper) dumpInputValueDefinition(ivd InputValueDefinition) {
 
 	io.WriteString(d.w, ivd.Name)
 	io.WriteString(d.w, " : ")
-	io.WriteString(d.w, ivd.Type.Kind.String())
+	io.WriteString(d.w, ivd.Type.NamedType)
 
 	if ivd.DefaultValue != nil {
 		io.WriteString(d.w, " = ")
@@ -582,12 +593,138 @@ func (d *dumper) dumpInputValueDefinition(ivd InputValueDefinition) {
 	}
 }
 
-// TODO(Luke-Vear): dumpTypeDefinition*
-func (d *dumper) dumpTypeDefinitionInterface(td *TypeDefinition)   {}
-func (d *dumper) dumpTypeDefinitionUnion(td *TypeDefinition)       {}
-func (d *dumper) dumpTypeDefinitionEnum(td *TypeDefinition)        {}
-func (d *dumper) dumpTypeDefinitionInputObject(td *TypeDefinition) {}
+// 3.7
+func (d *dumper) dumpTypeDefinitionInterface(td *TypeDefinition) {
+	d.dumpDescription(td.Description)
 
+	io.WriteString(d.w, "interface ")
+	io.WriteString(d.w, td.Name)
+
+	if td.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(td.Directives)
+	}
+
+	if td.FieldsDefinition != nil {
+		io.WriteString(d.w, " ")
+		d.dumpFieldsDefinition(td.FieldsDefinition)
+	}
+}
+
+// 3.8
+func (d *dumper) dumpTypeDefinitionUnion(td *TypeDefinition) {
+	d.dumpDescription(td.Description)
+
+	io.WriteString(d.w, "union ")
+	io.WriteString(d.w, td.Name)
+
+	if td.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(td.Directives)
+	}
+
+	if td.UnionMemberTypes != nil {
+		io.WriteString(d.w, " ")
+		d.dumpUnionMemberTypes(td.UnionMemberTypes)
+	}
+}
+
+// union SearchResult = Photo | Person
+// union SearchResult =
+//   | Photo
+//   | Person
+//   | Plate
+func (d *dumper) dumpUnionMemberTypes(umt *Types) {
+	io.WriteString(d.w, "=")
+
+	l := umt.Len()
+
+	// TODO: does this need to alter depth or will it always start at 0?
+	seperator := " | "
+	if l > 2 {
+		seperator = "\n " + seperator
+	}
+
+	umt.ForEach(func(t Type, i int) {
+		io.WriteString(d.w, seperator)
+		io.WriteString(d.w, t.NamedType)
+	})
+}
+
+// 3.9
+func (d *dumper) dumpTypeDefinitionEnum(td *TypeDefinition) {
+	d.dumpDescription(td.Description)
+
+	io.WriteString(d.w, "enum ")
+	io.WriteString(d.w, td.Name)
+
+	if td.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(td.Directives)
+	}
+
+	if td.EnumValuesDefinition != nil {
+		io.WriteString(d.w, " ")
+		d.dumpEnumValuesDefinition(td.EnumValuesDefinition)
+	}
+}
+
+func (d *dumper) dumpEnumValuesDefinition(evds *EnumValueDefinitions) {
+	io.WriteString(d.w, "{\n")
+	d.depth++
+
+	evds.ForEach(func(evd EnumValueDefinition, _ int) {
+		d.dumpEnumValueDefinition(evd)
+		io.WriteString(d.w, "\n")
+	})
+
+	d.depth--
+	io.WriteString(d.w, "}")
+}
+
+func (d *dumper) dumpEnumValueDefinition(evd EnumValueDefinition) {
+	d.dumpDescription(evd.Description)
+
+	io.WriteString(d.w, evd.EnumValue)
+
+	if evd.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(evd.Directives)
+	}
+}
+
+// 3.10
+func (d *dumper) dumpTypeDefinitionInputObject(td *TypeDefinition) {
+	d.dumpDescription(td.Description)
+
+	io.WriteString(d.w, "input ")
+	io.WriteString(d.w, td.Name)
+
+	if td.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(td.Directives)
+	}
+
+	if td.InputFieldsDefinition != nil {
+		io.WriteString(d.w, " ")
+		d.dumpInputFieldsDefinition(td.InputFieldsDefinition)
+	}
+}
+
+func (d *dumper) dumpInputFieldsDefinition(ivds *InputValueDefinitions) {
+	io.WriteString(d.w, "{")
+	d.depth++
+
+	ivds.ForEach(func(ivd InputValueDefinition, i int) {
+		io.WriteString(d.w, "\n")
+		d.dumpInputValueDefinition(ivd)
+	})
+
+	d.depth--
+	io.WriteString(d.w, "}")
+}
+
+// TODOL 3.13
 // dumpDirectiveDefinition ...
 func (d *dumper) dumpDirectiveDefinition(def *DirectiveDefinition) {
 	d.dumpDescription(def.Description)

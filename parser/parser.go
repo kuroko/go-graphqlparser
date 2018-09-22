@@ -813,6 +813,7 @@ func (p *Parser) parseArgumentsDefinition() (*ast.InputValueDefinitions, error) 
 		}
 	}
 
+	// TODO: unreachable?
 	return defs.Reverse(), nil
 }
 
