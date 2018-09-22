@@ -407,7 +407,7 @@ func (d *dumper) dumpDirective(directive Directive) {
 	d.dumpArguments(directive.Arguments)
 }
 
-// 3.1
+// 3
 // dumpTypeSystemDefinition ...
 func (d *dumper) dumpTypeSystemDefinition(def *TypeSystemDefinition) {
 	switch def.Kind {
@@ -419,6 +419,10 @@ func (d *dumper) dumpTypeSystemDefinition(def *TypeSystemDefinition) {
 		d.dumpDirectiveDefinition(def.DirectiveDefinition)
 	}
 }
+
+// 3.1
+// TODO: ast + dumpers.
+func (d *dumper) dumpTypeSystemExtension() {}
 
 // 3.2
 // dumpSchemaDefinition ...
@@ -548,7 +552,6 @@ func (d *dumper) dumpFieldDefinition(field FieldDefinition) {
 	io.WriteString(d.w, field.Name)
 
 	if field.ArgumentsDefinition != nil {
-		io.WriteString(d.w, " ")
 		d.dumpArgumentsDefinition(field.ArgumentsDefinition)
 	}
 
@@ -629,6 +632,7 @@ func (d *dumper) dumpTypeDefinitionUnion(td *TypeDefinition) {
 	}
 }
 
+// union SearchResult = Photo
 // union SearchResult = Photo | Person
 // union SearchResult =
 //   | Photo
@@ -639,15 +643,20 @@ func (d *dumper) dumpUnionMemberTypes(umt *Types) {
 
 	l := umt.Len()
 
-	// TODO: does this need to alter depth or will it always start at 0?
 	seperator := " | "
-	if l > 2 {
+	if l < 2 {
+		io.WriteString(d.w, " ")
+	} else {
 		seperator = "\n " + seperator
+		io.WriteString(d.w, seperator)
 	}
 
+	// TODO: does this need to alter depth or will it always start at 0?
 	umt.ForEach(func(t Type, i int) {
-		io.WriteString(d.w, seperator)
 		io.WriteString(d.w, t.NamedType)
+		if i < l-1 { // ?
+			io.WriteString(d.w, seperator)
+		}
 	})
 }
 
@@ -724,12 +733,46 @@ func (d *dumper) dumpInputFieldsDefinition(ivds *InputValueDefinitions) {
 	io.WriteString(d.w, "}")
 }
 
-// TODOL 3.13
+// 3.13
 // dumpDirectiveDefinition ...
 func (d *dumper) dumpDirectiveDefinition(def *DirectiveDefinition) {
 	d.dumpDescription(def.Description)
 
-	// TODO(seeruk): Rest of this.
+	io.WriteString(d.w, "directive @")
+	io.WriteString(d.w, def.Name)
+
+	if def.ArgumentsDefinition != nil {
+		d.dumpArgumentsDefinition(def.ArgumentsDefinition)
+	}
+
+	io.WriteString(d.w, " on")
+	d.dumpDirectiveLocations(def.DirectiveLocations)
+}
+
+// directive @example on FIELD
+// directive @example on FIELD_DEFINITION | ARGUMENT_DEFINITION
+// directive @example on
+//   | FIELD
+//   | FRAGMENT_SPREAD
+//   | INLINE_FRAGMENT
+func (d *dumper) dumpDirectiveLocations(dls *DirectiveLocations) {
+	l := dls.Len()
+
+	seperator := " | "
+	if l < 2 {
+		io.WriteString(d.w, " ")
+	} else {
+		seperator = "\n " + seperator
+		io.WriteString(d.w, seperator)
+	}
+
+	// TODO: does this need to alter depth or will it always start at 0?
+	dls.ForEach(func(dl DirectiveLocation, i int) {
+		io.WriteString(d.w, dl.String())
+		if i < l-1 { // ?
+			io.WriteString(d.w, seperator)
+		}
+	})
 }
 
 // escapeGraphQLString takes a single-line GraphQL string and escapes all special characters that

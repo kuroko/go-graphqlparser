@@ -293,6 +293,9 @@ type TypeSystemDefinition struct {
 	Kind                TypeSystemDefinitionKind
 }
 
+// 3.1 Type System Extensions
+// TODO: ast types.
+
 // 3.2 Schemam
 // http://facebook.github.io/graphql/June2018/#sec-Schema
 

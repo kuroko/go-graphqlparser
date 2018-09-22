@@ -159,10 +159,14 @@ type Business implements NamedEntity & ValuedEntity {
   employeeCount: Int
 }
 
-union SearchResult =
-  | Photo
-  | Person
-  | Plate
+union SmallestResult = Driftking
+
+union SmallerResult = Hans | Car
+
+union BiggerResult =
+  | Orange
+  | Black
+  | RX7
 
 enum Direction {
   NORTH
@@ -175,6 +179,15 @@ input Point2D {
   x: Float
   y: Float
 }
+
+directive @example on FIELD
+
+directive @example on FIELD_DEFINITION | ARGUMENT_DEFINITION
+
+directive @example on
+  | FIELD
+  | FRAGMENT_SPREAD
+  | INLINE_FRAGMENT
 `)
 )
 
