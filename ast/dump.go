@@ -42,7 +42,7 @@ type dumper struct {
 	w     io.Writer
 }
 
-// dumpDefinitions ...
+// 2.2 Document
 func (d *dumper) dumpDefinitions(definitions *Definitions) {
 	definitions.ForEach(func(definition Definition, i int) {
 		if i != 0 {
@@ -57,7 +57,6 @@ func (d *dumper) dumpDefinitions(definitions *Definitions) {
 	})
 }
 
-// dumpDefinition ...
 func (d *dumper) dumpDefinition(definition Definition) {
 	switch definition.Kind {
 	case DefinitionKindExecutable:
@@ -67,7 +66,6 @@ func (d *dumper) dumpDefinition(definition Definition) {
 	}
 }
 
-// dumpExecutableDefinition ...
 func (d *dumper) dumpExecutableDefinition(def *ExecutableDefinition) {
 	switch def.Kind {
 	case ExecutableDefinitionKindOperation:
@@ -77,7 +75,7 @@ func (d *dumper) dumpExecutableDefinition(def *ExecutableDefinition) {
 	}
 }
 
-// dumpOperationDefinition ...
+// 2.3 Operations
 func (d *dumper) dumpOperationDefinition(def *ExecutableDefinition) {
 	var shorthand bool
 	if d.defs == 1 {
@@ -115,39 +113,7 @@ func (d *dumper) dumpOperationDefinition(def *ExecutableDefinition) {
 	d.dumpSelections(def.SelectionSet)
 }
 
-// dumpVariableDefinitions ...
-func (d *dumper) dumpVariableDefinitions(definitions *VariableDefinitions) {
-	definitionsLen := definitions.Len()
-
-	io.WriteString(d.w, "(")
-
-	definitions.ForEach(func(definition VariableDefinition, i int) {
-		d.dumpVariableDefinition(definition)
-
-		if i < definitionsLen-1 {
-			io.WriteString(d.w, ", ")
-		}
-	})
-
-	io.WriteString(d.w, ")")
-}
-
-// dumpVariableDefinition ...
-func (d *dumper) dumpVariableDefinition(definition VariableDefinition) {
-	io.WriteString(d.w, "$")
-	io.WriteString(d.w, definition.Name)
-	io.WriteString(d.w, ": ")
-
-	d.dumpType(definition.Type)
-
-	if definition.DefaultValue != nil {
-		io.WriteString(d.w, " = ")
-
-		d.dumpValue(*definition.DefaultValue)
-	}
-}
-
-// dumpSelections ...
+// 2.4 Selection Sets
 func (d *dumper) dumpSelections(selections *Selections) {
 	io.WriteString(d.w, "{\n")
 
@@ -160,7 +126,6 @@ func (d *dumper) dumpSelections(selections *Selections) {
 	io.WriteString(d.w, "}")
 }
 
-// dumpSelection ...
 func (d *dumper) dumpSelection(selection Selection) {
 	d.depth++
 
@@ -176,7 +141,7 @@ func (d *dumper) dumpSelection(selection Selection) {
 	d.depth--
 }
 
-// dumpFieldSelection ...
+// 2.5 Fields
 func (d *dumper) dumpFieldSelection(selection Selection) {
 	indent := strings.Repeat(indentation, d.depth)
 
@@ -202,7 +167,7 @@ func (d *dumper) dumpFieldSelection(selection Selection) {
 	}
 }
 
-// dumpArguments ...
+// 2.6 Arguments
 func (d *dumper) dumpArguments(args *Arguments) {
 	argsLen := args.Len()
 	if argsLen == 0 {
@@ -221,7 +186,6 @@ func (d *dumper) dumpArguments(args *Arguments) {
 	io.WriteString(d.w, ")")
 }
 
-// dumpArgument ...
 func (d *dumper) dumpArgument(arg Argument) {
 	io.WriteString(d.w, arg.Name)
 	io.WriteString(d.w, ": ")
@@ -229,7 +193,7 @@ func (d *dumper) dumpArgument(arg Argument) {
 	d.dumpValue(arg.Value)
 }
 
-// dumpFragmentSpread ...
+// 2.8 Fragments
 func (d *dumper) dumpFragmentSpread(selection Selection) {
 	indent := strings.Repeat(indentation, d.depth)
 
@@ -244,7 +208,7 @@ func (d *dumper) dumpFragmentSpread(selection Selection) {
 	}
 }
 
-// dumpInlineFragment ...
+// 2.8.2 Inline Fragments
 func (d *dumper) dumpInlineFragment(selection Selection) {
 	indent := strings.Repeat(indentation, d.depth)
 
@@ -268,7 +232,6 @@ func (d *dumper) dumpInlineFragment(selection Selection) {
 	d.dumpSelections(selection.SelectionSet)
 }
 
-// dumpFragmentDefinition ...
 func (d *dumper) dumpFragmentDefinition(def *ExecutableDefinition) {
 	io.WriteString(d.w, "fragment")
 	io.WriteString(d.w, " ")
@@ -289,7 +252,7 @@ func (d *dumper) dumpFragmentDefinition(def *ExecutableDefinition) {
 	d.dumpSelections(def.SelectionSet)
 }
 
-// dumpValue ...
+// 2.9 Input Values
 func (d *dumper) dumpValue(value Value) {
 	switch value.Kind {
 	case ValueKindVariable:
@@ -372,7 +335,38 @@ func (d *dumper) dumpValue(value Value) {
 	}
 }
 
-// dumpType ...
+// 2.10 Variables
+func (d *dumper) dumpVariableDefinitions(definitions *VariableDefinitions) {
+	definitionsLen := definitions.Len()
+
+	io.WriteString(d.w, "(")
+
+	definitions.ForEach(func(definition VariableDefinition, i int) {
+		d.dumpVariableDefinition(definition)
+
+		if i < definitionsLen-1 {
+			io.WriteString(d.w, ", ")
+		}
+	})
+
+	io.WriteString(d.w, ")")
+}
+
+func (d *dumper) dumpVariableDefinition(definition VariableDefinition) {
+	io.WriteString(d.w, "$")
+	io.WriteString(d.w, definition.Name)
+	io.WriteString(d.w, ": ")
+
+	d.dumpType(definition.Type)
+
+	if definition.DefaultValue != nil {
+		io.WriteString(d.w, " = ")
+
+		d.dumpValue(*definition.DefaultValue)
+	}
+}
+
+// 2.11 Type References
 func (d *dumper) dumpType(astType Type) {
 	switch astType.Kind {
 	case TypeKindNamedType:
@@ -388,7 +382,7 @@ func (d *dumper) dumpType(astType Type) {
 	}
 }
 
-// dumpDirectives ...
+// 2.12 Directives
 func (d *dumper) dumpDirectives(directives *Directives) {
 	directives.ForEach(func(directive Directive, i int) {
 		if i != 0 {
@@ -399,7 +393,6 @@ func (d *dumper) dumpDirectives(directives *Directives) {
 	})
 }
 
-// dumpDirective ..
 func (d *dumper) dumpDirective(directive Directive) {
 	io.WriteString(d.w, "@")
 	io.WriteString(d.w, directive.Name)
@@ -407,8 +400,7 @@ func (d *dumper) dumpDirective(directive Directive) {
 	d.dumpArguments(directive.Arguments)
 }
 
-// 3
-// dumpTypeSystemDefinition ...
+// 3 Type System
 func (d *dumper) dumpTypeSystemDefinition(def *TypeSystemDefinition) {
 	switch def.Kind {
 	case TypeSystemDefinitionKindSchema:
@@ -420,21 +412,26 @@ func (d *dumper) dumpTypeSystemDefinition(def *TypeSystemDefinition) {
 	}
 }
 
-// 3.1
-// TODO: dumpers.
-func (d *dumper) dumpTypeSystemExtension() {}
+// 3.1 Type System Extensions
+func (d *dumper) dumpTypeSystemExtension(ext TypeSystemExtension) {
+	switch ext.Kind {
+	case TypeSystemExtensionKindSchema:
+		d.dumpSchemaExtension(ext.SchemaExtension)
+	case TypeSystemExtensionKindType:
+		d.dumpTypeExtension(ext.TypeExtension)
+	}
+}
 
-// 3.2
-// dumpSchemaDefinition ...
+// 3.2 Schema
 func (d *dumper) dumpSchemaDefinition(def *SchemaDefinition) {
-	io.WriteString(d.w, "schema ")
+	io.WriteString(d.w, "schema")
 
 	if def.Directives != nil {
-		d.dumpDirectives(def.Directives)
 		io.WriteString(d.w, " ")
+		d.dumpDirectives(def.Directives)
 	}
 
-	io.WriteString(d.w, "{\n")
+	io.WriteString(d.w, " {\n")
 	d.depth++
 
 	def.RootOperationTypeDefinitions.ForEach(func(opTypeDef RootOperationTypeDefinition, _ int) {
@@ -446,8 +443,7 @@ func (d *dumper) dumpSchemaDefinition(def *SchemaDefinition) {
 	io.WriteString(d.w, "}")
 }
 
-// 3.2.1
-// dumpRootOperationTypeDefinition ...
+// 3.2.1 Root Operation Types
 func (d *dumper) dumpRootOperationTypeDefinition(opTypeDef RootOperationTypeDefinition) {
 	indent := strings.Repeat(indentation, d.depth)
 
@@ -458,8 +454,41 @@ func (d *dumper) dumpRootOperationTypeDefinition(opTypeDef RootOperationTypeDefi
 	d.dumpType(opTypeDef.NamedType)
 }
 
-// 3.3
-// dumpDescription ...
+// 3.2.2 Schema Extension
+func (d *dumper) dumpSchemaExtension(sext *SchemaExtension) {
+	io.WriteString(d.w, "extend schema")
+
+	if sext.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(sext.Directives)
+	}
+
+	if sext.OperationTypeDefinitions != nil {
+		io.WriteString(d.w, " {\n")
+		d.depth++
+
+		sext.OperationTypeDefinitions.ForEach(func(otd OperationTypeDefinition, _ int) {
+			d.dumpOperationTypeDefinition(otd)
+			io.WriteString(d.w, "\n")
+		})
+
+		d.depth--
+		io.WriteString(d.w, "}")
+	}
+}
+
+func (d *dumper) dumpOperationTypeDefinition(otd OperationTypeDefinition) {
+	indent := strings.Repeat(indentation, d.depth)
+
+	io.WriteString(d.w, indent)
+	io.WriteString(d.w, otd.OperationType.String())
+	io.WriteString(d.w, ": ")
+
+	//d.dumpType(otd.NamedType)
+	io.WriteString(d.w, otd.NamedType)
+}
+
+// 3.3 Descriptions
 func (d *dumper) dumpDescription(description string) {
 	if description != "" {
 		io.WriteString(d.w, "\"\"\"\n")
@@ -468,7 +497,7 @@ func (d *dumper) dumpDescription(description string) {
 	}
 }
 
-// 3.4
+// 3.4 Types
 func (d *dumper) dumpTypeDefinition(td *TypeDefinition) {
 	switch td.Kind {
 	case TypeDefinitionKindScalar:
@@ -486,7 +515,25 @@ func (d *dumper) dumpTypeDefinition(td *TypeDefinition) {
 	}
 }
 
-// 3.5
+// 3.4.3 Type Extensions
+func (d *dumper) dumpTypeExtension(te *TypeExtension) {
+	switch te.Kind {
+	case TypeExtensionKindScalar:
+		d.dumpScalarTypeExtension(te)
+	case TypeExtensionKindObject:
+		d.dumpObjectTypeExtension(te)
+	case TypeExtensionKindInterface:
+		d.dumpInterfaceTypeExtension(te)
+	case TypeExtensionKindUnion:
+		d.dumpUnionTypeExtension(te)
+	case TypeExtensionKindEnum:
+		d.dumpEnumTypeExtension(te)
+	case TypeExtensionKindInputObject:
+		d.dumpInputObjectTypeExtension(te)
+	}
+}
+
+// 3.5 Scalars
 func (d *dumper) dumpTypeDefinitionScalar(td *TypeDefinition) {
 	d.dumpDescription(td.Description)
 
@@ -499,7 +546,18 @@ func (d *dumper) dumpTypeDefinitionScalar(td *TypeDefinition) {
 	}
 }
 
-// 3.6
+// 3.5.6 Scalar Extensions
+func (d *dumper) dumpScalarTypeExtension(te *TypeExtension) {
+	io.WriteString(d.w, "extend scalar ")
+	io.WriteString(d.w, te.Name)
+
+	if te.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(te.Directives)
+	}
+}
+
+// 3.6 Objects
 func (d *dumper) dumpTypeDefinitionObject(td *TypeDefinition) {
 	d.dumpDescription(td.Description)
 
@@ -522,6 +580,12 @@ func (d *dumper) dumpTypeDefinitionObject(td *TypeDefinition) {
 	}
 }
 
+// dumpImplementsInterfaces dumps the ImplementsInterfaces. The formatting of
+// ImplementsInterfaces is flexible, so the dumper uses a sensible pattern
+// which you can see an example of below.
+//
+// type Climbing implements Ropes
+// type Climbing implements Ropes & Rocks
 func (d *dumper) dumpImplementsInterfaces(ii *Types) {
 	io.WriteString(d.w, "implements ")
 
@@ -564,7 +628,7 @@ func (d *dumper) dumpFieldDefinition(field FieldDefinition) {
 	}
 }
 
-// 3.6.1
+// 3.6.1 Field Arguments
 func (d *dumper) dumpArgumentsDefinition(arguments *InputValueDefinitions) {
 	io.WriteString(d.w, "(")
 
@@ -596,6 +660,27 @@ func (d *dumper) dumpInputValueDefinition(ivd InputValueDefinition) {
 	}
 }
 
+// 3.6.3 Interfaces
+func (d *dumper) dumpObjectTypeExtension(te *TypeExtension) {
+	io.WriteString(d.w, "extend type ")
+	io.WriteString(d.w, te.Name)
+
+	if te.ImplementsInterface != nil {
+		io.WriteString(d.w, " ")
+		d.dumpImplementsInterfaces(te.ImplementsInterface)
+	}
+
+	if te.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(te.Directives)
+	}
+
+	if te.FieldsDefinition != nil {
+		io.WriteString(d.w, " ")
+		d.dumpFieldsDefinition(te.FieldsDefinition)
+	}
+}
+
 // 3.7
 func (d *dumper) dumpTypeDefinitionInterface(td *TypeDefinition) {
 	d.dumpDescription(td.Description)
@@ -614,7 +699,23 @@ func (d *dumper) dumpTypeDefinitionInterface(td *TypeDefinition) {
 	}
 }
 
-// 3.8
+// 3.7.1 Interface Extensions
+func (d *dumper) dumpInterfaceTypeExtension(te *TypeExtension) {
+	io.WriteString(d.w, "extend interface ")
+	io.WriteString(d.w, te.Name)
+
+	if te.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(te.Directives)
+	}
+
+	if te.FieldsDefinition != nil {
+		io.WriteString(d.w, " ")
+		d.dumpFieldsDefinition(te.FieldsDefinition)
+	}
+}
+
+// 3.8 Unions
 func (d *dumper) dumpTypeDefinitionUnion(td *TypeDefinition) {
 	d.dumpDescription(td.Description)
 
@@ -632,6 +733,10 @@ func (d *dumper) dumpTypeDefinitionUnion(td *TypeDefinition) {
 	}
 }
 
+// dumpUnionMemberTypes dumps the UnionMemberTypes. The formatting of
+// UnionMemberTypes is flexible, so the dumper uses a sensible pattern
+// which you can see an example of below.
+//
 // union SearchResult = Photo
 // union SearchResult = Photo | Person
 // union SearchResult =
@@ -660,7 +765,23 @@ func (d *dumper) dumpUnionMemberTypes(umt *Types) {
 	})
 }
 
-// 3.9
+// 3.8.1 Union Extensions
+func (d *dumper) dumpUnionTypeExtension(te *TypeExtension) {
+	io.WriteString(d.w, "extend union ")
+	io.WriteString(d.w, te.Name)
+
+	if te.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(te.Directives)
+	}
+
+	if te.UnionMemberTypes != nil {
+		io.WriteString(d.w, " ")
+		d.dumpUnionMemberTypes(te.UnionMemberTypes)
+	}
+}
+
+// 3.9 Enums
 func (d *dumper) dumpTypeDefinitionEnum(td *TypeDefinition) {
 	d.dumpDescription(td.Description)
 
@@ -702,7 +823,23 @@ func (d *dumper) dumpEnumValueDefinition(evd EnumValueDefinition) {
 	}
 }
 
-// 3.10
+// 3.9.1 Enum Extensions
+func (d *dumper) dumpEnumTypeExtension(te *TypeExtension) {
+	io.WriteString(d.w, "extend enum ")
+	io.WriteString(d.w, te.Name)
+
+	if te.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(te.Directives)
+	}
+
+	if te.EnumValuesDefinition != nil {
+		io.WriteString(d.w, " ")
+		d.dumpEnumValuesDefinition(te.EnumValuesDefinition)
+	}
+}
+
+// 3.10 Input Objects
 func (d *dumper) dumpTypeDefinitionInputObject(td *TypeDefinition) {
 	d.dumpDescription(td.Description)
 
@@ -733,7 +870,23 @@ func (d *dumper) dumpInputFieldsDefinition(ivds *InputValueDefinitions) {
 	io.WriteString(d.w, "}")
 }
 
-// 3.13
+// 3.10.1 Input Object Extensions
+func (d *dumper) dumpInputObjectTypeExtension(te *TypeExtension) {
+	io.WriteString(d.w, "extend input ")
+	io.WriteString(d.w, te.Name)
+
+	if te.Directives != nil {
+		io.WriteString(d.w, " ")
+		d.dumpDirectives(te.Directives)
+	}
+
+	if te.InputFieldsDefinition != nil {
+		io.WriteString(d.w, " ")
+		d.dumpInputFieldsDefinition(te.InputFieldsDefinition)
+	}
+}
+
+// 3.13 Directives
 // dumpDirectiveDefinition ...
 func (d *dumper) dumpDirectiveDefinition(def *DirectiveDefinition) {
 	d.dumpDescription(def.Description)
@@ -749,6 +902,10 @@ func (d *dumper) dumpDirectiveDefinition(def *DirectiveDefinition) {
 	d.dumpDirectiveLocations(def.DirectiveLocations)
 }
 
+// dumpDirectiveLocations dumps the DirectiveLocations. The formatting of
+// DirectiveLocations is flexible, so the dumper uses a sensible pattern
+// which you can see an example of below.
+//
 // directive @example on FIELD
 // directive @example on FIELD_DEFINITION | ARGUMENT_DEFINITION
 // directive @example on
@@ -774,6 +931,10 @@ func (d *dumper) dumpDirectiveLocations(dls *DirectiveLocations) {
 		}
 	})
 }
+
+/*****************************************************************************
+* Utility functions                                                          *
+*****************************************************************************/
 
 // escapeGraphQLString takes a single-line GraphQL string and escapes all special characters that
 // need to be escapes in it, returning the result.

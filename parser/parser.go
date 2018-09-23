@@ -965,7 +965,9 @@ func (p *Parser) parseDirectiveLocations() (*ast.DirectiveLocations, error) {
 	return locs.Reverse(), nil
 }
 
-// Parser utilities:
+/*****************************************************************************
+* Utility functions                                                          *
+*****************************************************************************/
 
 // consume0 ...
 func (p *Parser) consume0(t token.Type) (lexer.Token, bool) {

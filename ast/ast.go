@@ -295,7 +295,6 @@ type TypeSystemDefinition struct {
 }
 
 // 3.1 Type System Extensions
-// TODO: ast types.
 const (
 	TypeSystemExtensionKindSchema = iota
 	TypeSystemExtensionKindType
@@ -304,9 +303,9 @@ const (
 type TypeSystemExtensionKind uint8
 
 type TypeSystemExtension struct {
-	Kind            TypeSystemExtensionKind
 	SchemaExtension *SchemaExtension
 	TypeExtension   *TypeExtension
+	Kind            TypeSystemExtensionKind
 }
 
 // 3.2 Schema
@@ -317,6 +316,7 @@ type SchemaDefinition struct {
 	RootOperationTypeDefinitions *RootOperationTypeDefinitions
 }
 
+// TODO: Should NamedType be a string?
 type RootOperationTypeDefinition struct {
 	NamedType     Type // Only allow "TypeKindNamedType" kind NamedType.
 	OperationType OperationType
@@ -324,13 +324,13 @@ type RootOperationTypeDefinition struct {
 
 // 3.2.2 Schema Extension
 type SchemaExtension struct {
-	Directives              *Directives
-	OperationTypeDefinition *OperationTypeDefinitions
+	Directives               *Directives
+	OperationTypeDefinitions *OperationTypeDefinitions
 }
 
 type OperationTypeDefinition struct {
-	OperationType OperationType
 	NamedType     string
+	OperationType OperationType
 }
 
 // 3.4 Types
