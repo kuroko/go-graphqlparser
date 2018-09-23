@@ -8,6 +8,7 @@ typeNames=(
     EnumValueDefinition
     FieldDefinition
     InputValueDefinition
+    OperationTypeDefinition
     RootOperationTypeDefinition
     Selection
     Type

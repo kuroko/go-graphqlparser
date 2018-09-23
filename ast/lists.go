@@ -456,6 +456,71 @@ func (d *InputValueDefinitions) Reverse() *InputValueDefinitions {
 	return prev
 }
 
+// OperationTypeDefinitions is a linked list that contains OperationTypeDefinition values.
+type OperationTypeDefinitions struct {
+	Data OperationTypeDefinition
+	Next *OperationTypeDefinitions
+}
+
+// ForEach applies the given map function to each item in this linked list.
+func (d *OperationTypeDefinitions) ForEach(fn func(operationTypeDefinition OperationTypeDefinition, i int)) {
+	if d == nil {
+		return
+	}
+
+	iter := 0
+	current := d
+
+	for {
+		fn(current.Data, iter)
+
+		if current.Next == nil {
+			break
+		}
+
+		iter++
+		current = current.Next
+	}
+}
+
+// Len returns the length of this linked list. 
+func (d *OperationTypeDefinitions) Len() int {
+	if d == nil {
+		return 0
+	}
+
+	var length int
+
+	current := d
+	for {
+		length++
+		if current.Next == nil {
+			break
+		}
+
+		current = current.Next
+	}
+
+	return length
+}
+
+// Reverse reverses this linked list of OperationTypeDefinition. Usually when the linked list is being 
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// "right" order.
+func (d *OperationTypeDefinitions) Reverse() *OperationTypeDefinitions {
+	current := d
+
+	var prev *OperationTypeDefinitions
+	for current != nil {
+		next := current.Next
+		current.Next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
+}
+
 // RootOperationTypeDefinitions is a linked list that contains RootOperationTypeDefinition values.
 type RootOperationTypeDefinitions struct {
 	Data RootOperationTypeDefinition

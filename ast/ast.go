@@ -36,6 +36,7 @@ type Definition struct {
 // 2.8 Fragments
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fragments
 
+// +Kind?
 const (
 	OperationTypeQuery OperationType = iota
 	OperationTypeMutation
@@ -295,8 +296,20 @@ type TypeSystemDefinition struct {
 
 // 3.1 Type System Extensions
 // TODO: ast types.
+const (
+	TypeSystemExtensionKindSchema = iota
+	TypeSystemExtensionKindType
+)
 
-// 3.2 Schemam
+type TypeSystemExtensionKind uint8
+
+type TypeSystemExtension struct {
+	Kind            TypeSystemExtensionKind
+	SchemaExtension *SchemaExtension
+	TypeExtension   *TypeExtension
+}
+
+// 3.2 Schema
 // http://facebook.github.io/graphql/June2018/#sec-Schema
 
 type SchemaDefinition struct {
@@ -307,6 +320,17 @@ type SchemaDefinition struct {
 type RootOperationTypeDefinition struct {
 	NamedType     Type // Only allow "TypeKindNamedType" kind NamedType.
 	OperationType OperationType
+}
+
+// 3.2.2 Schema Extension
+type SchemaExtension struct {
+	Directives              *Directives
+	OperationTypeDefinition *OperationTypeDefinitions
+}
+
+type OperationTypeDefinition struct {
+	OperationType OperationType
+	NamedType     string
 }
 
 // 3.4 Types
@@ -349,6 +373,29 @@ type EnumValueDefinition struct {
 	EnumValue   string // Name but not true or false or null.
 }
 
+// 3.4.3 Type Extensions
+const (
+	TypeExtensionKindScalar = iota
+	TypeExtensionKindObject
+	TypeExtensionKindInterface
+	TypeExtensionKindUnion
+	TypeExtensionKindEnum
+	TypeExtensionKindInputObject
+)
+
+type TypeExtensionKind int8
+
+type TypeExtension struct {
+	Directives            *Directives
+	ImplementsInterface   *Types // Only allow "TypeKindNamedType" kind NamedType.
+	FieldsDefinition      *FieldDefinitions
+	UnionMemberTypes      *Types // Only allow "TypeKindNamedType" kind NamedType.
+	EnumValuesDefinition  *EnumValueDefinitions
+	InputFieldsDefinition *InputValueDefinitions
+	Name                  string
+	Kind                  TypeExtensionKind
+}
+
 // 3.6 Objects
 // http://facebook.github.io/graphql/June2018/#sec-Objects
 
@@ -363,6 +410,7 @@ type InputValueDefinition struct {
 // 3.13 Directives
 // http://facebook.github.io/graphql/June2018/#sec-Type-System.Directives
 
+// +Kind?
 const (
 	DirectiveLocationQuery DirectiveLocation = iota
 	DirectiveLocationMutation

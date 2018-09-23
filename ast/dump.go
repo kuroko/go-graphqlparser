@@ -421,7 +421,7 @@ func (d *dumper) dumpTypeSystemDefinition(def *TypeSystemDefinition) {
 }
 
 // 3.1
-// TODO: ast + dumpers.
+// TODO: dumpers.
 func (d *dumper) dumpTypeSystemExtension() {}
 
 // 3.2
