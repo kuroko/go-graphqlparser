@@ -90,7 +90,9 @@ func (l *Lexer) Scan() Token {
 	case (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || r == '_':
 		return l.scanName(r)
 
-	case r == '{' || r == '}' || r == '[' || r == ']' || r == '!' || r == '$' || r == '(' || r == ')' || r == '.' || r == ':' || r == '=' || r == '@' || r == '|':
+	// TODO(seeruk): Analyse frequency of occurrences of each punctuator in common queries to figure
+	// out the best order for these to be in.
+	case r == '{' || r == '}' || r == '[' || r == ']' || r == '!' || r == '$' || r == '(' || r == ')' || r == ':' || r == '@' || r == '&' || r == '.' || r == '=' || r == '|':
 		return l.scanPunctuator(r, w)
 
 	case (r >= '0' && r <= '9') || r == '-':

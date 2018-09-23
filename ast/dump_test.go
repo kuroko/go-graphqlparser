@@ -136,17 +136,14 @@ schema @foo @bar {
 }
 
 """
-sdiofhsidufhiusdhfuihsuidf
+Documentation blocks should support
+...multiple lines
+
+And gaps in lines
 """
 directive @foo on QUERY
 
-interface NamedEntity {
-  name: String
-}
-
-interface ValuedEntity {
-  value: Int
-}
+scalar JSON
 
 type Person implements NamedEntity {
   name: String
@@ -160,16 +157,24 @@ type Business implements NamedEntity & ValuedEntity {
 }
 
 type Climbing implements
-  & Ropes
-  & Rocks
-  & Chalk {
-    name: String
-    weight: Int
-  }
+    & Ropes
+    & Rocks
+    & Chalk {
+  name: String
+  weight: Int
+}
 
-union SmallestResult = Driftking
+interface NamedEntity {
+  name: String
+}
 
-union SmallerResult = Hans | Car
+interface ValuedEntity {
+  value: Int
+}
+
+union SmallestResult = DriftKing
+
+union SmallerResult = Donkey | Kong
 
 union BiggerResult =
   | Orange
@@ -216,6 +221,6 @@ func TestSdump(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, ast.Sdump(doc), tc.query)
+		assert.Equal(t, tc.query, ast.Sdump(doc))
 	}
 }

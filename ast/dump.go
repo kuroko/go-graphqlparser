@@ -566,7 +566,7 @@ func (d *dumper) dumpTypeDefinitionObject(td *TypeDefinition) {
 
 	if td.ImplementsInterface != nil {
 		io.WriteString(d.w, " ")
-		d.dumpImplementsInterfaces(td.ImplementsInterface)
+		d.dumpImplementsInterfaces(td.ImplementsInterface, td.FieldsDefinition != nil)
 	}
 
 	if td.Directives != nil {
@@ -590,52 +590,57 @@ func (d *dumper) dumpTypeDefinitionObject(td *TypeDefinition) {
 //   & Ropes
 //   & Rocks
 //   & Chalk
-func (d *dumper) dumpImplementsInterfaces(ii *Types) {
-	io.WriteString(d.w, "implements ")
+// type Climbing implements
+//   &
+func (d *dumper) dumpImplementsInterfaces(ii *Types, hasFields bool) {
+	io.WriteString(d.w, "implements")
 
 	l := ii.Len()
 
-	seperator := " & "
-	if l < 2 {
+	separator := " & "
+	if l < 3 {
 		io.WriteString(d.w, " ")
 	} else {
-		seperator = "\n " + seperator
-		io.WriteString(d.w, seperator)
+		if hasFields {
+			separator = indentation + separator
+		}
+
+		separator = "\n " + separator
+		io.WriteString(d.w, separator)
 	}
 
 	// TODO: does this need to alter depth or will it always start at 0?
 	ii.ForEach(func(t Type, i int) {
 		io.WriteString(d.w, t.NamedType)
 		if i < l-1 { // ?
-			io.WriteString(d.w, seperator)
+			io.WriteString(d.w, separator)
 		}
 	})
 }
 
 func (d *dumper) dumpFieldsDefinition(fields *FieldDefinitions) {
 	io.WriteString(d.w, "{\n")
-	d.depth++
 
 	fields.ForEach(func(field FieldDefinition, _ int) {
 		d.dumpFieldDefinition(field)
 		io.WriteString(d.w, "\n")
 	})
 
-	d.depth--
 	io.WriteString(d.w, "}")
 }
 
 func (d *dumper) dumpFieldDefinition(field FieldDefinition) {
 	d.dumpDescription(field.Description)
 
+	io.WriteString(d.w, indentation)
 	io.WriteString(d.w, field.Name)
 
 	if field.ArgumentsDefinition != nil {
 		d.dumpArgumentsDefinition(field.ArgumentsDefinition)
 	}
 
-	io.WriteString(d.w, " : ")
-	io.WriteString(d.w, field.Type.Kind.String())
+	io.WriteString(d.w, ": ")
+	io.WriteString(d.w, field.Type.NamedType)
 
 	if field.Directives != nil {
 		io.WriteString(d.w, " ")
@@ -661,7 +666,7 @@ func (d *dumper) dumpInputValueDefinition(ivd InputValueDefinition) {
 	d.dumpDescription(ivd.Description)
 
 	io.WriteString(d.w, ivd.Name)
-	io.WriteString(d.w, " : ")
+	io.WriteString(d.w, ": ")
 	io.WriteString(d.w, ivd.Type.NamedType)
 
 	if ivd.DefaultValue != nil {
@@ -682,7 +687,7 @@ func (d *dumper) dumpObjectTypeExtension(te *TypeExtension) {
 
 	if te.ImplementsInterface != nil {
 		io.WriteString(d.w, " ")
-		d.dumpImplementsInterfaces(te.ImplementsInterface)
+		d.dumpImplementsInterfaces(te.ImplementsInterface, te.FieldsDefinition != nil)
 	}
 
 	if te.Directives != nil {
@@ -763,19 +768,19 @@ func (d *dumper) dumpUnionMemberTypes(umt *Types) {
 
 	l := umt.Len()
 
-	seperator := " | "
-	if l < 2 {
+	separator := " | "
+	if l < 3 {
 		io.WriteString(d.w, " ")
 	} else {
-		seperator = "\n " + seperator
-		io.WriteString(d.w, seperator)
+		separator = "\n " + separator
+		io.WriteString(d.w, separator)
 	}
 
 	// TODO: does this need to alter depth or will it always start at 0?
 	umt.ForEach(func(t Type, i int) {
 		io.WriteString(d.w, t.NamedType)
 		if i < l-1 { // ?
-			io.WriteString(d.w, seperator)
+			io.WriteString(d.w, separator)
 		}
 	})
 }
@@ -816,20 +821,19 @@ func (d *dumper) dumpTypeDefinitionEnum(td *TypeDefinition) {
 
 func (d *dumper) dumpEnumValuesDefinition(evds *EnumValueDefinitions) {
 	io.WriteString(d.w, "{\n")
-	d.depth++
 
 	evds.ForEach(func(evd EnumValueDefinition, _ int) {
 		d.dumpEnumValueDefinition(evd)
 		io.WriteString(d.w, "\n")
 	})
 
-	d.depth--
 	io.WriteString(d.w, "}")
 }
 
 func (d *dumper) dumpEnumValueDefinition(evd EnumValueDefinition) {
 	d.dumpDescription(evd.Description)
 
+	io.WriteString(d.w, indentation)
 	io.WriteString(d.w, evd.EnumValue)
 
 	if evd.Directives != nil {
@@ -873,15 +877,14 @@ func (d *dumper) dumpTypeDefinitionInputObject(td *TypeDefinition) {
 }
 
 func (d *dumper) dumpInputFieldsDefinition(ivds *InputValueDefinitions) {
-	io.WriteString(d.w, "{")
-	d.depth++
+	io.WriteString(d.w, "{\n")
 
 	ivds.ForEach(func(ivd InputValueDefinition, i int) {
-		io.WriteString(d.w, "\n")
+		io.WriteString(d.w, indentation)
 		d.dumpInputValueDefinition(ivd)
+		io.WriteString(d.w, "\n")
 	})
 
-	d.depth--
 	io.WriteString(d.w, "}")
 }
 
@@ -930,19 +933,19 @@ func (d *dumper) dumpDirectiveDefinition(def *DirectiveDefinition) {
 func (d *dumper) dumpDirectiveLocations(dls *DirectiveLocations) {
 	l := dls.Len()
 
-	seperator := " | "
-	if l < 2 {
+	separator := " | "
+	if l < 3 {
 		io.WriteString(d.w, " ")
 	} else {
-		seperator = "\n " + seperator
-		io.WriteString(d.w, seperator)
+		separator = "\n " + separator
+		io.WriteString(d.w, separator)
 	}
 
 	// TODO: does this need to alter depth or will it always start at 0?
 	dls.ForEach(func(dl DirectiveLocation, i int) {
 		io.WriteString(d.w, dl.String())
 		if i < l-1 { // ?
-			io.WriteString(d.w, seperator)
+			io.WriteString(d.w, separator)
 		}
 	})
 }

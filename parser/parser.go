@@ -723,7 +723,21 @@ func (p *Parser) parseTypeSystemDefinition(description string) (*ast.TypeSystemD
 
 	// definition.TypeDefinition
 	if p.peekn(token.Name, "scalar", "type", "interface", "union", "enum", "input") {
+		typeDef, err := p.parseTypeDefinition()
+		if err != nil {
+			return nil, err
+		}
 
+		if typeDef != nil {
+			// Avoid passing description down several layers, copying along the way.
+			typeDef.Description = description
+		}
+
+		tsDefinition := &ast.TypeSystemDefinition{}
+		tsDefinition.Kind = ast.TypeSystemDefinitionKindType
+		tsDefinition.TypeDefinition = typeDef
+
+		return tsDefinition, nil
 	}
 
 	return &ast.TypeSystemDefinition{}, nil
@@ -809,11 +823,10 @@ func (p *Parser) parseArgumentsDefinition() (*ast.InputValueDefinitions, error) 
 		}
 
 		if p.skip1(token.Punctuator, ")") {
-			return nil, nil
+			break
 		}
 	}
 
-	// TODO: unreachable?
 	return defs.Reverse(), nil
 }
 
@@ -896,6 +909,368 @@ func (p *Parser) parseDirectiveDefinition(description string) (*ast.DirectiveDef
 		DirectiveLocations:  locations,
 		ArgumentsDefinition: arguments,
 	}, nil
+}
+
+// parseTypeDefinition ...
+func (p *Parser) parseTypeDefinition() (*ast.TypeDefinition, error) {
+	defType, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	switch defType.Literal {
+	case "scalar":
+		return p.parseScalarTypeDefinition()
+	case "type":
+		return p.parseObjectDefinition()
+	case "interface":
+		return p.parseInterfaceDefinition()
+	case "union":
+		return p.parseUnionDefinition()
+	case "enum":
+		return p.parseEnumDefinition()
+	case "input":
+		return p.parseInputObjectDefinition()
+	}
+
+	return nil, nil
+}
+
+// parseScalarTypeDefinition ...
+func (p *Parser) parseScalarTypeDefinition() (*ast.TypeDefinition, error) {
+	name, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.TypeDefinition{
+		Kind:       ast.TypeDefinitionKindScalar,
+		Name:       name.Literal,
+		Directives: directives,
+	}, nil
+}
+
+// parseObjectDefinition ...
+func (p *Parser) parseObjectDefinition() (*ast.TypeDefinition, error) {
+	name, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	implements, err := p.parseImplementsInterfaces()
+	if err != nil {
+		return nil, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+
+	fieldDefs, err := p.parseFieldsDefinition()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.TypeDefinition{
+		Kind:                ast.TypeDefinitionKindObject,
+		Name:                name.Literal,
+		ImplementsInterface: implements,
+		Directives:          directives,
+		FieldsDefinition:    fieldDefs,
+	}, nil
+}
+
+// parseInterfaceDefinition ...
+func (p *Parser) parseInterfaceDefinition() (*ast.TypeDefinition, error) {
+	name, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+
+	fieldDefs, err := p.parseFieldsDefinition()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.TypeDefinition{
+		Kind:             ast.TypeDefinitionKindInterface,
+		Name:             name.Literal,
+		Directives:       directives,
+		FieldsDefinition: fieldDefs,
+	}, nil
+}
+
+// parseUnionDefinition ...
+func (p *Parser) parseUnionDefinition() (*ast.TypeDefinition, error) {
+	name, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+
+	memberTypes, err := p.parseUnionMemberTypes()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.TypeDefinition{
+		Kind:             ast.TypeDefinitionKindUnion,
+		Name:             name.Literal,
+		Directives:       directives,
+		UnionMemberTypes: memberTypes,
+	}, nil
+}
+
+// parseEnumDefinition ...
+func (p *Parser) parseEnumDefinition() (*ast.TypeDefinition, error) {
+	name, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+
+	enumValues, err := p.parseEnumValuesDefinition()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.TypeDefinition{
+		Kind:                 ast.TypeDefinitionKindEnum,
+		Name:                 name.Literal,
+		Directives:           directives,
+		EnumValuesDefinition: enumValues,
+	}, nil
+}
+
+// parseInputObjectDefinition ...
+func (p *Parser) parseInputObjectDefinition() (*ast.TypeDefinition, error) {
+	name, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+
+	inputFields, err := p.parseInputFieldsDefinition()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.TypeDefinition{
+		Kind:                  ast.TypeDefinitionKindInputObject,
+		Name:                  name.Literal,
+		Directives:            directives,
+		InputFieldsDefinition: inputFields,
+	}, nil
+}
+
+// parseImplementsInterfaces ...
+func (p *Parser) parseImplementsInterfaces() (*ast.Types, error) {
+	if !p.skip1(token.Name, "implements") {
+		return nil, nil
+	}
+
+	p.skip1(token.Punctuator, "&")
+
+	var interfaceTypes *ast.Types
+
+	for {
+		interfaceType, err := p.parseType()
+		if err != nil {
+			return nil, err
+		}
+
+		interfaceTypes = &ast.Types{
+			Data: interfaceType,
+			Next: interfaceTypes,
+		}
+
+		if !p.skip1(token.Punctuator, "&") {
+			break
+		}
+	}
+
+	return interfaceTypes.Reverse(), nil
+}
+
+// parseFieldsDefinition ...
+func (p *Parser) parseFieldsDefinition() (*ast.FieldDefinitions, error) {
+	if !p.skip1(token.Punctuator, "{") {
+		return nil, nil
+	}
+
+	var fieldDefs *ast.FieldDefinitions
+
+	for {
+		var description string
+		if tok, ok := p.consume0(token.StringValue); ok {
+			description = tok.Literal
+		}
+
+		name, err := p.mustConsume0(token.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		arguments, err := p.parseArgumentsDefinition()
+		if err != nil {
+			return nil, err
+		}
+
+		if !p.skip1(token.Punctuator, ":") {
+			return nil, p.unexpected(p.token, p.expected(token.Punctuator, ":"))
+		}
+
+		fieldDefType, err := p.parseType()
+		if err != nil {
+			return nil, err
+		}
+
+		directives, err := p.parseDirectives()
+		if err != nil {
+			return nil, err
+		}
+
+		fieldDef := ast.FieldDefinition{
+			Description:         description,
+			Name:                name.Literal,
+			ArgumentsDefinition: arguments,
+			Type:                fieldDefType,
+			Directives:          directives,
+		}
+
+		fieldDefs = &ast.FieldDefinitions{
+			Data: fieldDef,
+			Next: fieldDefs,
+		}
+
+		if p.skip1(token.Punctuator, "}") {
+			break
+		}
+	}
+
+	return fieldDefs.Reverse(), nil
+}
+
+// parseUnionMemberTypes ...
+func (p *Parser) parseUnionMemberTypes() (*ast.Types, error) {
+	if !p.skip1(token.Punctuator, "=") {
+		return nil, nil
+	}
+
+	p.skip1(token.Punctuator, "|")
+
+	var memberTypes *ast.Types
+
+	for {
+		memberType, err := p.parseType()
+		if err != nil {
+			return nil, err
+		}
+
+		memberTypes = &ast.Types{
+			Data: memberType,
+			Next: memberTypes,
+		}
+
+		if !p.skip1(token.Punctuator, "|") {
+			break
+		}
+	}
+
+	return memberTypes.Reverse(), nil
+}
+
+// parseEnumValuesDefinition ...
+func (p *Parser) parseEnumValuesDefinition() (*ast.EnumValueDefinitions, error) {
+	if !p.skip1(token.Punctuator, "{") {
+		return nil, nil
+	}
+
+	var valDefs *ast.EnumValueDefinitions
+
+	for {
+		var description string
+		if tok, ok := p.consume0(token.StringValue); ok {
+			description = tok.Literal
+		}
+
+		enumValue, err := p.mustConsume0(token.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		directives, err := p.parseDirectives()
+		if err != nil {
+			return nil, err
+		}
+
+		valDef := ast.EnumValueDefinition{
+			Description: description,
+			EnumValue:   enumValue.Literal,
+			Directives:  directives,
+		}
+
+		valDefs = &ast.EnumValueDefinitions{
+			Data: valDef,
+			Next: valDefs,
+		}
+
+		if p.skip1(token.Punctuator, "}") {
+			break
+		}
+	}
+
+	return valDefs.Reverse(), nil
+}
+
+// parseInputFieldsDefinition ...
+func (p *Parser) parseInputFieldsDefinition() (*ast.InputValueDefinitions, error) {
+	if !p.skip1(token.Punctuator, "{") {
+		return nil, nil
+	}
+
+	var valDefs *ast.InputValueDefinitions
+
+	for {
+		valDef, err := p.parseInputValueDefinition()
+		if err != nil {
+			return nil, err
+		}
+
+		valDefs = &ast.InputValueDefinitions{
+			Data: valDef,
+			Next: valDefs,
+		}
+
+		if p.skip1(token.Punctuator, "}") {
+			break
+		}
+	}
+
+	return valDefs.Reverse(), nil
 }
 
 var directiveLocations = []string{
