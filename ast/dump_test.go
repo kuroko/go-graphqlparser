@@ -159,6 +159,14 @@ type Business implements NamedEntity & ValuedEntity {
   employeeCount: Int
 }
 
+type Climbing implements
+  & Ropes
+  & Rocks
+  & Chalk {
+    name: String
+    weight: Int
+  }
+
 union SmallestResult = Driftking
 
 union SmallerResult = Hans | Car

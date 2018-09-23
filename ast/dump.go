@@ -586,14 +586,29 @@ func (d *dumper) dumpTypeDefinitionObject(td *TypeDefinition) {
 //
 // type Climbing implements Ropes
 // type Climbing implements Ropes & Rocks
+// type Climbing implements
+//   & Ropes
+//   & Rocks
+//   & Chalk
 func (d *dumper) dumpImplementsInterfaces(ii *Types) {
 	io.WriteString(d.w, "implements ")
 
+	l := ii.Len()
+
+	seperator := " & "
+	if l < 2 {
+		io.WriteString(d.w, " ")
+	} else {
+		seperator = "\n " + seperator
+		io.WriteString(d.w, seperator)
+	}
+
+	// TODO: does this need to alter depth or will it always start at 0?
 	ii.ForEach(func(t Type, i int) {
-		if i > 0 {
-			io.WriteString(d.w, "& ")
-		}
 		io.WriteString(d.w, t.NamedType)
+		if i < l-1 { // ?
+			io.WriteString(d.w, seperator)
+		}
 	})
 }
 
