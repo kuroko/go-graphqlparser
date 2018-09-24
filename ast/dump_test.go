@@ -201,6 +201,13 @@ directive @example on
   | FIELD
   | FRAGMENT_SPREAD
   | INLINE_FRAGMENT
+
+extend schema @tonight
+
+extend schema {
+  query: TheBrain
+  mutation: Pinky
+}
 `)
 )
 

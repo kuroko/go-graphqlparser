@@ -10,6 +10,7 @@ type Document struct {
 const (
 	DefinitionKindExecutable DefinitionKind = iota
 	DefinitionKindTypeSystem
+	DefinitionKindTypeSystemExtension
 )
 
 type DefinitionKind int8
@@ -20,6 +21,8 @@ func (k DefinitionKind) String() string {
 		return "executable"
 	case DefinitionKindTypeSystem:
 		return "type system"
+	case DefinitionKindTypeSystemExtension:
+		return "type system extension"
 	}
 
 	return "invalid"
@@ -28,6 +31,7 @@ func (k DefinitionKind) String() string {
 type Definition struct {
 	ExecutableDefinition *ExecutableDefinition
 	TypeSystemDefinition *TypeSystemDefinition
+	TypeSystemExtension  *TypeSystemExtension
 	Kind                 DefinitionKind
 }
 
@@ -328,8 +332,9 @@ type SchemaExtension struct {
 	OperationTypeDefinitions *OperationTypeDefinitions
 }
 
+// TODO: Should NamedType be a string?
 type OperationTypeDefinition struct {
-	NamedType     string
+	NamedType     Type
 	OperationType OperationType
 }
 

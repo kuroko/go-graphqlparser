@@ -92,6 +92,15 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 		return definition, err
 	}
 
+	// TypeSystemExtension...
+	if p.peek1(token.Name, "extend") {
+		definition := ast.Definition{}
+		definition.Kind = ast.DefinitionKindTypeSystemExtension
+		definition.TypeSystemExtension, err = p.parseTypeSystemExtension()
+
+		return definition, err
+	}
+
 	var description string
 
 	// If we have a description, then we should encounter a `scalar`, a `type`, a `interface`, a
@@ -691,6 +700,11 @@ func (p *Parser) parseType() (ast.Type, error) {
 	return astType, nil
 }
 
+// parseTypeExtension ...
+func (p *Parser) parseTypeExtension() (*ast.TypeExtension, error) {
+	return nil, nil
+}
+
 // parseTypeSystemDefinition ...
 func (p *Parser) parseTypeSystemDefinition(description string) (*ast.TypeSystemDefinition, error) {
 	// definition.SchemaDefinition
@@ -741,6 +755,44 @@ func (p *Parser) parseTypeSystemDefinition(description string) (*ast.TypeSystemD
 	}
 
 	return &ast.TypeSystemDefinition{}, nil
+}
+
+// 3.4.3
+// parseTypeSystemExtension ...
+func (p *Parser) parseTypeSystemExtension() (*ast.TypeSystemExtension, error) {
+	if !p.skip1(token.Name, "extend") {
+		return nil, p.unexpected(p.token, p.expected(token.Name, "extend"))
+	}
+
+	// definition.SchemaDefinition
+	if p.peek1(token.Name, "schema") {
+		schemaExt, err := p.parseSchemaExtension()
+		if err != nil {
+			return nil, err
+		}
+
+		tsExtension := &ast.TypeSystemExtension{}
+		tsExtension.Kind = ast.TypeSystemExtensionKindSchema
+		tsExtension.SchemaExtension = schemaExt
+
+		return tsExtension, nil
+	}
+
+	// TODO: definition.TypeExtension
+	if p.peek1(token.Name, "foo") {
+		typeExt, err := p.parseTypeExtension()
+		if err != nil {
+			return nil, err
+		}
+
+		tsExtension := &ast.TypeSystemExtension{}
+		tsExtension.Kind = ast.TypeSystemExtensionKindType
+		tsExtension.TypeExtension = typeExt
+
+		return tsExtension, nil
+	}
+
+	return nil, nil
 }
 
 // parseSchemaDefinition ...
@@ -801,6 +853,80 @@ func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 		Directives:                   directives,
 		RootOperationTypeDefinitions: rootOperationTypeDefinitions.Reverse(),
 	}, nil
+}
+
+// 3.2.2
+// parseSchemaExtension ...
+func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
+	if !p.skip1(token.Name, "schema") {
+		return nil, p.unexpected(p.token, p.expected(token.Name, "schema"))
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+
+	var operationTypeDefinitions *ast.OperationTypeDefinitions
+
+	if p.peek1(token.Punctuator, "{") {
+		operationTypeDefinitions, err = p.parseOperationTypeDefinitions()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &ast.SchemaExtension{
+		Directives:               directives,
+		OperationTypeDefinitions: operationTypeDefinitions.Reverse(),
+	}, nil
+}
+
+func (p *Parser) parseOperationTypeDefinitions() (*ast.OperationTypeDefinitions, error) {
+	if !p.skip1(token.Punctuator, "{") {
+		return nil, p.unexpected(p.token, p.expected(token.Punctuator, "{"))
+	}
+
+	var operationTypeDefinitions *ast.OperationTypeDefinitions
+
+	for {
+		opType, err := p.parseOperationType()
+		if err != nil {
+			return nil, err
+		}
+
+		if !p.skip1(token.Punctuator, ":") {
+			return nil, p.unexpected(p.token, p.expected(token.Punctuator, ":"))
+		}
+
+		namedType, err := p.parseType()
+		if err != nil {
+			return nil, err
+		}
+
+		if namedType.Kind != ast.TypeKindNamedType {
+			return nil, p.unexpected(p.token, "NamedType")
+		}
+
+		operationTypeDefinitions = &ast.OperationTypeDefinitions{
+			Data: ast.OperationTypeDefinition{
+				OperationType: opType,
+				NamedType:     namedType,
+			},
+			Next: operationTypeDefinitions,
+		}
+
+		if p.peek1(token.Punctuator, "}") || p.peek0(token.EOF) {
+			break
+		}
+	}
+
+	_, err := p.mustConsume1(token.Punctuator, "}")
+	if err != nil {
+		return nil, err
+	}
+
+	return operationTypeDefinitions, nil
 }
 
 // parseArgumentsDefinition ...

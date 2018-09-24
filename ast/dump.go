@@ -63,6 +63,8 @@ func (d *dumper) dumpDefinition(definition Definition) {
 		d.dumpExecutableDefinition(definition.ExecutableDefinition)
 	case DefinitionKindTypeSystem:
 		d.dumpTypeSystemDefinition(definition.TypeSystemDefinition)
+	case DefinitionKindTypeSystemExtension:
+		d.dumpTypeSystemExtension(definition.TypeSystemExtension)
 	}
 }
 
@@ -413,7 +415,7 @@ func (d *dumper) dumpTypeSystemDefinition(def *TypeSystemDefinition) {
 }
 
 // 3.1 Type System Extensions
-func (d *dumper) dumpTypeSystemExtension(ext TypeSystemExtension) {
+func (d *dumper) dumpTypeSystemExtension(ext *TypeSystemExtension) {
 	switch ext.Kind {
 	case TypeSystemExtensionKindSchema:
 		d.dumpSchemaExtension(ext.SchemaExtension)
@@ -484,8 +486,7 @@ func (d *dumper) dumpOperationTypeDefinition(otd OperationTypeDefinition) {
 	io.WriteString(d.w, otd.OperationType.String())
 	io.WriteString(d.w, ": ")
 
-	//d.dumpType(otd.NamedType)
-	io.WriteString(d.w, otd.NamedType)
+	d.dumpType(otd.NamedType)
 }
 
 // 3.3 Descriptions
@@ -590,8 +591,6 @@ func (d *dumper) dumpTypeDefinitionObject(td *TypeDefinition) {
 //   & Ropes
 //   & Rocks
 //   & Chalk
-// type Climbing implements
-//   &
 func (d *dumper) dumpImplementsInterfaces(ii *Types, hasFields bool) {
 	io.WriteString(d.w, "implements")
 
@@ -609,10 +608,9 @@ func (d *dumper) dumpImplementsInterfaces(ii *Types, hasFields bool) {
 		io.WriteString(d.w, separator)
 	}
 
-	// TODO: does this need to alter depth or will it always start at 0?
 	ii.ForEach(func(t Type, i int) {
 		io.WriteString(d.w, t.NamedType)
-		if i < l-1 { // ?
+		if i < l-1 {
 			io.WriteString(d.w, separator)
 		}
 	})
@@ -776,10 +774,9 @@ func (d *dumper) dumpUnionMemberTypes(umt *Types) {
 		io.WriteString(d.w, separator)
 	}
 
-	// TODO: does this need to alter depth or will it always start at 0?
 	umt.ForEach(func(t Type, i int) {
 		io.WriteString(d.w, t.NamedType)
-		if i < l-1 { // ?
+		if i < l-1 {
 			io.WriteString(d.w, separator)
 		}
 	})
@@ -941,10 +938,9 @@ func (d *dumper) dumpDirectiveLocations(dls *DirectiveLocations) {
 		io.WriteString(d.w, separator)
 	}
 
-	// TODO: does this need to alter depth or will it always start at 0?
 	dls.ForEach(func(dl DirectiveLocation, i int) {
 		io.WriteString(d.w, dl.String())
-		if i < l-1 { // ?
+		if i < l-1 {
 			io.WriteString(d.w, separator)
 		}
 	})
