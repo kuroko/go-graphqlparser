@@ -8,7 +8,7 @@ fast GraphQL parser that adheres to the [June 2018][1] GraphQL specification.
 * [x] Lexer
 * [ ] Parser (in progress)
     * [x] Query parsing
-    * [ ] Type system parsing
+    * [x] Type system parsing
     * [ ] Consistent, helpful errors
 * [ ] Validation
 
