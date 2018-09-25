@@ -147,7 +147,7 @@ scalar JSON
 
 type Person implements NamedEntity {
   name: String
-  age: Int
+  weight(equipmentWeight: Int, ropeStrength: Int): Int
 }
 
 type Business implements NamedEntity & ValuedEntity {
@@ -207,6 +207,33 @@ extend schema @tonight
 extend schema {
   query: TheBrain
   mutation: Pinky
+}
+
+extend scalar IntyThing @add
+
+extend type Car implements Transport {
+"""
+Should the quotes around this be indented the same as the fields below?
+Indentation is not preserved.
+"""
+  upgrade(component: CarComponent): Cost
+}
+
+extend interface NamedEntity @addedDirective
+
+extend interface Transport {
+  cost: Int
+}
+
+extend union SmallestResult = Nissan350z
+
+extend enum Direction {
+  NORTHWEST
+  NORTHEAST
+}
+
+extend input Point2D {
+  distanceFromOrigin: Length
 }
 `)
 )

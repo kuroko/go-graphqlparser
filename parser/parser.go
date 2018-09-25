@@ -700,9 +700,83 @@ func (p *Parser) parseType() (ast.Type, error) {
 	return astType, nil
 }
 
+// 3.4.3 Type Extensions
 // parseTypeExtension ...
 func (p *Parser) parseTypeExtension() (*ast.TypeExtension, error) {
-	return nil, nil
+	kind, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	name, err := p.mustConsume0(token.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	te := &ast.TypeExtension{}
+
+	if kind.Literal == "type" && p.peek1(token.Name, "implements") {
+		ii, err := p.parseImplementsInterfaces()
+		if err != nil {
+			return nil, err
+		}
+		te.ImplementsInterface = ii
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+
+	switch kind.Literal {
+	case "scalar":
+		te.Kind = ast.TypeExtensionKindScalar
+
+	case "type":
+		fd, err := p.parseFieldsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		te.FieldsDefinition = fd
+		te.Kind = ast.TypeExtensionKindObject
+
+	case "interface":
+		fd, err := p.parseFieldsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		te.FieldsDefinition = fd
+		te.Kind = ast.TypeExtensionKindInterface
+
+	case "union":
+		umt, err := p.parseUnionMemberTypes()
+		if err != nil {
+			return nil, err
+		}
+		te.UnionMemberTypes = umt
+		te.Kind = ast.TypeExtensionKindUnion
+
+	case "enum":
+		evd, err := p.parseEnumValuesDefinition()
+		if err != nil {
+			return nil, err
+		}
+		te.EnumValuesDefinition = evd
+		te.Kind = ast.TypeExtensionKindEnum
+
+	case "input":
+		ifd, err := p.parseInputFieldsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		te.InputFieldsDefinition = ifd
+		te.Kind = ast.TypeExtensionKindInputObject
+	}
+
+	te.Name = name.Literal
+	te.Directives = directives
+
+	return te, nil
 }
 
 // parseTypeSystemDefinition ...
@@ -778,8 +852,8 @@ func (p *Parser) parseTypeSystemExtension() (*ast.TypeSystemExtension, error) {
 		return tsExtension, nil
 	}
 
-	// TODO: definition.TypeExtension
-	if p.peek1(token.Name, "foo") {
+	// definition.TypeExtension
+	if p.peekn(token.Name, "scalar", "type", "interface", "union", "enum", "input") {
 		typeExt, err := p.parseTypeExtension()
 		if err != nil {
 			return nil, err
@@ -948,9 +1022,14 @@ func (p *Parser) parseArgumentsDefinition() (*ast.InputValueDefinitions, error) 
 			Next: defs,
 		}
 
-		if p.skip1(token.Punctuator, ")") {
+		if p.peek1(token.Punctuator, ")") || p.peek0(token.EOF) {
 			break
 		}
+	}
+
+	_, err := p.mustConsume1(token.Punctuator, ")")
+	if err != nil {
+		return nil, err
 	}
 
 	return defs.Reverse(), nil
@@ -1297,7 +1376,11 @@ func (p *Parser) parseFieldsDefinition() (*ast.FieldDefinitions, error) {
 		}
 	}
 
-	return fieldDefs.Reverse(), nil
+	if fieldDefs != nil {
+		return fieldDefs.Reverse(), nil
+	}
+
+	return nil, nil
 }
 
 // parseUnionMemberTypes ...

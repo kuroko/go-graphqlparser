@@ -660,6 +660,7 @@ func (d *dumper) dumpArgumentsDefinition(arguments *InputValueDefinitions) {
 	io.WriteString(d.w, ")")
 }
 
+// TODO: with > 3 arguments, need breaklines inbetween.
 func (d *dumper) dumpInputValueDefinition(ivd InputValueDefinition) {
 	d.dumpDescription(ivd.Description)
 
