@@ -33,6 +33,9 @@ func main() {
 		if typeNameLCF == "type" {
 			typeNameLCF = "t"
 		}
+		if typeNameLCF == "error" {
+			typeNameLCF = "err"
+		}
 
 		linkedList.Execute(os.Stdout, map[string]string{
 			"TypeNameLCF": typeNameLCF,
