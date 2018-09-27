@@ -48,10 +48,7 @@ func (p *Parser) Parse() (ast.Document, error) {
 			return ast.Document{}, err
 		}
 
-		definitions = &ast.Definitions{
-			Data: definition,
-			Next: definitions,
-		}
+		definitions = definitions.Add(definition)
 
 		if p.peek0(token.Illegal) {
 			return ast.Document{}, p.unexpected(p.token)
@@ -291,10 +288,7 @@ func (p *Parser) parseVariableDefinitions() (*ast.VariableDefinitions, error) {
 			return nil, err
 		}
 
-		definitions = &ast.VariableDefinitions{
-			Data: definition,
-			Next: definitions,
-		}
+		definitions = definitions.Add(definition)
 
 		if p.peek1(token.Punctuator, ")") {
 			break
@@ -332,10 +326,7 @@ func (p *Parser) parseDirectives() (*ast.Directives, error) {
 		directive.Name = name.Literal
 		directive.Arguments = args
 
-		directives = &ast.Directives{
-			Data: directive,
-			Next: directives,
-		}
+		directives = directives.Add(directive)
 	}
 
 	if directives != nil {
@@ -380,10 +371,7 @@ func (p *Parser) parseSelectionSet(optional bool) (*ast.Selections, error) {
 			}
 		}
 
-		selections = &ast.Selections{
-			Data: selection,
-			Next: selections,
-		}
+		selections = selections.Add(selection)
 
 		if p.peek1(token.Punctuator, "}") || p.peek0(token.EOF) {
 			break
@@ -527,10 +515,7 @@ func (p *Parser) parseArguments() (*ast.Arguments, error) {
 		argument.Name = name.Literal
 		argument.Value = value
 
-		arguments = &ast.Arguments{
-			Data: argument,
-			Next: arguments,
-		}
+		arguments = arguments.Add(argument)
 	}
 
 	return arguments.Reverse(), nil
@@ -905,13 +890,10 @@ func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 			return nil, p.unexpected(p.token, "NamedType")
 		}
 
-		rootOperationTypeDefinitions = &ast.RootOperationTypeDefinitions{
-			Data: ast.RootOperationTypeDefinition{
-				OperationType: opType,
-				NamedType:     namedType,
-			},
-			Next: rootOperationTypeDefinitions,
-		}
+		rootOperationTypeDefinitions = rootOperationTypeDefinitions.Add(ast.RootOperationTypeDefinition{
+			OperationType: opType,
+			NamedType:     namedType,
+		})
 
 		if p.peek1(token.Punctuator, "}") || p.peek0(token.EOF) {
 			break
@@ -982,13 +964,10 @@ func (p *Parser) parseOperationTypeDefinitions() (*ast.OperationTypeDefinitions,
 			return nil, p.unexpected(p.token, "NamedType")
 		}
 
-		operationTypeDefinitions = &ast.OperationTypeDefinitions{
-			Data: ast.OperationTypeDefinition{
-				OperationType: opType,
-				NamedType:     namedType,
-			},
-			Next: operationTypeDefinitions,
-		}
+		operationTypeDefinitions = operationTypeDefinitions.Add(ast.OperationTypeDefinition{
+			OperationType: opType,
+			NamedType:     namedType,
+		})
 
 		if p.peek1(token.Punctuator, "}") || p.peek0(token.EOF) {
 			break
@@ -1017,10 +996,7 @@ func (p *Parser) parseArgumentsDefinition() (*ast.InputValueDefinitions, error) 
 			return nil, err
 		}
 
-		defs = &ast.InputValueDefinitions{
-			Data: def,
-			Next: defs,
-		}
+		defs = defs.Add(def)
 
 		if p.peek1(token.Punctuator, ")") || p.peek0(token.EOF) {
 			break
@@ -1307,10 +1283,7 @@ func (p *Parser) parseImplementsInterfaces() (*ast.Types, error) {
 			return nil, err
 		}
 
-		interfaceTypes = &ast.Types{
-			Data: interfaceType,
-			Next: interfaceTypes,
-		}
+		interfaceTypes = interfaceTypes.Add(interfaceType)
 
 		if !p.skip1(token.Punctuator, "&") {
 			break
@@ -1366,10 +1339,7 @@ func (p *Parser) parseFieldsDefinition() (*ast.FieldDefinitions, error) {
 			Directives:          directives,
 		}
 
-		fieldDefs = &ast.FieldDefinitions{
-			Data: fieldDef,
-			Next: fieldDefs,
-		}
+		fieldDefs = fieldDefs.Add(fieldDef)
 
 		if p.skip1(token.Punctuator, "}") {
 			break
@@ -1399,10 +1369,7 @@ func (p *Parser) parseUnionMemberTypes() (*ast.Types, error) {
 			return nil, err
 		}
 
-		memberTypes = &ast.Types{
-			Data: memberType,
-			Next: memberTypes,
-		}
+		memberTypes = memberTypes.Add(memberType)
 
 		if !p.skip1(token.Punctuator, "|") {
 			break
@@ -1442,10 +1409,7 @@ func (p *Parser) parseEnumValuesDefinition() (*ast.EnumValueDefinitions, error) 
 			Directives:  directives,
 		}
 
-		valDefs = &ast.EnumValueDefinitions{
-			Data: valDef,
-			Next: valDefs,
-		}
+		valDefs = valDefs.Add(valDef)
 
 		if p.skip1(token.Punctuator, "}") {
 			break
@@ -1469,10 +1433,7 @@ func (p *Parser) parseInputFieldsDefinition() (*ast.InputValueDefinitions, error
 			return nil, err
 		}
 
-		valDefs = &ast.InputValueDefinitions{
-			Data: valDef,
-			Next: valDefs,
-		}
+		valDefs = valDefs.Add(valDef)
 
 		if p.skip1(token.Punctuator, "}") {
 			break
@@ -1536,10 +1497,7 @@ func (p *Parser) parseDirectiveLocations() (*ast.DirectiveLocations, error) {
 			return nil, p.unexpected(p.token, p.expected(token.Name, directiveLocations...))
 		}
 
-		locs = &ast.DirectiveLocations{
-			Data: directiveLocationsMap[tok.Literal],
-			Next: locs,
-		}
+		locs = locs.Add(directiveLocationsMap[tok.Literal])
 
 		if !p.skip1(token.Punctuator, "|") {
 			break

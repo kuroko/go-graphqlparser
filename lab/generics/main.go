@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -36,6 +37,12 @@ func main() {
 		linkedList.Execute(os.Stdout, map[string]string{
 			"TypeNameLCF": typeNameLCF,
 			"TypeName":    tn,
+			"AbridgedTN": strings.Map(func(r rune) rune {
+				if unicode.IsUpper(r) {
+					return unicode.ToLower(r)
+				}
+				return -1
+			}, tn),
 		})
 	}
 }
@@ -47,14 +54,22 @@ type {{.TypeName}}s struct {
 	Next *{{.TypeName}}s
 }
 
+// Add appends a {{.TypeName}} to this linked list and returns this new head.
+func ({{.AbridgedTN}} *{{.TypeName}}s) Add(data {{.TypeName}}) *{{.TypeName}}s {
+	return &{{.TypeName}}s{
+		Data: data,
+		Next: {{.AbridgedTN}},
+	}
+}
+
 // ForEach applies the given map function to each item in this linked list.
-func (d *{{.TypeName}}s) ForEach(fn func({{.TypeNameLCF}} {{.TypeName}}, i int)) {
-	if d == nil {
+func ({{.AbridgedTN}} *{{.TypeName}}s) ForEach(fn func({{.TypeNameLCF}} {{.TypeName}}, i int)) {
+	if {{.AbridgedTN}} == nil {
 		return
 	}
 
 	iter := 0
-	current := d
+	current := {{.AbridgedTN}}
 
 	for {
 		fn(current.Data, iter)
@@ -69,14 +84,14 @@ func (d *{{.TypeName}}s) ForEach(fn func({{.TypeNameLCF}} {{.TypeName}}, i int))
 }
 
 // Len returns the length of this linked list. 
-func (d *{{.TypeName}}s) Len() int {
-	if d == nil {
+func ({{.AbridgedTN}} *{{.TypeName}}s) Len() int {
+	if {{.AbridgedTN}} == nil {
 		return 0
 	}
 
 	var length int
 
-	current := d
+	current := {{.AbridgedTN}}
 	for {
 		length++
 		if current.Next == nil {
@@ -92,8 +107,8 @@ func (d *{{.TypeName}}s) Len() int {
 // Reverse reverses this linked list of {{.TypeName}}. Usually when the linked list is being 
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
 // "right" order.
-func (d *{{.TypeName}}s) Reverse() *{{.TypeName}}s {
-	current := d
+func ({{.AbridgedTN}} *{{.TypeName}}s) Reverse() *{{.TypeName}}s {
+	current := {{.AbridgedTN}}
 
 	var prev *{{.TypeName}}s
 	for current != nil {

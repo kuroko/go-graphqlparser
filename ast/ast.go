@@ -488,3 +488,5 @@ type DirectiveDefinition struct {
 	ArgumentsDefinition *InputValueDefinitions
 	DirectiveLocations  *DirectiveLocations
 }
+
+type Error error
