@@ -4,11 +4,13 @@ import (
 	"errors"
 )
 
+// Validator ...
 type Validator struct {
 	DocumentAST   *Document
 	GraphQLSchema *Document
 }
 
+// NewValidator ...
 func NewValidator(documentAST *Document, gqlSchema *Document) *Validator {
 	return &Validator{
 		DocumentAST:   documentAST,
@@ -16,24 +18,24 @@ func NewValidator(documentAST *Document, gqlSchema *Document) *Validator {
 	}
 }
 
+// ApplyExecutableRules ...
 func (v *Validator) ApplyExecutableRules() *Errors {
 	var errs *Errors
 
 	for _, erFn := range executableRules {
-		e := erFn(v).Reverse()
-
+		e := erFn(v)
 		if e == nil {
 			continue
 		}
 
-		e.ForEach(func(err Error, _ int) {
-			errs = errs.Add(err)
-		})
+		e.Join(errs)
+		errs = e
 	}
 
 	return errs.Reverse()
 }
 
+// ApplySDLRules ...
 func (v *Validator) ApplySDLRules() *Errors { return nil }
 
 var executableRules = []func(*Validator) *Errors{

@@ -15,6 +15,17 @@ func (a *Arguments) Add(data Argument) *Arguments {
 	}
 }
 
+// Join attaches the tail of the reciever list "a" to the head of the otherList.
+func (a *Arguments) Join(otherList *Arguments) {
+	current := a
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (a *Arguments) ForEach(fn func(argument Argument, i int)) {
 	if a == nil {
@@ -86,6 +97,17 @@ func (d *Definitions) Add(data Definition) *Definitions {
 		Data: data,
 		Next: d,
 	}
+}
+
+// Join attaches the tail of the reciever list "d" to the head of the otherList.
+func (d *Definitions) Join(otherList *Definitions) {
+	current := d
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // ForEach applies the given map function to each item in this linked list.
@@ -161,6 +183,17 @@ func (d *Directives) Add(data Directive) *Directives {
 	}
 }
 
+// Join attaches the tail of the reciever list "d" to the head of the otherList.
+func (d *Directives) Join(otherList *Directives) {
+	current := d
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (d *Directives) ForEach(fn func(directive Directive, i int)) {
 	if d == nil {
@@ -232,6 +265,17 @@ func (dl *DirectiveLocations) Add(data DirectiveLocation) *DirectiveLocations {
 		Data: data,
 		Next: dl,
 	}
+}
+
+// Join attaches the tail of the reciever list "dl" to the head of the otherList.
+func (dl *DirectiveLocations) Join(otherList *DirectiveLocations) {
+	current := dl
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // ForEach applies the given map function to each item in this linked list.
@@ -307,6 +351,17 @@ func (evd *EnumValueDefinitions) Add(data EnumValueDefinition) *EnumValueDefinit
 	}
 }
 
+// Join attaches the tail of the reciever list "evd" to the head of the otherList.
+func (evd *EnumValueDefinitions) Join(otherList *EnumValueDefinitions) {
+	current := evd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (evd *EnumValueDefinitions) ForEach(fn func(enumValueDefinition EnumValueDefinition, i int)) {
 	if evd == nil {
@@ -380,8 +435,19 @@ func (e *Errors) Add(data Error) *Errors {
 	}
 }
 
+// Join attaches the tail of the reciever list "e" to the head of the otherList.
+func (e *Errors) Join(otherList *Errors) {
+	current := e
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
-func (e *Errors) ForEach(fn func(error Error, i int)) {
+func (e *Errors) ForEach(fn func(err Error, i int)) {
 	if e == nil {
 		return
 	}
@@ -451,6 +517,17 @@ func (fd *FieldDefinitions) Add(data FieldDefinition) *FieldDefinitions {
 		Data: data,
 		Next: fd,
 	}
+}
+
+// Join attaches the tail of the reciever list "fd" to the head of the otherList.
+func (fd *FieldDefinitions) Join(otherList *FieldDefinitions) {
+	current := fd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // ForEach applies the given map function to each item in this linked list.
@@ -526,6 +603,17 @@ func (ivd *InputValueDefinitions) Add(data InputValueDefinition) *InputValueDefi
 	}
 }
 
+// Join attaches the tail of the reciever list "ivd" to the head of the otherList.
+func (ivd *InputValueDefinitions) Join(otherList *InputValueDefinitions) {
+	current := ivd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (ivd *InputValueDefinitions) ForEach(fn func(inputValueDefinition InputValueDefinition, i int)) {
 	if ivd == nil {
@@ -597,6 +685,17 @@ func (otd *OperationTypeDefinitions) Add(data OperationTypeDefinition) *Operatio
 		Data: data,
 		Next: otd,
 	}
+}
+
+// Join attaches the tail of the reciever list "otd" to the head of the otherList.
+func (otd *OperationTypeDefinitions) Join(otherList *OperationTypeDefinitions) {
+	current := otd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // ForEach applies the given map function to each item in this linked list.
@@ -672,6 +771,17 @@ func (rotd *RootOperationTypeDefinitions) Add(data RootOperationTypeDefinition) 
 	}
 }
 
+// Join attaches the tail of the reciever list "rotd" to the head of the otherList.
+func (rotd *RootOperationTypeDefinitions) Join(otherList *RootOperationTypeDefinitions) {
+	current := rotd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (rotd *RootOperationTypeDefinitions) ForEach(fn func(rootOperationTypeDefinition RootOperationTypeDefinition, i int)) {
 	if rotd == nil {
@@ -743,6 +853,17 @@ func (s *Selections) Add(data Selection) *Selections {
 		Data: data,
 		Next: s,
 	}
+}
+
+// Join attaches the tail of the reciever list "s" to the head of the otherList.
+func (s *Selections) Join(otherList *Selections) {
+	current := s
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // ForEach applies the given map function to each item in this linked list.
@@ -818,6 +939,17 @@ func (t *Types) Add(data Type) *Types {
 	}
 }
 
+// Join attaches the tail of the reciever list "t" to the head of the otherList.
+func (t *Types) Join(otherList *Types) {
+	current := t
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (t *Types) ForEach(fn func(t Type, i int)) {
 	if t == nil {
@@ -889,6 +1021,17 @@ func (vd *VariableDefinitions) Add(data VariableDefinition) *VariableDefinitions
 		Data: data,
 		Next: vd,
 	}
+}
+
+// Join attaches the tail of the reciever list "vd" to the head of the otherList.
+func (vd *VariableDefinitions) Join(otherList *VariableDefinitions) {
+	current := vd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // ForEach applies the given map function to each item in this linked list.
