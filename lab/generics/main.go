@@ -97,7 +97,7 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) ForEach(fn func({{.TypeNameLCF}} {{.TypeN
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func ({{.AbridgedTN}} *{{.TypeName}}s) Len() int {
 	if {{.AbridgedTN}} == nil {
 		return 0
@@ -118,8 +118,8 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of {{.TypeName}}. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of {{.TypeName}}. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func ({{.AbridgedTN}} *{{.TypeName}}s) Reverse() *{{.TypeName}}s {
 	current := {{.AbridgedTN}}
