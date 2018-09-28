@@ -4,11 +4,13 @@ import (
 	"errors"
 )
 
+// Validator ...
 type Validator struct {
 	DocumentAST   *Document
 	GraphQLSchema *Document
 }
 
+// NewValidator ...
 func NewValidator(documentAST *Document, gqlSchema *Document) *Validator {
 	return &Validator{
 		DocumentAST:   documentAST,
@@ -16,27 +18,36 @@ func NewValidator(documentAST *Document, gqlSchema *Document) *Validator {
 	}
 }
 
+// ApplyExecutableRules ...
 func (v *Validator) ApplyExecutableRules() *Errors {
+	return v.applyRules(executableRules)
+}
+
+// ApplySDLRules ...
+func (v *Validator) ApplySDLRules() *Errors {
+	return v.applyRules(sdlRules)
+}
+
+// applyRules ...
+func (v *Validator) applyRules(rules []rule) *Errors {
 	var errs *Errors
 
-	for _, erFn := range executableRules {
-		e := erFn(v).Reverse()
-
+	for _, erFn := range rules {
+		e := erFn(v)
 		if e == nil {
 			continue
 		}
 
-		e.ForEach(func(err Error, _ int) {
-			errs = errs.Add(err)
-		})
+		e.Join(errs)
+		errs = e
 	}
 
 	return errs.Reverse()
 }
 
-func (v *Validator) ApplySDLRules() *Errors { return nil }
+type rule func(*Validator) *Errors
 
-var executableRules = []func(*Validator) *Errors{
+var executableRules = []rule{
 	(*Validator).executableDefinitions,
 	(*Validator).uniqueOperationNames,
 	(*Validator).loneAnonymousOperation,
@@ -65,7 +76,7 @@ var executableRules = []func(*Validator) *Errors{
 	(*Validator).uniqueInputFieldNames,
 }
 
-var sdlRules = []func(*Validator) *Errors{
+var sdlRules = []rule{
 	(*Validator).loneSchemaDefinition,
 	(*Validator).knownDirectives,
 	(*Validator).uniqueDirectivesPerLocation,

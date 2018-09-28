@@ -15,6 +15,17 @@ func (a *Arguments) Add(data Argument) *Arguments {
 	}
 }
 
+// Join attaches the tail of the reciever list "a" to the head of the otherList.
+func (a *Arguments) Join(otherList *Arguments) {
+	current := a
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (a *Arguments) ForEach(fn func(argument Argument, i int)) {
 	if a == nil {
@@ -36,7 +47,7 @@ func (a *Arguments) ForEach(fn func(argument Argument, i int)) {
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (a *Arguments) Len() int {
 	if a == nil {
 		return 0
@@ -57,8 +68,8 @@ func (a *Arguments) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of Argument. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of Argument. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (a *Arguments) Reverse() *Arguments {
 	current := a
@@ -88,6 +99,17 @@ func (d *Definitions) Add(data Definition) *Definitions {
 	}
 }
 
+// Join attaches the tail of the reciever list "d" to the head of the otherList.
+func (d *Definitions) Join(otherList *Definitions) {
+	current := d
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (d *Definitions) ForEach(fn func(definition Definition, i int)) {
 	if d == nil {
@@ -109,7 +131,7 @@ func (d *Definitions) ForEach(fn func(definition Definition, i int)) {
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (d *Definitions) Len() int {
 	if d == nil {
 		return 0
@@ -130,8 +152,8 @@ func (d *Definitions) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of Definition. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of Definition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (d *Definitions) Reverse() *Definitions {
 	current := d
@@ -161,6 +183,17 @@ func (d *Directives) Add(data Directive) *Directives {
 	}
 }
 
+// Join attaches the tail of the reciever list "d" to the head of the otherList.
+func (d *Directives) Join(otherList *Directives) {
+	current := d
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (d *Directives) ForEach(fn func(directive Directive, i int)) {
 	if d == nil {
@@ -182,7 +215,7 @@ func (d *Directives) ForEach(fn func(directive Directive, i int)) {
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (d *Directives) Len() int {
 	if d == nil {
 		return 0
@@ -203,8 +236,8 @@ func (d *Directives) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of Directive. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of Directive. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (d *Directives) Reverse() *Directives {
 	current := d
@@ -234,6 +267,17 @@ func (dl *DirectiveLocations) Add(data DirectiveLocation) *DirectiveLocations {
 	}
 }
 
+// Join attaches the tail of the reciever list "dl" to the head of the otherList.
+func (dl *DirectiveLocations) Join(otherList *DirectiveLocations) {
+	current := dl
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (dl *DirectiveLocations) ForEach(fn func(directiveLocation DirectiveLocation, i int)) {
 	if dl == nil {
@@ -255,7 +299,7 @@ func (dl *DirectiveLocations) ForEach(fn func(directiveLocation DirectiveLocatio
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (dl *DirectiveLocations) Len() int {
 	if dl == nil {
 		return 0
@@ -276,8 +320,8 @@ func (dl *DirectiveLocations) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of DirectiveLocation. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of DirectiveLocation. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (dl *DirectiveLocations) Reverse() *DirectiveLocations {
 	current := dl
@@ -307,6 +351,17 @@ func (evd *EnumValueDefinitions) Add(data EnumValueDefinition) *EnumValueDefinit
 	}
 }
 
+// Join attaches the tail of the reciever list "evd" to the head of the otherList.
+func (evd *EnumValueDefinitions) Join(otherList *EnumValueDefinitions) {
+	current := evd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (evd *EnumValueDefinitions) ForEach(fn func(enumValueDefinition EnumValueDefinition, i int)) {
 	if evd == nil {
@@ -328,7 +383,7 @@ func (evd *EnumValueDefinitions) ForEach(fn func(enumValueDefinition EnumValueDe
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (evd *EnumValueDefinitions) Len() int {
 	if evd == nil {
 		return 0
@@ -349,8 +404,8 @@ func (evd *EnumValueDefinitions) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of EnumValueDefinition. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of EnumValueDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (evd *EnumValueDefinitions) Reverse() *EnumValueDefinitions {
 	current := evd
@@ -380,8 +435,19 @@ func (e *Errors) Add(data Error) *Errors {
 	}
 }
 
+// Join attaches the tail of the reciever list "e" to the head of the otherList.
+func (e *Errors) Join(otherList *Errors) {
+	current := e
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
-func (e *Errors) ForEach(fn func(error Error, i int)) {
+func (e *Errors) ForEach(fn func(err Error, i int)) {
 	if e == nil {
 		return
 	}
@@ -401,7 +467,7 @@ func (e *Errors) ForEach(fn func(error Error, i int)) {
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (e *Errors) Len() int {
 	if e == nil {
 		return 0
@@ -422,8 +488,8 @@ func (e *Errors) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of Error. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of Error. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (e *Errors) Reverse() *Errors {
 	current := e
@@ -453,6 +519,17 @@ func (fd *FieldDefinitions) Add(data FieldDefinition) *FieldDefinitions {
 	}
 }
 
+// Join attaches the tail of the reciever list "fd" to the head of the otherList.
+func (fd *FieldDefinitions) Join(otherList *FieldDefinitions) {
+	current := fd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (fd *FieldDefinitions) ForEach(fn func(fieldDefinition FieldDefinition, i int)) {
 	if fd == nil {
@@ -474,7 +551,7 @@ func (fd *FieldDefinitions) ForEach(fn func(fieldDefinition FieldDefinition, i i
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (fd *FieldDefinitions) Len() int {
 	if fd == nil {
 		return 0
@@ -495,8 +572,8 @@ func (fd *FieldDefinitions) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of FieldDefinition. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of FieldDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (fd *FieldDefinitions) Reverse() *FieldDefinitions {
 	current := fd
@@ -526,6 +603,17 @@ func (ivd *InputValueDefinitions) Add(data InputValueDefinition) *InputValueDefi
 	}
 }
 
+// Join attaches the tail of the reciever list "ivd" to the head of the otherList.
+func (ivd *InputValueDefinitions) Join(otherList *InputValueDefinitions) {
+	current := ivd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (ivd *InputValueDefinitions) ForEach(fn func(inputValueDefinition InputValueDefinition, i int)) {
 	if ivd == nil {
@@ -547,7 +635,7 @@ func (ivd *InputValueDefinitions) ForEach(fn func(inputValueDefinition InputValu
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (ivd *InputValueDefinitions) Len() int {
 	if ivd == nil {
 		return 0
@@ -568,8 +656,8 @@ func (ivd *InputValueDefinitions) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of InputValueDefinition. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of InputValueDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (ivd *InputValueDefinitions) Reverse() *InputValueDefinitions {
 	current := ivd
@@ -599,6 +687,17 @@ func (otd *OperationTypeDefinitions) Add(data OperationTypeDefinition) *Operatio
 	}
 }
 
+// Join attaches the tail of the reciever list "otd" to the head of the otherList.
+func (otd *OperationTypeDefinitions) Join(otherList *OperationTypeDefinitions) {
+	current := otd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (otd *OperationTypeDefinitions) ForEach(fn func(operationTypeDefinition OperationTypeDefinition, i int)) {
 	if otd == nil {
@@ -620,7 +719,7 @@ func (otd *OperationTypeDefinitions) ForEach(fn func(operationTypeDefinition Ope
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (otd *OperationTypeDefinitions) Len() int {
 	if otd == nil {
 		return 0
@@ -641,8 +740,8 @@ func (otd *OperationTypeDefinitions) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of OperationTypeDefinition. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of OperationTypeDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (otd *OperationTypeDefinitions) Reverse() *OperationTypeDefinitions {
 	current := otd
@@ -672,6 +771,17 @@ func (rotd *RootOperationTypeDefinitions) Add(data RootOperationTypeDefinition) 
 	}
 }
 
+// Join attaches the tail of the reciever list "rotd" to the head of the otherList.
+func (rotd *RootOperationTypeDefinitions) Join(otherList *RootOperationTypeDefinitions) {
+	current := rotd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (rotd *RootOperationTypeDefinitions) ForEach(fn func(rootOperationTypeDefinition RootOperationTypeDefinition, i int)) {
 	if rotd == nil {
@@ -693,7 +803,7 @@ func (rotd *RootOperationTypeDefinitions) ForEach(fn func(rootOperationTypeDefin
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (rotd *RootOperationTypeDefinitions) Len() int {
 	if rotd == nil {
 		return 0
@@ -714,8 +824,8 @@ func (rotd *RootOperationTypeDefinitions) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of RootOperationTypeDefinition. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of RootOperationTypeDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (rotd *RootOperationTypeDefinitions) Reverse() *RootOperationTypeDefinitions {
 	current := rotd
@@ -745,6 +855,17 @@ func (s *Selections) Add(data Selection) *Selections {
 	}
 }
 
+// Join attaches the tail of the reciever list "s" to the head of the otherList.
+func (s *Selections) Join(otherList *Selections) {
+	current := s
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (s *Selections) ForEach(fn func(selection Selection, i int)) {
 	if s == nil {
@@ -766,7 +887,7 @@ func (s *Selections) ForEach(fn func(selection Selection, i int)) {
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (s *Selections) Len() int {
 	if s == nil {
 		return 0
@@ -787,8 +908,8 @@ func (s *Selections) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of Selection. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of Selection. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (s *Selections) Reverse() *Selections {
 	current := s
@@ -818,6 +939,17 @@ func (t *Types) Add(data Type) *Types {
 	}
 }
 
+// Join attaches the tail of the reciever list "t" to the head of the otherList.
+func (t *Types) Join(otherList *Types) {
+	current := t
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (t *Types) ForEach(fn func(t Type, i int)) {
 	if t == nil {
@@ -839,7 +971,7 @@ func (t *Types) ForEach(fn func(t Type, i int)) {
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (t *Types) Len() int {
 	if t == nil {
 		return 0
@@ -860,8 +992,8 @@ func (t *Types) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of Type. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of Type. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (t *Types) Reverse() *Types {
 	current := t
@@ -891,6 +1023,17 @@ func (vd *VariableDefinitions) Add(data VariableDefinition) *VariableDefinitions
 	}
 }
 
+// Join attaches the tail of the reciever list "vd" to the head of the otherList.
+func (vd *VariableDefinitions) Join(otherList *VariableDefinitions) {
+	current := vd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
 // ForEach applies the given map function to each item in this linked list.
 func (vd *VariableDefinitions) ForEach(fn func(variableDefinition VariableDefinition, i int)) {
 	if vd == nil {
@@ -912,7 +1055,7 @@ func (vd *VariableDefinitions) ForEach(fn func(variableDefinition VariableDefini
 	}
 }
 
-// Len returns the length of this linked list. 
+// Len returns the length of this linked list.
 func (vd *VariableDefinitions) Len() int {
 	if vd == nil {
 		return 0
@@ -933,8 +1076,8 @@ func (vd *VariableDefinitions) Len() int {
 	return length
 }
 
-// Reverse reverses this linked list of VariableDefinition. Usually when the linked list is being 
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the 
+// Reverse reverses this linked list of VariableDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
 func (vd *VariableDefinitions) Reverse() *VariableDefinitions {
 	current := vd
