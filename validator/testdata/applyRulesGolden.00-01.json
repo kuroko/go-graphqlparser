@@ -1,0 +1,5 @@
+{
+  "InputAST": "extend type foo",
+  "Schema": "schema {\n  query: MyQueryRootType\n  mutation: MyMutationRootType\n}\n\ntype MyQueryRootType {\n  someField: String\n}\n\ntype MyMutationRootType {\n  setSomeField(to: String): String\n}",
+  "Errors": null
+}
