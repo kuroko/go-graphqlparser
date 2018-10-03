@@ -86,6 +86,7 @@ type ExecutableDefinition struct {
 	VariableDefinitions *VariableDefinitions
 	Directives          *Directives
 	SelectionSet        *Selections
+	ShorthandQuery      bool
 	OperationType       OperationType
 	Kind                ExecutableDefinitionKind
 }
