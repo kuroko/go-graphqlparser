@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/bucketd/go-graphqlparser/ast"
@@ -90,32 +89,42 @@ var sdlRules = []rule{
 	(*Validator).providedRequiredArgumentsOnDirectives,
 }
 
+// https://facebook.github.io/graphql/June2018/#sec-Executable-Definitions
 func (v *Validator) executableDefinitions() *ast.Errors {
 	var errs *ast.Errors
 
 	v.DocumentAST.Definitions.ForEach(func(def ast.Definition, i int) {
 		if def.Kind != ast.DefinitionKindExecutable {
 			err := fmt.Errorf("definition %d is of type %v, must be executable", i, def.Kind.String())
-			errs.Add(err)
+			errs = errs.Add(err)
 		}
 	})
 
 	return errs
 }
-func (v *Validator) fieldsOnCorrectType() *ast.Errors {
+
+// https://facebook.github.io/graphql/June2018/#sec-Operation-Name-Uniqueness
+func (v *Validator) uniqueOperationNames() *ast.Errors {
 	var errs *ast.Errors
 
-	errs = errs.Add(ast.Error(errors.New("third error")))
-	errs = errs.Add(ast.Error(errors.New("fourth error")))
+	seenOpName := make(map[string]bool, v.DocumentAST.Definitions.Len())
+
+	v.DocumentAST.Definitions.ForEach(func(def ast.Definition, i int) {
+		if def.Kind != ast.DefinitionKindExecutable {
+			return
+		}
+
+		if seenOpName[def.ExecutableDefinition.Name] {
+			err := fmt.Errorf("operation definitions should be unique, seen %s more than once", def.ExecutableDefinition.Name)
+			errs = errs.Add(err)
+		}
+		seenOpName[def.ExecutableDefinition.Name] = true
+	})
 
 	return errs
 }
-func (v *Validator) fragmentsOnCompositeTypes() *ast.Errors      { return nil }
-func (v *Validator) knownArgumentNames() *ast.Errors             { return nil }
-func (v *Validator) knownArgumentNamesOnDirectives() *ast.Errors { return nil }
-func (v *Validator) knownDirectives() *ast.Errors                { return nil }
-func (v *Validator) knownFragmentNames() *ast.Errors             { return nil }
-func (v *Validator) knownTypeNames() *ast.Errors                 { return nil }
+
+// https://facebook.github.io/graphql/June2018/#sec-Lone-Anonymous-Operation
 func (v *Validator) loneAnonymousOperation() *ast.Errors {
 	var errs *ast.Errors
 
@@ -133,11 +142,89 @@ func (v *Validator) loneAnonymousOperation() *ast.Errors {
 
 	if seenAnonOpCount > 1 {
 		err := fmt.Errorf("seen %d shorthand queries", seenAnonOpCount)
-		errs.Add(err)
+		errs = errs.Add(err)
 	}
 
 	return errs
 }
+
+// https://facebook.github.io/graphql/June2018/#sec-Single-root-field
+func (v *Validator) singleFieldSubscriptions() *ast.Errors {
+	var errs *ast.Errors
+
+	v.DocumentAST.Definitions.ForEach(func(def ast.Definition, i int) {
+		if def.Kind != ast.DefinitionKindExecutable {
+			return
+		}
+
+		if def.ExecutableDefinition.OperationType != ast.OperationTypeSubscription {
+			return
+		}
+
+		if def.ExecutableDefinition.SelectionSet.Len() != 1 {
+			err := fmt.Errorf("subscription %s must have exactly one root field", def.ExecutableDefinition.Name)
+			errs = errs.Add(err)
+		}
+	})
+
+	return errs
+}
+
+// https://facebook.github.io/graphql/June2018/#sec-Field-Selections-on-Objects-Interfaces-and-Unions-Types
+func (v *Validator) fieldsOnCorrectType() *ast.Errors {
+	var errs *ast.Errors
+
+	v.DocumentAST.Definitions.ForEach(func(def ast.Definition, i int) {
+		if def.Kind != ast.DefinitionKindExecutable {
+			return
+		}
+
+		def.ExecutableDefinition.SelectionSet.ForEach(func(selection ast.Selection, _ int) {
+
+		})
+
+		if def.ExecutableDefinition.SelectionSet.Len() != 1 {
+			err := fmt.Errorf("subscription %s must have exactly one root field", def.ExecutableDefinition.Name)
+			errs = errs.Add(err)
+		}
+	})
+
+	return errs
+}
+
+// recursive check
+// func checkFieldsForType()
+
+func (v *Validator) fragmentsOnCompositeTypes() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) knownArgumentNames() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) knownArgumentNamesOnDirectives() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) knownDirectives() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) knownFragmentNames() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) knownTypeNames() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
 func (v *Validator) loneSchemaDefinition() *ast.Errors {
 	var errs *ast.Errors
 
@@ -155,41 +242,90 @@ func (v *Validator) loneSchemaDefinition() *ast.Errors {
 
 	if seenSchemaDefCount > 1 {
 		err := fmt.Errorf("seen %d schema definitions", seenSchemaDefCount)
-		errs.Add(err)
+		errs = errs.Add(err)
 	}
 
 	return errs
 }
-func (v *Validator) noFragmentCycles() *ast.Errors                      { return nil }
-func (v *Validator) noUndefinedVariables() *ast.Errors                  { return nil }
-func (v *Validator) noUnusedFragments() *ast.Errors                     { return nil }
-func (v *Validator) noUnusedVariables() *ast.Errors                     { return nil }
-func (v *Validator) overlappingFieldsCanBeMerged() *ast.Errors          { return nil }
-func (v *Validator) possibleFragmentSpreads() *ast.Errors               { return nil }
-func (v *Validator) providedRequiredArguments() *ast.Errors             { return nil }
-func (v *Validator) providedRequiredArgumentsOnDirectives() *ast.Errors { return nil }
-func (v *Validator) scalarLeafs() *ast.Errors                           { return nil }
-func (v *Validator) singleFieldSubscriptions() *ast.Errors              { return nil }
-func (v *Validator) uniqueArgumentNames() *ast.Errors                   { return nil }
-func (v *Validator) uniqueDirectivesPerLocation() *ast.Errors           { return nil }
-func (v *Validator) uniqueFragmentNames() *ast.Errors                   { return nil }
-func (v *Validator) uniqueInputFieldNames() *ast.Errors                 { return nil }
-func (v *Validator) uniqueOperationNames() *ast.Errors {
+
+func (v *Validator) noFragmentCycles() *ast.Errors {
 	var errs *ast.Errors
-
-	seenOpName := make(map[string]bool, v.DocumentAST.Definitions.Len())
-
-	v.DocumentAST.Definitions.ForEach(func(def ast.Definition, i int) {
-		if seenOpName[def.ExecutableDefinition.Name] {
-			err := fmt.Errorf("operation definitions should be unique, seen %s more than once", def.ExecutableDefinition.Name)
-			errs.Add(err)
-		}
-		seenOpName[def.ExecutableDefinition.Name] = true
-	})
-
 	return errs
 }
-func (v *Validator) uniqueVariableNames() *ast.Errors        { return nil }
-func (v *Validator) valuesOfCorrectType() *ast.Errors        { return nil }
-func (v *Validator) variablesAreInputTypes() *ast.Errors     { return nil }
-func (v *Validator) variablesInAllowedPosition() *ast.Errors { return nil }
+func (v *Validator) noUndefinedVariables() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+func (v *Validator) noUnusedFragments() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+func (v *Validator) noUnusedVariables() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) overlappingFieldsCanBeMerged() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) possibleFragmentSpreads() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) providedRequiredArguments() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) providedRequiredArgumentsOnDirectives() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) scalarLeafs() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) uniqueArgumentNames() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) uniqueDirectivesPerLocation() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) uniqueFragmentNames() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) uniqueInputFieldNames() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) uniqueVariableNames() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) valuesOfCorrectType() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) variablesAreInputTypes() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}
+
+func (v *Validator) variablesInAllowedPosition() *ast.Errors {
+	var errs *ast.Errors
+	return errs
+}

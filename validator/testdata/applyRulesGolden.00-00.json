@@ -1,5 +1,5 @@
 {
   "InputAST": "{\n  foo\n}",
-  "Schema": "schema {\n  query: MyQueryRootType\n  mutation: MyMutationRootType\n}\n\ntype MyQueryRootType {\n  someField: String\n}\n\ntype MyMutationRootType {\n  setSomeField(to: String): String\n}",
-  "Errors": null
+  "Schema": "type Query {\n  dog: Dog\n}\n\nenum DogCommand {\n  SIT\n  DOWN\n  HEEL\n}\n\ntype Dog implements Pet {\n  name: String!\n  nickname: String\n  barkVolume: Int\n  doesKnowCommand(dogCommand: DogCommand!): Boolean!\n  isHousetrained(atOtherHomes: Boolean): Boolean!\n  owner: Human\n}\n\ninterface Sentient {\n  name: String!\n}\n\ninterface Pet {\n  name: String!\n}\n\ntype Alien implements Sentient {\n  name: String!\n  homePlanet: String\n}\n\ntype Human implements Sentient {\n  name: String!\n}\n\nenum CatCommand {\n  JUMP\n}\n\ntype Cat implements Pet {\n  name: String!\n  nickname: String\n  doesKnowCommand(catCommand: CatCommand!): Boolean!\n  meowVolume: Int\n}\n\nunion CatOrDog = Cat | Dog\n\nunion DogOrHuman = Dog | Human\n\nunion HumanOrAlien = Human | Alien",
+  "Errors": ""
 }

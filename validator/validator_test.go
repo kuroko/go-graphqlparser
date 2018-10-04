@@ -64,7 +64,9 @@ type Cat implements Pet {
 }
 
 union CatOrDog = Cat | Dog
+
 union DogOrHuman = Dog | Human
+
 union HumanOrAlien = Human | Alien
 `)
 
@@ -136,7 +138,7 @@ func TestValidator_applyRulesGolden(t *testing.T) {
 	type record struct {
 		InputAST string
 		Schema   string
-		Errors   *ast.Errors
+		Errors   string
 	}
 
 	for _, tc := range tests {
@@ -159,7 +161,7 @@ func TestValidator_applyRulesGolden(t *testing.T) {
 			actual := record{
 				InputAST: ast.Sdump(*validator.DocumentAST),
 				Schema:   ast.Sdump(*validator.GraphQLSchema),
-				Errors:   errs,
+				Errors:   dumpErrors(errs),
 			}
 
 			goldenFileName := fmt.Sprintf("testdata/applyRulesGolden.%s.json", tc.index)
@@ -193,4 +195,14 @@ func TestValidator_applyRulesGolden(t *testing.T) {
 			assert.Equal(t, expected, actual)
 		})
 	}
+}
+
+func dumpErrors(errs *ast.Errors) string {
+	es := make([]string, 0, errs.Len())
+
+	errs.ForEach(func(err ast.Error, _ int) {
+		es = append(es, err.Error())
+	})
+
+	return strings.Join(es, ", ")
 }
