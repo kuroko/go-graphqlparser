@@ -639,6 +639,9 @@ func (d *dumper) dumpFieldDefinition(field FieldDefinition) {
 
 	io.WriteString(d.w, ": ")
 	io.WriteString(d.w, field.Type.NamedType)
+	if field.Type.NonNullable {
+		io.WriteString(d.w, "!")
+	}
 
 	if field.Directives != nil {
 		io.WriteString(d.w, " ")
@@ -667,6 +670,9 @@ func (d *dumper) dumpInputValueDefinition(ivd InputValueDefinition) {
 	io.WriteString(d.w, ivd.Name)
 	io.WriteString(d.w, ": ")
 	io.WriteString(d.w, ivd.Type.NamedType)
+	if ivd.Type.NonNullable {
+		io.WriteString(d.w, "!")
+	}
 
 	if ivd.DefaultValue != nil {
 		io.WriteString(d.w, " = ")

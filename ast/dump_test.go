@@ -16,6 +16,62 @@ var (
   world
 }
 `)
+
+	schemaTest = strings.TrimSpace(`
+type Query {
+  dog: Dog
+}
+
+enum DogCommand {
+  SIT
+  DOWN
+  HEEL
+}
+
+type Dog implements Pet {
+  name: String!
+  nickname: String
+  barkVolume: Int
+  doesKnowCommand(dogCommand: DogCommand!): Boolean!
+  isHousetrained(atOtherHomes: Boolean): Boolean!
+  owner: Human
+}
+
+interface Sentient {
+  name: String!
+}
+
+interface Pet {
+  name: String!
+}
+
+type Alien implements Sentient {
+  name: String!
+  homePlanet: String
+}
+
+type Human implements Sentient {
+  name: String!
+}
+
+enum CatCommand {
+  JUMP
+}
+
+type Cat implements Pet {
+  name: String!
+  nickname: String
+  doesKnowCommand(catCommand: CatCommand!): Boolean!
+  meowVolume: Int
+}
+
+union CatOrDog = Cat | Dog
+
+union DogOrHuman = Dog | Human
+
+union HumanOrAlien = Human | Alien
+`)
+
 	exhaustiveTest = strings.TrimSpace(`
 query Var($v: Int! = $var) {
   selection
@@ -244,6 +300,7 @@ func TestSdump(t *testing.T) {
 		query string
 	}{
 		{descr: "shorthand test", query: shorthandTest},
+		{descr: "schema test", query: schemaTest},
 		{descr: "exhaustive test", query: exhaustiveTest},
 	}
 
