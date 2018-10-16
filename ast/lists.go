@@ -15,7 +15,7 @@ func (a *Arguments) Add(data Argument) *Arguments {
 	}
 }
 
-// Join attaches the tail of the reciever list "a" to the head of the otherList.
+// Join attaches the tail of the receiver list "a" to the head of the otherList.
 func (a *Arguments) Join(otherList *Arguments) {
 	current := a
 
@@ -99,7 +99,7 @@ func (d *Definitions) Add(data Definition) *Definitions {
 	}
 }
 
-// Join attaches the tail of the reciever list "d" to the head of the otherList.
+// Join attaches the tail of the receiver list "d" to the head of the otherList.
 func (d *Definitions) Join(otherList *Definitions) {
 	current := d
 
@@ -183,7 +183,7 @@ func (d *Directives) Add(data Directive) *Directives {
 	}
 }
 
-// Join attaches the tail of the reciever list "d" to the head of the otherList.
+// Join attaches the tail of the receiver list "d" to the head of the otherList.
 func (d *Directives) Join(otherList *Directives) {
 	current := d
 
@@ -267,7 +267,7 @@ func (dl *DirectiveLocations) Add(data DirectiveLocation) *DirectiveLocations {
 	}
 }
 
-// Join attaches the tail of the reciever list "dl" to the head of the otherList.
+// Join attaches the tail of the receiver list "dl" to the head of the otherList.
 func (dl *DirectiveLocations) Join(otherList *DirectiveLocations) {
 	current := dl
 
@@ -351,7 +351,7 @@ func (evd *EnumValueDefinitions) Add(data EnumValueDefinition) *EnumValueDefinit
 	}
 }
 
-// Join attaches the tail of the reciever list "evd" to the head of the otherList.
+// Join attaches the tail of the receiver list "evd" to the head of the otherList.
 func (evd *EnumValueDefinitions) Join(otherList *EnumValueDefinitions) {
 	current := evd
 
@@ -435,7 +435,7 @@ func (e *Errors) Add(data Error) *Errors {
 	}
 }
 
-// Join attaches the tail of the reciever list "e" to the head of the otherList.
+// Join attaches the tail of the receiver list "e" to the head of the otherList.
 func (e *Errors) Join(otherList *Errors) {
 	current := e
 
@@ -519,7 +519,7 @@ func (fd *FieldDefinitions) Add(data FieldDefinition) *FieldDefinitions {
 	}
 }
 
-// Join attaches the tail of the reciever list "fd" to the head of the otherList.
+// Join attaches the tail of the receiver list "fd" to the head of the otherList.
 func (fd *FieldDefinitions) Join(otherList *FieldDefinitions) {
 	current := fd
 
@@ -603,7 +603,7 @@ func (ivd *InputValueDefinitions) Add(data InputValueDefinition) *InputValueDefi
 	}
 }
 
-// Join attaches the tail of the reciever list "ivd" to the head of the otherList.
+// Join attaches the tail of the receiver list "ivd" to the head of the otherList.
 func (ivd *InputValueDefinitions) Join(otherList *InputValueDefinitions) {
 	current := ivd
 
@@ -687,7 +687,7 @@ func (otd *OperationTypeDefinitions) Add(data OperationTypeDefinition) *Operatio
 	}
 }
 
-// Join attaches the tail of the reciever list "otd" to the head of the otherList.
+// Join attaches the tail of the receiver list "otd" to the head of the otherList.
 func (otd *OperationTypeDefinitions) Join(otherList *OperationTypeDefinitions) {
 	current := otd
 
@@ -771,7 +771,7 @@ func (rotd *RootOperationTypeDefinitions) Add(data RootOperationTypeDefinition) 
 	}
 }
 
-// Join attaches the tail of the reciever list "rotd" to the head of the otherList.
+// Join attaches the tail of the receiver list "rotd" to the head of the otherList.
 func (rotd *RootOperationTypeDefinitions) Join(otherList *RootOperationTypeDefinitions) {
 	current := rotd
 
@@ -855,7 +855,7 @@ func (s *Selections) Add(data Selection) *Selections {
 	}
 }
 
-// Join attaches the tail of the reciever list "s" to the head of the otherList.
+// Join attaches the tail of the receiver list "s" to the head of the otherList.
 func (s *Selections) Join(otherList *Selections) {
 	current := s
 
@@ -939,7 +939,7 @@ func (t *Types) Add(data Type) *Types {
 	}
 }
 
-// Join attaches the tail of the reciever list "t" to the head of the otherList.
+// Join attaches the tail of the receiver list "t" to the head of the otherList.
 func (t *Types) Join(otherList *Types) {
 	current := t
 
@@ -1023,7 +1023,7 @@ func (vd *VariableDefinitions) Add(data VariableDefinition) *VariableDefinitions
 	}
 }
 
-// Join attaches the tail of the reciever list "vd" to the head of the otherList.
+// Join attaches the tail of the receiver list "vd" to the head of the otherList.
 func (vd *VariableDefinitions) Join(otherList *VariableDefinitions) {
 	current := vd
 

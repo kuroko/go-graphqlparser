@@ -65,7 +65,7 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) Add(data {{.TypeName}}) *{{.TypeName}}s {
 	}
 }
 
-// Join attaches the tail of the reciever list "{{.AbridgedTN}}" to the head of the otherList.
+// Join attaches the tail of the receiver list "{{.AbridgedTN}}" to the head of the otherList.
 func ({{.AbridgedTN}} *{{.TypeName}}s) Join(otherList *{{.TypeName}}s) {
 	current := {{.AbridgedTN}}
 
