@@ -1,3 +1,3 @@
-package validator
+package ast
 
 type Schema struct{}

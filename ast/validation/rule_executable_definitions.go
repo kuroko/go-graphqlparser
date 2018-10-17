@@ -1,4 +1,4 @@
-package validator
+package validation
 
 import (
 	"errors"
@@ -8,10 +8,10 @@ import (
 )
 
 // executableDefinitions ...
-func executableDefinitions(vctx *validationContext, walker *ast.Walker) {
+func executableDefinitions(vctx *ast.ValidationContext, walker *ast.Walker) {
 	walker.AddDefinitionEventHandler(ast.WalkerEnter, func(def ast.Definition) {
 		if def.Kind != ast.DefinitionKindExecutable {
-			vctx.errors = vctx.errors.Add(errors.New(
+			vctx.Errors = vctx.Errors.Add(errors.New(
 				nonExecutableDefinitionMessage(def),
 			))
 		}
@@ -22,7 +22,7 @@ func executableDefinitions(vctx *validationContext, walker *ast.Walker) {
 func nonExecutableDefinitionMessage(def ast.Definition) string {
 	var name string
 
-	// TODO(elliot): We really need to move the name field to the top level of ast.Definition...
+	// TODO(elliot): We really need to move the name field to the top level of Definition...
 	switch def.Kind {
 	case ast.DefinitionKindTypeSystem:
 		tsDef := def.TypeSystemDefinition
