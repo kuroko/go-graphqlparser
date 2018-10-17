@@ -20,6 +20,9 @@ type DefinitionEventHandler func(Definition)
 type DefinitionEventHandlers map[WalkerEventKind][]DefinitionEventHandler
 
 type Walker struct {
+	// TODO(elliot): We might not want to use a map of slices actually, we could possibly avoid some
+	// allocations by just having 2 slices, one for enter, one for leave on the struct, and then
+	// when the struct is made that memory will be allocated (maybe on the stack even?)
 	documentEventHandlers    DocumentEventHandlers
 	definitionsEventHandlers DefinitionsEventHandlers
 	definitionEventHandlers  DefinitionEventHandlers
