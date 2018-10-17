@@ -171,7 +171,6 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefiniti
 		VariableDefinitions: variableDefinitions,
 		Directives:          directives,
 		SelectionSet:        selectionSet,
-		ShorthandQuery:      isQuery,
 	}, nil
 }
 
