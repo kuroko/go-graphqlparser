@@ -1,26 +1,26 @@
 package ast
 
 func (w *Walker) Walk(doc Document) {
-	w.OnDocumentEvent(WalkerEnter, doc)
+	w.OnDocumentEnter(doc)
 	w.walkDefinitions(doc.Definitions)
-	w.OnDocumentEvent(WalkerLeave, doc)
+	w.OnDocumentLeave(doc)
 }
 
 func (w *Walker) walkDefinitions(defs *Definitions) {
-	w.OnDefinitionsEvent(WalkerEnter, defs)
+	w.OnDefinitionsEnter(defs)
 
 	defs.ForEach(func(def Definition, i int) {
 		w.walkDefinition(def)
 	})
 
-	w.OnDefinitionsEvent(WalkerLeave, defs)
+	w.OnDefinitionsLeave(defs)
 }
 
 func (w *Walker) walkDefinition(definition Definition) {
-	w.OnDefinitionEvent(WalkerEnter, definition)
+	w.OnDefinitionEnter(definition)
 
 	// TODO...
 	//w.walkDefinitions(doc.Definitions)
 
-	w.OnDefinitionEvent(WalkerLeave, definition)
+	w.OnDefinitionLeave(definition)
 }

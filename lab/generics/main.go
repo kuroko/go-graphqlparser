@@ -45,12 +45,7 @@ func main() {
 		linkedList.Execute(os.Stdout, map[string]string{
 			"TypeNameLCF": typeNameLCF,
 			"TypeName":    tn,
-			"AbridgedTN": strings.Map(func(r rune) rune {
-				if unicode.IsUpper(r) {
-					return unicode.ToLower(r)
-				}
-				return -1
-			}, tn),
+			"AbridgedTN":  strings.Map(abridger, tn),
 		})
 	}
 }
@@ -153,4 +148,11 @@ func lcfirst(in string) string {
 	fr, w := utf8.DecodeRuneInString(in)
 
 	return strings.ToLower(string(fr)) + in[w:]
+}
+
+func abridger(r rune) rune {
+	if unicode.IsUpper(r) {
+		return unicode.ToLower(r)
+	}
+	return -1
 }

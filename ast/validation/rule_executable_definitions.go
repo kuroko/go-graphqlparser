@@ -9,7 +9,7 @@ import (
 
 // executableDefinitions ...
 func executableDefinitions(vctx *ast.ValidationContext, walker *ast.Walker) {
-	walker.AddDefinitionEventHandler(ast.WalkerEnter, func(def ast.Definition) {
+	walker.AddDefinitionEnterEventHandler(func(def ast.Definition) {
 		if def.Kind != ast.DefinitionKindExecutable {
 			vctx.Errors = vctx.Errors.Add(errors.New(
 				nonExecutableDefinitionMessage(def),
