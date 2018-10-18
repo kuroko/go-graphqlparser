@@ -76,19 +76,19 @@ func (w *Walker) AddArgumentEnterEventHandler(handler ArgumentEventHandler) {
 	w.argumentEventHandlers.enter = append(w.argumentEventHandlers.enter, handler)
 }
 
-// AddArgumentEnterEventHandler adds an event handler to be called when leaving a Argument node.
+// AddArgumentLeaveEventHandler adds an event handler to be called when leaving a Argument node.
 func (w *Walker) AddArgumentLeaveEventHandler(handler ArgumentEventHandler) {
 	w.argumentEventHandlers.leave = append(w.argumentEventHandlers.leave, handler)
 }
 
-// OnArgumentEnter calls the enter event handlers for this node type.
+// OnArgumentEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnArgumentEnter(a Argument) {
 	for _, handler := range w.argumentEventHandlers.enter {
 		handler(a)
 	}
 }
 
-// OnArgumentLeave calls the leave event handlers for this node type.
+// OnArgumentLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnArgumentLeave(a Argument) {
 	for _, handler := range w.argumentEventHandlers.leave {
 		handler(a)
@@ -109,19 +109,19 @@ func (w *Walker) AddArgumentsEnterEventHandler(handler ArgumentsEventHandler) {
 	w.argumentsEventHandlers.enter = append(w.argumentsEventHandlers.enter, handler)
 }
 
-// AddArgumentsEnterEventHandler adds an event handler to be called when leaving a Arguments node.
+// AddArgumentsLeaveEventHandler adds an event handler to be called when leaving a Arguments node.
 func (w *Walker) AddArgumentsLeaveEventHandler(handler ArgumentsEventHandler) {
 	w.argumentsEventHandlers.leave = append(w.argumentsEventHandlers.leave, handler)
 }
 
-// OnArgumentsEnter calls the enter event handlers for this node type.
+// OnArgumentsEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnArgumentsEnter(a *Arguments) {
 	for _, handler := range w.argumentsEventHandlers.enter {
 		handler(a)
 	}
 }
 
-// OnArgumentsLeave calls the leave event handlers for this node type.
+// OnArgumentsLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnArgumentsLeave(a *Arguments) {
 	for _, handler := range w.argumentsEventHandlers.leave {
 		handler(a)
@@ -142,19 +142,19 @@ func (w *Walker) AddArgumentsDefinitionEnterEventHandler(handler ArgumentsDefini
 	w.argumentsDefinitionEventHandlers.enter = append(w.argumentsDefinitionEventHandlers.enter, handler)
 }
 
-// AddArgumentsDefinitionEnterEventHandler adds an event handler to be called when leaving a ArgumentsDefinition node.
+// AddArgumentsDefinitionLeaveEventHandler adds an event handler to be called when leaving a ArgumentsDefinition node.
 func (w *Walker) AddArgumentsDefinitionLeaveEventHandler(handler ArgumentsDefinitionEventHandler) {
 	w.argumentsDefinitionEventHandlers.leave = append(w.argumentsDefinitionEventHandlers.leave, handler)
 }
 
-// OnArgumentsDefinitionEnter calls the enter event handlers for this node type.
+// OnArgumentsDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnArgumentsDefinitionEnter(ad *InputValueDefinitions) {
 	for _, handler := range w.argumentsDefinitionEventHandlers.enter {
 		handler(ad)
 	}
 }
 
-// OnArgumentsDefinitionLeave calls the leave event handlers for this node type.
+// OnArgumentsDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnArgumentsDefinitionLeave(ad *InputValueDefinitions) {
 	for _, handler := range w.argumentsDefinitionEventHandlers.leave {
 		handler(ad)
@@ -175,19 +175,19 @@ func (w *Walker) AddDefinitionEnterEventHandler(handler DefinitionEventHandler) 
 	w.definitionEventHandlers.enter = append(w.definitionEventHandlers.enter, handler)
 }
 
-// AddDefinitionEnterEventHandler adds an event handler to be called when leaving a Definition node.
+// AddDefinitionLeaveEventHandler adds an event handler to be called when leaving a Definition node.
 func (w *Walker) AddDefinitionLeaveEventHandler(handler DefinitionEventHandler) {
 	w.definitionEventHandlers.leave = append(w.definitionEventHandlers.leave, handler)
 }
 
-// OnDefinitionEnter calls the enter event handlers for this node type.
+// OnDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnDefinitionEnter(d Definition) {
 	for _, handler := range w.definitionEventHandlers.enter {
 		handler(d)
 	}
 }
 
-// OnDefinitionLeave calls the leave event handlers for this node type.
+// OnDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnDefinitionLeave(d Definition) {
 	for _, handler := range w.definitionEventHandlers.leave {
 		handler(d)
@@ -208,19 +208,19 @@ func (w *Walker) AddDefinitionsEnterEventHandler(handler DefinitionsEventHandler
 	w.definitionsEventHandlers.enter = append(w.definitionsEventHandlers.enter, handler)
 }
 
-// AddDefinitionsEnterEventHandler adds an event handler to be called when leaving a Definitions node.
+// AddDefinitionsLeaveEventHandler adds an event handler to be called when leaving a Definitions node.
 func (w *Walker) AddDefinitionsLeaveEventHandler(handler DefinitionsEventHandler) {
 	w.definitionsEventHandlers.leave = append(w.definitionsEventHandlers.leave, handler)
 }
 
-// OnDefinitionsEnter calls the enter event handlers for this node type.
+// OnDefinitionsEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnDefinitionsEnter(d *Definitions) {
 	for _, handler := range w.definitionsEventHandlers.enter {
 		handler(d)
 	}
 }
 
-// OnDefinitionsLeave calls the leave event handlers for this node type.
+// OnDefinitionsLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnDefinitionsLeave(d *Definitions) {
 	for _, handler := range w.definitionsEventHandlers.leave {
 		handler(d)
@@ -241,19 +241,19 @@ func (w *Walker) AddDescriptionEnterEventHandler(handler DescriptionEventHandler
 	w.descriptionEventHandlers.enter = append(w.descriptionEventHandlers.enter, handler)
 }
 
-// AddDescriptionEnterEventHandler adds an event handler to be called when leaving a Description node.
+// AddDescriptionLeaveEventHandler adds an event handler to be called when leaving a Description node.
 func (w *Walker) AddDescriptionLeaveEventHandler(handler DescriptionEventHandler) {
 	w.descriptionEventHandlers.leave = append(w.descriptionEventHandlers.leave, handler)
 }
 
-// OnDescriptionEnter calls the enter event handlers for this node type.
+// OnDescriptionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnDescriptionEnter(d string) {
 	for _, handler := range w.descriptionEventHandlers.enter {
 		handler(d)
 	}
 }
 
-// OnDescriptionLeave calls the leave event handlers for this node type.
+// OnDescriptionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnDescriptionLeave(d string) {
 	for _, handler := range w.descriptionEventHandlers.leave {
 		handler(d)
@@ -274,19 +274,19 @@ func (w *Walker) AddDirectiveEnterEventHandler(handler DirectiveEventHandler) {
 	w.directiveEventHandlers.enter = append(w.directiveEventHandlers.enter, handler)
 }
 
-// AddDirectiveEnterEventHandler adds an event handler to be called when leaving a Directive node.
+// AddDirectiveLeaveEventHandler adds an event handler to be called when leaving a Directive node.
 func (w *Walker) AddDirectiveLeaveEventHandler(handler DirectiveEventHandler) {
 	w.directiveEventHandlers.leave = append(w.directiveEventHandlers.leave, handler)
 }
 
-// OnDirectiveEnter calls the enter event handlers for this node type.
+// OnDirectiveEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnDirectiveEnter(d Directive) {
 	for _, handler := range w.directiveEventHandlers.enter {
 		handler(d)
 	}
 }
 
-// OnDirectiveLeave calls the leave event handlers for this node type.
+// OnDirectiveLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnDirectiveLeave(d Directive) {
 	for _, handler := range w.directiveEventHandlers.leave {
 		handler(d)
@@ -307,19 +307,19 @@ func (w *Walker) AddDirectiveDefinitionEnterEventHandler(handler DirectiveDefini
 	w.directiveDefinitionEventHandlers.enter = append(w.directiveDefinitionEventHandlers.enter, handler)
 }
 
-// AddDirectiveDefinitionEnterEventHandler adds an event handler to be called when leaving a DirectiveDefinition node.
+// AddDirectiveDefinitionLeaveEventHandler adds an event handler to be called when leaving a DirectiveDefinition node.
 func (w *Walker) AddDirectiveDefinitionLeaveEventHandler(handler DirectiveDefinitionEventHandler) {
 	w.directiveDefinitionEventHandlers.leave = append(w.directiveDefinitionEventHandlers.leave, handler)
 }
 
-// OnDirectiveDefinitionEnter calls the enter event handlers for this node type.
+// OnDirectiveDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnDirectiveDefinitionEnter(dd *DirectiveDefinition) {
 	for _, handler := range w.directiveDefinitionEventHandlers.enter {
 		handler(dd)
 	}
 }
 
-// OnDirectiveDefinitionLeave calls the leave event handlers for this node type.
+// OnDirectiveDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnDirectiveDefinitionLeave(dd *DirectiveDefinition) {
 	for _, handler := range w.directiveDefinitionEventHandlers.leave {
 		handler(dd)
@@ -340,19 +340,19 @@ func (w *Walker) AddDirectiveLocationsEnterEventHandler(handler DirectiveLocatio
 	w.directiveLocationsEventHandlers.enter = append(w.directiveLocationsEventHandlers.enter, handler)
 }
 
-// AddDirectiveLocationsEnterEventHandler adds an event handler to be called when leaving a DirectiveLocations node.
+// AddDirectiveLocationsLeaveEventHandler adds an event handler to be called when leaving a DirectiveLocations node.
 func (w *Walker) AddDirectiveLocationsLeaveEventHandler(handler DirectiveLocationsEventHandler) {
 	w.directiveLocationsEventHandlers.leave = append(w.directiveLocationsEventHandlers.leave, handler)
 }
 
-// OnDirectiveLocationsEnter calls the enter event handlers for this node type.
+// OnDirectiveLocationsEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnDirectiveLocationsEnter(dl *DirectiveLocations) {
 	for _, handler := range w.directiveLocationsEventHandlers.enter {
 		handler(dl)
 	}
 }
 
-// OnDirectiveLocationsLeave calls the leave event handlers for this node type.
+// OnDirectiveLocationsLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnDirectiveLocationsLeave(dl *DirectiveLocations) {
 	for _, handler := range w.directiveLocationsEventHandlers.leave {
 		handler(dl)
@@ -373,19 +373,19 @@ func (w *Walker) AddDirectivesEnterEventHandler(handler DirectivesEventHandler) 
 	w.directivesEventHandlers.enter = append(w.directivesEventHandlers.enter, handler)
 }
 
-// AddDirectivesEnterEventHandler adds an event handler to be called when leaving a Directives node.
+// AddDirectivesLeaveEventHandler adds an event handler to be called when leaving a Directives node.
 func (w *Walker) AddDirectivesLeaveEventHandler(handler DirectivesEventHandler) {
 	w.directivesEventHandlers.leave = append(w.directivesEventHandlers.leave, handler)
 }
 
-// OnDirectivesEnter calls the enter event handlers for this node type.
+// OnDirectivesEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnDirectivesEnter(d *Directives) {
 	for _, handler := range w.directivesEventHandlers.enter {
 		handler(d)
 	}
 }
 
-// OnDirectivesLeave calls the leave event handlers for this node type.
+// OnDirectivesLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnDirectivesLeave(d *Directives) {
 	for _, handler := range w.directivesEventHandlers.leave {
 		handler(d)
@@ -406,19 +406,19 @@ func (w *Walker) AddDocumentEnterEventHandler(handler DocumentEventHandler) {
 	w.documentEventHandlers.enter = append(w.documentEventHandlers.enter, handler)
 }
 
-// AddDocumentEnterEventHandler adds an event handler to be called when leaving a Document node.
+// AddDocumentLeaveEventHandler adds an event handler to be called when leaving a Document node.
 func (w *Walker) AddDocumentLeaveEventHandler(handler DocumentEventHandler) {
 	w.documentEventHandlers.leave = append(w.documentEventHandlers.leave, handler)
 }
 
-// OnDocumentEnter calls the enter event handlers for this node type.
+// OnDocumentEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnDocumentEnter(d Document) {
 	for _, handler := range w.documentEventHandlers.enter {
 		handler(d)
 	}
 }
 
-// OnDocumentLeave calls the leave event handlers for this node type.
+// OnDocumentLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnDocumentLeave(d Document) {
 	for _, handler := range w.documentEventHandlers.leave {
 		handler(d)
@@ -439,19 +439,19 @@ func (w *Walker) AddEnumTypeExtensionEnterEventHandler(handler EnumTypeExtension
 	w.enumTypeExtensionEventHandlers.enter = append(w.enumTypeExtensionEventHandlers.enter, handler)
 }
 
-// AddEnumTypeExtensionEnterEventHandler adds an event handler to be called when leaving a EnumTypeExtension node.
+// AddEnumTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a EnumTypeExtension node.
 func (w *Walker) AddEnumTypeExtensionLeaveEventHandler(handler EnumTypeExtensionEventHandler) {
 	w.enumTypeExtensionEventHandlers.leave = append(w.enumTypeExtensionEventHandlers.leave, handler)
 }
 
-// OnEnumTypeExtensionEnter calls the enter event handlers for this node type.
+// OnEnumTypeExtensionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnEnumTypeExtensionEnter(ete *TypeExtension) {
 	for _, handler := range w.enumTypeExtensionEventHandlers.enter {
 		handler(ete)
 	}
 }
 
-// OnEnumTypeExtensionLeave calls the leave event handlers for this node type.
+// OnEnumTypeExtensionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnEnumTypeExtensionLeave(ete *TypeExtension) {
 	for _, handler := range w.enumTypeExtensionEventHandlers.leave {
 		handler(ete)
@@ -472,19 +472,19 @@ func (w *Walker) AddEnumValueDefinitionEnterEventHandler(handler EnumValueDefini
 	w.enumValueDefinitionEventHandlers.enter = append(w.enumValueDefinitionEventHandlers.enter, handler)
 }
 
-// AddEnumValueDefinitionEnterEventHandler adds an event handler to be called when leaving a EnumValueDefinition node.
+// AddEnumValueDefinitionLeaveEventHandler adds an event handler to be called when leaving a EnumValueDefinition node.
 func (w *Walker) AddEnumValueDefinitionLeaveEventHandler(handler EnumValueDefinitionEventHandler) {
 	w.enumValueDefinitionEventHandlers.leave = append(w.enumValueDefinitionEventHandlers.leave, handler)
 }
 
-// OnEnumValueDefinitionEnter calls the enter event handlers for this node type.
+// OnEnumValueDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnEnumValueDefinitionEnter(evd EnumValueDefinition) {
 	for _, handler := range w.enumValueDefinitionEventHandlers.enter {
 		handler(evd)
 	}
 }
 
-// OnEnumValueDefinitionLeave calls the leave event handlers for this node type.
+// OnEnumValueDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnEnumValueDefinitionLeave(evd EnumValueDefinition) {
 	for _, handler := range w.enumValueDefinitionEventHandlers.leave {
 		handler(evd)
@@ -505,19 +505,19 @@ func (w *Walker) AddEnumValuesDefinitionEnterEventHandler(handler EnumValuesDefi
 	w.enumValuesDefinitionEventHandlers.enter = append(w.enumValuesDefinitionEventHandlers.enter, handler)
 }
 
-// AddEnumValuesDefinitionEnterEventHandler adds an event handler to be called when leaving a EnumValuesDefinition node.
+// AddEnumValuesDefinitionLeaveEventHandler adds an event handler to be called when leaving a EnumValuesDefinition node.
 func (w *Walker) AddEnumValuesDefinitionLeaveEventHandler(handler EnumValuesDefinitionEventHandler) {
 	w.enumValuesDefinitionEventHandlers.leave = append(w.enumValuesDefinitionEventHandlers.leave, handler)
 }
 
-// OnEnumValuesDefinitionEnter calls the enter event handlers for this node type.
+// OnEnumValuesDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnEnumValuesDefinitionEnter(evd *EnumValueDefinitions) {
 	for _, handler := range w.enumValuesDefinitionEventHandlers.enter {
 		handler(evd)
 	}
 }
 
-// OnEnumValuesDefinitionLeave calls the leave event handlers for this node type.
+// OnEnumValuesDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnEnumValuesDefinitionLeave(evd *EnumValueDefinitions) {
 	for _, handler := range w.enumValuesDefinitionEventHandlers.leave {
 		handler(evd)
@@ -538,19 +538,19 @@ func (w *Walker) AddExecutableDefinitionEnterEventHandler(handler ExecutableDefi
 	w.executableDefinitionEventHandlers.enter = append(w.executableDefinitionEventHandlers.enter, handler)
 }
 
-// AddExecutableDefinitionEnterEventHandler adds an event handler to be called when leaving a ExecutableDefinition node.
+// AddExecutableDefinitionLeaveEventHandler adds an event handler to be called when leaving a ExecutableDefinition node.
 func (w *Walker) AddExecutableDefinitionLeaveEventHandler(handler ExecutableDefinitionEventHandler) {
 	w.executableDefinitionEventHandlers.leave = append(w.executableDefinitionEventHandlers.leave, handler)
 }
 
-// OnExecutableDefinitionEnter calls the enter event handlers for this node type.
+// OnExecutableDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnExecutableDefinitionEnter(ed *ExecutableDefinition) {
 	for _, handler := range w.executableDefinitionEventHandlers.enter {
 		handler(ed)
 	}
 }
 
-// OnExecutableDefinitionLeave calls the leave event handlers for this node type.
+// OnExecutableDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnExecutableDefinitionLeave(ed *ExecutableDefinition) {
 	for _, handler := range w.executableDefinitionEventHandlers.leave {
 		handler(ed)
@@ -571,19 +571,19 @@ func (w *Walker) AddFieldDefinitionEnterEventHandler(handler FieldDefinitionEven
 	w.fieldDefinitionEventHandlers.enter = append(w.fieldDefinitionEventHandlers.enter, handler)
 }
 
-// AddFieldDefinitionEnterEventHandler adds an event handler to be called when leaving a FieldDefinition node.
+// AddFieldDefinitionLeaveEventHandler adds an event handler to be called when leaving a FieldDefinition node.
 func (w *Walker) AddFieldDefinitionLeaveEventHandler(handler FieldDefinitionEventHandler) {
 	w.fieldDefinitionEventHandlers.leave = append(w.fieldDefinitionEventHandlers.leave, handler)
 }
 
-// OnFieldDefinitionEnter calls the enter event handlers for this node type.
+// OnFieldDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnFieldDefinitionEnter(fd FieldDefinition) {
 	for _, handler := range w.fieldDefinitionEventHandlers.enter {
 		handler(fd)
 	}
 }
 
-// OnFieldDefinitionLeave calls the leave event handlers for this node type.
+// OnFieldDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnFieldDefinitionLeave(fd FieldDefinition) {
 	for _, handler := range w.fieldDefinitionEventHandlers.leave {
 		handler(fd)
@@ -604,19 +604,19 @@ func (w *Walker) AddFieldSelectionEnterEventHandler(handler FieldSelectionEventH
 	w.fieldSelectionEventHandlers.enter = append(w.fieldSelectionEventHandlers.enter, handler)
 }
 
-// AddFieldSelectionEnterEventHandler adds an event handler to be called when leaving a FieldSelection node.
+// AddFieldSelectionLeaveEventHandler adds an event handler to be called when leaving a FieldSelection node.
 func (w *Walker) AddFieldSelectionLeaveEventHandler(handler FieldSelectionEventHandler) {
 	w.fieldSelectionEventHandlers.leave = append(w.fieldSelectionEventHandlers.leave, handler)
 }
 
-// OnFieldSelectionEnter calls the enter event handlers for this node type.
+// OnFieldSelectionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnFieldSelectionEnter(fs Selection) {
 	for _, handler := range w.fieldSelectionEventHandlers.enter {
 		handler(fs)
 	}
 }
 
-// OnFieldSelectionLeave calls the leave event handlers for this node type.
+// OnFieldSelectionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnFieldSelectionLeave(fs Selection) {
 	for _, handler := range w.fieldSelectionEventHandlers.leave {
 		handler(fs)
@@ -637,19 +637,19 @@ func (w *Walker) AddFieldsDefinitionEnterEventHandler(handler FieldsDefinitionEv
 	w.fieldsDefinitionEventHandlers.enter = append(w.fieldsDefinitionEventHandlers.enter, handler)
 }
 
-// AddFieldsDefinitionEnterEventHandler adds an event handler to be called when leaving a FieldsDefinition node.
+// AddFieldsDefinitionLeaveEventHandler adds an event handler to be called when leaving a FieldsDefinition node.
 func (w *Walker) AddFieldsDefinitionLeaveEventHandler(handler FieldsDefinitionEventHandler) {
 	w.fieldsDefinitionEventHandlers.leave = append(w.fieldsDefinitionEventHandlers.leave, handler)
 }
 
-// OnFieldsDefinitionEnter calls the enter event handlers for this node type.
+// OnFieldsDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnFieldsDefinitionEnter(fd *FieldDefinitions) {
 	for _, handler := range w.fieldsDefinitionEventHandlers.enter {
 		handler(fd)
 	}
 }
 
-// OnFieldsDefinitionLeave calls the leave event handlers for this node type.
+// OnFieldsDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnFieldsDefinitionLeave(fd *FieldDefinitions) {
 	for _, handler := range w.fieldsDefinitionEventHandlers.leave {
 		handler(fd)
@@ -670,19 +670,19 @@ func (w *Walker) AddFragmentDefinitionEnterEventHandler(handler FragmentDefiniti
 	w.fragmentDefinitionEventHandlers.enter = append(w.fragmentDefinitionEventHandlers.enter, handler)
 }
 
-// AddFragmentDefinitionEnterEventHandler adds an event handler to be called when leaving a FragmentDefinition node.
+// AddFragmentDefinitionLeaveEventHandler adds an event handler to be called when leaving a FragmentDefinition node.
 func (w *Walker) AddFragmentDefinitionLeaveEventHandler(handler FragmentDefinitionEventHandler) {
 	w.fragmentDefinitionEventHandlers.leave = append(w.fragmentDefinitionEventHandlers.leave, handler)
 }
 
-// OnFragmentDefinitionEnter calls the enter event handlers for this node type.
+// OnFragmentDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnFragmentDefinitionEnter(fd *ExecutableDefinition) {
 	for _, handler := range w.fragmentDefinitionEventHandlers.enter {
 		handler(fd)
 	}
 }
 
-// OnFragmentDefinitionLeave calls the leave event handlers for this node type.
+// OnFragmentDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnFragmentDefinitionLeave(fd *ExecutableDefinition) {
 	for _, handler := range w.fragmentDefinitionEventHandlers.leave {
 		handler(fd)
@@ -703,19 +703,19 @@ func (w *Walker) AddFragmentSpreadEnterEventHandler(handler FragmentSpreadEventH
 	w.fragmentSpreadEventHandlers.enter = append(w.fragmentSpreadEventHandlers.enter, handler)
 }
 
-// AddFragmentSpreadEnterEventHandler adds an event handler to be called when leaving a FragmentSpread node.
+// AddFragmentSpreadLeaveEventHandler adds an event handler to be called when leaving a FragmentSpread node.
 func (w *Walker) AddFragmentSpreadLeaveEventHandler(handler FragmentSpreadEventHandler) {
 	w.fragmentSpreadEventHandlers.leave = append(w.fragmentSpreadEventHandlers.leave, handler)
 }
 
-// OnFragmentSpreadEnter calls the enter event handlers for this node type.
+// OnFragmentSpreadEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnFragmentSpreadEnter(fs Selection) {
 	for _, handler := range w.fragmentSpreadEventHandlers.enter {
 		handler(fs)
 	}
 }
 
-// OnFragmentSpreadLeave calls the leave event handlers for this node type.
+// OnFragmentSpreadLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnFragmentSpreadLeave(fs Selection) {
 	for _, handler := range w.fragmentSpreadEventHandlers.leave {
 		handler(fs)
@@ -736,19 +736,19 @@ func (w *Walker) AddImplementsInterfacesEnterEventHandler(handler ImplementsInte
 	w.implementsInterfacesEventHandlers.enter = append(w.implementsInterfacesEventHandlers.enter, handler)
 }
 
-// AddImplementsInterfacesEnterEventHandler adds an event handler to be called when leaving a ImplementsInterfaces node.
+// AddImplementsInterfacesLeaveEventHandler adds an event handler to be called when leaving a ImplementsInterfaces node.
 func (w *Walker) AddImplementsInterfacesLeaveEventHandler(handler ImplementsInterfacesEventHandler) {
 	w.implementsInterfacesEventHandlers.leave = append(w.implementsInterfacesEventHandlers.leave, handler)
 }
 
-// OnImplementsInterfacesEnter calls the enter event handlers for this node type.
+// OnImplementsInterfacesEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnImplementsInterfacesEnter(ii *Types) {
 	for _, handler := range w.implementsInterfacesEventHandlers.enter {
 		handler(ii)
 	}
 }
 
-// OnImplementsInterfacesLeave calls the leave event handlers for this node type.
+// OnImplementsInterfacesLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnImplementsInterfacesLeave(ii *Types) {
 	for _, handler := range w.implementsInterfacesEventHandlers.leave {
 		handler(ii)
@@ -769,19 +769,19 @@ func (w *Walker) AddInlineFragmentEnterEventHandler(handler InlineFragmentEventH
 	w.inlineFragmentEventHandlers.enter = append(w.inlineFragmentEventHandlers.enter, handler)
 }
 
-// AddInlineFragmentEnterEventHandler adds an event handler to be called when leaving a InlineFragment node.
+// AddInlineFragmentLeaveEventHandler adds an event handler to be called when leaving a InlineFragment node.
 func (w *Walker) AddInlineFragmentLeaveEventHandler(handler InlineFragmentEventHandler) {
 	w.inlineFragmentEventHandlers.leave = append(w.inlineFragmentEventHandlers.leave, handler)
 }
 
-// OnInlineFragmentEnter calls the enter event handlers for this node type.
+// OnInlineFragmentEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnInlineFragmentEnter(ilf Selection) {
 	for _, handler := range w.inlineFragmentEventHandlers.enter {
 		handler(ilf)
 	}
 }
 
-// OnInlineFragmentLeave calls the leave event handlers for this node type.
+// OnInlineFragmentLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnInlineFragmentLeave(ilf Selection) {
 	for _, handler := range w.inlineFragmentEventHandlers.leave {
 		handler(ilf)
@@ -802,19 +802,19 @@ func (w *Walker) AddInputFieldsDefinitionEnterEventHandler(handler InputFieldsDe
 	w.inputFieldsDefinitionEventHandlers.enter = append(w.inputFieldsDefinitionEventHandlers.enter, handler)
 }
 
-// AddInputFieldsDefinitionEnterEventHandler adds an event handler to be called when leaving a InputFieldsDefinition node.
+// AddInputFieldsDefinitionLeaveEventHandler adds an event handler to be called when leaving a InputFieldsDefinition node.
 func (w *Walker) AddInputFieldsDefinitionLeaveEventHandler(handler InputFieldsDefinitionEventHandler) {
 	w.inputFieldsDefinitionEventHandlers.leave = append(w.inputFieldsDefinitionEventHandlers.leave, handler)
 }
 
-// OnInputFieldsDefinitionEnter calls the enter event handlers for this node type.
+// OnInputFieldsDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnInputFieldsDefinitionEnter(ifd *InputValueDefinitions) {
 	for _, handler := range w.inputFieldsDefinitionEventHandlers.enter {
 		handler(ifd)
 	}
 }
 
-// OnInputFieldsDefinitionLeave calls the leave event handlers for this node type.
+// OnInputFieldsDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnInputFieldsDefinitionLeave(ifd *InputValueDefinitions) {
 	for _, handler := range w.inputFieldsDefinitionEventHandlers.leave {
 		handler(ifd)
@@ -835,19 +835,19 @@ func (w *Walker) AddInputObjectTypeExtensionEnterEventHandler(handler InputObjec
 	w.inputObjectTypeExtensionEventHandlers.enter = append(w.inputObjectTypeExtensionEventHandlers.enter, handler)
 }
 
-// AddInputObjectTypeExtensionEnterEventHandler adds an event handler to be called when leaving a InputObjectTypeExtension node.
+// AddInputObjectTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a InputObjectTypeExtension node.
 func (w *Walker) AddInputObjectTypeExtensionLeaveEventHandler(handler InputObjectTypeExtensionEventHandler) {
 	w.inputObjectTypeExtensionEventHandlers.leave = append(w.inputObjectTypeExtensionEventHandlers.leave, handler)
 }
 
-// OnInputObjectTypeExtensionEnter calls the enter event handlers for this node type.
+// OnInputObjectTypeExtensionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnInputObjectTypeExtensionEnter(iote *TypeExtension) {
 	for _, handler := range w.inputObjectTypeExtensionEventHandlers.enter {
 		handler(iote)
 	}
 }
 
-// OnInputObjectTypeExtensionLeave calls the leave event handlers for this node type.
+// OnInputObjectTypeExtensionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnInputObjectTypeExtensionLeave(iote *TypeExtension) {
 	for _, handler := range w.inputObjectTypeExtensionEventHandlers.leave {
 		handler(iote)
@@ -868,19 +868,19 @@ func (w *Walker) AddInputValueDefinitionEnterEventHandler(handler InputValueDefi
 	w.inputValueDefinitionEventHandlers.enter = append(w.inputValueDefinitionEventHandlers.enter, handler)
 }
 
-// AddInputValueDefinitionEnterEventHandler adds an event handler to be called when leaving a InputValueDefinition node.
+// AddInputValueDefinitionLeaveEventHandler adds an event handler to be called when leaving a InputValueDefinition node.
 func (w *Walker) AddInputValueDefinitionLeaveEventHandler(handler InputValueDefinitionEventHandler) {
 	w.inputValueDefinitionEventHandlers.leave = append(w.inputValueDefinitionEventHandlers.leave, handler)
 }
 
-// OnInputValueDefinitionEnter calls the enter event handlers for this node type.
+// OnInputValueDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnInputValueDefinitionEnter(ivd InputValueDefinition) {
 	for _, handler := range w.inputValueDefinitionEventHandlers.enter {
 		handler(ivd)
 	}
 }
 
-// OnInputValueDefinitionLeave calls the leave event handlers for this node type.
+// OnInputValueDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnInputValueDefinitionLeave(ivd InputValueDefinition) {
 	for _, handler := range w.inputValueDefinitionEventHandlers.leave {
 		handler(ivd)
@@ -901,19 +901,19 @@ func (w *Walker) AddInterfaceTypeExtensionEnterEventHandler(handler InterfaceTyp
 	w.interfaceTypeExtensionEventHandlers.enter = append(w.interfaceTypeExtensionEventHandlers.enter, handler)
 }
 
-// AddInterfaceTypeExtensionEnterEventHandler adds an event handler to be called when leaving a InterfaceTypeExtension node.
+// AddInterfaceTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a InterfaceTypeExtension node.
 func (w *Walker) AddInterfaceTypeExtensionLeaveEventHandler(handler InterfaceTypeExtensionEventHandler) {
 	w.interfaceTypeExtensionEventHandlers.leave = append(w.interfaceTypeExtensionEventHandlers.leave, handler)
 }
 
-// OnInterfaceTypeExtensionEnter calls the enter event handlers for this node type.
+// OnInterfaceTypeExtensionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnInterfaceTypeExtensionEnter(ite *TypeExtension) {
 	for _, handler := range w.interfaceTypeExtensionEventHandlers.enter {
 		handler(ite)
 	}
 }
 
-// OnInterfaceTypeExtensionLeave calls the leave event handlers for this node type.
+// OnInterfaceTypeExtensionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnInterfaceTypeExtensionLeave(ite *TypeExtension) {
 	for _, handler := range w.interfaceTypeExtensionEventHandlers.leave {
 		handler(ite)
@@ -934,19 +934,19 @@ func (w *Walker) AddObjectTypeExtensionEnterEventHandler(handler ObjectTypeExten
 	w.objectTypeExtensionEventHandlers.enter = append(w.objectTypeExtensionEventHandlers.enter, handler)
 }
 
-// AddObjectTypeExtensionEnterEventHandler adds an event handler to be called when leaving a ObjectTypeExtension node.
+// AddObjectTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a ObjectTypeExtension node.
 func (w *Walker) AddObjectTypeExtensionLeaveEventHandler(handler ObjectTypeExtensionEventHandler) {
 	w.objectTypeExtensionEventHandlers.leave = append(w.objectTypeExtensionEventHandlers.leave, handler)
 }
 
-// OnObjectTypeExtensionEnter calls the enter event handlers for this node type.
+// OnObjectTypeExtensionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnObjectTypeExtensionEnter(ote *TypeExtension) {
 	for _, handler := range w.objectTypeExtensionEventHandlers.enter {
 		handler(ote)
 	}
 }
 
-// OnObjectTypeExtensionLeave calls the leave event handlers for this node type.
+// OnObjectTypeExtensionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnObjectTypeExtensionLeave(ote *TypeExtension) {
 	for _, handler := range w.objectTypeExtensionEventHandlers.leave {
 		handler(ote)
@@ -967,19 +967,19 @@ func (w *Walker) AddOperationDefinitionEnterEventHandler(handler OperationDefini
 	w.operationDefinitionEventHandlers.enter = append(w.operationDefinitionEventHandlers.enter, handler)
 }
 
-// AddOperationDefinitionEnterEventHandler adds an event handler to be called when leaving a OperationDefinition node.
+// AddOperationDefinitionLeaveEventHandler adds an event handler to be called when leaving a OperationDefinition node.
 func (w *Walker) AddOperationDefinitionLeaveEventHandler(handler OperationDefinitionEventHandler) {
 	w.operationDefinitionEventHandlers.leave = append(w.operationDefinitionEventHandlers.leave, handler)
 }
 
-// OnOperationDefinitionEnter calls the enter event handlers for this node type.
+// OnOperationDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnOperationDefinitionEnter(od *ExecutableDefinition) {
 	for _, handler := range w.operationDefinitionEventHandlers.enter {
 		handler(od)
 	}
 }
 
-// OnOperationDefinitionLeave calls the leave event handlers for this node type.
+// OnOperationDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnOperationDefinitionLeave(od *ExecutableDefinition) {
 	for _, handler := range w.operationDefinitionEventHandlers.leave {
 		handler(od)
@@ -1000,19 +1000,19 @@ func (w *Walker) AddOperationTypeDefinitionEnterEventHandler(handler OperationTy
 	w.operationTypeDefinitionEventHandlers.enter = append(w.operationTypeDefinitionEventHandlers.enter, handler)
 }
 
-// AddOperationTypeDefinitionEnterEventHandler adds an event handler to be called when leaving a OperationTypeDefinition node.
+// AddOperationTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving a OperationTypeDefinition node.
 func (w *Walker) AddOperationTypeDefinitionLeaveEventHandler(handler OperationTypeDefinitionEventHandler) {
 	w.operationTypeDefinitionEventHandlers.leave = append(w.operationTypeDefinitionEventHandlers.leave, handler)
 }
 
-// OnOperationTypeDefinitionEnter calls the enter event handlers for this node type.
+// OnOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnOperationTypeDefinitionEnter(otd OperationTypeDefinition) {
 	for _, handler := range w.operationTypeDefinitionEventHandlers.enter {
 		handler(otd)
 	}
 }
 
-// OnOperationTypeDefinitionLeave calls the leave event handlers for this node type.
+// OnOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnOperationTypeDefinitionLeave(otd OperationTypeDefinition) {
 	for _, handler := range w.operationTypeDefinitionEventHandlers.leave {
 		handler(otd)
@@ -1033,19 +1033,19 @@ func (w *Walker) AddRootOperationTypeDefinitionEnterEventHandler(handler RootOpe
 	w.rootOperationTypeDefinitionEventHandlers.enter = append(w.rootOperationTypeDefinitionEventHandlers.enter, handler)
 }
 
-// AddRootOperationTypeDefinitionEnterEventHandler adds an event handler to be called when leaving a RootOperationTypeDefinition node.
+// AddRootOperationTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving a RootOperationTypeDefinition node.
 func (w *Walker) AddRootOperationTypeDefinitionLeaveEventHandler(handler RootOperationTypeDefinitionEventHandler) {
 	w.rootOperationTypeDefinitionEventHandlers.leave = append(w.rootOperationTypeDefinitionEventHandlers.leave, handler)
 }
 
-// OnRootOperationTypeDefinitionEnter calls the enter event handlers for this node type.
+// OnRootOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnRootOperationTypeDefinitionEnter(rotd RootOperationTypeDefinition) {
 	for _, handler := range w.rootOperationTypeDefinitionEventHandlers.enter {
 		handler(rotd)
 	}
 }
 
-// OnRootOperationTypeDefinitionLeave calls the leave event handlers for this node type.
+// OnRootOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnRootOperationTypeDefinitionLeave(rotd RootOperationTypeDefinition) {
 	for _, handler := range w.rootOperationTypeDefinitionEventHandlers.leave {
 		handler(rotd)
@@ -1066,19 +1066,19 @@ func (w *Walker) AddScalarTypeExtensionEnterEventHandler(handler ScalarTypeExten
 	w.scalarTypeExtensionEventHandlers.enter = append(w.scalarTypeExtensionEventHandlers.enter, handler)
 }
 
-// AddScalarTypeExtensionEnterEventHandler adds an event handler to be called when leaving a ScalarTypeExtension node.
+// AddScalarTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a ScalarTypeExtension node.
 func (w *Walker) AddScalarTypeExtensionLeaveEventHandler(handler ScalarTypeExtensionEventHandler) {
 	w.scalarTypeExtensionEventHandlers.leave = append(w.scalarTypeExtensionEventHandlers.leave, handler)
 }
 
-// OnScalarTypeExtensionEnter calls the enter event handlers for this node type.
+// OnScalarTypeExtensionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnScalarTypeExtensionEnter(ste *TypeExtension) {
 	for _, handler := range w.scalarTypeExtensionEventHandlers.enter {
 		handler(ste)
 	}
 }
 
-// OnScalarTypeExtensionLeave calls the leave event handlers for this node type.
+// OnScalarTypeExtensionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnScalarTypeExtensionLeave(ste *TypeExtension) {
 	for _, handler := range w.scalarTypeExtensionEventHandlers.leave {
 		handler(ste)
@@ -1099,19 +1099,19 @@ func (w *Walker) AddSchemaDefinitionEnterEventHandler(handler SchemaDefinitionEv
 	w.schemaDefinitionEventHandlers.enter = append(w.schemaDefinitionEventHandlers.enter, handler)
 }
 
-// AddSchemaDefinitionEnterEventHandler adds an event handler to be called when leaving a SchemaDefinition node.
+// AddSchemaDefinitionLeaveEventHandler adds an event handler to be called when leaving a SchemaDefinition node.
 func (w *Walker) AddSchemaDefinitionLeaveEventHandler(handler SchemaDefinitionEventHandler) {
 	w.schemaDefinitionEventHandlers.leave = append(w.schemaDefinitionEventHandlers.leave, handler)
 }
 
-// OnSchemaDefinitionEnter calls the enter event handlers for this node type.
+// OnSchemaDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnSchemaDefinitionEnter(sd *SchemaDefinition) {
 	for _, handler := range w.schemaDefinitionEventHandlers.enter {
 		handler(sd)
 	}
 }
 
-// OnSchemaDefinitionLeave calls the leave event handlers for this node type.
+// OnSchemaDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnSchemaDefinitionLeave(sd *SchemaDefinition) {
 	for _, handler := range w.schemaDefinitionEventHandlers.leave {
 		handler(sd)
@@ -1132,19 +1132,19 @@ func (w *Walker) AddSchemaExtensionEnterEventHandler(handler SchemaExtensionEven
 	w.schemaExtensionEventHandlers.enter = append(w.schemaExtensionEventHandlers.enter, handler)
 }
 
-// AddSchemaExtensionEnterEventHandler adds an event handler to be called when leaving a SchemaExtension node.
+// AddSchemaExtensionLeaveEventHandler adds an event handler to be called when leaving a SchemaExtension node.
 func (w *Walker) AddSchemaExtensionLeaveEventHandler(handler SchemaExtensionEventHandler) {
 	w.schemaExtensionEventHandlers.leave = append(w.schemaExtensionEventHandlers.leave, handler)
 }
 
-// OnSchemaExtensionEnter calls the enter event handlers for this node type.
+// OnSchemaExtensionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnSchemaExtensionEnter(se *SchemaExtension) {
 	for _, handler := range w.schemaExtensionEventHandlers.enter {
 		handler(se)
 	}
 }
 
-// OnSchemaExtensionLeave calls the leave event handlers for this node type.
+// OnSchemaExtensionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnSchemaExtensionLeave(se *SchemaExtension) {
 	for _, handler := range w.schemaExtensionEventHandlers.leave {
 		handler(se)
@@ -1165,19 +1165,19 @@ func (w *Walker) AddSelectionEnterEventHandler(handler SelectionEventHandler) {
 	w.selectionEventHandlers.enter = append(w.selectionEventHandlers.enter, handler)
 }
 
-// AddSelectionEnterEventHandler adds an event handler to be called when leaving a Selection node.
+// AddSelectionLeaveEventHandler adds an event handler to be called when leaving a Selection node.
 func (w *Walker) AddSelectionLeaveEventHandler(handler SelectionEventHandler) {
 	w.selectionEventHandlers.leave = append(w.selectionEventHandlers.leave, handler)
 }
 
-// OnSelectionEnter calls the enter event handlers for this node type.
+// OnSelectionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnSelectionEnter(s Selection) {
 	for _, handler := range w.selectionEventHandlers.enter {
 		handler(s)
 	}
 }
 
-// OnSelectionLeave calls the leave event handlers for this node type.
+// OnSelectionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnSelectionLeave(s Selection) {
 	for _, handler := range w.selectionEventHandlers.leave {
 		handler(s)
@@ -1198,19 +1198,19 @@ func (w *Walker) AddSelectionsEnterEventHandler(handler SelectionsEventHandler) 
 	w.selectionsEventHandlers.enter = append(w.selectionsEventHandlers.enter, handler)
 }
 
-// AddSelectionsEnterEventHandler adds an event handler to be called when leaving a Selections node.
+// AddSelectionsLeaveEventHandler adds an event handler to be called when leaving a Selections node.
 func (w *Walker) AddSelectionsLeaveEventHandler(handler SelectionsEventHandler) {
 	w.selectionsEventHandlers.leave = append(w.selectionsEventHandlers.leave, handler)
 }
 
-// OnSelectionsEnter calls the enter event handlers for this node type.
+// OnSelectionsEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnSelectionsEnter(s *Selections) {
 	for _, handler := range w.selectionsEventHandlers.enter {
 		handler(s)
 	}
 }
 
-// OnSelectionsLeave calls the leave event handlers for this node type.
+// OnSelectionsLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnSelectionsLeave(s *Selections) {
 	for _, handler := range w.selectionsEventHandlers.leave {
 		handler(s)
@@ -1231,19 +1231,19 @@ func (w *Walker) AddTypeEnterEventHandler(handler TypeEventHandler) {
 	w.typeEventHandlers.enter = append(w.typeEventHandlers.enter, handler)
 }
 
-// AddTypeEnterEventHandler adds an event handler to be called when leaving a Type node.
+// AddTypeLeaveEventHandler adds an event handler to be called when leaving a Type node.
 func (w *Walker) AddTypeLeaveEventHandler(handler TypeEventHandler) {
 	w.typeEventHandlers.leave = append(w.typeEventHandlers.leave, handler)
 }
 
-// OnTypeEnter calls the enter event handlers for this node type.
+// OnTypeEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeEnter(t Type) {
 	for _, handler := range w.typeEventHandlers.enter {
 		handler(t)
 	}
 }
 
-// OnTypeLeave calls the leave event handlers for this node type.
+// OnTypeLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeLeave(t Type) {
 	for _, handler := range w.typeEventHandlers.leave {
 		handler(t)
@@ -1264,19 +1264,19 @@ func (w *Walker) AddTypeDefinitionEnterEventHandler(handler TypeDefinitionEventH
 	w.typeDefinitionEventHandlers.enter = append(w.typeDefinitionEventHandlers.enter, handler)
 }
 
-// AddTypeDefinitionEnterEventHandler adds an event handler to be called when leaving a TypeDefinition node.
+// AddTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving a TypeDefinition node.
 func (w *Walker) AddTypeDefinitionLeaveEventHandler(handler TypeDefinitionEventHandler) {
 	w.typeDefinitionEventHandlers.leave = append(w.typeDefinitionEventHandlers.leave, handler)
 }
 
-// OnTypeDefinitionEnter calls the enter event handlers for this node type.
+// OnTypeDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionEnter(td *TypeDefinition) {
 	for _, handler := range w.typeDefinitionEventHandlers.enter {
 		handler(td)
 	}
 }
 
-// OnTypeDefinitionLeave calls the leave event handlers for this node type.
+// OnTypeDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionLeave(td *TypeDefinition) {
 	for _, handler := range w.typeDefinitionEventHandlers.leave {
 		handler(td)
@@ -1297,19 +1297,19 @@ func (w *Walker) AddTypeDefinitionEnumEnterEventHandler(handler TypeDefinitionEn
 	w.typeDefinitionEnumEventHandlers.enter = append(w.typeDefinitionEnumEventHandlers.enter, handler)
 }
 
-// AddTypeDefinitionEnumEnterEventHandler adds an event handler to be called when leaving a TypeDefinitionEnum node.
+// AddTypeDefinitionEnumLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionEnum node.
 func (w *Walker) AddTypeDefinitionEnumLeaveEventHandler(handler TypeDefinitionEnumEventHandler) {
 	w.typeDefinitionEnumEventHandlers.leave = append(w.typeDefinitionEnumEventHandlers.leave, handler)
 }
 
-// OnTypeDefinitionEnumEnter calls the enter event handlers for this node type.
+// OnTypeDefinitionEnumEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionEnumEnter(tde *TypeDefinition) {
 	for _, handler := range w.typeDefinitionEnumEventHandlers.enter {
 		handler(tde)
 	}
 }
 
-// OnTypeDefinitionEnumLeave calls the leave event handlers for this node type.
+// OnTypeDefinitionEnumLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionEnumLeave(tde *TypeDefinition) {
 	for _, handler := range w.typeDefinitionEnumEventHandlers.leave {
 		handler(tde)
@@ -1330,19 +1330,19 @@ func (w *Walker) AddTypeDefinitionInputObjectEnterEventHandler(handler TypeDefin
 	w.typeDefinitionInputObjectEventHandlers.enter = append(w.typeDefinitionInputObjectEventHandlers.enter, handler)
 }
 
-// AddTypeDefinitionInputObjectEnterEventHandler adds an event handler to be called when leaving a TypeDefinitionInputObject node.
+// AddTypeDefinitionInputObjectLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionInputObject node.
 func (w *Walker) AddTypeDefinitionInputObjectLeaveEventHandler(handler TypeDefinitionInputObjectEventHandler) {
 	w.typeDefinitionInputObjectEventHandlers.leave = append(w.typeDefinitionInputObjectEventHandlers.leave, handler)
 }
 
-// OnTypeDefinitionInputObjectEnter calls the enter event handlers for this node type.
+// OnTypeDefinitionInputObjectEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionInputObjectEnter(tdio *TypeDefinition) {
 	for _, handler := range w.typeDefinitionInputObjectEventHandlers.enter {
 		handler(tdio)
 	}
 }
 
-// OnTypeDefinitionInputObjectLeave calls the leave event handlers for this node type.
+// OnTypeDefinitionInputObjectLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionInputObjectLeave(tdio *TypeDefinition) {
 	for _, handler := range w.typeDefinitionInputObjectEventHandlers.leave {
 		handler(tdio)
@@ -1363,19 +1363,19 @@ func (w *Walker) AddTypeDefinitionInterfaceEnterEventHandler(handler TypeDefinit
 	w.typeDefinitionInterfaceEventHandlers.enter = append(w.typeDefinitionInterfaceEventHandlers.enter, handler)
 }
 
-// AddTypeDefinitionInterfaceEnterEventHandler adds an event handler to be called when leaving a TypeDefinitionInterface node.
+// AddTypeDefinitionInterfaceLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionInterface node.
 func (w *Walker) AddTypeDefinitionInterfaceLeaveEventHandler(handler TypeDefinitionInterfaceEventHandler) {
 	w.typeDefinitionInterfaceEventHandlers.leave = append(w.typeDefinitionInterfaceEventHandlers.leave, handler)
 }
 
-// OnTypeDefinitionInterfaceEnter calls the enter event handlers for this node type.
+// OnTypeDefinitionInterfaceEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionInterfaceEnter(tdi *TypeDefinition) {
 	for _, handler := range w.typeDefinitionInterfaceEventHandlers.enter {
 		handler(tdi)
 	}
 }
 
-// OnTypeDefinitionInterfaceLeave calls the leave event handlers for this node type.
+// OnTypeDefinitionInterfaceLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionInterfaceLeave(tdi *TypeDefinition) {
 	for _, handler := range w.typeDefinitionInterfaceEventHandlers.leave {
 		handler(tdi)
@@ -1396,19 +1396,19 @@ func (w *Walker) AddTypeDefinitionObjectEnterEventHandler(handler TypeDefinition
 	w.typeDefinitionObjectEventHandlers.enter = append(w.typeDefinitionObjectEventHandlers.enter, handler)
 }
 
-// AddTypeDefinitionObjectEnterEventHandler adds an event handler to be called when leaving a TypeDefinitionObject node.
+// AddTypeDefinitionObjectLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionObject node.
 func (w *Walker) AddTypeDefinitionObjectLeaveEventHandler(handler TypeDefinitionObjectEventHandler) {
 	w.typeDefinitionObjectEventHandlers.leave = append(w.typeDefinitionObjectEventHandlers.leave, handler)
 }
 
-// OnTypeDefinitionObjectEnter calls the enter event handlers for this node type.
+// OnTypeDefinitionObjectEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionObjectEnter(tdo *TypeDefinition) {
 	for _, handler := range w.typeDefinitionObjectEventHandlers.enter {
 		handler(tdo)
 	}
 }
 
-// OnTypeDefinitionObjectLeave calls the leave event handlers for this node type.
+// OnTypeDefinitionObjectLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionObjectLeave(tdo *TypeDefinition) {
 	for _, handler := range w.typeDefinitionObjectEventHandlers.leave {
 		handler(tdo)
@@ -1429,19 +1429,19 @@ func (w *Walker) AddTypeDefinitionScalarEnterEventHandler(handler TypeDefinition
 	w.typeDefinitionScalarEventHandlers.enter = append(w.typeDefinitionScalarEventHandlers.enter, handler)
 }
 
-// AddTypeDefinitionScalarEnterEventHandler adds an event handler to be called when leaving a TypeDefinitionScalar node.
+// AddTypeDefinitionScalarLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionScalar node.
 func (w *Walker) AddTypeDefinitionScalarLeaveEventHandler(handler TypeDefinitionScalarEventHandler) {
 	w.typeDefinitionScalarEventHandlers.leave = append(w.typeDefinitionScalarEventHandlers.leave, handler)
 }
 
-// OnTypeDefinitionScalarEnter calls the enter event handlers for this node type.
+// OnTypeDefinitionScalarEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionScalarEnter(tds *TypeDefinition) {
 	for _, handler := range w.typeDefinitionScalarEventHandlers.enter {
 		handler(tds)
 	}
 }
 
-// OnTypeDefinitionScalarLeave calls the leave event handlers for this node type.
+// OnTypeDefinitionScalarLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionScalarLeave(tds *TypeDefinition) {
 	for _, handler := range w.typeDefinitionScalarEventHandlers.leave {
 		handler(tds)
@@ -1462,19 +1462,19 @@ func (w *Walker) AddTypeDefinitionUnionEnterEventHandler(handler TypeDefinitionU
 	w.typeDefinitionUnionEventHandlers.enter = append(w.typeDefinitionUnionEventHandlers.enter, handler)
 }
 
-// AddTypeDefinitionUnionEnterEventHandler adds an event handler to be called when leaving a TypeDefinitionUnion node.
+// AddTypeDefinitionUnionLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionUnion node.
 func (w *Walker) AddTypeDefinitionUnionLeaveEventHandler(handler TypeDefinitionUnionEventHandler) {
 	w.typeDefinitionUnionEventHandlers.leave = append(w.typeDefinitionUnionEventHandlers.leave, handler)
 }
 
-// OnTypeDefinitionUnionEnter calls the enter event handlers for this node type.
+// OnTypeDefinitionUnionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionUnionEnter(tdu *TypeDefinition) {
 	for _, handler := range w.typeDefinitionUnionEventHandlers.enter {
 		handler(tdu)
 	}
 }
 
-// OnTypeDefinitionUnionLeave calls the leave event handlers for this node type.
+// OnTypeDefinitionUnionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeDefinitionUnionLeave(tdu *TypeDefinition) {
 	for _, handler := range w.typeDefinitionUnionEventHandlers.leave {
 		handler(tdu)
@@ -1495,19 +1495,19 @@ func (w *Walker) AddTypeExtensionEnterEventHandler(handler TypeExtensionEventHan
 	w.typeExtensionEventHandlers.enter = append(w.typeExtensionEventHandlers.enter, handler)
 }
 
-// AddTypeExtensionEnterEventHandler adds an event handler to be called when leaving a TypeExtension node.
+// AddTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a TypeExtension node.
 func (w *Walker) AddTypeExtensionLeaveEventHandler(handler TypeExtensionEventHandler) {
 	w.typeExtensionEventHandlers.leave = append(w.typeExtensionEventHandlers.leave, handler)
 }
 
-// OnTypeExtensionEnter calls the enter event handlers for this node type.
+// OnTypeExtensionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeExtensionEnter(te *TypeExtension) {
 	for _, handler := range w.typeExtensionEventHandlers.enter {
 		handler(te)
 	}
 }
 
-// OnTypeExtensionLeave calls the leave event handlers for this node type.
+// OnTypeExtensionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeExtensionLeave(te *TypeExtension) {
 	for _, handler := range w.typeExtensionEventHandlers.leave {
 		handler(te)
@@ -1528,19 +1528,19 @@ func (w *Walker) AddTypeSystemDefinitionEnterEventHandler(handler TypeSystemDefi
 	w.typeSystemDefinitionEventHandlers.enter = append(w.typeSystemDefinitionEventHandlers.enter, handler)
 }
 
-// AddTypeSystemDefinitionEnterEventHandler adds an event handler to be called when leaving a TypeSystemDefinition node.
+// AddTypeSystemDefinitionLeaveEventHandler adds an event handler to be called when leaving a TypeSystemDefinition node.
 func (w *Walker) AddTypeSystemDefinitionLeaveEventHandler(handler TypeSystemDefinitionEventHandler) {
 	w.typeSystemDefinitionEventHandlers.leave = append(w.typeSystemDefinitionEventHandlers.leave, handler)
 }
 
-// OnTypeSystemDefinitionEnter calls the enter event handlers for this node type.
+// OnTypeSystemDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeSystemDefinitionEnter(tsd *TypeSystemDefinition) {
 	for _, handler := range w.typeSystemDefinitionEventHandlers.enter {
 		handler(tsd)
 	}
 }
 
-// OnTypeSystemDefinitionLeave calls the leave event handlers for this node type.
+// OnTypeSystemDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeSystemDefinitionLeave(tsd *TypeSystemDefinition) {
 	for _, handler := range w.typeSystemDefinitionEventHandlers.leave {
 		handler(tsd)
@@ -1561,19 +1561,19 @@ func (w *Walker) AddTypeSystemExtensionEnterEventHandler(handler TypeSystemExten
 	w.typeSystemExtensionEventHandlers.enter = append(w.typeSystemExtensionEventHandlers.enter, handler)
 }
 
-// AddTypeSystemExtensionEnterEventHandler adds an event handler to be called when leaving a TypeSystemExtension node.
+// AddTypeSystemExtensionLeaveEventHandler adds an event handler to be called when leaving a TypeSystemExtension node.
 func (w *Walker) AddTypeSystemExtensionLeaveEventHandler(handler TypeSystemExtensionEventHandler) {
 	w.typeSystemExtensionEventHandlers.leave = append(w.typeSystemExtensionEventHandlers.leave, handler)
 }
 
-// OnTypeSystemExtensionEnter calls the enter event handlers for this node type.
+// OnTypeSystemExtensionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnTypeSystemExtensionEnter(tse *TypeSystemExtension) {
 	for _, handler := range w.typeSystemExtensionEventHandlers.enter {
 		handler(tse)
 	}
 }
 
-// OnTypeSystemExtensionLeave calls the leave event handlers for this node type.
+// OnTypeSystemExtensionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnTypeSystemExtensionLeave(tse *TypeSystemExtension) {
 	for _, handler := range w.typeSystemExtensionEventHandlers.leave {
 		handler(tse)
@@ -1594,19 +1594,19 @@ func (w *Walker) AddUnionMemberTypesEnterEventHandler(handler UnionMemberTypesEv
 	w.unionMemberTypesEventHandlers.enter = append(w.unionMemberTypesEventHandlers.enter, handler)
 }
 
-// AddUnionMemberTypesEnterEventHandler adds an event handler to be called when leaving a UnionMemberTypes node.
+// AddUnionMemberTypesLeaveEventHandler adds an event handler to be called when leaving a UnionMemberTypes node.
 func (w *Walker) AddUnionMemberTypesLeaveEventHandler(handler UnionMemberTypesEventHandler) {
 	w.unionMemberTypesEventHandlers.leave = append(w.unionMemberTypesEventHandlers.leave, handler)
 }
 
-// OnUnionMemberTypesEnter calls the enter event handlers for this node type.
+// OnUnionMemberTypesEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnUnionMemberTypesEnter(umt *Types) {
 	for _, handler := range w.unionMemberTypesEventHandlers.enter {
 		handler(umt)
 	}
 }
 
-// OnUnionMemberTypesLeave calls the leave event handlers for this node type.
+// OnUnionMemberTypesLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnUnionMemberTypesLeave(umt *Types) {
 	for _, handler := range w.unionMemberTypesEventHandlers.leave {
 		handler(umt)
@@ -1627,19 +1627,19 @@ func (w *Walker) AddUnionTypeExtensionEnterEventHandler(handler UnionTypeExtensi
 	w.unionTypeExtensionEventHandlers.enter = append(w.unionTypeExtensionEventHandlers.enter, handler)
 }
 
-// AddUnionTypeExtensionEnterEventHandler adds an event handler to be called when leaving a UnionTypeExtension node.
+// AddUnionTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a UnionTypeExtension node.
 func (w *Walker) AddUnionTypeExtensionLeaveEventHandler(handler UnionTypeExtensionEventHandler) {
 	w.unionTypeExtensionEventHandlers.leave = append(w.unionTypeExtensionEventHandlers.leave, handler)
 }
 
-// OnUnionTypeExtensionEnter calls the enter event handlers for this node type.
+// OnUnionTypeExtensionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnUnionTypeExtensionEnter(ute *TypeExtension) {
 	for _, handler := range w.unionTypeExtensionEventHandlers.enter {
 		handler(ute)
 	}
 }
 
-// OnUnionTypeExtensionLeave calls the leave event handlers for this node type.
+// OnUnionTypeExtensionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnUnionTypeExtensionLeave(ute *TypeExtension) {
 	for _, handler := range w.unionTypeExtensionEventHandlers.leave {
 		handler(ute)
@@ -1660,19 +1660,19 @@ func (w *Walker) AddValueEnterEventHandler(handler ValueEventHandler) {
 	w.valueEventHandlers.enter = append(w.valueEventHandlers.enter, handler)
 }
 
-// AddValueEnterEventHandler adds an event handler to be called when leaving a Value node.
+// AddValueLeaveEventHandler adds an event handler to be called when leaving a Value node.
 func (w *Walker) AddValueLeaveEventHandler(handler ValueEventHandler) {
 	w.valueEventHandlers.leave = append(w.valueEventHandlers.leave, handler)
 }
 
-// OnValueEnter calls the enter event handlers for this node type.
+// OnValueEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnValueEnter(v Value) {
 	for _, handler := range w.valueEventHandlers.enter {
 		handler(v)
 	}
 }
 
-// OnValueLeave calls the leave event handlers for this node type.
+// OnValueLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnValueLeave(v Value) {
 	for _, handler := range w.valueEventHandlers.leave {
 		handler(v)
@@ -1693,19 +1693,19 @@ func (w *Walker) AddVariableDefinitionEnterEventHandler(handler VariableDefiniti
 	w.variableDefinitionEventHandlers.enter = append(w.variableDefinitionEventHandlers.enter, handler)
 }
 
-// AddVariableDefinitionEnterEventHandler adds an event handler to be called when leaving a VariableDefinition node.
+// AddVariableDefinitionLeaveEventHandler adds an event handler to be called when leaving a VariableDefinition node.
 func (w *Walker) AddVariableDefinitionLeaveEventHandler(handler VariableDefinitionEventHandler) {
 	w.variableDefinitionEventHandlers.leave = append(w.variableDefinitionEventHandlers.leave, handler)
 }
 
-// OnVariableDefinitionEnter calls the enter event handlers for this node type.
+// OnVariableDefinitionEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnVariableDefinitionEnter(vd VariableDefinition) {
 	for _, handler := range w.variableDefinitionEventHandlers.enter {
 		handler(vd)
 	}
 }
 
-// OnVariableDefinitionLeave calls the leave event handlers for this node type.
+// OnVariableDefinitionLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnVariableDefinitionLeave(vd VariableDefinition) {
 	for _, handler := range w.variableDefinitionEventHandlers.leave {
 		handler(vd)
@@ -1726,19 +1726,19 @@ func (w *Walker) AddVariableDefinitionsEnterEventHandler(handler VariableDefinit
 	w.variableDefinitionsEventHandlers.enter = append(w.variableDefinitionsEventHandlers.enter, handler)
 }
 
-// AddVariableDefinitionsEnterEventHandler adds an event handler to be called when leaving a VariableDefinitions node.
+// AddVariableDefinitionsLeaveEventHandler adds an event handler to be called when leaving a VariableDefinitions node.
 func (w *Walker) AddVariableDefinitionsLeaveEventHandler(handler VariableDefinitionsEventHandler) {
 	w.variableDefinitionsEventHandlers.leave = append(w.variableDefinitionsEventHandlers.leave, handler)
 }
 
-// OnVariableDefinitionsEnter calls the enter event handlers for this node type.
+// OnVariableDefinitionsEnter calls the enter event handlers registered for this node type.
 func (w *Walker) OnVariableDefinitionsEnter(vd *VariableDefinitions) {
 	for _, handler := range w.variableDefinitionsEventHandlers.enter {
 		handler(vd)
 	}
 }
 
-// OnVariableDefinitionsLeave calls the leave event handlers for this node type.
+// OnVariableDefinitionsLeave calls the leave event handlers registered for this node type.
 func (w *Walker) OnVariableDefinitionsLeave(vd *VariableDefinitions) {
 	for _, handler := range w.variableDefinitionsEventHandlers.leave {
 		handler(vd)

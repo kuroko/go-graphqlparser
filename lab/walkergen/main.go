@@ -155,19 +155,19 @@ func (w *Walker) Add{{.TypeName}}EnterEventHandler(handler {{.TypeName}}EventHan
 	w.{{.TypeNameLCF}}EventHandlers.enter = append(w.{{.TypeNameLCF}}EventHandlers.enter, handler)
 }
 
-// Add{{.TypeName}}EnterEventHandler adds an event handler to be called when leaving a {{.TypeName}} node.
+// Add{{.TypeName}}LeaveEventHandler adds an event handler to be called when leaving a {{.TypeName}} node.
 func (w *Walker) Add{{.TypeName}}LeaveEventHandler(handler {{.TypeName}}EventHandler) {
 	w.{{.TypeNameLCF}}EventHandlers.leave = append(w.{{.TypeNameLCF}}EventHandlers.leave, handler)
 }
 
-// On{{.TypeName}}Enter calls the enter event handlers for this node type.
+// On{{.TypeName}}Enter calls the enter event handlers registered for this node type.
 func (w *Walker) On{{.TypeName}}Enter({{.AbridgedTN}} {{.Pointer}}{{.RealTypeName}}) {
 	for _, handler := range w.{{.TypeNameLCF}}EventHandlers.enter {
 		handler({{.AbridgedTN}})
 	}
 }
 
-// On{{.TypeName}}Leave calls the leave event handlers for this node type.
+// On{{.TypeName}}Leave calls the leave event handlers registered for this node type.
 func (w *Walker) On{{.TypeName}}Leave({{.AbridgedTN}} {{.Pointer}}{{.RealTypeName}}) {
 	for _, handler := range w.{{.TypeNameLCF}}EventHandlers.leave {
 		handler({{.AbridgedTN}})
