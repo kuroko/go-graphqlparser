@@ -113,9 +113,8 @@ func main() {
 	// Walker middle
 	for i, tn := range tns {
 		handlers.Execute(os.Stdout, map[string]string{
-			"TypeNameLCF": sane(lcfirst(tn)),
+			"TypeNameLCF": lcfirst(tn),
 			"TypeName":    tn,
-			"AbridgedTN":  sane(strings.Map(abridger, tn)),
 		})
 		if i < len(tns) {
 			fmt.Fprintf(os.Stdout, "\n\t")
@@ -128,7 +127,7 @@ func main() {
 	// Event handers
 	for _, tn := range tns {
 		eventHandlers.Execute(os.Stdout, map[string]string{
-			"TypeNameLCF":  sane(lcfirst(tn)),
+			"TypeNameLCF":  lcfirst(tn),
 			"TypeName":     tn,
 			"RealTypeName": realTypeName(tn),
 			"AbridgedTN":   sane(strings.Map(abridger, tn)),

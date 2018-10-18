@@ -39,7 +39,7 @@ type Walker struct {
 	schemaExtensionEventHandlers             SchemaExtensionEventHandlers
 	selectionEventHandlers                   SelectionEventHandlers
 	selectionsEventHandlers                  SelectionsEventHandlers
-	tEventHandlers                           TypeEventHandlers
+	typeEventHandlers                        TypeEventHandlers
 	typeDefinitionEventHandlers              TypeDefinitionEventHandlers
 	typeDefinitionEnumEventHandlers          TypeDefinitionEnumEventHandlers
 	typeDefinitionInputObjectEventHandlers   TypeDefinitionInputObjectEventHandlers
@@ -1228,24 +1228,24 @@ type TypeEventHandlers struct {
 
 // AddTypeEnterEventHandler adds an event handler to be called when entering a Type node.
 func (w *Walker) AddTypeEnterEventHandler(handler TypeEventHandler) {
-	w.tEventHandlers.enter = append(w.tEventHandlers.enter, handler)
+	w.typeEventHandlers.enter = append(w.typeEventHandlers.enter, handler)
 }
 
 // AddTypeEnterEventHandler adds an event handler to be called when leaving a Type node.
 func (w *Walker) AddTypeLeaveEventHandler(handler TypeEventHandler) {
-	w.tEventHandlers.leave = append(w.tEventHandlers.leave, handler)
+	w.typeEventHandlers.leave = append(w.typeEventHandlers.leave, handler)
 }
 
 // OnTypeEnter calls the enter event handlers for this node type.
 func (w *Walker) OnTypeEnter(t Type) {
-	for _, handler := range w.tEventHandlers.enter {
+	for _, handler := range w.typeEventHandlers.enter {
 		handler(t)
 	}
 }
 
 // OnTypeLeave calls the leave event handlers for this node type.
 func (w *Walker) OnTypeLeave(t Type) {
-	for _, handler := range w.tEventHandlers.leave {
+	for _, handler := range w.typeEventHandlers.leave {
 		handler(t)
 	}
 }
