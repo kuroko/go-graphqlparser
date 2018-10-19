@@ -20,63 +20,67 @@ var (
 	packageName string
 
 	ti = map[string]typeInfo{
-		"Arguments":                   {"", true},
-		"ArgumentsDefinition":         {"InputValueDefinitions", true},
-		"Definitions":                 {"", true},
-		"DirectiveDefinition":         {"", true},
-		"DirectiveLocations":          {"", true},
-		"Directives":                  {"", true},
-		"EnumTypeExtension":           {"TypeExtension", true},
-		"EnumValuesDefinition":        {"EnumValueDefinitions", true},
-		"ExecutableDefinition":        {"", true},
-		"FieldsDefinition":            {"FieldDefinitions", true},
-		"FragmentDefinition":          {"ExecutableDefinition", true},
-		"ImplementsInterfaces":        {"Types", true},
-		"InputFieldsDefinition":       {"InputValueDefinitions", true},
-		"InputObjectTypeExtension":    {"TypeExtension", true},
-		"InterfaceTypeExtension":      {"TypeExtension", true},
-		"ObjectTypeExtension":         {"TypeExtension", true},
-		"OperationDefinition":         {"ExecutableDefinition", true},
-		"ScalarTypeExtension":         {"TypeExtension", true},
-		"SchemaDefinition":            {"", true},
-		"SchemaExtension":             {"", true},
-		"Selections":                  {"", true},
-		"TypeDefinition":              {"", true},
-		"TypeDefinitionEnum":          {"TypeDefinition", true},
-		"TypeDefinitionInputObject":   {"TypeDefinition", true},
-		"TypeDefinitionInterface":     {"TypeDefinition", true},
-		"TypeDefinitionObject":        {"TypeDefinition", true},
-		"TypeDefinitionScalar":        {"TypeDefinition", true},
-		"TypeDefinitionUnion":         {"TypeDefinition", true},
-		"TypeExtension":               {"TypeExtension", true},
-		"TypeSystemDefinition":        {"", true},
-		"TypeSystemExtension":         {"", true},
-		"UnionMemberTypes":            {"Types", true},
-		"UnionTypeExtension":          {"TypeExtension", true},
-		"VariableDefinitions":         {"", true},
-		"Argument":                    {"", false},
-		"Definition":                  {"", false},
+		"Arguments":                   {"ast.Arguments", true},
+		"ArgumentsDefinition":         {"ast.InputValueDefinitions", true},
+		"Definitions":                 {"ast.Definitions", true},
+		"DirectiveDefinition":         {"ast.DirectiveDefinition", true},
+		"DirectiveLocations":          {"ast.DirectiveLocations", true},
+		"Directives":                  {"ast.Directives", true},
+		"EnumTypeExtension":           {"ast.TypeExtension", true},
+		"EnumValuesDefinition":        {"ast.EnumValueDefinitions", true},
+		"ExecutableDefinition":        {"ast.ExecutableDefinition", true},
+		"FieldsDefinition":            {"ast.FieldDefinitions", true},
+		"FragmentDefinition":          {"ast.ExecutableDefinition", true},
+		"ImplementsInterfaces":        {"ast.Types", true},
+		"InputFieldsDefinition":       {"ast.InputValueDefinitions", true},
+		"InputObjectTypeExtension":    {"ast.TypeExtension", true},
+		"InterfaceTypeExtension":      {"ast.TypeExtension", true},
+		"ObjectTypeExtension":         {"ast.TypeExtension", true},
+		"OperationDefinition":         {"ast.ExecutableDefinition", true},
+		"ScalarTypeExtension":         {"ast.TypeExtension", true},
+		"SchemaDefinition":            {"ast.SchemaDefinition", true},
+		"SchemaExtension":             {"ast.SchemaExtension", true},
+		"Selections":                  {"ast.Selections", true},
+		"TypeDefinition":              {"ast.TypeDefinition", true},
+		"TypeDefinitionEnum":          {"ast.TypeDefinition", true},
+		"TypeDefinitionInputObject":   {"ast.TypeDefinition", true},
+		"TypeDefinitionInterface":     {"ast.TypeDefinition", true},
+		"TypeDefinitionObject":        {"ast.TypeDefinition", true},
+		"TypeDefinitionScalar":        {"ast.TypeDefinition", true},
+		"TypeDefinitionUnion":         {"ast.TypeDefinition", true},
+		"TypeExtension":               {"ast.TypeExtension", true},
+		"TypeSystemDefinition":        {"ast.TypeSystemDefinition", true},
+		"TypeSystemExtension":         {"ast.TypeSystemExtension", true},
+		"UnionMemberTypes":            {"ast.Types", true},
+		"UnionTypeExtension":          {"ast.TypeExtension", true},
+		"VariableDefinitions":         {"ast.VariableDefinitions", true},
+		"Argument":                    {"ast.Argument", false},
+		"Definition":                  {"ast.Definition", false},
 		"Description":                 {"string", false},
-		"Directive":                   {"", false},
-		"Document":                    {"", false},
-		"EnumValueDefinition":         {"", false},
-		"FieldDefinition":             {"", false},
-		"FieldSelection":              {"Selection", false},
-		"FragmentSpread":              {"Selection", false},
-		"InlineFragment":              {"Selection", false},
-		"InputValueDefinition":        {"", false},
-		"OperationTypeDefinition":     {"", false},
-		"RootOperationTypeDefinition": {"", false},
-		"Selection":                   {"", false},
-		"Type":                        {"", false},
-		"Value":                       {"", false},
-		"VariableDefinition":          {"", false},
+		"Directive":                   {"ast.Directive", false},
+		"Document":                    {"ast.Document", false},
+		"EnumValueDefinition":         {"ast.EnumValueDefinition", false},
+		"FieldDefinition":             {"ast.FieldDefinition", false},
+		"FieldSelection":              {"ast.Selection", false},
+		"FragmentSpread":              {"ast.Selection", false},
+		"InlineFragment":              {"ast.Selection", false},
+		"InputValueDefinition":        {"ast.InputValueDefinition", false},
+		"OperationTypeDefinition":     {"ast.OperationTypeDefinition", false},
+		"RootOperationTypeDefinition": {"ast.RootOperationTypeDefinition", false},
+		"Selection":                   {"ast.Selection", false},
+		"Type":                        {"ast.Type", false},
+		"Value":                       {"ast.Value", false},
+		"VariableDefinition":          {"ast.VariableDefinition", false},
 	}
 )
 
 var header = `
 // Code generated by lab/walkergen
 // DO NOT EDIT!
+`
+
+var imports = `
+import "github.com/bucketd/go-graphqlparser/ast"
 `
 
 var walkerHead = `
@@ -87,9 +91,14 @@ type Walker struct {
 var walkerBottom = `
 }
 
-// NewWalker returns a *Walker.
-func NewWalker() *Walker {
-	return &Walker{}
+// NewWalker returns a new Walker instance.
+func NewWalker(rules []RuleFunc) *Walker {
+	walker := &Walker{}
+	for _, rule := range rules {
+		rule(walker)
+	}
+
+	return walker
 }
 `
 
@@ -106,6 +115,7 @@ func main() {
 	// Header and package name
 	fmt.Fprintf(os.Stdout, strings.TrimSpace(header))
 	fmt.Fprintf(os.Stdout, "\npackage %s\n", packageName)
+	fmt.Fprintf(os.Stdout, "%s\n", imports)
 
 	// Walker head
 	fmt.Fprintf(os.Stdout, walkerHead+"\t")
@@ -124,7 +134,7 @@ func main() {
 	// Walker bottom
 	fmt.Fprintf(os.Stdout, walkerBottom)
 
-	// Event handers
+	// Event handlers
 	for _, tn := range tns {
 		eventHandlers.Execute(os.Stdout, map[string]string{
 			"TypeNameLCF":  lcfirst(tn),
@@ -142,7 +152,7 @@ var handlers = template.Must(template.New("handlers").Parse(strings.TrimSpace(`
 
 var eventHandlers = template.Must(template.New("eventHandlers").Parse(`
 // {{.TypeName}}EventHandler function can handle enter/leave events for {{.TypeName}}.
-type {{.TypeName}}EventHandler func({{.Pointer}}{{.RealTypeName}})
+type {{.TypeName}}EventHandler func(*Context, {{.Pointer}}{{.RealTypeName}})
 
 // {{.TypeName}}EventHandlers stores the enter and leave events handlers.
 type {{.TypeName}}EventHandlers struct {
@@ -161,16 +171,16 @@ func (w *Walker) Add{{.TypeName}}LeaveEventHandler(handler {{.TypeName}}EventHan
 }
 
 // On{{.TypeName}}Enter calls the enter event handlers registered for this node type.
-func (w *Walker) On{{.TypeName}}Enter({{.AbridgedTN}} {{.Pointer}}{{.RealTypeName}}) {
+func (w *Walker) On{{.TypeName}}Enter(ctx *Context, {{.AbridgedTN}} {{.Pointer}}{{.RealTypeName}}) {
 	for _, handler := range w.{{.TypeNameLCF}}EventHandlers.enter {
-		handler({{.AbridgedTN}})
+		handler(ctx, {{.AbridgedTN}})
 	}
 }
 
 // On{{.TypeName}}Leave calls the leave event handlers registered for this node type.
-func (w *Walker) On{{.TypeName}}Leave({{.AbridgedTN}} {{.Pointer}}{{.RealTypeName}}) {
+func (w *Walker) On{{.TypeName}}Leave(ctx *Context, {{.AbridgedTN}} {{.Pointer}}{{.RealTypeName}}) {
 	for _, handler := range w.{{.TypeNameLCF}}EventHandlers.leave {
-		handler({{.AbridgedTN}})
+		handler(ctx, {{.AbridgedTN}})
 	}
 }
 `))

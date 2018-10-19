@@ -53,3 +53,10 @@ var SpecifiedSDL = []validation.RuleFunc{
 	// uniqueInputFieldNames,
 	// providedRequiredArgumentsOnDirectives,
 }
+
+// ApplyRules ...
+func ApplyRules(rules []validation.RuleFunc, walker *validation.Walker) {
+	for _, rule := range rules {
+		rule(walker)
+	}
+}

@@ -12,20 +12,13 @@ type Context struct {
 }
 
 // RuleFunc ...
-type RuleFunc func(vctx *Context, walker *ast.Walker)
+type RuleFunc func(walker *Walker)
 
 // Validate ...
-func Validate(doc ast.Document, rules []RuleFunc) *graphql.Errors {
-	vctx := &Context{}
-	walker := ast.NewWalker()
+func Validate(doc ast.Document, walker *Walker) *graphql.Errors {
+	ctx := &Context{}
 
-	// Apply all specified validation rules to the walker so that the AST can be validated as it is
-	// traversed by the walker, populating the Context along the way.
-	for _, rule := range rules {
-		rule(vctx, walker)
-	}
+	walker.Walk(ctx, doc)
 
-	walker.Walk(doc)
-
-	return vctx.Errors
+	return ctx.Errors
 }
