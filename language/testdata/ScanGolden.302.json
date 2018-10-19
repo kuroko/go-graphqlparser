@@ -2,13 +2,13 @@
   "Input": "\"foo \\n bar\"",
   "Tokens": [
     {
-      "Type": 5,
+      "Kind": 5,
       "Literal": "foo \n bar",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 0,
+      "Kind": 0,
       "Literal": "",
       "Position": 13,
       "Line": 1

@@ -2,7 +2,7 @@
   "Input": "01",
   "Tokens": [
     {
-      "Type": -1,
+      "Kind": -1,
       "Literal": "invalid number, unexpected digit after 0: '1'",
       "Position": 1,
       "Line": 1

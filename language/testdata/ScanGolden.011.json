@@ -2,7 +2,7 @@
   "Input": "-界",
   "Tokens": [
     {
-      "Type": -1,
+      "Kind": -1,
       "Literal": "invalid number, expected digit but got: '界'",
       "Position": 1,
       "Line": 1

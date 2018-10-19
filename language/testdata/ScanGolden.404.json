@@ -2,13 +2,13 @@
   "Input": "\"\"\"\\t \\u1234\"\"\"",
   "Tokens": [
     {
-      "Type": 5,
+      "Kind": 5,
       "Literal": "\\t \\u1234",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 0,
+      "Kind": 0,
       "Literal": "",
       "Position": 16,
       "Line": 1

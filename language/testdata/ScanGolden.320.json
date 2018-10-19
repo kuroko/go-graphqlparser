@@ -2,13 +2,13 @@
   "Input": "\"😀\"",
   "Tokens": [
     {
-      "Type": 5,
+      "Kind": 5,
       "Literal": "😀",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 0,
+      "Kind": 0,
       "Literal": "",
       "Position": 4,
       "Line": 1

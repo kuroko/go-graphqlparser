@@ -2,13 +2,13 @@
   "Input": "\"\\f\"",
   "Tokens": [
     {
-      "Type": 5,
+      "Kind": 5,
       "Literal": "\u000c",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 0,
+      "Kind": 0,
       "Literal": "",
       "Position": 5,
       "Line": 1

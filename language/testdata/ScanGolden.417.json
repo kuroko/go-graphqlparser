@@ -2,7 +2,7 @@
   "Input": "\"\"\"\\\"\"\"\"\"",
   "Tokens": [
     {
-      "Type": -1,
+      "Kind": -1,
       "Literal": "unexpected eof, probably unclosed block string",
       "Position": 1,
       "Line": 1

@@ -2,7 +2,7 @@
   "Input": "\"\\uAzAz\"",
   "Tokens": [
     {
-      "Type": -1,
+      "Kind": -1,
       "Literal": "invalid character escape sequence: \\uAzAz",
       "Position": 1,
       "Line": 1

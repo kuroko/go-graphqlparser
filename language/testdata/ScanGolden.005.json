@@ -2,13 +2,13 @@
   "Input": "-1.1",
   "Tokens": [
     {
-      "Type": 4,
+      "Kind": 4,
       "Literal": "-1.1",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 0,
+      "Kind": 0,
       "Literal": "",
       "Position": 5,
       "Line": 1

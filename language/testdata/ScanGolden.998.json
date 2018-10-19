@@ -2,19 +2,19 @@
   "Input": "query foo 😃 { bar baz }",
   "Tokens": [
     {
-      "Type": 2,
+      "Kind": 2,
       "Literal": "query",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 2,
+      "Kind": 2,
       "Literal": "foo",
       "Position": 7,
       "Line": 1
     },
     {
-      "Type": -1,
+      "Kind": -1,
       "Literal": "😃",
       "Position": 11,
       "Line": 1

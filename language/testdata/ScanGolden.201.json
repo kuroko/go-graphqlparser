@@ -2,7 +2,7 @@
   "Input": "# only comment",
   "Tokens": [
     {
-      "Type": 0,
+      "Kind": 0,
       "Literal": "",
       "Position": 15,
       "Line": 1

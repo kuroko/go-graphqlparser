@@ -2,7 +2,7 @@
   "Input": ".界界",
   "Tokens": [
     {
-      "Type": -1,
+      "Kind": -1,
       "Literal": "invalid punctuator, expected \"...\" but got: \".界界\"",
       "Position": 1,
       "Line": 1

@@ -2,13 +2,13 @@
   "Input": "-123456789",
   "Tokens": [
     {
-      "Type": 3,
+      "Kind": 3,
       "Literal": "-123456789",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 0,
+      "Kind": 0,
       "Literal": "",
       "Position": 11,
       "Line": 1

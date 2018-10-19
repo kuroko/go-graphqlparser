@@ -2,13 +2,13 @@
   "Input": "\"\\u0080\"",
   "Tokens": [
     {
-      "Type": 5,
+      "Kind": 5,
       "Literal": "",
       "Position": 1,
       "Line": 1
     },
     {
-      "Type": 0,
+      "Kind": 0,
       "Literal": "",
       "Position": 9,
       "Line": 1

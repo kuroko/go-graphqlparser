@@ -2,7 +2,7 @@
   "Input": "\"foo\n\"",
   "Tokens": [
     {
-      "Type": -1,
+      "Kind": -1,
       "Literal": "invalid character within string: '\\n'",
       "Position": 1,
       "Line": 1
