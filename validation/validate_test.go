@@ -17,6 +17,7 @@ query Foo {
 `)
 
 func BenchmarkValidate(b *testing.B) {
+	walker := validation.NewWalker(rules.Specified)
 	parser := language.NewParser(query)
 
 	doc, err := parser.Parse()
@@ -27,6 +28,6 @@ func BenchmarkValidate(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		validation.Validate(doc, rules.Specified)
+		validation.Validate(doc, walker)
 	}
 }
