@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/ast/validation"
 	"github.com/bucketd/go-graphqlparser/language"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -26,7 +26,7 @@ func main() {
 		panic(err)
 	}
 
-	errs := ast.Validate(doc, validation.Rules)
+	errs := ast.Validate(doc, rules.Specified)
 
 	spew.Dump(errs)
 }

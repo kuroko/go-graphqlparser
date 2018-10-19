@@ -2,8 +2,8 @@
 // DO NOT EDIT!
 package ast
 
-// Strider holds event handlers for entering and leaving AST nodes.
-type Strider struct {
+// Walker holds event handlers for entering and leaving AST nodes.
+type Walker struct {
 	argumentEventHandlers                    *ArgumentEventHandlers
 	argumentsEventHandlers                   *ArgumentsEventHandlers
 	argumentsDefinitionEventHandlers         *ArgumentsDefinitionEventHandlers
@@ -57,9 +57,9 @@ type Strider struct {
 	variableDefinitionsEventHandlers         *VariableDefinitionsEventHandlers
 }
 
-// NewStrider returns a *Strider.
-func NewStrider() *Strider {
-	return &Strider{}
+// NewWalker returns a *Walker.
+func NewWalker() *Walker {
+	return &Walker{}
 }
 
 // ArgumentEventHandler function can handle enter/leave events for Argument.
@@ -72,7 +72,7 @@ type ArgumentEventHandlers struct {
 }
 
 // AddArgumentEnterEventHandler adds an event handler to be called when entering a Argument node.
-func (w *Strider) AddArgumentEnterEventHandler(handler ArgumentEventHandler) {
+func (w *Walker) AddArgumentEnterEventHandler(handler ArgumentEventHandler) {
 	if w.argumentEventHandlers == nil {
 		w.argumentEventHandlers = &ArgumentEventHandlers{}
 	}
@@ -80,7 +80,7 @@ func (w *Strider) AddArgumentEnterEventHandler(handler ArgumentEventHandler) {
 }
 
 // AddArgumentLeaveEventHandler adds an event handler to be called when leaving a Argument node.
-func (w *Strider) AddArgumentLeaveEventHandler(handler ArgumentEventHandler) {
+func (w *Walker) AddArgumentLeaveEventHandler(handler ArgumentEventHandler) {
 	if w.argumentEventHandlers == nil {
 		w.argumentEventHandlers = &ArgumentEventHandlers{}
 	}
@@ -88,7 +88,7 @@ func (w *Strider) AddArgumentLeaveEventHandler(handler ArgumentEventHandler) {
 }
 
 // OnArgumentEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnArgumentEnter(a Argument) {
+func (w *Walker) OnArgumentEnter(a Argument) {
 	if w.argumentEventHandlers == nil {
 		return
 	}
@@ -99,7 +99,7 @@ func (w *Strider) OnArgumentEnter(a Argument) {
 }
 
 // OnArgumentLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnArgumentLeave(a Argument) {
+func (w *Walker) OnArgumentLeave(a Argument) {
 	if w.argumentEventHandlers == nil {
 		return
 	}
@@ -119,7 +119,7 @@ type ArgumentsEventHandlers struct {
 }
 
 // AddArgumentsEnterEventHandler adds an event handler to be called when entering a Arguments node.
-func (w *Strider) AddArgumentsEnterEventHandler(handler ArgumentsEventHandler) {
+func (w *Walker) AddArgumentsEnterEventHandler(handler ArgumentsEventHandler) {
 	if w.argumentsEventHandlers == nil {
 		w.argumentsEventHandlers = &ArgumentsEventHandlers{}
 	}
@@ -127,7 +127,7 @@ func (w *Strider) AddArgumentsEnterEventHandler(handler ArgumentsEventHandler) {
 }
 
 // AddArgumentsLeaveEventHandler adds an event handler to be called when leaving a Arguments node.
-func (w *Strider) AddArgumentsLeaveEventHandler(handler ArgumentsEventHandler) {
+func (w *Walker) AddArgumentsLeaveEventHandler(handler ArgumentsEventHandler) {
 	if w.argumentsEventHandlers == nil {
 		w.argumentsEventHandlers = &ArgumentsEventHandlers{}
 	}
@@ -135,7 +135,7 @@ func (w *Strider) AddArgumentsLeaveEventHandler(handler ArgumentsEventHandler) {
 }
 
 // OnArgumentsEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnArgumentsEnter(a *Arguments) {
+func (w *Walker) OnArgumentsEnter(a *Arguments) {
 	if w.argumentsEventHandlers == nil {
 		return
 	}
@@ -146,7 +146,7 @@ func (w *Strider) OnArgumentsEnter(a *Arguments) {
 }
 
 // OnArgumentsLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnArgumentsLeave(a *Arguments) {
+func (w *Walker) OnArgumentsLeave(a *Arguments) {
 	if w.argumentsEventHandlers == nil {
 		return
 	}
@@ -166,7 +166,7 @@ type ArgumentsDefinitionEventHandlers struct {
 }
 
 // AddArgumentsDefinitionEnterEventHandler adds an event handler to be called when entering a ArgumentsDefinition node.
-func (w *Strider) AddArgumentsDefinitionEnterEventHandler(handler ArgumentsDefinitionEventHandler) {
+func (w *Walker) AddArgumentsDefinitionEnterEventHandler(handler ArgumentsDefinitionEventHandler) {
 	if w.argumentsDefinitionEventHandlers == nil {
 		w.argumentsDefinitionEventHandlers = &ArgumentsDefinitionEventHandlers{}
 	}
@@ -174,7 +174,7 @@ func (w *Strider) AddArgumentsDefinitionEnterEventHandler(handler ArgumentsDefin
 }
 
 // AddArgumentsDefinitionLeaveEventHandler adds an event handler to be called when leaving a ArgumentsDefinition node.
-func (w *Strider) AddArgumentsDefinitionLeaveEventHandler(handler ArgumentsDefinitionEventHandler) {
+func (w *Walker) AddArgumentsDefinitionLeaveEventHandler(handler ArgumentsDefinitionEventHandler) {
 	if w.argumentsDefinitionEventHandlers == nil {
 		w.argumentsDefinitionEventHandlers = &ArgumentsDefinitionEventHandlers{}
 	}
@@ -182,7 +182,7 @@ func (w *Strider) AddArgumentsDefinitionLeaveEventHandler(handler ArgumentsDefin
 }
 
 // OnArgumentsDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnArgumentsDefinitionEnter(ad *InputValueDefinitions) {
+func (w *Walker) OnArgumentsDefinitionEnter(ad *InputValueDefinitions) {
 	if w.argumentsDefinitionEventHandlers == nil {
 		return
 	}
@@ -193,7 +193,7 @@ func (w *Strider) OnArgumentsDefinitionEnter(ad *InputValueDefinitions) {
 }
 
 // OnArgumentsDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnArgumentsDefinitionLeave(ad *InputValueDefinitions) {
+func (w *Walker) OnArgumentsDefinitionLeave(ad *InputValueDefinitions) {
 	if w.argumentsDefinitionEventHandlers == nil {
 		return
 	}
@@ -213,7 +213,7 @@ type DefinitionEventHandlers struct {
 }
 
 // AddDefinitionEnterEventHandler adds an event handler to be called when entering a Definition node.
-func (w *Strider) AddDefinitionEnterEventHandler(handler DefinitionEventHandler) {
+func (w *Walker) AddDefinitionEnterEventHandler(handler DefinitionEventHandler) {
 	if w.definitionEventHandlers == nil {
 		w.definitionEventHandlers = &DefinitionEventHandlers{}
 	}
@@ -221,7 +221,7 @@ func (w *Strider) AddDefinitionEnterEventHandler(handler DefinitionEventHandler)
 }
 
 // AddDefinitionLeaveEventHandler adds an event handler to be called when leaving a Definition node.
-func (w *Strider) AddDefinitionLeaveEventHandler(handler DefinitionEventHandler) {
+func (w *Walker) AddDefinitionLeaveEventHandler(handler DefinitionEventHandler) {
 	if w.definitionEventHandlers == nil {
 		w.definitionEventHandlers = &DefinitionEventHandlers{}
 	}
@@ -229,7 +229,7 @@ func (w *Strider) AddDefinitionLeaveEventHandler(handler DefinitionEventHandler)
 }
 
 // OnDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnDefinitionEnter(d Definition) {
+func (w *Walker) OnDefinitionEnter(d Definition) {
 	if w.definitionEventHandlers == nil {
 		return
 	}
@@ -240,7 +240,7 @@ func (w *Strider) OnDefinitionEnter(d Definition) {
 }
 
 // OnDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnDefinitionLeave(d Definition) {
+func (w *Walker) OnDefinitionLeave(d Definition) {
 	if w.definitionEventHandlers == nil {
 		return
 	}
@@ -260,7 +260,7 @@ type DefinitionsEventHandlers struct {
 }
 
 // AddDefinitionsEnterEventHandler adds an event handler to be called when entering a Definitions node.
-func (w *Strider) AddDefinitionsEnterEventHandler(handler DefinitionsEventHandler) {
+func (w *Walker) AddDefinitionsEnterEventHandler(handler DefinitionsEventHandler) {
 	if w.definitionsEventHandlers == nil {
 		w.definitionsEventHandlers = &DefinitionsEventHandlers{}
 	}
@@ -268,7 +268,7 @@ func (w *Strider) AddDefinitionsEnterEventHandler(handler DefinitionsEventHandle
 }
 
 // AddDefinitionsLeaveEventHandler adds an event handler to be called when leaving a Definitions node.
-func (w *Strider) AddDefinitionsLeaveEventHandler(handler DefinitionsEventHandler) {
+func (w *Walker) AddDefinitionsLeaveEventHandler(handler DefinitionsEventHandler) {
 	if w.definitionsEventHandlers == nil {
 		w.definitionsEventHandlers = &DefinitionsEventHandlers{}
 	}
@@ -276,7 +276,7 @@ func (w *Strider) AddDefinitionsLeaveEventHandler(handler DefinitionsEventHandle
 }
 
 // OnDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnDefinitionsEnter(d *Definitions) {
+func (w *Walker) OnDefinitionsEnter(d *Definitions) {
 	if w.definitionsEventHandlers == nil {
 		return
 	}
@@ -287,7 +287,7 @@ func (w *Strider) OnDefinitionsEnter(d *Definitions) {
 }
 
 // OnDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnDefinitionsLeave(d *Definitions) {
+func (w *Walker) OnDefinitionsLeave(d *Definitions) {
 	if w.definitionsEventHandlers == nil {
 		return
 	}
@@ -307,7 +307,7 @@ type DescriptionEventHandlers struct {
 }
 
 // AddDescriptionEnterEventHandler adds an event handler to be called when entering a Description node.
-func (w *Strider) AddDescriptionEnterEventHandler(handler DescriptionEventHandler) {
+func (w *Walker) AddDescriptionEnterEventHandler(handler DescriptionEventHandler) {
 	if w.descriptionEventHandlers == nil {
 		w.descriptionEventHandlers = &DescriptionEventHandlers{}
 	}
@@ -315,7 +315,7 @@ func (w *Strider) AddDescriptionEnterEventHandler(handler DescriptionEventHandle
 }
 
 // AddDescriptionLeaveEventHandler adds an event handler to be called when leaving a Description node.
-func (w *Strider) AddDescriptionLeaveEventHandler(handler DescriptionEventHandler) {
+func (w *Walker) AddDescriptionLeaveEventHandler(handler DescriptionEventHandler) {
 	if w.descriptionEventHandlers == nil {
 		w.descriptionEventHandlers = &DescriptionEventHandlers{}
 	}
@@ -323,7 +323,7 @@ func (w *Strider) AddDescriptionLeaveEventHandler(handler DescriptionEventHandle
 }
 
 // OnDescriptionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnDescriptionEnter(d string) {
+func (w *Walker) OnDescriptionEnter(d string) {
 	if w.descriptionEventHandlers == nil {
 		return
 	}
@@ -334,7 +334,7 @@ func (w *Strider) OnDescriptionEnter(d string) {
 }
 
 // OnDescriptionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnDescriptionLeave(d string) {
+func (w *Walker) OnDescriptionLeave(d string) {
 	if w.descriptionEventHandlers == nil {
 		return
 	}
@@ -354,7 +354,7 @@ type DirectiveEventHandlers struct {
 }
 
 // AddDirectiveEnterEventHandler adds an event handler to be called when entering a Directive node.
-func (w *Strider) AddDirectiveEnterEventHandler(handler DirectiveEventHandler) {
+func (w *Walker) AddDirectiveEnterEventHandler(handler DirectiveEventHandler) {
 	if w.directiveEventHandlers == nil {
 		w.directiveEventHandlers = &DirectiveEventHandlers{}
 	}
@@ -362,7 +362,7 @@ func (w *Strider) AddDirectiveEnterEventHandler(handler DirectiveEventHandler) {
 }
 
 // AddDirectiveLeaveEventHandler adds an event handler to be called when leaving a Directive node.
-func (w *Strider) AddDirectiveLeaveEventHandler(handler DirectiveEventHandler) {
+func (w *Walker) AddDirectiveLeaveEventHandler(handler DirectiveEventHandler) {
 	if w.directiveEventHandlers == nil {
 		w.directiveEventHandlers = &DirectiveEventHandlers{}
 	}
@@ -370,7 +370,7 @@ func (w *Strider) AddDirectiveLeaveEventHandler(handler DirectiveEventHandler) {
 }
 
 // OnDirectiveEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnDirectiveEnter(d Directive) {
+func (w *Walker) OnDirectiveEnter(d Directive) {
 	if w.directiveEventHandlers == nil {
 		return
 	}
@@ -381,7 +381,7 @@ func (w *Strider) OnDirectiveEnter(d Directive) {
 }
 
 // OnDirectiveLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnDirectiveLeave(d Directive) {
+func (w *Walker) OnDirectiveLeave(d Directive) {
 	if w.directiveEventHandlers == nil {
 		return
 	}
@@ -401,7 +401,7 @@ type DirectiveDefinitionEventHandlers struct {
 }
 
 // AddDirectiveDefinitionEnterEventHandler adds an event handler to be called when entering a DirectiveDefinition node.
-func (w *Strider) AddDirectiveDefinitionEnterEventHandler(handler DirectiveDefinitionEventHandler) {
+func (w *Walker) AddDirectiveDefinitionEnterEventHandler(handler DirectiveDefinitionEventHandler) {
 	if w.directiveDefinitionEventHandlers == nil {
 		w.directiveDefinitionEventHandlers = &DirectiveDefinitionEventHandlers{}
 	}
@@ -409,7 +409,7 @@ func (w *Strider) AddDirectiveDefinitionEnterEventHandler(handler DirectiveDefin
 }
 
 // AddDirectiveDefinitionLeaveEventHandler adds an event handler to be called when leaving a DirectiveDefinition node.
-func (w *Strider) AddDirectiveDefinitionLeaveEventHandler(handler DirectiveDefinitionEventHandler) {
+func (w *Walker) AddDirectiveDefinitionLeaveEventHandler(handler DirectiveDefinitionEventHandler) {
 	if w.directiveDefinitionEventHandlers == nil {
 		w.directiveDefinitionEventHandlers = &DirectiveDefinitionEventHandlers{}
 	}
@@ -417,7 +417,7 @@ func (w *Strider) AddDirectiveDefinitionLeaveEventHandler(handler DirectiveDefin
 }
 
 // OnDirectiveDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnDirectiveDefinitionEnter(dd *DirectiveDefinition) {
+func (w *Walker) OnDirectiveDefinitionEnter(dd *DirectiveDefinition) {
 	if w.directiveDefinitionEventHandlers == nil {
 		return
 	}
@@ -428,7 +428,7 @@ func (w *Strider) OnDirectiveDefinitionEnter(dd *DirectiveDefinition) {
 }
 
 // OnDirectiveDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnDirectiveDefinitionLeave(dd *DirectiveDefinition) {
+func (w *Walker) OnDirectiveDefinitionLeave(dd *DirectiveDefinition) {
 	if w.directiveDefinitionEventHandlers == nil {
 		return
 	}
@@ -448,7 +448,7 @@ type DirectiveLocationsEventHandlers struct {
 }
 
 // AddDirectiveLocationsEnterEventHandler adds an event handler to be called when entering a DirectiveLocations node.
-func (w *Strider) AddDirectiveLocationsEnterEventHandler(handler DirectiveLocationsEventHandler) {
+func (w *Walker) AddDirectiveLocationsEnterEventHandler(handler DirectiveLocationsEventHandler) {
 	if w.directiveLocationsEventHandlers == nil {
 		w.directiveLocationsEventHandlers = &DirectiveLocationsEventHandlers{}
 	}
@@ -456,7 +456,7 @@ func (w *Strider) AddDirectiveLocationsEnterEventHandler(handler DirectiveLocati
 }
 
 // AddDirectiveLocationsLeaveEventHandler adds an event handler to be called when leaving a DirectiveLocations node.
-func (w *Strider) AddDirectiveLocationsLeaveEventHandler(handler DirectiveLocationsEventHandler) {
+func (w *Walker) AddDirectiveLocationsLeaveEventHandler(handler DirectiveLocationsEventHandler) {
 	if w.directiveLocationsEventHandlers == nil {
 		w.directiveLocationsEventHandlers = &DirectiveLocationsEventHandlers{}
 	}
@@ -464,7 +464,7 @@ func (w *Strider) AddDirectiveLocationsLeaveEventHandler(handler DirectiveLocati
 }
 
 // OnDirectiveLocationsEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnDirectiveLocationsEnter(dl *DirectiveLocations) {
+func (w *Walker) OnDirectiveLocationsEnter(dl *DirectiveLocations) {
 	if w.directiveLocationsEventHandlers == nil {
 		return
 	}
@@ -475,7 +475,7 @@ func (w *Strider) OnDirectiveLocationsEnter(dl *DirectiveLocations) {
 }
 
 // OnDirectiveLocationsLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnDirectiveLocationsLeave(dl *DirectiveLocations) {
+func (w *Walker) OnDirectiveLocationsLeave(dl *DirectiveLocations) {
 	if w.directiveLocationsEventHandlers == nil {
 		return
 	}
@@ -495,7 +495,7 @@ type DirectivesEventHandlers struct {
 }
 
 // AddDirectivesEnterEventHandler adds an event handler to be called when entering a Directives node.
-func (w *Strider) AddDirectivesEnterEventHandler(handler DirectivesEventHandler) {
+func (w *Walker) AddDirectivesEnterEventHandler(handler DirectivesEventHandler) {
 	if w.directivesEventHandlers == nil {
 		w.directivesEventHandlers = &DirectivesEventHandlers{}
 	}
@@ -503,7 +503,7 @@ func (w *Strider) AddDirectivesEnterEventHandler(handler DirectivesEventHandler)
 }
 
 // AddDirectivesLeaveEventHandler adds an event handler to be called when leaving a Directives node.
-func (w *Strider) AddDirectivesLeaveEventHandler(handler DirectivesEventHandler) {
+func (w *Walker) AddDirectivesLeaveEventHandler(handler DirectivesEventHandler) {
 	if w.directivesEventHandlers == nil {
 		w.directivesEventHandlers = &DirectivesEventHandlers{}
 	}
@@ -511,7 +511,7 @@ func (w *Strider) AddDirectivesLeaveEventHandler(handler DirectivesEventHandler)
 }
 
 // OnDirectivesEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnDirectivesEnter(d *Directives) {
+func (w *Walker) OnDirectivesEnter(d *Directives) {
 	if w.directivesEventHandlers == nil {
 		return
 	}
@@ -522,7 +522,7 @@ func (w *Strider) OnDirectivesEnter(d *Directives) {
 }
 
 // OnDirectivesLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnDirectivesLeave(d *Directives) {
+func (w *Walker) OnDirectivesLeave(d *Directives) {
 	if w.directivesEventHandlers == nil {
 		return
 	}
@@ -542,7 +542,7 @@ type DocumentEventHandlers struct {
 }
 
 // AddDocumentEnterEventHandler adds an event handler to be called when entering a Document node.
-func (w *Strider) AddDocumentEnterEventHandler(handler DocumentEventHandler) {
+func (w *Walker) AddDocumentEnterEventHandler(handler DocumentEventHandler) {
 	if w.documentEventHandlers == nil {
 		w.documentEventHandlers = &DocumentEventHandlers{}
 	}
@@ -550,7 +550,7 @@ func (w *Strider) AddDocumentEnterEventHandler(handler DocumentEventHandler) {
 }
 
 // AddDocumentLeaveEventHandler adds an event handler to be called when leaving a Document node.
-func (w *Strider) AddDocumentLeaveEventHandler(handler DocumentEventHandler) {
+func (w *Walker) AddDocumentLeaveEventHandler(handler DocumentEventHandler) {
 	if w.documentEventHandlers == nil {
 		w.documentEventHandlers = &DocumentEventHandlers{}
 	}
@@ -558,7 +558,7 @@ func (w *Strider) AddDocumentLeaveEventHandler(handler DocumentEventHandler) {
 }
 
 // OnDocumentEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnDocumentEnter(d Document) {
+func (w *Walker) OnDocumentEnter(d Document) {
 	if w.documentEventHandlers == nil {
 		return
 	}
@@ -569,7 +569,7 @@ func (w *Strider) OnDocumentEnter(d Document) {
 }
 
 // OnDocumentLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnDocumentLeave(d Document) {
+func (w *Walker) OnDocumentLeave(d Document) {
 	if w.documentEventHandlers == nil {
 		return
 	}
@@ -589,7 +589,7 @@ type EnumTypeExtensionEventHandlers struct {
 }
 
 // AddEnumTypeExtensionEnterEventHandler adds an event handler to be called when entering a EnumTypeExtension node.
-func (w *Strider) AddEnumTypeExtensionEnterEventHandler(handler EnumTypeExtensionEventHandler) {
+func (w *Walker) AddEnumTypeExtensionEnterEventHandler(handler EnumTypeExtensionEventHandler) {
 	if w.enumTypeExtensionEventHandlers == nil {
 		w.enumTypeExtensionEventHandlers = &EnumTypeExtensionEventHandlers{}
 	}
@@ -597,7 +597,7 @@ func (w *Strider) AddEnumTypeExtensionEnterEventHandler(handler EnumTypeExtensio
 }
 
 // AddEnumTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a EnumTypeExtension node.
-func (w *Strider) AddEnumTypeExtensionLeaveEventHandler(handler EnumTypeExtensionEventHandler) {
+func (w *Walker) AddEnumTypeExtensionLeaveEventHandler(handler EnumTypeExtensionEventHandler) {
 	if w.enumTypeExtensionEventHandlers == nil {
 		w.enumTypeExtensionEventHandlers = &EnumTypeExtensionEventHandlers{}
 	}
@@ -605,7 +605,7 @@ func (w *Strider) AddEnumTypeExtensionLeaveEventHandler(handler EnumTypeExtensio
 }
 
 // OnEnumTypeExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnEnumTypeExtensionEnter(ete *TypeExtension) {
+func (w *Walker) OnEnumTypeExtensionEnter(ete *TypeExtension) {
 	if w.enumTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -616,7 +616,7 @@ func (w *Strider) OnEnumTypeExtensionEnter(ete *TypeExtension) {
 }
 
 // OnEnumTypeExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnEnumTypeExtensionLeave(ete *TypeExtension) {
+func (w *Walker) OnEnumTypeExtensionLeave(ete *TypeExtension) {
 	if w.enumTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -636,7 +636,7 @@ type EnumValueDefinitionEventHandlers struct {
 }
 
 // AddEnumValueDefinitionEnterEventHandler adds an event handler to be called when entering a EnumValueDefinition node.
-func (w *Strider) AddEnumValueDefinitionEnterEventHandler(handler EnumValueDefinitionEventHandler) {
+func (w *Walker) AddEnumValueDefinitionEnterEventHandler(handler EnumValueDefinitionEventHandler) {
 	if w.enumValueDefinitionEventHandlers == nil {
 		w.enumValueDefinitionEventHandlers = &EnumValueDefinitionEventHandlers{}
 	}
@@ -644,7 +644,7 @@ func (w *Strider) AddEnumValueDefinitionEnterEventHandler(handler EnumValueDefin
 }
 
 // AddEnumValueDefinitionLeaveEventHandler adds an event handler to be called when leaving a EnumValueDefinition node.
-func (w *Strider) AddEnumValueDefinitionLeaveEventHandler(handler EnumValueDefinitionEventHandler) {
+func (w *Walker) AddEnumValueDefinitionLeaveEventHandler(handler EnumValueDefinitionEventHandler) {
 	if w.enumValueDefinitionEventHandlers == nil {
 		w.enumValueDefinitionEventHandlers = &EnumValueDefinitionEventHandlers{}
 	}
@@ -652,7 +652,7 @@ func (w *Strider) AddEnumValueDefinitionLeaveEventHandler(handler EnumValueDefin
 }
 
 // OnEnumValueDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnEnumValueDefinitionEnter(evd EnumValueDefinition) {
+func (w *Walker) OnEnumValueDefinitionEnter(evd EnumValueDefinition) {
 	if w.enumValueDefinitionEventHandlers == nil {
 		return
 	}
@@ -663,7 +663,7 @@ func (w *Strider) OnEnumValueDefinitionEnter(evd EnumValueDefinition) {
 }
 
 // OnEnumValueDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnEnumValueDefinitionLeave(evd EnumValueDefinition) {
+func (w *Walker) OnEnumValueDefinitionLeave(evd EnumValueDefinition) {
 	if w.enumValueDefinitionEventHandlers == nil {
 		return
 	}
@@ -683,7 +683,7 @@ type EnumValuesDefinitionEventHandlers struct {
 }
 
 // AddEnumValuesDefinitionEnterEventHandler adds an event handler to be called when entering a EnumValuesDefinition node.
-func (w *Strider) AddEnumValuesDefinitionEnterEventHandler(handler EnumValuesDefinitionEventHandler) {
+func (w *Walker) AddEnumValuesDefinitionEnterEventHandler(handler EnumValuesDefinitionEventHandler) {
 	if w.enumValuesDefinitionEventHandlers == nil {
 		w.enumValuesDefinitionEventHandlers = &EnumValuesDefinitionEventHandlers{}
 	}
@@ -691,7 +691,7 @@ func (w *Strider) AddEnumValuesDefinitionEnterEventHandler(handler EnumValuesDef
 }
 
 // AddEnumValuesDefinitionLeaveEventHandler adds an event handler to be called when leaving a EnumValuesDefinition node.
-func (w *Strider) AddEnumValuesDefinitionLeaveEventHandler(handler EnumValuesDefinitionEventHandler) {
+func (w *Walker) AddEnumValuesDefinitionLeaveEventHandler(handler EnumValuesDefinitionEventHandler) {
 	if w.enumValuesDefinitionEventHandlers == nil {
 		w.enumValuesDefinitionEventHandlers = &EnumValuesDefinitionEventHandlers{}
 	}
@@ -699,7 +699,7 @@ func (w *Strider) AddEnumValuesDefinitionLeaveEventHandler(handler EnumValuesDef
 }
 
 // OnEnumValuesDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnEnumValuesDefinitionEnter(evd *EnumValueDefinitions) {
+func (w *Walker) OnEnumValuesDefinitionEnter(evd *EnumValueDefinitions) {
 	if w.enumValuesDefinitionEventHandlers == nil {
 		return
 	}
@@ -710,7 +710,7 @@ func (w *Strider) OnEnumValuesDefinitionEnter(evd *EnumValueDefinitions) {
 }
 
 // OnEnumValuesDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnEnumValuesDefinitionLeave(evd *EnumValueDefinitions) {
+func (w *Walker) OnEnumValuesDefinitionLeave(evd *EnumValueDefinitions) {
 	if w.enumValuesDefinitionEventHandlers == nil {
 		return
 	}
@@ -730,7 +730,7 @@ type ExecutableDefinitionEventHandlers struct {
 }
 
 // AddExecutableDefinitionEnterEventHandler adds an event handler to be called when entering a ExecutableDefinition node.
-func (w *Strider) AddExecutableDefinitionEnterEventHandler(handler ExecutableDefinitionEventHandler) {
+func (w *Walker) AddExecutableDefinitionEnterEventHandler(handler ExecutableDefinitionEventHandler) {
 	if w.executableDefinitionEventHandlers == nil {
 		w.executableDefinitionEventHandlers = &ExecutableDefinitionEventHandlers{}
 	}
@@ -738,7 +738,7 @@ func (w *Strider) AddExecutableDefinitionEnterEventHandler(handler ExecutableDef
 }
 
 // AddExecutableDefinitionLeaveEventHandler adds an event handler to be called when leaving a ExecutableDefinition node.
-func (w *Strider) AddExecutableDefinitionLeaveEventHandler(handler ExecutableDefinitionEventHandler) {
+func (w *Walker) AddExecutableDefinitionLeaveEventHandler(handler ExecutableDefinitionEventHandler) {
 	if w.executableDefinitionEventHandlers == nil {
 		w.executableDefinitionEventHandlers = &ExecutableDefinitionEventHandlers{}
 	}
@@ -746,7 +746,7 @@ func (w *Strider) AddExecutableDefinitionLeaveEventHandler(handler ExecutableDef
 }
 
 // OnExecutableDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnExecutableDefinitionEnter(ed *ExecutableDefinition) {
+func (w *Walker) OnExecutableDefinitionEnter(ed *ExecutableDefinition) {
 	if w.executableDefinitionEventHandlers == nil {
 		return
 	}
@@ -757,7 +757,7 @@ func (w *Strider) OnExecutableDefinitionEnter(ed *ExecutableDefinition) {
 }
 
 // OnExecutableDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnExecutableDefinitionLeave(ed *ExecutableDefinition) {
+func (w *Walker) OnExecutableDefinitionLeave(ed *ExecutableDefinition) {
 	if w.executableDefinitionEventHandlers == nil {
 		return
 	}
@@ -777,7 +777,7 @@ type FieldDefinitionEventHandlers struct {
 }
 
 // AddFieldDefinitionEnterEventHandler adds an event handler to be called when entering a FieldDefinition node.
-func (w *Strider) AddFieldDefinitionEnterEventHandler(handler FieldDefinitionEventHandler) {
+func (w *Walker) AddFieldDefinitionEnterEventHandler(handler FieldDefinitionEventHandler) {
 	if w.fieldDefinitionEventHandlers == nil {
 		w.fieldDefinitionEventHandlers = &FieldDefinitionEventHandlers{}
 	}
@@ -785,7 +785,7 @@ func (w *Strider) AddFieldDefinitionEnterEventHandler(handler FieldDefinitionEve
 }
 
 // AddFieldDefinitionLeaveEventHandler adds an event handler to be called when leaving a FieldDefinition node.
-func (w *Strider) AddFieldDefinitionLeaveEventHandler(handler FieldDefinitionEventHandler) {
+func (w *Walker) AddFieldDefinitionLeaveEventHandler(handler FieldDefinitionEventHandler) {
 	if w.fieldDefinitionEventHandlers == nil {
 		w.fieldDefinitionEventHandlers = &FieldDefinitionEventHandlers{}
 	}
@@ -793,7 +793,7 @@ func (w *Strider) AddFieldDefinitionLeaveEventHandler(handler FieldDefinitionEve
 }
 
 // OnFieldDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnFieldDefinitionEnter(fd FieldDefinition) {
+func (w *Walker) OnFieldDefinitionEnter(fd FieldDefinition) {
 	if w.fieldDefinitionEventHandlers == nil {
 		return
 	}
@@ -804,7 +804,7 @@ func (w *Strider) OnFieldDefinitionEnter(fd FieldDefinition) {
 }
 
 // OnFieldDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnFieldDefinitionLeave(fd FieldDefinition) {
+func (w *Walker) OnFieldDefinitionLeave(fd FieldDefinition) {
 	if w.fieldDefinitionEventHandlers == nil {
 		return
 	}
@@ -824,7 +824,7 @@ type FieldSelectionEventHandlers struct {
 }
 
 // AddFieldSelectionEnterEventHandler adds an event handler to be called when entering a FieldSelection node.
-func (w *Strider) AddFieldSelectionEnterEventHandler(handler FieldSelectionEventHandler) {
+func (w *Walker) AddFieldSelectionEnterEventHandler(handler FieldSelectionEventHandler) {
 	if w.fieldSelectionEventHandlers == nil {
 		w.fieldSelectionEventHandlers = &FieldSelectionEventHandlers{}
 	}
@@ -832,7 +832,7 @@ func (w *Strider) AddFieldSelectionEnterEventHandler(handler FieldSelectionEvent
 }
 
 // AddFieldSelectionLeaveEventHandler adds an event handler to be called when leaving a FieldSelection node.
-func (w *Strider) AddFieldSelectionLeaveEventHandler(handler FieldSelectionEventHandler) {
+func (w *Walker) AddFieldSelectionLeaveEventHandler(handler FieldSelectionEventHandler) {
 	if w.fieldSelectionEventHandlers == nil {
 		w.fieldSelectionEventHandlers = &FieldSelectionEventHandlers{}
 	}
@@ -840,7 +840,7 @@ func (w *Strider) AddFieldSelectionLeaveEventHandler(handler FieldSelectionEvent
 }
 
 // OnFieldSelectionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnFieldSelectionEnter(fs Selection) {
+func (w *Walker) OnFieldSelectionEnter(fs Selection) {
 	if w.fieldSelectionEventHandlers == nil {
 		return
 	}
@@ -851,7 +851,7 @@ func (w *Strider) OnFieldSelectionEnter(fs Selection) {
 }
 
 // OnFieldSelectionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnFieldSelectionLeave(fs Selection) {
+func (w *Walker) OnFieldSelectionLeave(fs Selection) {
 	if w.fieldSelectionEventHandlers == nil {
 		return
 	}
@@ -871,7 +871,7 @@ type FieldsDefinitionEventHandlers struct {
 }
 
 // AddFieldsDefinitionEnterEventHandler adds an event handler to be called when entering a FieldsDefinition node.
-func (w *Strider) AddFieldsDefinitionEnterEventHandler(handler FieldsDefinitionEventHandler) {
+func (w *Walker) AddFieldsDefinitionEnterEventHandler(handler FieldsDefinitionEventHandler) {
 	if w.fieldsDefinitionEventHandlers == nil {
 		w.fieldsDefinitionEventHandlers = &FieldsDefinitionEventHandlers{}
 	}
@@ -879,7 +879,7 @@ func (w *Strider) AddFieldsDefinitionEnterEventHandler(handler FieldsDefinitionE
 }
 
 // AddFieldsDefinitionLeaveEventHandler adds an event handler to be called when leaving a FieldsDefinition node.
-func (w *Strider) AddFieldsDefinitionLeaveEventHandler(handler FieldsDefinitionEventHandler) {
+func (w *Walker) AddFieldsDefinitionLeaveEventHandler(handler FieldsDefinitionEventHandler) {
 	if w.fieldsDefinitionEventHandlers == nil {
 		w.fieldsDefinitionEventHandlers = &FieldsDefinitionEventHandlers{}
 	}
@@ -887,7 +887,7 @@ func (w *Strider) AddFieldsDefinitionLeaveEventHandler(handler FieldsDefinitionE
 }
 
 // OnFieldsDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnFieldsDefinitionEnter(fd *FieldDefinitions) {
+func (w *Walker) OnFieldsDefinitionEnter(fd *FieldDefinitions) {
 	if w.fieldsDefinitionEventHandlers == nil {
 		return
 	}
@@ -898,7 +898,7 @@ func (w *Strider) OnFieldsDefinitionEnter(fd *FieldDefinitions) {
 }
 
 // OnFieldsDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnFieldsDefinitionLeave(fd *FieldDefinitions) {
+func (w *Walker) OnFieldsDefinitionLeave(fd *FieldDefinitions) {
 	if w.fieldsDefinitionEventHandlers == nil {
 		return
 	}
@@ -918,7 +918,7 @@ type FragmentDefinitionEventHandlers struct {
 }
 
 // AddFragmentDefinitionEnterEventHandler adds an event handler to be called when entering a FragmentDefinition node.
-func (w *Strider) AddFragmentDefinitionEnterEventHandler(handler FragmentDefinitionEventHandler) {
+func (w *Walker) AddFragmentDefinitionEnterEventHandler(handler FragmentDefinitionEventHandler) {
 	if w.fragmentDefinitionEventHandlers == nil {
 		w.fragmentDefinitionEventHandlers = &FragmentDefinitionEventHandlers{}
 	}
@@ -926,7 +926,7 @@ func (w *Strider) AddFragmentDefinitionEnterEventHandler(handler FragmentDefinit
 }
 
 // AddFragmentDefinitionLeaveEventHandler adds an event handler to be called when leaving a FragmentDefinition node.
-func (w *Strider) AddFragmentDefinitionLeaveEventHandler(handler FragmentDefinitionEventHandler) {
+func (w *Walker) AddFragmentDefinitionLeaveEventHandler(handler FragmentDefinitionEventHandler) {
 	if w.fragmentDefinitionEventHandlers == nil {
 		w.fragmentDefinitionEventHandlers = &FragmentDefinitionEventHandlers{}
 	}
@@ -934,7 +934,7 @@ func (w *Strider) AddFragmentDefinitionLeaveEventHandler(handler FragmentDefinit
 }
 
 // OnFragmentDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnFragmentDefinitionEnter(fd *ExecutableDefinition) {
+func (w *Walker) OnFragmentDefinitionEnter(fd *ExecutableDefinition) {
 	if w.fragmentDefinitionEventHandlers == nil {
 		return
 	}
@@ -945,7 +945,7 @@ func (w *Strider) OnFragmentDefinitionEnter(fd *ExecutableDefinition) {
 }
 
 // OnFragmentDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnFragmentDefinitionLeave(fd *ExecutableDefinition) {
+func (w *Walker) OnFragmentDefinitionLeave(fd *ExecutableDefinition) {
 	if w.fragmentDefinitionEventHandlers == nil {
 		return
 	}
@@ -965,7 +965,7 @@ type FragmentSpreadEventHandlers struct {
 }
 
 // AddFragmentSpreadEnterEventHandler adds an event handler to be called when entering a FragmentSpread node.
-func (w *Strider) AddFragmentSpreadEnterEventHandler(handler FragmentSpreadEventHandler) {
+func (w *Walker) AddFragmentSpreadEnterEventHandler(handler FragmentSpreadEventHandler) {
 	if w.fragmentSpreadEventHandlers == nil {
 		w.fragmentSpreadEventHandlers = &FragmentSpreadEventHandlers{}
 	}
@@ -973,7 +973,7 @@ func (w *Strider) AddFragmentSpreadEnterEventHandler(handler FragmentSpreadEvent
 }
 
 // AddFragmentSpreadLeaveEventHandler adds an event handler to be called when leaving a FragmentSpread node.
-func (w *Strider) AddFragmentSpreadLeaveEventHandler(handler FragmentSpreadEventHandler) {
+func (w *Walker) AddFragmentSpreadLeaveEventHandler(handler FragmentSpreadEventHandler) {
 	if w.fragmentSpreadEventHandlers == nil {
 		w.fragmentSpreadEventHandlers = &FragmentSpreadEventHandlers{}
 	}
@@ -981,7 +981,7 @@ func (w *Strider) AddFragmentSpreadLeaveEventHandler(handler FragmentSpreadEvent
 }
 
 // OnFragmentSpreadEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnFragmentSpreadEnter(fs Selection) {
+func (w *Walker) OnFragmentSpreadEnter(fs Selection) {
 	if w.fragmentSpreadEventHandlers == nil {
 		return
 	}
@@ -992,7 +992,7 @@ func (w *Strider) OnFragmentSpreadEnter(fs Selection) {
 }
 
 // OnFragmentSpreadLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnFragmentSpreadLeave(fs Selection) {
+func (w *Walker) OnFragmentSpreadLeave(fs Selection) {
 	if w.fragmentSpreadEventHandlers == nil {
 		return
 	}
@@ -1012,7 +1012,7 @@ type ImplementsInterfacesEventHandlers struct {
 }
 
 // AddImplementsInterfacesEnterEventHandler adds an event handler to be called when entering a ImplementsInterfaces node.
-func (w *Strider) AddImplementsInterfacesEnterEventHandler(handler ImplementsInterfacesEventHandler) {
+func (w *Walker) AddImplementsInterfacesEnterEventHandler(handler ImplementsInterfacesEventHandler) {
 	if w.implementsInterfacesEventHandlers == nil {
 		w.implementsInterfacesEventHandlers = &ImplementsInterfacesEventHandlers{}
 	}
@@ -1020,7 +1020,7 @@ func (w *Strider) AddImplementsInterfacesEnterEventHandler(handler ImplementsInt
 }
 
 // AddImplementsInterfacesLeaveEventHandler adds an event handler to be called when leaving a ImplementsInterfaces node.
-func (w *Strider) AddImplementsInterfacesLeaveEventHandler(handler ImplementsInterfacesEventHandler) {
+func (w *Walker) AddImplementsInterfacesLeaveEventHandler(handler ImplementsInterfacesEventHandler) {
 	if w.implementsInterfacesEventHandlers == nil {
 		w.implementsInterfacesEventHandlers = &ImplementsInterfacesEventHandlers{}
 	}
@@ -1028,7 +1028,7 @@ func (w *Strider) AddImplementsInterfacesLeaveEventHandler(handler ImplementsInt
 }
 
 // OnImplementsInterfacesEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnImplementsInterfacesEnter(ii *Types) {
+func (w *Walker) OnImplementsInterfacesEnter(ii *Types) {
 	if w.implementsInterfacesEventHandlers == nil {
 		return
 	}
@@ -1039,7 +1039,7 @@ func (w *Strider) OnImplementsInterfacesEnter(ii *Types) {
 }
 
 // OnImplementsInterfacesLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnImplementsInterfacesLeave(ii *Types) {
+func (w *Walker) OnImplementsInterfacesLeave(ii *Types) {
 	if w.implementsInterfacesEventHandlers == nil {
 		return
 	}
@@ -1059,7 +1059,7 @@ type InlineFragmentEventHandlers struct {
 }
 
 // AddInlineFragmentEnterEventHandler adds an event handler to be called when entering a InlineFragment node.
-func (w *Strider) AddInlineFragmentEnterEventHandler(handler InlineFragmentEventHandler) {
+func (w *Walker) AddInlineFragmentEnterEventHandler(handler InlineFragmentEventHandler) {
 	if w.inlineFragmentEventHandlers == nil {
 		w.inlineFragmentEventHandlers = &InlineFragmentEventHandlers{}
 	}
@@ -1067,7 +1067,7 @@ func (w *Strider) AddInlineFragmentEnterEventHandler(handler InlineFragmentEvent
 }
 
 // AddInlineFragmentLeaveEventHandler adds an event handler to be called when leaving a InlineFragment node.
-func (w *Strider) AddInlineFragmentLeaveEventHandler(handler InlineFragmentEventHandler) {
+func (w *Walker) AddInlineFragmentLeaveEventHandler(handler InlineFragmentEventHandler) {
 	if w.inlineFragmentEventHandlers == nil {
 		w.inlineFragmentEventHandlers = &InlineFragmentEventHandlers{}
 	}
@@ -1075,7 +1075,7 @@ func (w *Strider) AddInlineFragmentLeaveEventHandler(handler InlineFragmentEvent
 }
 
 // OnInlineFragmentEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnInlineFragmentEnter(ilf Selection) {
+func (w *Walker) OnInlineFragmentEnter(ilf Selection) {
 	if w.inlineFragmentEventHandlers == nil {
 		return
 	}
@@ -1086,7 +1086,7 @@ func (w *Strider) OnInlineFragmentEnter(ilf Selection) {
 }
 
 // OnInlineFragmentLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnInlineFragmentLeave(ilf Selection) {
+func (w *Walker) OnInlineFragmentLeave(ilf Selection) {
 	if w.inlineFragmentEventHandlers == nil {
 		return
 	}
@@ -1106,7 +1106,7 @@ type InputFieldsDefinitionEventHandlers struct {
 }
 
 // AddInputFieldsDefinitionEnterEventHandler adds an event handler to be called when entering a InputFieldsDefinition node.
-func (w *Strider) AddInputFieldsDefinitionEnterEventHandler(handler InputFieldsDefinitionEventHandler) {
+func (w *Walker) AddInputFieldsDefinitionEnterEventHandler(handler InputFieldsDefinitionEventHandler) {
 	if w.inputFieldsDefinitionEventHandlers == nil {
 		w.inputFieldsDefinitionEventHandlers = &InputFieldsDefinitionEventHandlers{}
 	}
@@ -1114,7 +1114,7 @@ func (w *Strider) AddInputFieldsDefinitionEnterEventHandler(handler InputFieldsD
 }
 
 // AddInputFieldsDefinitionLeaveEventHandler adds an event handler to be called when leaving a InputFieldsDefinition node.
-func (w *Strider) AddInputFieldsDefinitionLeaveEventHandler(handler InputFieldsDefinitionEventHandler) {
+func (w *Walker) AddInputFieldsDefinitionLeaveEventHandler(handler InputFieldsDefinitionEventHandler) {
 	if w.inputFieldsDefinitionEventHandlers == nil {
 		w.inputFieldsDefinitionEventHandlers = &InputFieldsDefinitionEventHandlers{}
 	}
@@ -1122,7 +1122,7 @@ func (w *Strider) AddInputFieldsDefinitionLeaveEventHandler(handler InputFieldsD
 }
 
 // OnInputFieldsDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnInputFieldsDefinitionEnter(ifd *InputValueDefinitions) {
+func (w *Walker) OnInputFieldsDefinitionEnter(ifd *InputValueDefinitions) {
 	if w.inputFieldsDefinitionEventHandlers == nil {
 		return
 	}
@@ -1133,7 +1133,7 @@ func (w *Strider) OnInputFieldsDefinitionEnter(ifd *InputValueDefinitions) {
 }
 
 // OnInputFieldsDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnInputFieldsDefinitionLeave(ifd *InputValueDefinitions) {
+func (w *Walker) OnInputFieldsDefinitionLeave(ifd *InputValueDefinitions) {
 	if w.inputFieldsDefinitionEventHandlers == nil {
 		return
 	}
@@ -1153,7 +1153,7 @@ type InputObjectTypeExtensionEventHandlers struct {
 }
 
 // AddInputObjectTypeExtensionEnterEventHandler adds an event handler to be called when entering a InputObjectTypeExtension node.
-func (w *Strider) AddInputObjectTypeExtensionEnterEventHandler(handler InputObjectTypeExtensionEventHandler) {
+func (w *Walker) AddInputObjectTypeExtensionEnterEventHandler(handler InputObjectTypeExtensionEventHandler) {
 	if w.inputObjectTypeExtensionEventHandlers == nil {
 		w.inputObjectTypeExtensionEventHandlers = &InputObjectTypeExtensionEventHandlers{}
 	}
@@ -1161,7 +1161,7 @@ func (w *Strider) AddInputObjectTypeExtensionEnterEventHandler(handler InputObje
 }
 
 // AddInputObjectTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a InputObjectTypeExtension node.
-func (w *Strider) AddInputObjectTypeExtensionLeaveEventHandler(handler InputObjectTypeExtensionEventHandler) {
+func (w *Walker) AddInputObjectTypeExtensionLeaveEventHandler(handler InputObjectTypeExtensionEventHandler) {
 	if w.inputObjectTypeExtensionEventHandlers == nil {
 		w.inputObjectTypeExtensionEventHandlers = &InputObjectTypeExtensionEventHandlers{}
 	}
@@ -1169,7 +1169,7 @@ func (w *Strider) AddInputObjectTypeExtensionLeaveEventHandler(handler InputObje
 }
 
 // OnInputObjectTypeExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnInputObjectTypeExtensionEnter(iote *TypeExtension) {
+func (w *Walker) OnInputObjectTypeExtensionEnter(iote *TypeExtension) {
 	if w.inputObjectTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -1180,7 +1180,7 @@ func (w *Strider) OnInputObjectTypeExtensionEnter(iote *TypeExtension) {
 }
 
 // OnInputObjectTypeExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnInputObjectTypeExtensionLeave(iote *TypeExtension) {
+func (w *Walker) OnInputObjectTypeExtensionLeave(iote *TypeExtension) {
 	if w.inputObjectTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -1200,7 +1200,7 @@ type InputValueDefinitionEventHandlers struct {
 }
 
 // AddInputValueDefinitionEnterEventHandler adds an event handler to be called when entering a InputValueDefinition node.
-func (w *Strider) AddInputValueDefinitionEnterEventHandler(handler InputValueDefinitionEventHandler) {
+func (w *Walker) AddInputValueDefinitionEnterEventHandler(handler InputValueDefinitionEventHandler) {
 	if w.inputValueDefinitionEventHandlers == nil {
 		w.inputValueDefinitionEventHandlers = &InputValueDefinitionEventHandlers{}
 	}
@@ -1208,7 +1208,7 @@ func (w *Strider) AddInputValueDefinitionEnterEventHandler(handler InputValueDef
 }
 
 // AddInputValueDefinitionLeaveEventHandler adds an event handler to be called when leaving a InputValueDefinition node.
-func (w *Strider) AddInputValueDefinitionLeaveEventHandler(handler InputValueDefinitionEventHandler) {
+func (w *Walker) AddInputValueDefinitionLeaveEventHandler(handler InputValueDefinitionEventHandler) {
 	if w.inputValueDefinitionEventHandlers == nil {
 		w.inputValueDefinitionEventHandlers = &InputValueDefinitionEventHandlers{}
 	}
@@ -1216,7 +1216,7 @@ func (w *Strider) AddInputValueDefinitionLeaveEventHandler(handler InputValueDef
 }
 
 // OnInputValueDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnInputValueDefinitionEnter(ivd InputValueDefinition) {
+func (w *Walker) OnInputValueDefinitionEnter(ivd InputValueDefinition) {
 	if w.inputValueDefinitionEventHandlers == nil {
 		return
 	}
@@ -1227,7 +1227,7 @@ func (w *Strider) OnInputValueDefinitionEnter(ivd InputValueDefinition) {
 }
 
 // OnInputValueDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnInputValueDefinitionLeave(ivd InputValueDefinition) {
+func (w *Walker) OnInputValueDefinitionLeave(ivd InputValueDefinition) {
 	if w.inputValueDefinitionEventHandlers == nil {
 		return
 	}
@@ -1247,7 +1247,7 @@ type InterfaceTypeExtensionEventHandlers struct {
 }
 
 // AddInterfaceTypeExtensionEnterEventHandler adds an event handler to be called when entering a InterfaceTypeExtension node.
-func (w *Strider) AddInterfaceTypeExtensionEnterEventHandler(handler InterfaceTypeExtensionEventHandler) {
+func (w *Walker) AddInterfaceTypeExtensionEnterEventHandler(handler InterfaceTypeExtensionEventHandler) {
 	if w.interfaceTypeExtensionEventHandlers == nil {
 		w.interfaceTypeExtensionEventHandlers = &InterfaceTypeExtensionEventHandlers{}
 	}
@@ -1255,7 +1255,7 @@ func (w *Strider) AddInterfaceTypeExtensionEnterEventHandler(handler InterfaceTy
 }
 
 // AddInterfaceTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a InterfaceTypeExtension node.
-func (w *Strider) AddInterfaceTypeExtensionLeaveEventHandler(handler InterfaceTypeExtensionEventHandler) {
+func (w *Walker) AddInterfaceTypeExtensionLeaveEventHandler(handler InterfaceTypeExtensionEventHandler) {
 	if w.interfaceTypeExtensionEventHandlers == nil {
 		w.interfaceTypeExtensionEventHandlers = &InterfaceTypeExtensionEventHandlers{}
 	}
@@ -1263,7 +1263,7 @@ func (w *Strider) AddInterfaceTypeExtensionLeaveEventHandler(handler InterfaceTy
 }
 
 // OnInterfaceTypeExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnInterfaceTypeExtensionEnter(ite *TypeExtension) {
+func (w *Walker) OnInterfaceTypeExtensionEnter(ite *TypeExtension) {
 	if w.interfaceTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -1274,7 +1274,7 @@ func (w *Strider) OnInterfaceTypeExtensionEnter(ite *TypeExtension) {
 }
 
 // OnInterfaceTypeExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnInterfaceTypeExtensionLeave(ite *TypeExtension) {
+func (w *Walker) OnInterfaceTypeExtensionLeave(ite *TypeExtension) {
 	if w.interfaceTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -1294,7 +1294,7 @@ type ObjectTypeExtensionEventHandlers struct {
 }
 
 // AddObjectTypeExtensionEnterEventHandler adds an event handler to be called when entering a ObjectTypeExtension node.
-func (w *Strider) AddObjectTypeExtensionEnterEventHandler(handler ObjectTypeExtensionEventHandler) {
+func (w *Walker) AddObjectTypeExtensionEnterEventHandler(handler ObjectTypeExtensionEventHandler) {
 	if w.objectTypeExtensionEventHandlers == nil {
 		w.objectTypeExtensionEventHandlers = &ObjectTypeExtensionEventHandlers{}
 	}
@@ -1302,7 +1302,7 @@ func (w *Strider) AddObjectTypeExtensionEnterEventHandler(handler ObjectTypeExte
 }
 
 // AddObjectTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a ObjectTypeExtension node.
-func (w *Strider) AddObjectTypeExtensionLeaveEventHandler(handler ObjectTypeExtensionEventHandler) {
+func (w *Walker) AddObjectTypeExtensionLeaveEventHandler(handler ObjectTypeExtensionEventHandler) {
 	if w.objectTypeExtensionEventHandlers == nil {
 		w.objectTypeExtensionEventHandlers = &ObjectTypeExtensionEventHandlers{}
 	}
@@ -1310,7 +1310,7 @@ func (w *Strider) AddObjectTypeExtensionLeaveEventHandler(handler ObjectTypeExte
 }
 
 // OnObjectTypeExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnObjectTypeExtensionEnter(ote *TypeExtension) {
+func (w *Walker) OnObjectTypeExtensionEnter(ote *TypeExtension) {
 	if w.objectTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -1321,7 +1321,7 @@ func (w *Strider) OnObjectTypeExtensionEnter(ote *TypeExtension) {
 }
 
 // OnObjectTypeExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnObjectTypeExtensionLeave(ote *TypeExtension) {
+func (w *Walker) OnObjectTypeExtensionLeave(ote *TypeExtension) {
 	if w.objectTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -1341,7 +1341,7 @@ type OperationDefinitionEventHandlers struct {
 }
 
 // AddOperationDefinitionEnterEventHandler adds an event handler to be called when entering a OperationDefinition node.
-func (w *Strider) AddOperationDefinitionEnterEventHandler(handler OperationDefinitionEventHandler) {
+func (w *Walker) AddOperationDefinitionEnterEventHandler(handler OperationDefinitionEventHandler) {
 	if w.operationDefinitionEventHandlers == nil {
 		w.operationDefinitionEventHandlers = &OperationDefinitionEventHandlers{}
 	}
@@ -1349,7 +1349,7 @@ func (w *Strider) AddOperationDefinitionEnterEventHandler(handler OperationDefin
 }
 
 // AddOperationDefinitionLeaveEventHandler adds an event handler to be called when leaving a OperationDefinition node.
-func (w *Strider) AddOperationDefinitionLeaveEventHandler(handler OperationDefinitionEventHandler) {
+func (w *Walker) AddOperationDefinitionLeaveEventHandler(handler OperationDefinitionEventHandler) {
 	if w.operationDefinitionEventHandlers == nil {
 		w.operationDefinitionEventHandlers = &OperationDefinitionEventHandlers{}
 	}
@@ -1357,7 +1357,7 @@ func (w *Strider) AddOperationDefinitionLeaveEventHandler(handler OperationDefin
 }
 
 // OnOperationDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnOperationDefinitionEnter(od *ExecutableDefinition) {
+func (w *Walker) OnOperationDefinitionEnter(od *ExecutableDefinition) {
 	if w.operationDefinitionEventHandlers == nil {
 		return
 	}
@@ -1368,7 +1368,7 @@ func (w *Strider) OnOperationDefinitionEnter(od *ExecutableDefinition) {
 }
 
 // OnOperationDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnOperationDefinitionLeave(od *ExecutableDefinition) {
+func (w *Walker) OnOperationDefinitionLeave(od *ExecutableDefinition) {
 	if w.operationDefinitionEventHandlers == nil {
 		return
 	}
@@ -1388,7 +1388,7 @@ type OperationTypeDefinitionEventHandlers struct {
 }
 
 // AddOperationTypeDefinitionEnterEventHandler adds an event handler to be called when entering a OperationTypeDefinition node.
-func (w *Strider) AddOperationTypeDefinitionEnterEventHandler(handler OperationTypeDefinitionEventHandler) {
+func (w *Walker) AddOperationTypeDefinitionEnterEventHandler(handler OperationTypeDefinitionEventHandler) {
 	if w.operationTypeDefinitionEventHandlers == nil {
 		w.operationTypeDefinitionEventHandlers = &OperationTypeDefinitionEventHandlers{}
 	}
@@ -1396,7 +1396,7 @@ func (w *Strider) AddOperationTypeDefinitionEnterEventHandler(handler OperationT
 }
 
 // AddOperationTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving a OperationTypeDefinition node.
-func (w *Strider) AddOperationTypeDefinitionLeaveEventHandler(handler OperationTypeDefinitionEventHandler) {
+func (w *Walker) AddOperationTypeDefinitionLeaveEventHandler(handler OperationTypeDefinitionEventHandler) {
 	if w.operationTypeDefinitionEventHandlers == nil {
 		w.operationTypeDefinitionEventHandlers = &OperationTypeDefinitionEventHandlers{}
 	}
@@ -1404,7 +1404,7 @@ func (w *Strider) AddOperationTypeDefinitionLeaveEventHandler(handler OperationT
 }
 
 // OnOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnOperationTypeDefinitionEnter(otd OperationTypeDefinition) {
+func (w *Walker) OnOperationTypeDefinitionEnter(otd OperationTypeDefinition) {
 	if w.operationTypeDefinitionEventHandlers == nil {
 		return
 	}
@@ -1415,7 +1415,7 @@ func (w *Strider) OnOperationTypeDefinitionEnter(otd OperationTypeDefinition) {
 }
 
 // OnOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnOperationTypeDefinitionLeave(otd OperationTypeDefinition) {
+func (w *Walker) OnOperationTypeDefinitionLeave(otd OperationTypeDefinition) {
 	if w.operationTypeDefinitionEventHandlers == nil {
 		return
 	}
@@ -1435,7 +1435,7 @@ type RootOperationTypeDefinitionEventHandlers struct {
 }
 
 // AddRootOperationTypeDefinitionEnterEventHandler adds an event handler to be called when entering a RootOperationTypeDefinition node.
-func (w *Strider) AddRootOperationTypeDefinitionEnterEventHandler(handler RootOperationTypeDefinitionEventHandler) {
+func (w *Walker) AddRootOperationTypeDefinitionEnterEventHandler(handler RootOperationTypeDefinitionEventHandler) {
 	if w.rootOperationTypeDefinitionEventHandlers == nil {
 		w.rootOperationTypeDefinitionEventHandlers = &RootOperationTypeDefinitionEventHandlers{}
 	}
@@ -1443,7 +1443,7 @@ func (w *Strider) AddRootOperationTypeDefinitionEnterEventHandler(handler RootOp
 }
 
 // AddRootOperationTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving a RootOperationTypeDefinition node.
-func (w *Strider) AddRootOperationTypeDefinitionLeaveEventHandler(handler RootOperationTypeDefinitionEventHandler) {
+func (w *Walker) AddRootOperationTypeDefinitionLeaveEventHandler(handler RootOperationTypeDefinitionEventHandler) {
 	if w.rootOperationTypeDefinitionEventHandlers == nil {
 		w.rootOperationTypeDefinitionEventHandlers = &RootOperationTypeDefinitionEventHandlers{}
 	}
@@ -1451,7 +1451,7 @@ func (w *Strider) AddRootOperationTypeDefinitionLeaveEventHandler(handler RootOp
 }
 
 // OnRootOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnRootOperationTypeDefinitionEnter(rotd RootOperationTypeDefinition) {
+func (w *Walker) OnRootOperationTypeDefinitionEnter(rotd RootOperationTypeDefinition) {
 	if w.rootOperationTypeDefinitionEventHandlers == nil {
 		return
 	}
@@ -1462,7 +1462,7 @@ func (w *Strider) OnRootOperationTypeDefinitionEnter(rotd RootOperationTypeDefin
 }
 
 // OnRootOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnRootOperationTypeDefinitionLeave(rotd RootOperationTypeDefinition) {
+func (w *Walker) OnRootOperationTypeDefinitionLeave(rotd RootOperationTypeDefinition) {
 	if w.rootOperationTypeDefinitionEventHandlers == nil {
 		return
 	}
@@ -1482,7 +1482,7 @@ type ScalarTypeExtensionEventHandlers struct {
 }
 
 // AddScalarTypeExtensionEnterEventHandler adds an event handler to be called when entering a ScalarTypeExtension node.
-func (w *Strider) AddScalarTypeExtensionEnterEventHandler(handler ScalarTypeExtensionEventHandler) {
+func (w *Walker) AddScalarTypeExtensionEnterEventHandler(handler ScalarTypeExtensionEventHandler) {
 	if w.scalarTypeExtensionEventHandlers == nil {
 		w.scalarTypeExtensionEventHandlers = &ScalarTypeExtensionEventHandlers{}
 	}
@@ -1490,7 +1490,7 @@ func (w *Strider) AddScalarTypeExtensionEnterEventHandler(handler ScalarTypeExte
 }
 
 // AddScalarTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a ScalarTypeExtension node.
-func (w *Strider) AddScalarTypeExtensionLeaveEventHandler(handler ScalarTypeExtensionEventHandler) {
+func (w *Walker) AddScalarTypeExtensionLeaveEventHandler(handler ScalarTypeExtensionEventHandler) {
 	if w.scalarTypeExtensionEventHandlers == nil {
 		w.scalarTypeExtensionEventHandlers = &ScalarTypeExtensionEventHandlers{}
 	}
@@ -1498,7 +1498,7 @@ func (w *Strider) AddScalarTypeExtensionLeaveEventHandler(handler ScalarTypeExte
 }
 
 // OnScalarTypeExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnScalarTypeExtensionEnter(ste *TypeExtension) {
+func (w *Walker) OnScalarTypeExtensionEnter(ste *TypeExtension) {
 	if w.scalarTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -1509,7 +1509,7 @@ func (w *Strider) OnScalarTypeExtensionEnter(ste *TypeExtension) {
 }
 
 // OnScalarTypeExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnScalarTypeExtensionLeave(ste *TypeExtension) {
+func (w *Walker) OnScalarTypeExtensionLeave(ste *TypeExtension) {
 	if w.scalarTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -1529,7 +1529,7 @@ type SchemaDefinitionEventHandlers struct {
 }
 
 // AddSchemaDefinitionEnterEventHandler adds an event handler to be called when entering a SchemaDefinition node.
-func (w *Strider) AddSchemaDefinitionEnterEventHandler(handler SchemaDefinitionEventHandler) {
+func (w *Walker) AddSchemaDefinitionEnterEventHandler(handler SchemaDefinitionEventHandler) {
 	if w.schemaDefinitionEventHandlers == nil {
 		w.schemaDefinitionEventHandlers = &SchemaDefinitionEventHandlers{}
 	}
@@ -1537,7 +1537,7 @@ func (w *Strider) AddSchemaDefinitionEnterEventHandler(handler SchemaDefinitionE
 }
 
 // AddSchemaDefinitionLeaveEventHandler adds an event handler to be called when leaving a SchemaDefinition node.
-func (w *Strider) AddSchemaDefinitionLeaveEventHandler(handler SchemaDefinitionEventHandler) {
+func (w *Walker) AddSchemaDefinitionLeaveEventHandler(handler SchemaDefinitionEventHandler) {
 	if w.schemaDefinitionEventHandlers == nil {
 		w.schemaDefinitionEventHandlers = &SchemaDefinitionEventHandlers{}
 	}
@@ -1545,7 +1545,7 @@ func (w *Strider) AddSchemaDefinitionLeaveEventHandler(handler SchemaDefinitionE
 }
 
 // OnSchemaDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnSchemaDefinitionEnter(sd *SchemaDefinition) {
+func (w *Walker) OnSchemaDefinitionEnter(sd *SchemaDefinition) {
 	if w.schemaDefinitionEventHandlers == nil {
 		return
 	}
@@ -1556,7 +1556,7 @@ func (w *Strider) OnSchemaDefinitionEnter(sd *SchemaDefinition) {
 }
 
 // OnSchemaDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnSchemaDefinitionLeave(sd *SchemaDefinition) {
+func (w *Walker) OnSchemaDefinitionLeave(sd *SchemaDefinition) {
 	if w.schemaDefinitionEventHandlers == nil {
 		return
 	}
@@ -1576,7 +1576,7 @@ type SchemaExtensionEventHandlers struct {
 }
 
 // AddSchemaExtensionEnterEventHandler adds an event handler to be called when entering a SchemaExtension node.
-func (w *Strider) AddSchemaExtensionEnterEventHandler(handler SchemaExtensionEventHandler) {
+func (w *Walker) AddSchemaExtensionEnterEventHandler(handler SchemaExtensionEventHandler) {
 	if w.schemaExtensionEventHandlers == nil {
 		w.schemaExtensionEventHandlers = &SchemaExtensionEventHandlers{}
 	}
@@ -1584,7 +1584,7 @@ func (w *Strider) AddSchemaExtensionEnterEventHandler(handler SchemaExtensionEve
 }
 
 // AddSchemaExtensionLeaveEventHandler adds an event handler to be called when leaving a SchemaExtension node.
-func (w *Strider) AddSchemaExtensionLeaveEventHandler(handler SchemaExtensionEventHandler) {
+func (w *Walker) AddSchemaExtensionLeaveEventHandler(handler SchemaExtensionEventHandler) {
 	if w.schemaExtensionEventHandlers == nil {
 		w.schemaExtensionEventHandlers = &SchemaExtensionEventHandlers{}
 	}
@@ -1592,7 +1592,7 @@ func (w *Strider) AddSchemaExtensionLeaveEventHandler(handler SchemaExtensionEve
 }
 
 // OnSchemaExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnSchemaExtensionEnter(se *SchemaExtension) {
+func (w *Walker) OnSchemaExtensionEnter(se *SchemaExtension) {
 	if w.schemaExtensionEventHandlers == nil {
 		return
 	}
@@ -1603,7 +1603,7 @@ func (w *Strider) OnSchemaExtensionEnter(se *SchemaExtension) {
 }
 
 // OnSchemaExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnSchemaExtensionLeave(se *SchemaExtension) {
+func (w *Walker) OnSchemaExtensionLeave(se *SchemaExtension) {
 	if w.schemaExtensionEventHandlers == nil {
 		return
 	}
@@ -1623,7 +1623,7 @@ type SelectionEventHandlers struct {
 }
 
 // AddSelectionEnterEventHandler adds an event handler to be called when entering a Selection node.
-func (w *Strider) AddSelectionEnterEventHandler(handler SelectionEventHandler) {
+func (w *Walker) AddSelectionEnterEventHandler(handler SelectionEventHandler) {
 	if w.selectionEventHandlers == nil {
 		w.selectionEventHandlers = &SelectionEventHandlers{}
 	}
@@ -1631,7 +1631,7 @@ func (w *Strider) AddSelectionEnterEventHandler(handler SelectionEventHandler) {
 }
 
 // AddSelectionLeaveEventHandler adds an event handler to be called when leaving a Selection node.
-func (w *Strider) AddSelectionLeaveEventHandler(handler SelectionEventHandler) {
+func (w *Walker) AddSelectionLeaveEventHandler(handler SelectionEventHandler) {
 	if w.selectionEventHandlers == nil {
 		w.selectionEventHandlers = &SelectionEventHandlers{}
 	}
@@ -1639,7 +1639,7 @@ func (w *Strider) AddSelectionLeaveEventHandler(handler SelectionEventHandler) {
 }
 
 // OnSelectionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnSelectionEnter(s Selection) {
+func (w *Walker) OnSelectionEnter(s Selection) {
 	if w.selectionEventHandlers == nil {
 		return
 	}
@@ -1650,7 +1650,7 @@ func (w *Strider) OnSelectionEnter(s Selection) {
 }
 
 // OnSelectionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnSelectionLeave(s Selection) {
+func (w *Walker) OnSelectionLeave(s Selection) {
 	if w.selectionEventHandlers == nil {
 		return
 	}
@@ -1670,7 +1670,7 @@ type SelectionsEventHandlers struct {
 }
 
 // AddSelectionsEnterEventHandler adds an event handler to be called when entering a Selections node.
-func (w *Strider) AddSelectionsEnterEventHandler(handler SelectionsEventHandler) {
+func (w *Walker) AddSelectionsEnterEventHandler(handler SelectionsEventHandler) {
 	if w.selectionsEventHandlers == nil {
 		w.selectionsEventHandlers = &SelectionsEventHandlers{}
 	}
@@ -1678,7 +1678,7 @@ func (w *Strider) AddSelectionsEnterEventHandler(handler SelectionsEventHandler)
 }
 
 // AddSelectionsLeaveEventHandler adds an event handler to be called when leaving a Selections node.
-func (w *Strider) AddSelectionsLeaveEventHandler(handler SelectionsEventHandler) {
+func (w *Walker) AddSelectionsLeaveEventHandler(handler SelectionsEventHandler) {
 	if w.selectionsEventHandlers == nil {
 		w.selectionsEventHandlers = &SelectionsEventHandlers{}
 	}
@@ -1686,7 +1686,7 @@ func (w *Strider) AddSelectionsLeaveEventHandler(handler SelectionsEventHandler)
 }
 
 // OnSelectionsEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnSelectionsEnter(s *Selections) {
+func (w *Walker) OnSelectionsEnter(s *Selections) {
 	if w.selectionsEventHandlers == nil {
 		return
 	}
@@ -1697,7 +1697,7 @@ func (w *Strider) OnSelectionsEnter(s *Selections) {
 }
 
 // OnSelectionsLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnSelectionsLeave(s *Selections) {
+func (w *Walker) OnSelectionsLeave(s *Selections) {
 	if w.selectionsEventHandlers == nil {
 		return
 	}
@@ -1717,7 +1717,7 @@ type TypeEventHandlers struct {
 }
 
 // AddTypeEnterEventHandler adds an event handler to be called when entering a Type node.
-func (w *Strider) AddTypeEnterEventHandler(handler TypeEventHandler) {
+func (w *Walker) AddTypeEnterEventHandler(handler TypeEventHandler) {
 	if w.typeEventHandlers == nil {
 		w.typeEventHandlers = &TypeEventHandlers{}
 	}
@@ -1725,7 +1725,7 @@ func (w *Strider) AddTypeEnterEventHandler(handler TypeEventHandler) {
 }
 
 // AddTypeLeaveEventHandler adds an event handler to be called when leaving a Type node.
-func (w *Strider) AddTypeLeaveEventHandler(handler TypeEventHandler) {
+func (w *Walker) AddTypeLeaveEventHandler(handler TypeEventHandler) {
 	if w.typeEventHandlers == nil {
 		w.typeEventHandlers = &TypeEventHandlers{}
 	}
@@ -1733,7 +1733,7 @@ func (w *Strider) AddTypeLeaveEventHandler(handler TypeEventHandler) {
 }
 
 // OnTypeEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeEnter(t Type) {
+func (w *Walker) OnTypeEnter(t Type) {
 	if w.typeEventHandlers == nil {
 		return
 	}
@@ -1744,7 +1744,7 @@ func (w *Strider) OnTypeEnter(t Type) {
 }
 
 // OnTypeLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeLeave(t Type) {
+func (w *Walker) OnTypeLeave(t Type) {
 	if w.typeEventHandlers == nil {
 		return
 	}
@@ -1764,7 +1764,7 @@ type TypeDefinitionEventHandlers struct {
 }
 
 // AddTypeDefinitionEnterEventHandler adds an event handler to be called when entering a TypeDefinition node.
-func (w *Strider) AddTypeDefinitionEnterEventHandler(handler TypeDefinitionEventHandler) {
+func (w *Walker) AddTypeDefinitionEnterEventHandler(handler TypeDefinitionEventHandler) {
 	if w.typeDefinitionEventHandlers == nil {
 		w.typeDefinitionEventHandlers = &TypeDefinitionEventHandlers{}
 	}
@@ -1772,7 +1772,7 @@ func (w *Strider) AddTypeDefinitionEnterEventHandler(handler TypeDefinitionEvent
 }
 
 // AddTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving a TypeDefinition node.
-func (w *Strider) AddTypeDefinitionLeaveEventHandler(handler TypeDefinitionEventHandler) {
+func (w *Walker) AddTypeDefinitionLeaveEventHandler(handler TypeDefinitionEventHandler) {
 	if w.typeDefinitionEventHandlers == nil {
 		w.typeDefinitionEventHandlers = &TypeDefinitionEventHandlers{}
 	}
@@ -1780,7 +1780,7 @@ func (w *Strider) AddTypeDefinitionLeaveEventHandler(handler TypeDefinitionEvent
 }
 
 // OnTypeDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionEnter(td *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionEnter(td *TypeDefinition) {
 	if w.typeDefinitionEventHandlers == nil {
 		return
 	}
@@ -1791,7 +1791,7 @@ func (w *Strider) OnTypeDefinitionEnter(td *TypeDefinition) {
 }
 
 // OnTypeDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionLeave(td *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionLeave(td *TypeDefinition) {
 	if w.typeDefinitionEventHandlers == nil {
 		return
 	}
@@ -1811,7 +1811,7 @@ type TypeDefinitionEnumEventHandlers struct {
 }
 
 // AddTypeDefinitionEnumEnterEventHandler adds an event handler to be called when entering a TypeDefinitionEnum node.
-func (w *Strider) AddTypeDefinitionEnumEnterEventHandler(handler TypeDefinitionEnumEventHandler) {
+func (w *Walker) AddTypeDefinitionEnumEnterEventHandler(handler TypeDefinitionEnumEventHandler) {
 	if w.typeDefinitionEnumEventHandlers == nil {
 		w.typeDefinitionEnumEventHandlers = &TypeDefinitionEnumEventHandlers{}
 	}
@@ -1819,7 +1819,7 @@ func (w *Strider) AddTypeDefinitionEnumEnterEventHandler(handler TypeDefinitionE
 }
 
 // AddTypeDefinitionEnumLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionEnum node.
-func (w *Strider) AddTypeDefinitionEnumLeaveEventHandler(handler TypeDefinitionEnumEventHandler) {
+func (w *Walker) AddTypeDefinitionEnumLeaveEventHandler(handler TypeDefinitionEnumEventHandler) {
 	if w.typeDefinitionEnumEventHandlers == nil {
 		w.typeDefinitionEnumEventHandlers = &TypeDefinitionEnumEventHandlers{}
 	}
@@ -1827,7 +1827,7 @@ func (w *Strider) AddTypeDefinitionEnumLeaveEventHandler(handler TypeDefinitionE
 }
 
 // OnTypeDefinitionEnumEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionEnumEnter(tde *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionEnumEnter(tde *TypeDefinition) {
 	if w.typeDefinitionEnumEventHandlers == nil {
 		return
 	}
@@ -1838,7 +1838,7 @@ func (w *Strider) OnTypeDefinitionEnumEnter(tde *TypeDefinition) {
 }
 
 // OnTypeDefinitionEnumLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionEnumLeave(tde *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionEnumLeave(tde *TypeDefinition) {
 	if w.typeDefinitionEnumEventHandlers == nil {
 		return
 	}
@@ -1858,7 +1858,7 @@ type TypeDefinitionInputObjectEventHandlers struct {
 }
 
 // AddTypeDefinitionInputObjectEnterEventHandler adds an event handler to be called when entering a TypeDefinitionInputObject node.
-func (w *Strider) AddTypeDefinitionInputObjectEnterEventHandler(handler TypeDefinitionInputObjectEventHandler) {
+func (w *Walker) AddTypeDefinitionInputObjectEnterEventHandler(handler TypeDefinitionInputObjectEventHandler) {
 	if w.typeDefinitionInputObjectEventHandlers == nil {
 		w.typeDefinitionInputObjectEventHandlers = &TypeDefinitionInputObjectEventHandlers{}
 	}
@@ -1866,7 +1866,7 @@ func (w *Strider) AddTypeDefinitionInputObjectEnterEventHandler(handler TypeDefi
 }
 
 // AddTypeDefinitionInputObjectLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionInputObject node.
-func (w *Strider) AddTypeDefinitionInputObjectLeaveEventHandler(handler TypeDefinitionInputObjectEventHandler) {
+func (w *Walker) AddTypeDefinitionInputObjectLeaveEventHandler(handler TypeDefinitionInputObjectEventHandler) {
 	if w.typeDefinitionInputObjectEventHandlers == nil {
 		w.typeDefinitionInputObjectEventHandlers = &TypeDefinitionInputObjectEventHandlers{}
 	}
@@ -1874,7 +1874,7 @@ func (w *Strider) AddTypeDefinitionInputObjectLeaveEventHandler(handler TypeDefi
 }
 
 // OnTypeDefinitionInputObjectEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionInputObjectEnter(tdio *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionInputObjectEnter(tdio *TypeDefinition) {
 	if w.typeDefinitionInputObjectEventHandlers == nil {
 		return
 	}
@@ -1885,7 +1885,7 @@ func (w *Strider) OnTypeDefinitionInputObjectEnter(tdio *TypeDefinition) {
 }
 
 // OnTypeDefinitionInputObjectLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionInputObjectLeave(tdio *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionInputObjectLeave(tdio *TypeDefinition) {
 	if w.typeDefinitionInputObjectEventHandlers == nil {
 		return
 	}
@@ -1905,7 +1905,7 @@ type TypeDefinitionInterfaceEventHandlers struct {
 }
 
 // AddTypeDefinitionInterfaceEnterEventHandler adds an event handler to be called when entering a TypeDefinitionInterface node.
-func (w *Strider) AddTypeDefinitionInterfaceEnterEventHandler(handler TypeDefinitionInterfaceEventHandler) {
+func (w *Walker) AddTypeDefinitionInterfaceEnterEventHandler(handler TypeDefinitionInterfaceEventHandler) {
 	if w.typeDefinitionInterfaceEventHandlers == nil {
 		w.typeDefinitionInterfaceEventHandlers = &TypeDefinitionInterfaceEventHandlers{}
 	}
@@ -1913,7 +1913,7 @@ func (w *Strider) AddTypeDefinitionInterfaceEnterEventHandler(handler TypeDefini
 }
 
 // AddTypeDefinitionInterfaceLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionInterface node.
-func (w *Strider) AddTypeDefinitionInterfaceLeaveEventHandler(handler TypeDefinitionInterfaceEventHandler) {
+func (w *Walker) AddTypeDefinitionInterfaceLeaveEventHandler(handler TypeDefinitionInterfaceEventHandler) {
 	if w.typeDefinitionInterfaceEventHandlers == nil {
 		w.typeDefinitionInterfaceEventHandlers = &TypeDefinitionInterfaceEventHandlers{}
 	}
@@ -1921,7 +1921,7 @@ func (w *Strider) AddTypeDefinitionInterfaceLeaveEventHandler(handler TypeDefini
 }
 
 // OnTypeDefinitionInterfaceEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionInterfaceEnter(tdi *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionInterfaceEnter(tdi *TypeDefinition) {
 	if w.typeDefinitionInterfaceEventHandlers == nil {
 		return
 	}
@@ -1932,7 +1932,7 @@ func (w *Strider) OnTypeDefinitionInterfaceEnter(tdi *TypeDefinition) {
 }
 
 // OnTypeDefinitionInterfaceLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionInterfaceLeave(tdi *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionInterfaceLeave(tdi *TypeDefinition) {
 	if w.typeDefinitionInterfaceEventHandlers == nil {
 		return
 	}
@@ -1952,7 +1952,7 @@ type TypeDefinitionObjectEventHandlers struct {
 }
 
 // AddTypeDefinitionObjectEnterEventHandler adds an event handler to be called when entering a TypeDefinitionObject node.
-func (w *Strider) AddTypeDefinitionObjectEnterEventHandler(handler TypeDefinitionObjectEventHandler) {
+func (w *Walker) AddTypeDefinitionObjectEnterEventHandler(handler TypeDefinitionObjectEventHandler) {
 	if w.typeDefinitionObjectEventHandlers == nil {
 		w.typeDefinitionObjectEventHandlers = &TypeDefinitionObjectEventHandlers{}
 	}
@@ -1960,7 +1960,7 @@ func (w *Strider) AddTypeDefinitionObjectEnterEventHandler(handler TypeDefinitio
 }
 
 // AddTypeDefinitionObjectLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionObject node.
-func (w *Strider) AddTypeDefinitionObjectLeaveEventHandler(handler TypeDefinitionObjectEventHandler) {
+func (w *Walker) AddTypeDefinitionObjectLeaveEventHandler(handler TypeDefinitionObjectEventHandler) {
 	if w.typeDefinitionObjectEventHandlers == nil {
 		w.typeDefinitionObjectEventHandlers = &TypeDefinitionObjectEventHandlers{}
 	}
@@ -1968,7 +1968,7 @@ func (w *Strider) AddTypeDefinitionObjectLeaveEventHandler(handler TypeDefinitio
 }
 
 // OnTypeDefinitionObjectEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionObjectEnter(tdo *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionObjectEnter(tdo *TypeDefinition) {
 	if w.typeDefinitionObjectEventHandlers == nil {
 		return
 	}
@@ -1979,7 +1979,7 @@ func (w *Strider) OnTypeDefinitionObjectEnter(tdo *TypeDefinition) {
 }
 
 // OnTypeDefinitionObjectLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionObjectLeave(tdo *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionObjectLeave(tdo *TypeDefinition) {
 	if w.typeDefinitionObjectEventHandlers == nil {
 		return
 	}
@@ -1999,7 +1999,7 @@ type TypeDefinitionScalarEventHandlers struct {
 }
 
 // AddTypeDefinitionScalarEnterEventHandler adds an event handler to be called when entering a TypeDefinitionScalar node.
-func (w *Strider) AddTypeDefinitionScalarEnterEventHandler(handler TypeDefinitionScalarEventHandler) {
+func (w *Walker) AddTypeDefinitionScalarEnterEventHandler(handler TypeDefinitionScalarEventHandler) {
 	if w.typeDefinitionScalarEventHandlers == nil {
 		w.typeDefinitionScalarEventHandlers = &TypeDefinitionScalarEventHandlers{}
 	}
@@ -2007,7 +2007,7 @@ func (w *Strider) AddTypeDefinitionScalarEnterEventHandler(handler TypeDefinitio
 }
 
 // AddTypeDefinitionScalarLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionScalar node.
-func (w *Strider) AddTypeDefinitionScalarLeaveEventHandler(handler TypeDefinitionScalarEventHandler) {
+func (w *Walker) AddTypeDefinitionScalarLeaveEventHandler(handler TypeDefinitionScalarEventHandler) {
 	if w.typeDefinitionScalarEventHandlers == nil {
 		w.typeDefinitionScalarEventHandlers = &TypeDefinitionScalarEventHandlers{}
 	}
@@ -2015,7 +2015,7 @@ func (w *Strider) AddTypeDefinitionScalarLeaveEventHandler(handler TypeDefinitio
 }
 
 // OnTypeDefinitionScalarEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionScalarEnter(tds *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionScalarEnter(tds *TypeDefinition) {
 	if w.typeDefinitionScalarEventHandlers == nil {
 		return
 	}
@@ -2026,7 +2026,7 @@ func (w *Strider) OnTypeDefinitionScalarEnter(tds *TypeDefinition) {
 }
 
 // OnTypeDefinitionScalarLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionScalarLeave(tds *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionScalarLeave(tds *TypeDefinition) {
 	if w.typeDefinitionScalarEventHandlers == nil {
 		return
 	}
@@ -2046,7 +2046,7 @@ type TypeDefinitionUnionEventHandlers struct {
 }
 
 // AddTypeDefinitionUnionEnterEventHandler adds an event handler to be called when entering a TypeDefinitionUnion node.
-func (w *Strider) AddTypeDefinitionUnionEnterEventHandler(handler TypeDefinitionUnionEventHandler) {
+func (w *Walker) AddTypeDefinitionUnionEnterEventHandler(handler TypeDefinitionUnionEventHandler) {
 	if w.typeDefinitionUnionEventHandlers == nil {
 		w.typeDefinitionUnionEventHandlers = &TypeDefinitionUnionEventHandlers{}
 	}
@@ -2054,7 +2054,7 @@ func (w *Strider) AddTypeDefinitionUnionEnterEventHandler(handler TypeDefinition
 }
 
 // AddTypeDefinitionUnionLeaveEventHandler adds an event handler to be called when leaving a TypeDefinitionUnion node.
-func (w *Strider) AddTypeDefinitionUnionLeaveEventHandler(handler TypeDefinitionUnionEventHandler) {
+func (w *Walker) AddTypeDefinitionUnionLeaveEventHandler(handler TypeDefinitionUnionEventHandler) {
 	if w.typeDefinitionUnionEventHandlers == nil {
 		w.typeDefinitionUnionEventHandlers = &TypeDefinitionUnionEventHandlers{}
 	}
@@ -2062,7 +2062,7 @@ func (w *Strider) AddTypeDefinitionUnionLeaveEventHandler(handler TypeDefinition
 }
 
 // OnTypeDefinitionUnionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionUnionEnter(tdu *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionUnionEnter(tdu *TypeDefinition) {
 	if w.typeDefinitionUnionEventHandlers == nil {
 		return
 	}
@@ -2073,7 +2073,7 @@ func (w *Strider) OnTypeDefinitionUnionEnter(tdu *TypeDefinition) {
 }
 
 // OnTypeDefinitionUnionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeDefinitionUnionLeave(tdu *TypeDefinition) {
+func (w *Walker) OnTypeDefinitionUnionLeave(tdu *TypeDefinition) {
 	if w.typeDefinitionUnionEventHandlers == nil {
 		return
 	}
@@ -2093,7 +2093,7 @@ type TypeExtensionEventHandlers struct {
 }
 
 // AddTypeExtensionEnterEventHandler adds an event handler to be called when entering a TypeExtension node.
-func (w *Strider) AddTypeExtensionEnterEventHandler(handler TypeExtensionEventHandler) {
+func (w *Walker) AddTypeExtensionEnterEventHandler(handler TypeExtensionEventHandler) {
 	if w.typeExtensionEventHandlers == nil {
 		w.typeExtensionEventHandlers = &TypeExtensionEventHandlers{}
 	}
@@ -2101,7 +2101,7 @@ func (w *Strider) AddTypeExtensionEnterEventHandler(handler TypeExtensionEventHa
 }
 
 // AddTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a TypeExtension node.
-func (w *Strider) AddTypeExtensionLeaveEventHandler(handler TypeExtensionEventHandler) {
+func (w *Walker) AddTypeExtensionLeaveEventHandler(handler TypeExtensionEventHandler) {
 	if w.typeExtensionEventHandlers == nil {
 		w.typeExtensionEventHandlers = &TypeExtensionEventHandlers{}
 	}
@@ -2109,7 +2109,7 @@ func (w *Strider) AddTypeExtensionLeaveEventHandler(handler TypeExtensionEventHa
 }
 
 // OnTypeExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeExtensionEnter(te *TypeExtension) {
+func (w *Walker) OnTypeExtensionEnter(te *TypeExtension) {
 	if w.typeExtensionEventHandlers == nil {
 		return
 	}
@@ -2120,7 +2120,7 @@ func (w *Strider) OnTypeExtensionEnter(te *TypeExtension) {
 }
 
 // OnTypeExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeExtensionLeave(te *TypeExtension) {
+func (w *Walker) OnTypeExtensionLeave(te *TypeExtension) {
 	if w.typeExtensionEventHandlers == nil {
 		return
 	}
@@ -2140,7 +2140,7 @@ type TypeSystemDefinitionEventHandlers struct {
 }
 
 // AddTypeSystemDefinitionEnterEventHandler adds an event handler to be called when entering a TypeSystemDefinition node.
-func (w *Strider) AddTypeSystemDefinitionEnterEventHandler(handler TypeSystemDefinitionEventHandler) {
+func (w *Walker) AddTypeSystemDefinitionEnterEventHandler(handler TypeSystemDefinitionEventHandler) {
 	if w.typeSystemDefinitionEventHandlers == nil {
 		w.typeSystemDefinitionEventHandlers = &TypeSystemDefinitionEventHandlers{}
 	}
@@ -2148,7 +2148,7 @@ func (w *Strider) AddTypeSystemDefinitionEnterEventHandler(handler TypeSystemDef
 }
 
 // AddTypeSystemDefinitionLeaveEventHandler adds an event handler to be called when leaving a TypeSystemDefinition node.
-func (w *Strider) AddTypeSystemDefinitionLeaveEventHandler(handler TypeSystemDefinitionEventHandler) {
+func (w *Walker) AddTypeSystemDefinitionLeaveEventHandler(handler TypeSystemDefinitionEventHandler) {
 	if w.typeSystemDefinitionEventHandlers == nil {
 		w.typeSystemDefinitionEventHandlers = &TypeSystemDefinitionEventHandlers{}
 	}
@@ -2156,7 +2156,7 @@ func (w *Strider) AddTypeSystemDefinitionLeaveEventHandler(handler TypeSystemDef
 }
 
 // OnTypeSystemDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeSystemDefinitionEnter(tsd *TypeSystemDefinition) {
+func (w *Walker) OnTypeSystemDefinitionEnter(tsd *TypeSystemDefinition) {
 	if w.typeSystemDefinitionEventHandlers == nil {
 		return
 	}
@@ -2167,7 +2167,7 @@ func (w *Strider) OnTypeSystemDefinitionEnter(tsd *TypeSystemDefinition) {
 }
 
 // OnTypeSystemDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeSystemDefinitionLeave(tsd *TypeSystemDefinition) {
+func (w *Walker) OnTypeSystemDefinitionLeave(tsd *TypeSystemDefinition) {
 	if w.typeSystemDefinitionEventHandlers == nil {
 		return
 	}
@@ -2187,7 +2187,7 @@ type TypeSystemExtensionEventHandlers struct {
 }
 
 // AddTypeSystemExtensionEnterEventHandler adds an event handler to be called when entering a TypeSystemExtension node.
-func (w *Strider) AddTypeSystemExtensionEnterEventHandler(handler TypeSystemExtensionEventHandler) {
+func (w *Walker) AddTypeSystemExtensionEnterEventHandler(handler TypeSystemExtensionEventHandler) {
 	if w.typeSystemExtensionEventHandlers == nil {
 		w.typeSystemExtensionEventHandlers = &TypeSystemExtensionEventHandlers{}
 	}
@@ -2195,7 +2195,7 @@ func (w *Strider) AddTypeSystemExtensionEnterEventHandler(handler TypeSystemExte
 }
 
 // AddTypeSystemExtensionLeaveEventHandler adds an event handler to be called when leaving a TypeSystemExtension node.
-func (w *Strider) AddTypeSystemExtensionLeaveEventHandler(handler TypeSystemExtensionEventHandler) {
+func (w *Walker) AddTypeSystemExtensionLeaveEventHandler(handler TypeSystemExtensionEventHandler) {
 	if w.typeSystemExtensionEventHandlers == nil {
 		w.typeSystemExtensionEventHandlers = &TypeSystemExtensionEventHandlers{}
 	}
@@ -2203,7 +2203,7 @@ func (w *Strider) AddTypeSystemExtensionLeaveEventHandler(handler TypeSystemExte
 }
 
 // OnTypeSystemExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnTypeSystemExtensionEnter(tse *TypeSystemExtension) {
+func (w *Walker) OnTypeSystemExtensionEnter(tse *TypeSystemExtension) {
 	if w.typeSystemExtensionEventHandlers == nil {
 		return
 	}
@@ -2214,7 +2214,7 @@ func (w *Strider) OnTypeSystemExtensionEnter(tse *TypeSystemExtension) {
 }
 
 // OnTypeSystemExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnTypeSystemExtensionLeave(tse *TypeSystemExtension) {
+func (w *Walker) OnTypeSystemExtensionLeave(tse *TypeSystemExtension) {
 	if w.typeSystemExtensionEventHandlers == nil {
 		return
 	}
@@ -2234,7 +2234,7 @@ type UnionMemberTypesEventHandlers struct {
 }
 
 // AddUnionMemberTypesEnterEventHandler adds an event handler to be called when entering a UnionMemberTypes node.
-func (w *Strider) AddUnionMemberTypesEnterEventHandler(handler UnionMemberTypesEventHandler) {
+func (w *Walker) AddUnionMemberTypesEnterEventHandler(handler UnionMemberTypesEventHandler) {
 	if w.unionMemberTypesEventHandlers == nil {
 		w.unionMemberTypesEventHandlers = &UnionMemberTypesEventHandlers{}
 	}
@@ -2242,7 +2242,7 @@ func (w *Strider) AddUnionMemberTypesEnterEventHandler(handler UnionMemberTypesE
 }
 
 // AddUnionMemberTypesLeaveEventHandler adds an event handler to be called when leaving a UnionMemberTypes node.
-func (w *Strider) AddUnionMemberTypesLeaveEventHandler(handler UnionMemberTypesEventHandler) {
+func (w *Walker) AddUnionMemberTypesLeaveEventHandler(handler UnionMemberTypesEventHandler) {
 	if w.unionMemberTypesEventHandlers == nil {
 		w.unionMemberTypesEventHandlers = &UnionMemberTypesEventHandlers{}
 	}
@@ -2250,7 +2250,7 @@ func (w *Strider) AddUnionMemberTypesLeaveEventHandler(handler UnionMemberTypesE
 }
 
 // OnUnionMemberTypesEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnUnionMemberTypesEnter(umt *Types) {
+func (w *Walker) OnUnionMemberTypesEnter(umt *Types) {
 	if w.unionMemberTypesEventHandlers == nil {
 		return
 	}
@@ -2261,7 +2261,7 @@ func (w *Strider) OnUnionMemberTypesEnter(umt *Types) {
 }
 
 // OnUnionMemberTypesLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnUnionMemberTypesLeave(umt *Types) {
+func (w *Walker) OnUnionMemberTypesLeave(umt *Types) {
 	if w.unionMemberTypesEventHandlers == nil {
 		return
 	}
@@ -2281,7 +2281,7 @@ type UnionTypeExtensionEventHandlers struct {
 }
 
 // AddUnionTypeExtensionEnterEventHandler adds an event handler to be called when entering a UnionTypeExtension node.
-func (w *Strider) AddUnionTypeExtensionEnterEventHandler(handler UnionTypeExtensionEventHandler) {
+func (w *Walker) AddUnionTypeExtensionEnterEventHandler(handler UnionTypeExtensionEventHandler) {
 	if w.unionTypeExtensionEventHandlers == nil {
 		w.unionTypeExtensionEventHandlers = &UnionTypeExtensionEventHandlers{}
 	}
@@ -2289,7 +2289,7 @@ func (w *Strider) AddUnionTypeExtensionEnterEventHandler(handler UnionTypeExtens
 }
 
 // AddUnionTypeExtensionLeaveEventHandler adds an event handler to be called when leaving a UnionTypeExtension node.
-func (w *Strider) AddUnionTypeExtensionLeaveEventHandler(handler UnionTypeExtensionEventHandler) {
+func (w *Walker) AddUnionTypeExtensionLeaveEventHandler(handler UnionTypeExtensionEventHandler) {
 	if w.unionTypeExtensionEventHandlers == nil {
 		w.unionTypeExtensionEventHandlers = &UnionTypeExtensionEventHandlers{}
 	}
@@ -2297,7 +2297,7 @@ func (w *Strider) AddUnionTypeExtensionLeaveEventHandler(handler UnionTypeExtens
 }
 
 // OnUnionTypeExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnUnionTypeExtensionEnter(ute *TypeExtension) {
+func (w *Walker) OnUnionTypeExtensionEnter(ute *TypeExtension) {
 	if w.unionTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -2308,7 +2308,7 @@ func (w *Strider) OnUnionTypeExtensionEnter(ute *TypeExtension) {
 }
 
 // OnUnionTypeExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnUnionTypeExtensionLeave(ute *TypeExtension) {
+func (w *Walker) OnUnionTypeExtensionLeave(ute *TypeExtension) {
 	if w.unionTypeExtensionEventHandlers == nil {
 		return
 	}
@@ -2328,7 +2328,7 @@ type ValueEventHandlers struct {
 }
 
 // AddValueEnterEventHandler adds an event handler to be called when entering a Value node.
-func (w *Strider) AddValueEnterEventHandler(handler ValueEventHandler) {
+func (w *Walker) AddValueEnterEventHandler(handler ValueEventHandler) {
 	if w.valueEventHandlers == nil {
 		w.valueEventHandlers = &ValueEventHandlers{}
 	}
@@ -2336,7 +2336,7 @@ func (w *Strider) AddValueEnterEventHandler(handler ValueEventHandler) {
 }
 
 // AddValueLeaveEventHandler adds an event handler to be called when leaving a Value node.
-func (w *Strider) AddValueLeaveEventHandler(handler ValueEventHandler) {
+func (w *Walker) AddValueLeaveEventHandler(handler ValueEventHandler) {
 	if w.valueEventHandlers == nil {
 		w.valueEventHandlers = &ValueEventHandlers{}
 	}
@@ -2344,7 +2344,7 @@ func (w *Strider) AddValueLeaveEventHandler(handler ValueEventHandler) {
 }
 
 // OnValueEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnValueEnter(v Value) {
+func (w *Walker) OnValueEnter(v Value) {
 	if w.valueEventHandlers == nil {
 		return
 	}
@@ -2355,7 +2355,7 @@ func (w *Strider) OnValueEnter(v Value) {
 }
 
 // OnValueLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnValueLeave(v Value) {
+func (w *Walker) OnValueLeave(v Value) {
 	if w.valueEventHandlers == nil {
 		return
 	}
@@ -2375,7 +2375,7 @@ type VariableDefinitionEventHandlers struct {
 }
 
 // AddVariableDefinitionEnterEventHandler adds an event handler to be called when entering a VariableDefinition node.
-func (w *Strider) AddVariableDefinitionEnterEventHandler(handler VariableDefinitionEventHandler) {
+func (w *Walker) AddVariableDefinitionEnterEventHandler(handler VariableDefinitionEventHandler) {
 	if w.variableDefinitionEventHandlers == nil {
 		w.variableDefinitionEventHandlers = &VariableDefinitionEventHandlers{}
 	}
@@ -2383,7 +2383,7 @@ func (w *Strider) AddVariableDefinitionEnterEventHandler(handler VariableDefinit
 }
 
 // AddVariableDefinitionLeaveEventHandler adds an event handler to be called when leaving a VariableDefinition node.
-func (w *Strider) AddVariableDefinitionLeaveEventHandler(handler VariableDefinitionEventHandler) {
+func (w *Walker) AddVariableDefinitionLeaveEventHandler(handler VariableDefinitionEventHandler) {
 	if w.variableDefinitionEventHandlers == nil {
 		w.variableDefinitionEventHandlers = &VariableDefinitionEventHandlers{}
 	}
@@ -2391,7 +2391,7 @@ func (w *Strider) AddVariableDefinitionLeaveEventHandler(handler VariableDefinit
 }
 
 // OnVariableDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnVariableDefinitionEnter(vd VariableDefinition) {
+func (w *Walker) OnVariableDefinitionEnter(vd VariableDefinition) {
 	if w.variableDefinitionEventHandlers == nil {
 		return
 	}
@@ -2402,7 +2402,7 @@ func (w *Strider) OnVariableDefinitionEnter(vd VariableDefinition) {
 }
 
 // OnVariableDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnVariableDefinitionLeave(vd VariableDefinition) {
+func (w *Walker) OnVariableDefinitionLeave(vd VariableDefinition) {
 	if w.variableDefinitionEventHandlers == nil {
 		return
 	}
@@ -2422,7 +2422,7 @@ type VariableDefinitionsEventHandlers struct {
 }
 
 // AddVariableDefinitionsEnterEventHandler adds an event handler to be called when entering a VariableDefinitions node.
-func (w *Strider) AddVariableDefinitionsEnterEventHandler(handler VariableDefinitionsEventHandler) {
+func (w *Walker) AddVariableDefinitionsEnterEventHandler(handler VariableDefinitionsEventHandler) {
 	if w.variableDefinitionsEventHandlers == nil {
 		w.variableDefinitionsEventHandlers = &VariableDefinitionsEventHandlers{}
 	}
@@ -2430,7 +2430,7 @@ func (w *Strider) AddVariableDefinitionsEnterEventHandler(handler VariableDefini
 }
 
 // AddVariableDefinitionsLeaveEventHandler adds an event handler to be called when leaving a VariableDefinitions node.
-func (w *Strider) AddVariableDefinitionsLeaveEventHandler(handler VariableDefinitionsEventHandler) {
+func (w *Walker) AddVariableDefinitionsLeaveEventHandler(handler VariableDefinitionsEventHandler) {
 	if w.variableDefinitionsEventHandlers == nil {
 		w.variableDefinitionsEventHandlers = &VariableDefinitionsEventHandlers{}
 	}
@@ -2438,7 +2438,7 @@ func (w *Strider) AddVariableDefinitionsLeaveEventHandler(handler VariableDefini
 }
 
 // OnVariableDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Strider) OnVariableDefinitionsEnter(vd *VariableDefinitions) {
+func (w *Walker) OnVariableDefinitionsEnter(vd *VariableDefinitions) {
 	if w.variableDefinitionsEventHandlers == nil {
 		return
 	}
@@ -2449,7 +2449,7 @@ func (w *Strider) OnVariableDefinitionsEnter(vd *VariableDefinitions) {
 }
 
 // OnVariableDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Strider) OnVariableDefinitionsLeave(vd *VariableDefinitions) {
+func (w *Walker) OnVariableDefinitionsLeave(vd *VariableDefinitions) {
 	if w.variableDefinitionsEventHandlers == nil {
 		return
 	}

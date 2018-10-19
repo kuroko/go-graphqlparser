@@ -1,3 +1,3 @@
-package ast
+package graphql
 
 type Schema struct{}

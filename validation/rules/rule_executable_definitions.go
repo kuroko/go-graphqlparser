@@ -1,14 +1,15 @@
-package validation
+package rules
 
 import (
 	"errors"
 	"fmt"
 
 	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/validation"
 )
 
 // executableDefinitions ...
-func executableDefinitions(vctx *ast.ValidationContext, walker *ast.Walker) {
+func executableDefinitions(vctx *validation.Context, walker *ast.Walker) {
 	walker.AddDefinitionEnterEventHandler(func(def ast.Definition) {
 		if def.Kind != ast.DefinitionKindExecutable {
 			vctx.Errors = vctx.Errors.Add(errors.New(
