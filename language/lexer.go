@@ -6,8 +6,6 @@ import (
 	"math"
 	"strings"
 	"unicode/utf8"
-
-	"github.com/bucketd/go-graphqlparser/token"
 )
 
 const (
@@ -54,10 +52,10 @@ const (
 // Token represents a small, easily categorisable data structure that is fed to the parser to
 // produce the abstract syntax tree (AST).
 type Token struct {
-	Type     token.Type // The token type.
-	Literal  string     // The literal value consumed.
-	Position int        // The starting position, in runes, of this token in the input.
-	Line     int        // The line number at the start of this item.
+	Kind     TokenKind // The token type.
+	Literal  string    // The literal value consumed.
+	Position int       // The starting position, in runes, of this token in the input.
+	Line     int       // The line number at the start of this item.
 }
 
 // Lexer holds the state of a state machine for lexically analysing GraphQL queries.
@@ -113,14 +111,14 @@ func (l *Lexer) Scan() Token {
 
 	case r == eof:
 		return Token{
-			Type:     token.EOF,
+			Kind:     TokenKindEOF,
 			Position: l.lpos + 1,
 			Line:     l.line,
 		}
 
 	default:
 		return Token{
-			Type:     token.Illegal,
+			Kind:     TokenKindIllegal,
 			Literal:  string(r),
 			Position: l.lpos,
 			Line:     l.line,
@@ -150,7 +148,7 @@ func (l *Lexer) scanString(r rune) Token {
 
 		case r < ws && r != tab:
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  fmt.Sprintf("invalid character within string: %q", r),
 				Position: startLPos,
 				Line:     startLine,
@@ -184,7 +182,7 @@ func (l *Lexer) scanString(r rune) Token {
 
 	if !hasEscape {
 		return Token{
-			Type:     token.StringValue,
+			Kind:     TokenKindStringValue,
 			Literal:  btos(l.input[startPos : l.pos-1]),
 			Position: startLPos,
 			Line:     startLine,
@@ -206,7 +204,7 @@ func (l *Lexer) scanString(r rune) Token {
 		switch {
 		case r == '"' || r == eof:
 			return Token{
-				Type:     token.StringValue,
+				Kind:     TokenKindStringValue,
 				Literal:  btos(bs),
 				Position: startLPos,
 				Line:     startLine,
@@ -216,7 +214,7 @@ func (l *Lexer) scanString(r rune) Token {
 			r, err := escapedChar(l)
 			if err != nil {
 				return Token{
-					Type:     token.Illegal,
+					Kind:     TokenKindIllegal,
 					Literal:  err.Error(),
 					Position: startLPos,
 					Line:     startLine,
@@ -264,7 +262,7 @@ func (l *Lexer) scanBlockString(r rune) Token {
 		// Check for invalid characters in the block string, bail early.
 		if r < ws && r != tab && r != lf && r != cr {
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  fmt.Sprintf("invalid character within block string: %q", r),
 				Position: startLPos - 2,
 				Line:     startLine,
@@ -279,7 +277,7 @@ func (l *Lexer) scanBlockString(r rune) Token {
 		// Check for end of input.
 		if r == eof {
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  "unexpected eof, probably unclosed block string",
 				Position: startLPos - 2,
 				Line:     startLine,
@@ -313,7 +311,7 @@ func (l *Lexer) scanBlockString(r rune) Token {
 			}
 		} else if r == eof {
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  "unexpected eof, probably unclosed block string",
 				Position: startLPos - 2,
 				Line:     startLine,
@@ -323,7 +321,7 @@ func (l *Lexer) scanBlockString(r rune) Token {
 			break
 		} else if r < ws && r != tab && r != lf && r != cr {
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  fmt.Sprintf("invalid character within block string: %q", r),
 				Position: startLPos - 2,
 				Line:     startLine,
@@ -335,7 +333,7 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	}
 
 	return Token{
-		Type:     token.StringValue,
+		Kind:     TokenKindStringValue,
 		Literal:  l.blockStringLiteral(btos(buf.Bytes())),
 		Position: startLPos - 2,
 		Line:     startLine,
@@ -581,7 +579,7 @@ Loop:
 	}
 
 	return Token{
-		Type:     token.Name,
+		Kind:     TokenKindName,
 		Literal:  btos(l.input[byteStart:l.pos]),
 		Position: runeStart,
 		Line:     l.line,
@@ -600,7 +598,7 @@ func (l *Lexer) scanPunctuator(r rune, w int) Token {
 		rs := []rune{r, r2, r3}
 		if rs[1] != '.' || rs[2] != '.' {
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  fmt.Sprintf("invalid punctuator, expected \"...\" but got: %q", string(rs)),
 				Position: runeStart,
 				Line:     l.line,
@@ -608,7 +606,7 @@ func (l *Lexer) scanPunctuator(r rune, w int) Token {
 		}
 
 		return Token{
-			Type:     token.Punctuator,
+			Kind:     TokenKindPunctuator,
 			Literal:  "...",
 			Position: runeStart,
 			Line:     l.line,
@@ -616,7 +614,7 @@ func (l *Lexer) scanPunctuator(r rune, w int) Token {
 	}
 
 	return Token{
-		Type:     token.Punctuator,
+		Kind:     TokenKindPunctuator,
 		Literal:  btos(l.input[byteStart-w : byteStart]),
 		Position: runeStart,
 		Line:     l.line,
@@ -645,7 +643,7 @@ func (l *Lexer) scanNumber(r rune) Token {
 		// If there is another digit after zero, error.
 		if r >= '0' && r <= '9' {
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  fmt.Sprintf("invalid number, unexpected digit after 0: %q", r),
 				Position: runeStart,
 				Line:     l.line,
@@ -658,7 +656,7 @@ func (l *Lexer) scanNumber(r rune) Token {
 		r, w, err = l.readDigits(r)
 		if err != nil {
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  err.Error(),
 				Position: runeStart,
 				Line:     l.line,
@@ -676,7 +674,7 @@ func (l *Lexer) scanNumber(r rune) Token {
 		r, w, err = l.readDigits(r)
 		if err != nil {
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  err.Error(),
 				Position: runeStart,
 				Line:     l.line,
@@ -699,7 +697,7 @@ func (l *Lexer) scanNumber(r rune) Token {
 		r, w, err = l.readDigits(r)
 		if err != nil {
 			return Token{
-				Type:     token.Illegal,
+				Kind:     TokenKindIllegal,
 				Literal:  err.Error(),
 				Position: runeStart,
 				Line:     l.line,
@@ -717,9 +715,9 @@ func (l *Lexer) scanNumber(r rune) Token {
 		Position: runeStart,
 	}
 
-	t.Type = token.IntValue
+	t.Kind = TokenKindIntValue
 	if float {
-		t.Type = token.FloatValue
+		t.Kind = TokenKindFloatValue
 	}
 
 	return t

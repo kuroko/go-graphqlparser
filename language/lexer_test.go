@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/token"
 	"github.com/graphql-go/graphql/language/lexer"
 	"github.com/graphql-go/graphql/language/source"
 	"github.com/stretchr/testify/assert"
@@ -54,11 +53,11 @@ func BenchmarkLexer(b *testing.B) {
 
 			for {
 				tok := lxr.Scan()
-				if tok.Type == token.Illegal {
+				if tok.Kind == TokenKindIllegal {
 					b.Fatal(tok.Literal)
 				}
 
-				if tok.Type == token.EOF || tok.Type == token.Illegal {
+				if tok.Kind == TokenKindEOF || tok.Kind == TokenKindIllegal {
 					break
 				}
 
@@ -218,11 +217,11 @@ func TestLexer_ScanGolden(t *testing.T) {
 				tok := lxr.Scan()
 
 				actual.Tokens = append(actual.Tokens, tok)
-				if tok.Type == token.Illegal {
+				if tok.Kind == TokenKindIllegal {
 					actual.Errors = append(actual.Errors, tok.Literal)
 				}
 
-				if tok.Type == token.EOF || tok.Type == token.Illegal {
+				if tok.Kind == TokenKindEOF || tok.Kind == TokenKindIllegal {
 					break
 				}
 			}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/bucketd/go-graphqlparser/language"
-	"github.com/bucketd/go-graphqlparser/token"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -17,7 +16,7 @@ func main() {
 
 	for {
 		tok := lxr.Scan()
-		if tok.Type == token.EOF {
+		if tok.Kind == language.TokenKindEOF {
 			break
 		}
 
