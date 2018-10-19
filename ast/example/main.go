@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/ast/validation"
-	"github.com/bucketd/go-graphqlparser/parser"
+	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -20,8 +20,8 @@ enum Bar {
 `)
 
 func main() {
-	prsr := parser.New(query)
-	doc, err := prsr.Parse()
+	parser := language.NewParser(query)
+	doc, err := parser.Parse()
 	if err != nil {
 		panic(err)
 	}
