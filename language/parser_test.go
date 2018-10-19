@@ -1,4 +1,4 @@
-package parser
+package language
 
 import (
 	"bytes"
@@ -81,7 +81,7 @@ func runBucketdParser(b *testing.B, query []byte) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		psr := New(query)
+		psr := NewParser(query)
 
 		doc, err := psr.Parse()
 		if err != nil {

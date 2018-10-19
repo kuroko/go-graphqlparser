@@ -1,4 +1,4 @@
-package lexer
+package language
 
 import (
 	"encoding/json"
@@ -50,7 +50,7 @@ func BenchmarkLexer(b *testing.B) {
 
 	b.Run("github.com/bucketd/go-graphqlparser", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			lxr := New(qry)
+			lxr := NewLexer(qry)
 
 			for {
 				tok := lxr.Scan()
@@ -209,7 +209,7 @@ func TestLexer_ScanGolden(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(fmt.Sprintf("%s", test.index), func(t *testing.T) {
-			lxr := New([]byte(test.input))
+			lxr := NewLexer([]byte(test.input))
 			actual := record{
 				Input: test.input,
 			}
@@ -264,7 +264,7 @@ func TestLexerReadUnread(t *testing.T) {
 	// We need to test what happens when we have bytes containing runes of different lengths when we
 	// do reads and unreads, so we know we go backwards and forwards the right number of bytes.
 	bs := []byte("世h界e界l界l界o")
-	l := New(bs)
+	l := NewLexer(bs)
 
 	r, w1 := l.read()
 	assert.Equal(t, fmt.Sprintf("%q", '世'), fmt.Sprintf("%q", r))

@@ -1,4 +1,4 @@
-package lexer
+package language
 
 import (
 	"bytes"
@@ -6,7 +6,6 @@ import (
 	"math"
 	"strings"
 	"unicode/utf8"
-	"unsafe"
 
 	"github.com/bucketd/go-graphqlparser/token"
 )
@@ -72,8 +71,8 @@ type Lexer struct {
 	line int // The current line number.
 }
 
-// New returns a new lexer, for lexically analysing GraphQL queries from a given reader.
-func New(input []byte) *Lexer {
+// NewLexer returns a new lexer, for lexically analysing GraphQL queries from a given reader.
+func NewLexer(input []byte) *Lexer {
 	return &Lexer{
 		input:    input,
 		inputLen: len(input),
@@ -817,9 +816,4 @@ func (l *Lexer) unread(width int) {
 	if l.lpos > 0 {
 		l.lpos--
 	}
-}
-
-// btos takes the given bytes, and turns them into a string.
-func btos(bs []byte) string {
-	return *(*string)(unsafe.Pointer(&bs))
 }

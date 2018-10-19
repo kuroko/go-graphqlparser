@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/parser"
+	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -305,7 +305,7 @@ func TestSdump(t *testing.T) {
 	}
 
 	for _, tc := range tt {
-		psr := parser.New([]byte(tc.query))
+		psr := language.NewParser([]byte(tc.query))
 
 		doc, err := psr.Parse()
 		if err != nil {

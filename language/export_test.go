@@ -1,4 +1,4 @@
-package parser
+package language
 
 var (
 	bigQuery = []byte(`

@@ -1,30 +1,28 @@
-package parser
+package language
 
 import (
 	"bytes"
 	"errors"
 	"strconv"
 	"strings"
-	"unsafe"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/lexer"
 	"github.com/bucketd/go-graphqlparser/token"
 )
 
 // Parser is a parser for GraphQL documents.
 type Parser struct {
-	lexer *lexer.Lexer
-	token lexer.Token
+	lexer *Lexer
+	token Token
 
 	// Stateful checks.
 	hasShorthandQuery bool
 }
 
-// New returns a new Parser instance.
-func New(input []byte) *Parser {
+// NewParser returns a new Parser instance.
+func NewParser(input []byte) *Parser {
 	return &Parser{
-		lexer: lexer.New(input),
+		lexer: NewLexer(input),
 	}
 }
 
@@ -1512,7 +1510,7 @@ func (p *Parser) parseDirectiveLocations() (*ast.DirectiveLocations, error) {
 *****************************************************************************/
 
 // consume0 ...
-func (p *Parser) consume0(t token.Type) (lexer.Token, bool) {
+func (p *Parser) consume0(t token.Type) (Token, bool) {
 	tok := p.token
 	ok := p.token.Type == t
 
@@ -1524,7 +1522,7 @@ func (p *Parser) consume0(t token.Type) (lexer.Token, bool) {
 }
 
 // consume1 ...
-func (p *Parser) consume1(t token.Type, l string) (lexer.Token, bool) {
+func (p *Parser) consume1(t token.Type, l string) (Token, bool) {
 	tok := p.token
 	ok := p.token.Type == t && p.token.Literal == l
 
@@ -1536,7 +1534,7 @@ func (p *Parser) consume1(t token.Type, l string) (lexer.Token, bool) {
 }
 
 // consumen ...
-func (p *Parser) consumen(t token.Type, ls ...string) (lexer.Token, bool) {
+func (p *Parser) consumen(t token.Type, ls ...string) (Token, bool) {
 	tok := p.token
 	if tok.Type != t {
 		return tok, false
@@ -1560,7 +1558,7 @@ func (p *Parser) consumen(t token.Type, ls ...string) (lexer.Token, bool) {
 }
 
 // mustConsume0 ...
-func (p *Parser) mustConsume0(t token.Type) (lexer.Token, error) {
+func (p *Parser) mustConsume0(t token.Type) (Token, error) {
 	tok := p.token
 
 	if p.token.Type != t {
@@ -1573,7 +1571,7 @@ func (p *Parser) mustConsume0(t token.Type) (lexer.Token, error) {
 }
 
 // mustConsume1 ...
-func (p *Parser) mustConsume1(t token.Type, l string) (lexer.Token, error) {
+func (p *Parser) mustConsume1(t token.Type, l string) (Token, error) {
 	tok := p.token
 
 	if p.token.Type != t || p.token.Literal != l {
@@ -1586,7 +1584,7 @@ func (p *Parser) mustConsume1(t token.Type, l string) (lexer.Token, error) {
 }
 
 // mustConsumen ...
-func (p *Parser) mustConsumen(t token.Type, ls ...string) (lexer.Token, error) {
+func (p *Parser) mustConsumen(t token.Type, ls ...string) (Token, error) {
 	tok, ok := p.consumen(t, ls...)
 	if !ok {
 		return tok, p.unexpected(tok, p.expected(t, ls...))
@@ -1674,7 +1672,7 @@ func (p *Parser) expected(t token.Type, ls ...string) string {
 }
 
 // unexpected ...
-func (p *Parser) unexpected(token lexer.Token, wants ...string) error {
+func (p *Parser) unexpected(token Token, wants ...string) error {
 	//_, file, line, _ := runtime.Caller(2)
 	//fmt.Println(file, line)
 
@@ -1702,9 +1700,4 @@ func (p *Parser) unexpected(token lexer.Token, wants ...string) error {
 	}
 
 	return errors.New(btos(buf.Bytes()))
-}
-
-// btos takes the given bytes, and turns them into a string.
-func btos(bs []byte) string {
-	return *(*string)(unsafe.Pointer(&bs))
 }

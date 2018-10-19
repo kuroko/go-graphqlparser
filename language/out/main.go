@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/parser"
+	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -61,7 +61,7 @@ directive @example on
 	var err error
 
 	for i := 0; i < 1; i++ {
-		psr := parser.New(query)
+		psr := language.NewParser(query)
 
 		doc, err = psr.Parse()
 		if err != nil {
