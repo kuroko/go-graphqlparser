@@ -29,11 +29,11 @@ func BenchmarkTypeSystemParser(b *testing.B) {
 
 	for _, t := range tt {
 		b.Run(t.name, func(b *testing.B) {
-			b.Run("github.com/bucketd/go-graphqlparser", func(b *testing.B) {
+			b.Run("bucketd", func(b *testing.B) {
 				runBucketdParser(b, t.query)
 			})
 
-			b.Run("github.com/vektah/gqlparser", func(b *testing.B) {
+			b.Run("vektah", func(b *testing.B) {
 				runVektahGQLSchemaParser(b, t.query)
 			})
 		})
@@ -62,15 +62,15 @@ func BenchmarkParser(b *testing.B) {
 
 	for _, t := range tt {
 		b.Run(t.name, func(b *testing.B) {
-			b.Run("github.com/bucketd/go-graphqlparser", func(b *testing.B) {
+			b.Run("bucketd", func(b *testing.B) {
 				runBucketdParser(b, t.query)
 			})
 
-			b.Run("github.com/graphql-go/graphql", func(b *testing.B) {
+			b.Run("graphql-go", func(b *testing.B) {
 				runGraphQLGoParser(b, t.query)
 			})
 
-			b.Run("github.com/vektah/gqlparser", func(b *testing.B) {
+			b.Run("vektah", func(b *testing.B) {
 				runVektahGQLParser(b, t.query)
 			})
 		})

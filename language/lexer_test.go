@@ -47,7 +47,7 @@ const (
 func BenchmarkLexer(b *testing.B) {
 	qry := []byte(query)
 
-	b.Run("github.com/bucketd/go-graphqlparser", func(b *testing.B) {
+	b.Run("bucketd", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			lxr := NewLexer(qry)
 
@@ -66,7 +66,7 @@ func BenchmarkLexer(b *testing.B) {
 		}
 	})
 
-	b.Run("github.com/graphql-go/graphql", func(b *testing.B) {
+	b.Run("graphql-go", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			lxr := lexer.Lex(source.NewSource(&source.Source{
 				Body: qry,
@@ -87,7 +87,7 @@ func BenchmarkLexer(b *testing.B) {
 		}
 	})
 
-	b.Run("github.com/vektah/gqlparser", func(b *testing.B) {
+	b.Run("vektah", func(b *testing.B) {
 		input := string(qry)
 
 		b.ResetTimer()
