@@ -2,8 +2,7 @@ package language
 
 import (
 	"testing"
-
-	"github.com/seeruk/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestToken_String(t *testing.T) {
