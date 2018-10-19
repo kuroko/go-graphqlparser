@@ -5,6 +5,10 @@ default: help
 help: ## Show this help.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}'
 
+test: ## Unit test the go source files.
+	./scripts/test.sh
+.PHONY: test
+
 generate-lists: ## Generate the linked list types go source files.
 	./scripts/lists.sh
 .PHONY: generate-lists
