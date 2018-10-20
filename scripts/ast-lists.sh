@@ -6,7 +6,6 @@ typeNames=(
   Directive
   DirectiveLocation
   EnumValueDefinition
-  Error
   FieldDefinition
   InputValueDefinition
   OperationTypeDefinition

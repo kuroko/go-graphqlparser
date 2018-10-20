@@ -9,9 +9,14 @@ test: ## Unit test the go source files.
 	./scripts/test.sh
 
 .PHONY: generate-lists
-generate-lists: ## Generate the linked list types go source files.
-	./scripts/lists.sh
+generate-lists: ast/lists.go graphql/lists.go ## Generate the linked list types go source files.
 
 .PHONY: generate-walkerevents
 generate-walkerevents: ## Generate the walker events go source files.
 	./scripts/walker_events.sh
+
+ast/lists.go:
+	./scripts/ast-lists.sh
+
+graphql/lists.go:
+	./scripts/graphql-lists.sh

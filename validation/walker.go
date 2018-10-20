@@ -35,6 +35,10 @@ func (w *Walker) walkDefinition(ctx *Context, def ast.Definition) {
 // walkExecutableDefinition ...
 func (w *Walker) walkExecutableDefinition(ctx *Context, def *ast.ExecutableDefinition) {
 	w.OnExecutableDefinitionEnter(ctx, def)
+	switch def.Kind {
+	case ast.ExecutableDefinitionKindOperation:
+	case ast.ExecutableDefinitionKindFragment:
+	}
 	w.OnExecutableDefinitionLeave(ctx, def)
 }
 
