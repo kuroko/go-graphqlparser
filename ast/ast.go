@@ -1,5 +1,7 @@
 package ast
 
+import "github.com/bucketd/go-graphqlparser/graphql"
+
 // 2.2 Document
 // http://facebook.github.io/graphql/June2018/#sec-Language.Document
 
@@ -121,19 +123,9 @@ type Selection struct {
 	Arguments     *Arguments
 	Directives    *Directives
 	SelectionSet  *Selections
+	Path          *graphql.PathNodes
 	Kind          SelectionKind
 }
-
-// 2.5 Fields
-// http://facebook.github.io/graphql/June2018/#sec-Language.Fields
-
-//type Field struct {
-//	Alias        string
-//	Name         string
-//	Arguments    []*Argument
-//	Directives   *Directives
-//	SelectionSet *Selections
-//}
 
 // 2.6 Arguments
 // http://facebook.github.io/graphql/June2018/#sec-Language.Arguments
@@ -147,20 +139,9 @@ type Argument struct {
 // 2.8 Fragments
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fragments
 
-//type FragmentSpread struct {
-//	Name       string // but not "on"
-//	Directives *Directives
-//}
-
 type TypeCondition struct {
 	NamedType Type // Only allow "TypeKindNamedType" kind NamedType.
 }
-
-//type InlineFragment struct {
-//	TypeCondition TypeCondition
-//	Directives    *Directives
-//	SelectionSet  *Selections
-//}
 
 // 2.9 Input Values
 // http://facebook.github.io/graphql/June2018/#sec-Input-Values

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -11,10 +12,12 @@ import (
 func executableDefinitions(walker *validation.Walker) {
 	walker.AddDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.Definition) {
 		if def.Kind != ast.DefinitionKindExecutable {
-			// TODO...
-			//ctx.Errors = ctx.Errors.Add(errors.New(
-			//	nonExecutableDefinitionMessage(def),
-			//))
+			err := graphql.NewError(nonExecutableDefinitionMessage(def))
+			// TODO: Add locations to AST.
+			err.Locations = err.Locations.Add(graphql.Location{Line: 6, Column: 7})
+			// NOTE(elliot): err.Path is unused in validation.
+
+			ctx.Errors = ctx.Errors.Add(err)
 		}
 	})
 }

@@ -12,6 +12,13 @@ type Error struct {
 	Path      *PathNodes
 }
 
+// NewError returns a new Error with the given message.
+func NewError(message string) Error {
+	return Error{
+		Message: message,
+	}
+}
+
 // MarshalJSON returns this Error as some JSON bytes. If the Error is invalid, an error will be
 // returned.
 func (e *Error) MarshalJSON() ([]byte, error) {
@@ -82,4 +89,20 @@ type PathNode struct {
 	Kind   PathNodeKind
 	String string
 	Int    int
+}
+
+// NewStringPathNode returns a new PathNode with the given string as it's value.
+func NewStringPathNode(s string) PathNode {
+	return PathNode{
+		Kind:   PathNodeKindString,
+		String: s,
+	}
+}
+
+// NewIntPathNode returns a new Pathnode with the given int as it's value.
+func NewIntPathNode(i int) PathNode {
+	return PathNode{
+		Kind: PathNodeKindInt,
+		Int:  i,
+	}
 }
