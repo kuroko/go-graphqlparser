@@ -9,6 +9,7 @@ func BenchmarkResponse_MarshalGraphQL(b *testing.B) {
 	var res []byte
 	var err error
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
@@ -51,6 +52,7 @@ func BenchmarkResponse_MapToJSON(b *testing.B) {
 	var mapBS []byte
 	var err error
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {

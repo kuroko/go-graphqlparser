@@ -2,6 +2,8 @@
 
 typeNames=(
   Error
+  Location
+  PathNode
 )
 
 types=

@@ -1,7 +1,6 @@
 package rules
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/bucketd/go-graphqlparser/ast"
@@ -12,9 +11,10 @@ import (
 func executableDefinitions(walker *validation.Walker) {
 	walker.AddDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.Definition) {
 		if def.Kind != ast.DefinitionKindExecutable {
-			ctx.Errors = ctx.Errors.Add(errors.New(
-				nonExecutableDefinitionMessage(def),
-			))
+			// TODO...
+			//ctx.Errors = ctx.Errors.Add(errors.New(
+			//	nonExecutableDefinitionMessage(def),
+			//))
 		}
 	})
 }

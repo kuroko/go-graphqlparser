@@ -48,6 +48,15 @@ func (a *Arguments) ForEach(fn func(argument Argument, i int)) {
 	}
 }
 
+// ArgumentsFromSlice returns a Arguments list from a slice of Argument.
+func ArgumentsFromSlice(sl []Argument) *Arguments {
+	var list *Arguments
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
 // Len returns the length of this linked list.
 func (a *Arguments) Len() int {
 	if a == nil {
@@ -130,6 +139,15 @@ func (d *Definitions) ForEach(fn func(definition Definition, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// DefinitionsFromSlice returns a Definitions list from a slice of Definition.
+func DefinitionsFromSlice(sl []Definition) *Definitions {
+	var list *Definitions
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
 }
 
 // Len returns the length of this linked list.
@@ -216,6 +234,15 @@ func (d *Directives) ForEach(fn func(directive Directive, i int)) {
 	}
 }
 
+// DirectivesFromSlice returns a Directives list from a slice of Directive.
+func DirectivesFromSlice(sl []Directive) *Directives {
+	var list *Directives
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
 // Len returns the length of this linked list.
 func (d *Directives) Len() int {
 	if d == nil {
@@ -298,6 +325,15 @@ func (dl *DirectiveLocations) ForEach(fn func(directiveLocation DirectiveLocatio
 		iter++
 		current = current.Next
 	}
+}
+
+// DirectiveLocationsFromSlice returns a DirectiveLocations list from a slice of DirectiveLocation.
+func DirectiveLocationsFromSlice(sl []DirectiveLocation) *DirectiveLocations {
+	var list *DirectiveLocations
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
 }
 
 // Len returns the length of this linked list.
@@ -384,6 +420,15 @@ func (evd *EnumValueDefinitions) ForEach(fn func(enumValueDefinition EnumValueDe
 	}
 }
 
+// EnumValueDefinitionsFromSlice returns a EnumValueDefinitions list from a slice of EnumValueDefinition.
+func EnumValueDefinitionsFromSlice(sl []EnumValueDefinition) *EnumValueDefinitions {
+	var list *EnumValueDefinitions
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
 // Len returns the length of this linked list.
 func (evd *EnumValueDefinitions) Len() int {
 	if evd == nil {
@@ -466,6 +511,15 @@ func (fd *FieldDefinitions) ForEach(fn func(fieldDefinition FieldDefinition, i i
 		iter++
 		current = current.Next
 	}
+}
+
+// FieldDefinitionsFromSlice returns a FieldDefinitions list from a slice of FieldDefinition.
+func FieldDefinitionsFromSlice(sl []FieldDefinition) *FieldDefinitions {
+	var list *FieldDefinitions
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
 }
 
 // Len returns the length of this linked list.
@@ -552,6 +606,15 @@ func (ivd *InputValueDefinitions) ForEach(fn func(inputValueDefinition InputValu
 	}
 }
 
+// InputValueDefinitionsFromSlice returns a InputValueDefinitions list from a slice of InputValueDefinition.
+func InputValueDefinitionsFromSlice(sl []InputValueDefinition) *InputValueDefinitions {
+	var list *InputValueDefinitions
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
 // Len returns the length of this linked list.
 func (ivd *InputValueDefinitions) Len() int {
 	if ivd == nil {
@@ -634,6 +697,15 @@ func (otd *OperationTypeDefinitions) ForEach(fn func(operationTypeDefinition Ope
 		iter++
 		current = current.Next
 	}
+}
+
+// OperationTypeDefinitionsFromSlice returns a OperationTypeDefinitions list from a slice of OperationTypeDefinition.
+func OperationTypeDefinitionsFromSlice(sl []OperationTypeDefinition) *OperationTypeDefinitions {
+	var list *OperationTypeDefinitions
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
 }
 
 // Len returns the length of this linked list.
@@ -720,6 +792,15 @@ func (rotd *RootOperationTypeDefinitions) ForEach(fn func(rootOperationTypeDefin
 	}
 }
 
+// RootOperationTypeDefinitionsFromSlice returns a RootOperationTypeDefinitions list from a slice of RootOperationTypeDefinition.
+func RootOperationTypeDefinitionsFromSlice(sl []RootOperationTypeDefinition) *RootOperationTypeDefinitions {
+	var list *RootOperationTypeDefinitions
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
 // Len returns the length of this linked list.
 func (rotd *RootOperationTypeDefinitions) Len() int {
 	if rotd == nil {
@@ -802,6 +883,15 @@ func (s *Selections) ForEach(fn func(selection Selection, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// SelectionsFromSlice returns a Selections list from a slice of Selection.
+func SelectionsFromSlice(sl []Selection) *Selections {
+	var list *Selections
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
 }
 
 // Len returns the length of this linked list.
@@ -888,6 +978,15 @@ func (t *Types) ForEach(fn func(t Type, i int)) {
 	}
 }
 
+// TypesFromSlice returns a Types list from a slice of Type.
+func TypesFromSlice(sl []Type) *Types {
+	var list *Types
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
 // Len returns the length of this linked list.
 func (t *Types) Len() int {
 	if t == nil {
@@ -970,6 +1069,15 @@ func (vd *VariableDefinitions) ForEach(fn func(variableDefinition VariableDefini
 		iter++
 		current = current.Next
 	}
+}
+
+// VariableDefinitionsFromSlice returns a VariableDefinitions list from a slice of VariableDefinition.
+func VariableDefinitionsFromSlice(sl []VariableDefinition) *VariableDefinitions {
+	var list *VariableDefinitions
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
 }
 
 // Len returns the length of this linked list.

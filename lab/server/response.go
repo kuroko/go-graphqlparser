@@ -109,7 +109,7 @@ type Response struct {
 	Errors []error // @TODO: This is not the right type.
 }
 
-// MarshalGraphQL marshalls the server response.
+// MarshalGraphQL marshals the server response.
 func (r Response) MarshalGraphQL() ([]byte, error) {
 	buf := &bytes.Buffer{}
 

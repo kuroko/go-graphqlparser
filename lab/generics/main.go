@@ -97,6 +97,15 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) ForEach(fn func({{.TypeNameLCF}} {{.TypeN
 	}
 }
 
+// {{.TypeName}}sFromSlice returns a {{.TypeName}}s list from a slice of {{.TypeName}}.
+func {{.TypeName}}sFromSlice(sl []{{.TypeName}}) *{{.TypeName}}s {
+	var list *{{.TypeName}}s
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
 // Len returns the length of this linked list.
 func ({{.AbridgedTN}} *{{.TypeName}}s) Len() int {
 	if {{.AbridgedTN}} == nil {

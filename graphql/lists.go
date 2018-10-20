@@ -48,6 +48,15 @@ func (e *Errors) ForEach(fn func(err Error, i int)) {
 	}
 }
 
+// ErrorsFromSlice returns a Errors list from a slice of Error.
+func ErrorsFromSlice(sl []Error) *Errors {
+	var list *Errors
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
 // Len returns the length of this linked list.
 func (e *Errors) Len() int {
 	if e == nil {
@@ -76,6 +85,192 @@ func (e *Errors) Reverse() *Errors {
 	current := e
 
 	var prev *Errors
+	for current != nil {
+		next := current.Next
+		current.Next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
+}
+
+// Locations is a linked list that contains Location values.
+type Locations struct {
+	Data Location
+	Next *Locations
+}
+
+// Add appends a Location to this linked list and returns this new head.
+func (l *Locations) Add(data Location) *Locations {
+	return &Locations{
+		Data: data,
+		Next: l,
+	}
+}
+
+// Join attaches the tail of the receiver list "l" to the head of the otherList.
+func (l *Locations) Join(otherList *Locations) {
+	current := l
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
+// ForEach applies the given map function to each item in this linked list.
+func (l *Locations) ForEach(fn func(location Location, i int)) {
+	if l == nil {
+		return
+	}
+
+	iter := 0
+	current := l
+
+	for {
+		fn(current.Data, iter)
+
+		if current.Next == nil {
+			break
+		}
+
+		iter++
+		current = current.Next
+	}
+}
+
+// LocationsFromSlice returns a Locations list from a slice of Location.
+func LocationsFromSlice(sl []Location) *Locations {
+	var list *Locations
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
+// Len returns the length of this linked list.
+func (l *Locations) Len() int {
+	if l == nil {
+		return 0
+	}
+
+	var length int
+
+	current := l
+	for {
+		length++
+		if current.Next == nil {
+			break
+		}
+
+		current = current.Next
+	}
+
+	return length
+}
+
+// Reverse reverses this linked list of Location. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (l *Locations) Reverse() *Locations {
+	current := l
+
+	var prev *Locations
+	for current != nil {
+		next := current.Next
+		current.Next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
+}
+
+// PathNodes is a linked list that contains PathNode values.
+type PathNodes struct {
+	Data PathNode
+	Next *PathNodes
+}
+
+// Add appends a PathNode to this linked list and returns this new head.
+func (pn *PathNodes) Add(data PathNode) *PathNodes {
+	return &PathNodes{
+		Data: data,
+		Next: pn,
+	}
+}
+
+// Join attaches the tail of the receiver list "pn" to the head of the otherList.
+func (pn *PathNodes) Join(otherList *PathNodes) {
+	current := pn
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
+}
+
+// ForEach applies the given map function to each item in this linked list.
+func (pn *PathNodes) ForEach(fn func(pathNode PathNode, i int)) {
+	if pn == nil {
+		return
+	}
+
+	iter := 0
+	current := pn
+
+	for {
+		fn(current.Data, iter)
+
+		if current.Next == nil {
+			break
+		}
+
+		iter++
+		current = current.Next
+	}
+}
+
+// PathNodesFromSlice returns a PathNodes list from a slice of PathNode.
+func PathNodesFromSlice(sl []PathNode) *PathNodes {
+	var list *PathNodes
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
+}
+
+// Len returns the length of this linked list.
+func (pn *PathNodes) Len() int {
+	if pn == nil {
+		return 0
+	}
+
+	var length int
+
+	current := pn
+	for {
+		length++
+		if current.Next == nil {
+			break
+		}
+
+		current = current.Next
+	}
+
+	return length
+}
+
+// Reverse reverses this linked list of PathNode. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (pn *PathNodes) Reverse() *PathNodes {
+	current := pn
+
+	var prev *PathNodes
 	for current != nil {
 		next := current.Next
 		current.Next = prev
