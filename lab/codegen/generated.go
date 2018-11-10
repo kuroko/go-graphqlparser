@@ -64,7 +64,7 @@ type DroidInput struct {
 
 // MarshalGraphQL ...
 func (di *DroidInput) MarshalGraphQL(value ast.Value) error {
-	if value.Kind != ast.ValueKindObjectValue {
+	if value.Kind != ast.ValueKindObject {
 		return errors.New("TODO")
 	}
 

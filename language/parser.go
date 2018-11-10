@@ -133,7 +133,7 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefiniti
 	var name string
 	var err error
 
-	opType := ast.OperationTypeQuery
+	opType := ast.OperationDefinitionKindQuery
 
 	if !isQuery {
 		opType, err = p.parseOperationType()
@@ -172,7 +172,7 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefiniti
 }
 
 // parseOperationType ...
-func (p *Parser) parseOperationType() (ast.OperationType, error) {
+func (p *Parser) parseOperationType() (ast.OperationDefinitionKind, error) {
 	tok, err := p.mustConsumen(TokenKindName, "query", "mutation", "subscription")
 	if err != nil {
 		return -1, err
@@ -180,11 +180,11 @@ func (p *Parser) parseOperationType() (ast.OperationType, error) {
 
 	switch tok.Literal {
 	case "query":
-		return ast.OperationTypeQuery, nil
+		return ast.OperationDefinitionKindQuery, nil
 	case "mutation":
-		return ast.OperationTypeMutation, nil
+		return ast.OperationDefinitionKindMutation, nil
 	default:
-		return ast.OperationTypeSubscription, nil
+		return ast.OperationDefinitionKindSubscription, nil
 	}
 }
 
@@ -240,7 +240,7 @@ func (p *Parser) parseTypeCondition() (*ast.TypeCondition, error) {
 		return nil, err
 	}
 
-	if conType.Kind != ast.TypeKindNamedType {
+	if conType.Kind != ast.TypeKindNamed {
 		return nil, p.unexpected(p.token, "NamedType")
 	}
 
@@ -553,7 +553,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 		}
 
 		return ast.Value{
-			Kind:     ast.ValueKindIntValue,
+			Kind:     ast.ValueKindInt,
 			IntValue: iv,
 		}, nil
 	}
@@ -565,41 +565,41 @@ func (p *Parser) parseValue() (ast.Value, error) {
 		}
 
 		return ast.Value{
-			Kind:       ast.ValueKindFloatValue,
+			Kind:       ast.ValueKindFloat,
 			FloatValue: fv,
 		}, nil
 	}
 
 	if tok, ok := p.consume0(TokenKindStringValue); ok {
 		return ast.Value{
-			Kind:        ast.ValueKindStringValue,
+			Kind:        ast.ValueKindString,
 			StringValue: tok.Literal,
 		}, nil
 	}
 
 	if tok, ok := p.consumen(TokenKindName, "true", "false"); ok {
 		return ast.Value{
-			Kind:         ast.ValueKindBooleanValue,
+			Kind:         ast.ValueKindBoolean,
 			BooleanValue: tok.Literal == "true",
 		}, nil
 	}
 
 	if p.skip1(TokenKindName, "null") {
 		return ast.Value{
-			Kind: ast.ValueKindNullValue,
+			Kind: ast.ValueKindNull,
 		}, nil
 	}
 
 	if tok, ok := p.consume0(TokenKindName); ok {
 		return ast.Value{
-			Kind:        ast.ValueKindEnumValue,
+			Kind:        ast.ValueKindEnum,
 			StringValue: tok.Literal,
 		}, nil
 	}
 
 	if p.skip1(TokenKindPunctuator, "[") {
 		list := ast.Value{}
-		list.Kind = ast.ValueKindListValue
+		list.Kind = ast.ValueKindList
 
 		for !p.skip1(TokenKindPunctuator, "]") {
 			val, err := p.parseValue()
@@ -615,7 +615,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 
 	if p.skip1(TokenKindPunctuator, "{") {
 		object := ast.Value{}
-		object.Kind = ast.ValueKindObjectValue
+		object.Kind = ast.ValueKindObject
 
 		for !p.skip1(TokenKindPunctuator, "}") {
 			tok, err := p.mustConsume0(TokenKindName)
@@ -652,7 +652,7 @@ func (p *Parser) parseType() (ast.Type, error) {
 
 	// If we hit an opening square brace, we've got a list type, time to dive in.
 	if p.skip1(TokenKindPunctuator, "[") {
-		astType.Kind = ast.TypeKindListType
+		astType.Kind = ast.TypeKindList
 
 		itemType, err := p.parseType()
 		if err != nil {
@@ -665,7 +665,7 @@ func (p *Parser) parseType() (ast.Type, error) {
 			return astType, err
 		}
 	} else {
-		astType.Kind = ast.TypeKindNamedType
+		astType.Kind = ast.TypeKindNamed
 
 		tok, err := p.mustConsume0(TokenKindName)
 		if err != nil {
@@ -883,7 +883,7 @@ func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 			return nil, err
 		}
 
-		if namedType.Kind != ast.TypeKindNamedType {
+		if namedType.Kind != ast.TypeKindNamed {
 			return nil, p.unexpected(p.token, "NamedType")
 		}
 
@@ -957,7 +957,7 @@ func (p *Parser) parseOperationTypeDefinitions() (*ast.OperationTypeDefinitions,
 			return nil, err
 		}
 
-		if namedType.Kind != ast.TypeKindNamedType {
+		if namedType.Kind != ast.TypeKindNamed {
 			return nil, p.unexpected(p.token, "NamedType")
 		}
 
@@ -1462,24 +1462,24 @@ var directiveLocations = []string{
 }
 
 var directiveLocationsMap = map[string]ast.DirectiveLocation{
-	"QUERY":                  ast.DirectiveLocationQuery,
-	"MUTATION":               ast.DirectiveLocationMutation,
-	"SUBSCRIPTION":           ast.DirectiveLocationSubscription,
-	"FIELD":                  ast.DirectiveLocationField,
-	"FRAGMENT_DEFINITION":    ast.DirectiveLocationFragmentDefinition,
-	"FRAGMENT_SPREAD":        ast.DirectiveLocationFragmentSpread,
-	"INLINE_FRAGMENT":        ast.DirectiveLocationInlineFragment,
-	"SCHEMA":                 ast.DirectiveLocationSchema,
-	"SCALAR":                 ast.DirectiveLocationScalar,
-	"OBJECT":                 ast.DirectiveLocationObject,
-	"FIELD_DEFINITION":       ast.DirectiveLocationFieldDefinition,
-	"ARGUMENT_DEFINITION":    ast.DirectiveLocationArgumentDefinition,
-	"INTERFACE":              ast.DirectiveLocationInterface,
-	"UNION":                  ast.DirectiveLocationUnion,
-	"ENUM":                   ast.DirectiveLocationEnum,
-	"ENUM_VALUE":             ast.DirectiveLocationEnumValue,
-	"INPUT_OBJECT":           ast.DirectiveLocationInputObject,
-	"INPUT_FIELD_DEFINITION": ast.DirectiveLocationInputFieldDefinition,
+	"QUERY":                  ast.DirectiveLocationKindQuery,
+	"MUTATION":               ast.DirectiveLocationKindMutation,
+	"SUBSCRIPTION":           ast.DirectiveLocationKindSubscription,
+	"FIELD":                  ast.DirectiveLocationKindField,
+	"FRAGMENT_DEFINITION":    ast.DirectiveLocationKindFragmentDefinition,
+	"FRAGMENT_SPREAD":        ast.DirectiveLocationKindFragmentSpread,
+	"INLINE_FRAGMENT":        ast.DirectiveLocationKindInlineFragment,
+	"SCHEMA":                 ast.DirectiveLocationKindSchema,
+	"SCALAR":                 ast.DirectiveLocationKindScalar,
+	"OBJECT":                 ast.DirectiveLocationKindObject,
+	"FIELD_DEFINITION":       ast.DirectiveLocationKindFieldDefinition,
+	"ARGUMENT_DEFINITION":    ast.DirectiveLocationKindArgumentDefinition,
+	"INTERFACE":              ast.DirectiveLocationKindInterface,
+	"UNION":                  ast.DirectiveLocationKindUnion,
+	"ENUM":                   ast.DirectiveLocationKindEnum,
+	"ENUM_VALUE":             ast.DirectiveLocationKindEnumValue,
+	"INPUT_OBJECT":           ast.DirectiveLocationKindInputObject,
+	"INPUT_FIELD_DEFINITION": ast.DirectiveLocationKindInputFieldDefinition,
 }
 
 // parseDirectiveLocations ...

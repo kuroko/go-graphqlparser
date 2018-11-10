@@ -10,8 +10,11 @@ type Document struct {
 }
 
 const (
+	// @wg:kind ExecutableDefinition
 	DefinitionKindExecutable DefinitionKind = iota
+	// @wg:kind TypeSystemDefinition
 	DefinitionKindTypeSystem
+	// @wg:kind TypeSystemExtension
 	DefinitionKindTypeSystemExtension
 )
 
@@ -42,30 +45,10 @@ type Definition struct {
 // 2.8 Fragments
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fragments
 
-// +Kind?
 const (
-	OperationTypeQuery OperationType = iota
-	OperationTypeMutation
-	OperationTypeSubscription
-)
-
-type OperationType int8
-
-func (t OperationType) String() string {
-	switch t {
-	case OperationTypeQuery:
-		return "query"
-	case OperationTypeMutation:
-		return "mutation"
-	case OperationTypeSubscription:
-		return "subscription"
-	}
-
-	return "invalid"
-}
-
-const (
+	// @wg:kind OperationDefinition
 	ExecutableDefinitionKindOperation ExecutableDefinitionKind = iota
+	// @wg:kind FragmentDefinition
 	ExecutableDefinitionKindFragment
 )
 
@@ -82,14 +65,52 @@ func (k ExecutableDefinitionKind) String() string {
 	return "invalid"
 }
 
+// NOTE: When using walker generator thing by walking the Go AST, when we encounter a `Kind` field,
+// by default we'll assume it's going to pass the current type into the walk function (i.e. itself,
+// in this case, ExecutableDefinition) and the walker function name will come from the const name.
+// We'll take "Kind" out of the name, and take the bit after "Kind" and put that on the front, e.g.
+// "OperationExecutableDefinition" and "FragmentExecutableDefinition".
 type ExecutableDefinition struct {
-	Name                string         // but not "on" if is FragmentDefinition kind.
-	TypeCondition       *TypeCondition // not on operation definition.
+	FragmentDefinition  *FragmentDefinition
+	OperationDefinition *OperationDefinition
+	Kind                ExecutableDefinitionKind
+}
+
+type FragmentDefinition struct {
+	Name          string
+	TypeCondition *TypeCondition
+	Directives    *Directives
+	SelectionSet  *Selections
+}
+
+const (
+	OperationDefinitionKindQuery OperationDefinitionKind = iota
+	OperationDefinitionKindMutation
+	OperationDefinitionKindSubscription
+)
+
+type OperationDefinitionKind int8
+
+func (t OperationDefinitionKind) String() string {
+	switch t {
+	case OperationDefinitionKindQuery:
+		return "query"
+	case OperationDefinitionKindMutation:
+		return "mutation"
+	case OperationDefinitionKindSubscription:
+		return "subscription"
+	}
+
+	return "invalid"
+}
+
+// @wg:leaf
+type OperationDefinition struct {
+	Name                string
 	VariableDefinitions *VariableDefinitions
 	Directives          *Directives
 	SelectionSet        *Selections
-	OperationType       OperationType
-	Kind                ExecutableDefinitionKind
+	Kind                OperationDefinitionKind
 }
 
 // 2.4 Selection Sets
@@ -140,7 +161,7 @@ type Argument struct {
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fragments
 
 type TypeCondition struct {
-	NamedType Type // Only allow "TypeKindNamedType" kind NamedType.
+	NamedType Type // Only allow "TypeKindNamed" kind NamedType.
 }
 
 // 2.9 Input Values
@@ -149,14 +170,14 @@ type TypeCondition struct {
 // Value :
 const (
 	ValueKindVariable ValueKind = iota
-	ValueKindIntValue
-	ValueKindFloatValue
-	ValueKindStringValue
-	ValueKindBooleanValue
-	ValueKindNullValue
-	ValueKindEnumValue
-	ValueKindListValue
-	ValueKindObjectValue
+	ValueKindInt
+	ValueKindFloat
+	ValueKindString
+	ValueKindBoolean
+	ValueKindNull
+	ValueKindEnum
+	ValueKindList
+	ValueKindObject
 )
 
 type ValueKind int8
@@ -165,21 +186,21 @@ func (k ValueKind) String() string {
 	switch k {
 	case ValueKindVariable:
 		return "variable value"
-	case ValueKindIntValue:
+	case ValueKindInt:
 		return "int8 value"
-	case ValueKindFloatValue:
+	case ValueKindFloat:
 		return "float value"
-	case ValueKindStringValue:
+	case ValueKindString:
 		return "string value"
-	case ValueKindBooleanValue:
+	case ValueKindBoolean:
 		return "boolean value"
-	case ValueKindNullValue:
+	case ValueKindNull:
 		return "null value"
-	case ValueKindEnumValue:
+	case ValueKindEnum:
 		return "enum value"
-	case ValueKindListValue:
+	case ValueKindList:
 		return "list value"
-	case ValueKindObjectValue:
+	case ValueKindObject:
 		return "object value"
 	}
 
@@ -215,17 +236,17 @@ type VariableDefinition struct {
 // http://facebook.github.io/graphql/June2018/#sec-Type-References
 
 const (
-	TypeKindNamedType TypeKind = iota
-	TypeKindListType
+	TypeKindNamed TypeKind = iota
+	TypeKindList
 )
 
 type TypeKind int8
 
 func (k TypeKind) String() string {
 	switch k {
-	case TypeKindNamedType:
+	case TypeKindNamed:
 		return "NamedType"
-	case TypeKindListType:
+	case TypeKindList:
 		return "ListType"
 	}
 
@@ -281,7 +302,7 @@ type TypeSystemDefinition struct {
 
 // 3.1 Type System Extensions
 const (
-	TypeSystemExtensionKindSchema = iota
+	TypeSystemExtensionKindSchema TypeSystemExtensionKind = iota
 	TypeSystemExtensionKindType
 )
 
@@ -303,8 +324,8 @@ type SchemaDefinition struct {
 
 // TODO: Should NamedType be a string?
 type RootOperationTypeDefinition struct {
-	NamedType     Type // Only allow "TypeKindNamedType" kind NamedType.
-	OperationType OperationType
+	NamedType     Type // Only allow "TypeKindNamed" kind NamedType.
+	OperationType OperationDefinitionKind
 }
 
 // 3.2.2 Schema Extension
@@ -316,7 +337,7 @@ type SchemaExtension struct {
 // TODO: Should NamedType be a string?
 type OperationTypeDefinition struct {
 	NamedType     Type
-	OperationType OperationType
+	OperationType OperationDefinitionKind
 }
 
 // 3.4 Types
@@ -336,9 +357,9 @@ type TypeDefinitionKind int8
 type TypeDefinition struct {
 	Description           string
 	Directives            *Directives
-	ImplementsInterface   *Types // Only allow "TypeKindNamedType" kind NamedType.
+	ImplementsInterface   *Types // Only allow "TypeKindNamed" kind NamedType.
 	FieldsDefinition      *FieldDefinitions
-	UnionMemberTypes      *Types // Only allow "TypeKindNamedType" kind NamedType.
+	UnionMemberTypes      *Types // Only allow "TypeKindNamed" kind NamedType.
 	EnumValuesDefinition  *EnumValueDefinitions
 	InputFieldsDefinition *InputValueDefinitions
 	Name                  string
@@ -361,7 +382,7 @@ type EnumValueDefinition struct {
 
 // 3.4.3 Type Extensions
 const (
-	TypeExtensionKindScalar = iota
+	TypeExtensionKindScalar TypeExtensionKind = iota
 	TypeExtensionKindObject
 	TypeExtensionKindInterface
 	TypeExtensionKindUnion
@@ -373,9 +394,9 @@ type TypeExtensionKind int8
 
 type TypeExtension struct {
 	Directives            *Directives
-	ImplementsInterface   *Types // Only allow "TypeKindNamedType" kind NamedType.
+	ImplementsInterface   *Types // Only allow "TypeKindNamed" kind NamedType.
 	FieldsDefinition      *FieldDefinitions
-	UnionMemberTypes      *Types // Only allow "TypeKindNamedType" kind NamedType.
+	UnionMemberTypes      *Types // Only allow "TypeKindNamed" kind NamedType.
 	EnumValuesDefinition  *EnumValueDefinitions
 	InputFieldsDefinition *InputValueDefinitions
 	Name                  string
@@ -396,67 +417,66 @@ type InputValueDefinition struct {
 // 3.13 Directives
 // http://facebook.github.io/graphql/June2018/#sec-Type-System.Directives
 
-// +Kind?
 const (
-	DirectiveLocationQuery DirectiveLocation = iota
-	DirectiveLocationMutation
-	DirectiveLocationSubscription
-	DirectiveLocationField
-	DirectiveLocationFragmentDefinition
-	DirectiveLocationFragmentSpread
-	DirectiveLocationInlineFragment
-	DirectiveLocationSchema
-	DirectiveLocationScalar
-	DirectiveLocationObject
-	DirectiveLocationFieldDefinition
-	DirectiveLocationArgumentDefinition
-	DirectiveLocationInterface
-	DirectiveLocationUnion
-	DirectiveLocationEnum
-	DirectiveLocationEnumValue
-	DirectiveLocationInputObject
-	DirectiveLocationInputFieldDefinition
+	DirectiveLocationKindQuery DirectiveLocation = iota
+	DirectiveLocationKindMutation
+	DirectiveLocationKindSubscription
+	DirectiveLocationKindField
+	DirectiveLocationKindFragmentDefinition
+	DirectiveLocationKindFragmentSpread
+	DirectiveLocationKindInlineFragment
+	DirectiveLocationKindSchema
+	DirectiveLocationKindScalar
+	DirectiveLocationKindObject
+	DirectiveLocationKindFieldDefinition
+	DirectiveLocationKindArgumentDefinition
+	DirectiveLocationKindInterface
+	DirectiveLocationKindUnion
+	DirectiveLocationKindEnum
+	DirectiveLocationKindEnumValue
+	DirectiveLocationKindInputObject
+	DirectiveLocationKindInputFieldDefinition
 )
 
 type DirectiveLocation int8
 
 func (l DirectiveLocation) String() string {
 	switch l {
-	case DirectiveLocationQuery:
+	case DirectiveLocationKindQuery:
 		return "QUERY"
-	case DirectiveLocationMutation:
+	case DirectiveLocationKindMutation:
 		return "MUTATION"
-	case DirectiveLocationSubscription:
+	case DirectiveLocationKindSubscription:
 		return "SUBSCRIPTION"
-	case DirectiveLocationField:
+	case DirectiveLocationKindField:
 		return "FIELD"
-	case DirectiveLocationFragmentDefinition:
+	case DirectiveLocationKindFragmentDefinition:
 		return "FRAGMENT_DEFINITION"
-	case DirectiveLocationFragmentSpread:
+	case DirectiveLocationKindFragmentSpread:
 		return "FRAGMENT_SPREAD"
-	case DirectiveLocationInlineFragment:
+	case DirectiveLocationKindInlineFragment:
 		return "INLINE_FRAGMENT"
-	case DirectiveLocationSchema:
+	case DirectiveLocationKindSchema:
 		return "SCHEMA"
-	case DirectiveLocationScalar:
+	case DirectiveLocationKindScalar:
 		return "SCALAR"
-	case DirectiveLocationObject:
+	case DirectiveLocationKindObject:
 		return "OBJECT"
-	case DirectiveLocationFieldDefinition:
+	case DirectiveLocationKindFieldDefinition:
 		return "FIELD_DEFINITION"
-	case DirectiveLocationArgumentDefinition:
+	case DirectiveLocationKindArgumentDefinition:
 		return "ARGUMENT_DEFINITION"
-	case DirectiveLocationInterface:
+	case DirectiveLocationKindInterface:
 		return "INTERFACE"
-	case DirectiveLocationUnion:
+	case DirectiveLocationKindUnion:
 		return "UNION"
-	case DirectiveLocationEnum:
+	case DirectiveLocationKindEnum:
 		return "ENUM"
-	case DirectiveLocationEnumValue:
+	case DirectiveLocationKindEnumValue:
 		return "ENUM_VALUE"
-	case DirectiveLocationInputObject:
+	case DirectiveLocationKindInputObject:
 		return "INPUT_OBJECT"
-	case DirectiveLocationInputFieldDefinition:
+	case DirectiveLocationKindInputFieldDefinition:
 		return "INPUT_FIELD_DEFINITION"
 	}
 

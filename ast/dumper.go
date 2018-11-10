@@ -85,13 +85,13 @@ func (d *dumper) dumpOperationDefinition(def *ExecutableDefinition) {
 	}
 
 	switch def.OperationType {
-	case OperationTypeQuery:
+	case OperationDefinitionKindQuery:
 		if !shorthand || def.Name != "" {
 			io.WriteString(d.w, "query ")
 		}
-	case OperationTypeMutation:
+	case OperationDefinitionKindMutation:
 		io.WriteString(d.w, "mutation ")
-	case OperationTypeSubscription:
+	case OperationDefinitionKindSubscription:
 		io.WriteString(d.w, "subscription ")
 	}
 
@@ -260,11 +260,11 @@ func (d *dumper) dumpValue(value Value) {
 	case ValueKindVariable:
 		io.WriteString(d.w, "$")
 		io.WriteString(d.w, value.StringValue)
-	case ValueKindIntValue:
+	case ValueKindInt:
 		io.WriteString(d.w, strconv.Itoa(value.IntValue))
-	case ValueKindFloatValue:
+	case ValueKindFloat:
 		io.WriteString(d.w, fmt.Sprintf("%g", value.FloatValue))
-	case ValueKindStringValue:
+	case ValueKindString:
 		hasLF := strings.Contains(value.StringValue, "\n")
 
 		// If the string contains a new line, we'll print it out as a multi-line string.
@@ -297,17 +297,17 @@ func (d *dumper) dumpValue(value Value) {
 			io.WriteString(d.w, `"`)
 		}
 
-	case ValueKindBooleanValue:
+	case ValueKindBoolean:
 		if value.BooleanValue {
 			io.WriteString(d.w, "true")
 		} else {
 			io.WriteString(d.w, "false")
 		}
-	case ValueKindNullValue:
+	case ValueKindNull:
 		io.WriteString(d.w, "null")
-	case ValueKindEnumValue:
+	case ValueKindEnum:
 		io.WriteString(d.w, value.StringValue)
-	case ValueKindListValue:
+	case ValueKindList:
 		io.WriteString(d.w, "[")
 
 		vals := len(value.ListValue)
@@ -319,7 +319,7 @@ func (d *dumper) dumpValue(value Value) {
 		}
 
 		io.WriteString(d.w, "]")
-	case ValueKindObjectValue:
+	case ValueKindObject:
 		io.WriteString(d.w, "{ ")
 
 		vals := len(value.ObjectValue)
@@ -371,9 +371,9 @@ func (d *dumper) dumpVariableDefinition(definition VariableDefinition) {
 // 2.11 Type References
 func (d *dumper) dumpType(astType Type) {
 	switch astType.Kind {
-	case TypeKindNamedType:
+	case TypeKindNamed:
 		io.WriteString(d.w, astType.NamedType)
-	case TypeKindListType:
+	case TypeKindList:
 		io.WriteString(d.w, "[")
 		d.dumpType(*astType.ListType)
 		io.WriteString(d.w, "]")
