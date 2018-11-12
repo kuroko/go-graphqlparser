@@ -16,17 +16,6 @@ func (e *Errors) Add(data Error) *Errors {
 	}
 }
 
-// Join attaches the tail of the receiver list "e" to the head of the otherList.
-func (e *Errors) Join(otherList *Errors) {
-	current := e
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (e *Errors) ForEach(fn func(err Error, i int)) {
 	if e == nil {
@@ -46,6 +35,17 @@ func (e *Errors) ForEach(fn func(err Error, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "e" to the head of the otherList.
+func (e *Errors) Join(otherList *Errors) {
+	current := e
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // ErrorsFromSlice returns a Errors list from a slice of Error.
@@ -109,17 +109,6 @@ func (l *Locations) Add(data Location) *Locations {
 	}
 }
 
-// Join attaches the tail of the receiver list "l" to the head of the otherList.
-func (l *Locations) Join(otherList *Locations) {
-	current := l
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (l *Locations) ForEach(fn func(location Location, i int)) {
 	if l == nil {
@@ -139,6 +128,17 @@ func (l *Locations) ForEach(fn func(location Location, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "l" to the head of the otherList.
+func (l *Locations) Join(otherList *Locations) {
+	current := l
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // LocationsFromSlice returns a Locations list from a slice of Location.
@@ -202,17 +202,6 @@ func (pn *PathNodes) Add(data PathNode) *PathNodes {
 	}
 }
 
-// Join attaches the tail of the receiver list "pn" to the head of the otherList.
-func (pn *PathNodes) Join(otherList *PathNodes) {
-	current := pn
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (pn *PathNodes) ForEach(fn func(pathNode PathNode, i int)) {
 	if pn == nil {
@@ -232,6 +221,17 @@ func (pn *PathNodes) ForEach(fn func(pathNode PathNode, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "pn" to the head of the otherList.
+func (pn *PathNodes) Join(otherList *PathNodes) {
+	current := pn
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // PathNodesFromSlice returns a PathNodes list from a slice of PathNode.

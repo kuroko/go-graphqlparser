@@ -16,17 +16,6 @@ func (a *Arguments) Add(data Argument) *Arguments {
 	}
 }
 
-// Join attaches the tail of the receiver list "a" to the head of the otherList.
-func (a *Arguments) Join(otherList *Arguments) {
-	current := a
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (a *Arguments) ForEach(fn func(argument Argument, i int)) {
 	if a == nil {
@@ -46,6 +35,17 @@ func (a *Arguments) ForEach(fn func(argument Argument, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "a" to the head of the otherList.
+func (a *Arguments) Join(otherList *Arguments) {
+	current := a
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // ArgumentsFromSlice returns a Arguments list from a slice of Argument.
@@ -109,17 +109,6 @@ func (d *Definitions) Add(data Definition) *Definitions {
 	}
 }
 
-// Join attaches the tail of the receiver list "d" to the head of the otherList.
-func (d *Definitions) Join(otherList *Definitions) {
-	current := d
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (d *Definitions) ForEach(fn func(definition Definition, i int)) {
 	if d == nil {
@@ -139,6 +128,17 @@ func (d *Definitions) ForEach(fn func(definition Definition, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "d" to the head of the otherList.
+func (d *Definitions) Join(otherList *Definitions) {
+	current := d
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // DefinitionsFromSlice returns a Definitions list from a slice of Definition.
@@ -202,17 +202,6 @@ func (d *Directives) Add(data Directive) *Directives {
 	}
 }
 
-// Join attaches the tail of the receiver list "d" to the head of the otherList.
-func (d *Directives) Join(otherList *Directives) {
-	current := d
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (d *Directives) ForEach(fn func(directive Directive, i int)) {
 	if d == nil {
@@ -232,6 +221,17 @@ func (d *Directives) ForEach(fn func(directive Directive, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "d" to the head of the otherList.
+func (d *Directives) Join(otherList *Directives) {
+	current := d
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // DirectivesFromSlice returns a Directives list from a slice of Directive.
@@ -295,17 +295,6 @@ func (dl *DirectiveLocations) Add(data DirectiveLocation) *DirectiveLocations {
 	}
 }
 
-// Join attaches the tail of the receiver list "dl" to the head of the otherList.
-func (dl *DirectiveLocations) Join(otherList *DirectiveLocations) {
-	current := dl
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (dl *DirectiveLocations) ForEach(fn func(directiveLocation DirectiveLocation, i int)) {
 	if dl == nil {
@@ -325,6 +314,17 @@ func (dl *DirectiveLocations) ForEach(fn func(directiveLocation DirectiveLocatio
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "dl" to the head of the otherList.
+func (dl *DirectiveLocations) Join(otherList *DirectiveLocations) {
+	current := dl
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // DirectiveLocationsFromSlice returns a DirectiveLocations list from a slice of DirectiveLocation.
@@ -388,17 +388,6 @@ func (evd *EnumValueDefinitions) Add(data EnumValueDefinition) *EnumValueDefinit
 	}
 }
 
-// Join attaches the tail of the receiver list "evd" to the head of the otherList.
-func (evd *EnumValueDefinitions) Join(otherList *EnumValueDefinitions) {
-	current := evd
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (evd *EnumValueDefinitions) ForEach(fn func(enumValueDefinition EnumValueDefinition, i int)) {
 	if evd == nil {
@@ -418,6 +407,17 @@ func (evd *EnumValueDefinitions) ForEach(fn func(enumValueDefinition EnumValueDe
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "evd" to the head of the otherList.
+func (evd *EnumValueDefinitions) Join(otherList *EnumValueDefinitions) {
+	current := evd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // EnumValueDefinitionsFromSlice returns a EnumValueDefinitions list from a slice of EnumValueDefinition.
@@ -481,17 +481,6 @@ func (fd *FieldDefinitions) Add(data FieldDefinition) *FieldDefinitions {
 	}
 }
 
-// Join attaches the tail of the receiver list "fd" to the head of the otherList.
-func (fd *FieldDefinitions) Join(otherList *FieldDefinitions) {
-	current := fd
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (fd *FieldDefinitions) ForEach(fn func(fieldDefinition FieldDefinition, i int)) {
 	if fd == nil {
@@ -511,6 +500,17 @@ func (fd *FieldDefinitions) ForEach(fn func(fieldDefinition FieldDefinition, i i
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "fd" to the head of the otherList.
+func (fd *FieldDefinitions) Join(otherList *FieldDefinitions) {
+	current := fd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // FieldDefinitionsFromSlice returns a FieldDefinitions list from a slice of FieldDefinition.
@@ -574,17 +574,6 @@ func (ivd *InputValueDefinitions) Add(data InputValueDefinition) *InputValueDefi
 	}
 }
 
-// Join attaches the tail of the receiver list "ivd" to the head of the otherList.
-func (ivd *InputValueDefinitions) Join(otherList *InputValueDefinitions) {
-	current := ivd
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (ivd *InputValueDefinitions) ForEach(fn func(inputValueDefinition InputValueDefinition, i int)) {
 	if ivd == nil {
@@ -604,6 +593,17 @@ func (ivd *InputValueDefinitions) ForEach(fn func(inputValueDefinition InputValu
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "ivd" to the head of the otherList.
+func (ivd *InputValueDefinitions) Join(otherList *InputValueDefinitions) {
+	current := ivd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // InputValueDefinitionsFromSlice returns a InputValueDefinitions list from a slice of InputValueDefinition.
@@ -667,17 +667,6 @@ func (otd *OperationTypeDefinitions) Add(data OperationTypeDefinition) *Operatio
 	}
 }
 
-// Join attaches the tail of the receiver list "otd" to the head of the otherList.
-func (otd *OperationTypeDefinitions) Join(otherList *OperationTypeDefinitions) {
-	current := otd
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (otd *OperationTypeDefinitions) ForEach(fn func(operationTypeDefinition OperationTypeDefinition, i int)) {
 	if otd == nil {
@@ -697,6 +686,17 @@ func (otd *OperationTypeDefinitions) ForEach(fn func(operationTypeDefinition Ope
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "otd" to the head of the otherList.
+func (otd *OperationTypeDefinitions) Join(otherList *OperationTypeDefinitions) {
+	current := otd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // OperationTypeDefinitionsFromSlice returns a OperationTypeDefinitions list from a slice of OperationTypeDefinition.
@@ -760,17 +760,6 @@ func (rotd *RootOperationTypeDefinitions) Add(data RootOperationTypeDefinition) 
 	}
 }
 
-// Join attaches the tail of the receiver list "rotd" to the head of the otherList.
-func (rotd *RootOperationTypeDefinitions) Join(otherList *RootOperationTypeDefinitions) {
-	current := rotd
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (rotd *RootOperationTypeDefinitions) ForEach(fn func(rootOperationTypeDefinition RootOperationTypeDefinition, i int)) {
 	if rotd == nil {
@@ -790,6 +779,17 @@ func (rotd *RootOperationTypeDefinitions) ForEach(fn func(rootOperationTypeDefin
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "rotd" to the head of the otherList.
+func (rotd *RootOperationTypeDefinitions) Join(otherList *RootOperationTypeDefinitions) {
+	current := rotd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // RootOperationTypeDefinitionsFromSlice returns a RootOperationTypeDefinitions list from a slice of RootOperationTypeDefinition.
@@ -853,17 +853,6 @@ func (s *Selections) Add(data Selection) *Selections {
 	}
 }
 
-// Join attaches the tail of the receiver list "s" to the head of the otherList.
-func (s *Selections) Join(otherList *Selections) {
-	current := s
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (s *Selections) ForEach(fn func(selection Selection, i int)) {
 	if s == nil {
@@ -883,6 +872,17 @@ func (s *Selections) ForEach(fn func(selection Selection, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "s" to the head of the otherList.
+func (s *Selections) Join(otherList *Selections) {
+	current := s
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // SelectionsFromSlice returns a Selections list from a slice of Selection.
@@ -946,17 +946,6 @@ func (t *Types) Add(data Type) *Types {
 	}
 }
 
-// Join attaches the tail of the receiver list "t" to the head of the otherList.
-func (t *Types) Join(otherList *Types) {
-	current := t
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (t *Types) ForEach(fn func(t Type, i int)) {
 	if t == nil {
@@ -976,6 +965,17 @@ func (t *Types) ForEach(fn func(t Type, i int)) {
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "t" to the head of the otherList.
+func (t *Types) Join(otherList *Types) {
+	current := t
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // TypesFromSlice returns a Types list from a slice of Type.
@@ -1039,17 +1039,6 @@ func (vd *VariableDefinitions) Add(data VariableDefinition) *VariableDefinitions
 	}
 }
 
-// Join attaches the tail of the receiver list "vd" to the head of the otherList.
-func (vd *VariableDefinitions) Join(otherList *VariableDefinitions) {
-	current := vd
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
-}
-
 // ForEach applies the given map function to each item in this linked list.
 func (vd *VariableDefinitions) ForEach(fn func(variableDefinition VariableDefinition, i int)) {
 	if vd == nil {
@@ -1069,6 +1058,17 @@ func (vd *VariableDefinitions) ForEach(fn func(variableDefinition VariableDefini
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "vd" to the head of the otherList.
+func (vd *VariableDefinitions) Join(otherList *VariableDefinitions) {
+	current := vd
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // VariableDefinitionsFromSlice returns a VariableDefinitions list from a slice of VariableDefinition.

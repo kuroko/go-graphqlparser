@@ -50,6 +50,14 @@ func main() {
 	}
 }
 
+// Add
+// ForEach
+// Insert
+// Join
+// Len
+// Reverse
+// ArgumentsFromSlice // not method
+
 var linkedList = template.Must(template.New("linkedList").Parse(`
 // {{.TypeName}}s is a linked list that contains {{.TypeName}} values.
 type {{.TypeName}}s struct {
@@ -63,17 +71,6 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) Add(data {{.TypeName}}) *{{.TypeName}}s {
 		Data: data,
 		Next: {{.AbridgedTN}},
 	}
-}
-
-// Join attaches the tail of the receiver list "{{.AbridgedTN}}" to the head of the otherList.
-func ({{.AbridgedTN}} *{{.TypeName}}s) Join(otherList *{{.TypeName}}s) {
-	current := {{.AbridgedTN}}
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
 }
 
 // ForEach applies the given map function to each item in this linked list.
@@ -95,6 +92,17 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) ForEach(fn func({{.TypeNameLCF}} {{.TypeN
 		iter++
 		current = current.Next
 	}
+}
+
+// Join attaches the tail of the receiver list "{{.AbridgedTN}}" to the head of the otherList.
+func ({{.AbridgedTN}} *{{.TypeName}}s) Join(otherList *{{.TypeName}}s) {
+	current := {{.AbridgedTN}}
+
+	for current.Next != nil {
+		current = current.Next
+	}
+
+	current.Next = otherList
 }
 
 // {{.TypeName}}sFromSlice returns a {{.TypeName}}s list from a slice of {{.TypeName}}.
