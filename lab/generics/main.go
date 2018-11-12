@@ -62,14 +62,22 @@ var linkedList = template.Must(template.New("linkedList").Parse(`
 // {{.TypeName}}s is a linked list that contains {{.TypeName}} values.
 type {{.TypeName}}s struct {
 	Data {{.TypeName}}
-	Next *{{.TypeName}}s
+	next *{{.TypeName}}s
+	pos  int
 }
 
 // Add appends a {{.TypeName}} to this linked list and returns this new head.
 func ({{.AbridgedTN}} *{{.TypeName}}s) Add(data {{.TypeName}}) *{{.TypeName}}s {
+	var pos int
+
+	if {{.AbridgedTN}} != nil {
+		pos = {{.AbridgedTN}}.pos + 1
+	}
+
 	return &{{.TypeName}}s{
 		Data: data,
-		Next: {{.AbridgedTN}},
+		next: {{.AbridgedTN}},
+		pos: pos,
 	}
 }
 
@@ -85,33 +93,31 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) ForEach(fn func({{.TypeNameLCF}} {{.TypeN
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
+
+// Insert places the {{.TypeName}} in the position given.
+func ({{.AbridgedTN}} *{{.TypeName}}s) Insert(item {{.TypeName}}, pos int) {}
 
 // Join attaches the tail of the receiver list "{{.AbridgedTN}}" to the head of the otherList.
 func ({{.AbridgedTN}} *{{.TypeName}}s) Join(otherList *{{.TypeName}}s) {
-	current := {{.AbridgedTN}}
+	pos := {{.AbridgedTN}}.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := {{.AbridgedTN}}
+	for {{.AbridgedTN}} != nil {
+		{{.AbridgedTN}}.pos = pos
+		pos--
+		last = {{.AbridgedTN}}
+		{{.AbridgedTN}} = {{.AbridgedTN}}.next
 	}
 
-	current.Next = otherList
-}
-
-// {{.TypeName}}sFromSlice returns a {{.TypeName}}s list from a slice of {{.TypeName}}.
-func {{.TypeName}}sFromSlice(sl []{{.TypeName}}) *{{.TypeName}}s {
-	var list *{{.TypeName}}s
-	for _, v := range sl {
-		list = list.Add(v)
-	}
-	return list.Reverse()
+	last.next = otherList
 }
 
 // Len returns the length of this linked list.
@@ -119,20 +125,7 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) Len() int {
 	if {{.AbridgedTN}} == nil {
 		return 0
 	}
-
-	var length int
-
-	current := {{.AbridgedTN}}
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
+	return {{.AbridgedTN}}.pos + 1
 }
 
 // Reverse reverses this linked list of {{.TypeName}}. Usually when the linked list is being
@@ -142,14 +135,28 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) Reverse() *{{.TypeName}}s {
 	current := {{.AbridgedTN}}
 
 	var prev *{{.TypeName}}s
+	var pos int
+
 	for current != nil {
-		next := current.Next
-		current.Next = prev
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
 		prev = current
 		current = next
 	}
 
 	return prev
+}
+
+// {{.TypeName}}sFromSlice returns a {{.TypeName}}s list from a slice of {{.TypeName}}.
+func {{.TypeName}}sFromSlice(sl []{{.TypeName}}) *{{.TypeName}}s {
+	var list *{{.TypeName}}s
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
 }
 `))
 

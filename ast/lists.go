@@ -5,14 +5,22 @@ package ast
 // Arguments is a linked list that contains Argument values.
 type Arguments struct {
 	Data Argument
-	Next *Arguments
+	next *Arguments
+	pos  int
 }
 
 // Add appends a Argument to this linked list and returns this new head.
 func (a *Arguments) Add(data Argument) *Arguments {
+	var pos int
+
+	if a != nil {
+		pos = a.pos + 1
+	}
+
 	return &Arguments{
 		Data: data,
-		Next: a,
+		next: a,
+		pos:  pos,
 	}
 }
 
@@ -28,24 +36,61 @@ func (a *Arguments) ForEach(fn func(argument Argument, i int)) {
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the Argument in the position given.
+func (a *Arguments) Insert(item Argument, pos int) {}
+
 // Join attaches the tail of the receiver list "a" to the head of the otherList.
 func (a *Arguments) Join(otherList *Arguments) {
-	current := a
+	pos := a.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := a
+	for a != nil {
+		a.pos = pos
+		pos--
+		last = a
+		a = a.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (a *Arguments) Len() int {
+	if a == nil {
+		return 0
+	}
+	return a.pos + 1
+}
+
+// Reverse reverses this linked list of Argument. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (a *Arguments) Reverse() *Arguments {
+	current := a
+
+	var prev *Arguments
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // ArgumentsFromSlice returns a Arguments list from a slice of Argument.
@@ -57,55 +102,25 @@ func ArgumentsFromSlice(sl []Argument) *Arguments {
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (a *Arguments) Len() int {
-	if a == nil {
-		return 0
-	}
-
-	var length int
-
-	current := a
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of Argument. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (a *Arguments) Reverse() *Arguments {
-	current := a
-
-	var prev *Arguments
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // Definitions is a linked list that contains Definition values.
 type Definitions struct {
 	Data Definition
-	Next *Definitions
+	next *Definitions
+	pos  int
 }
 
 // Add appends a Definition to this linked list and returns this new head.
 func (d *Definitions) Add(data Definition) *Definitions {
+	var pos int
+
+	if d != nil {
+		pos = d.pos + 1
+	}
+
 	return &Definitions{
 		Data: data,
-		Next: d,
+		next: d,
+		pos:  pos,
 	}
 }
 
@@ -121,24 +136,61 @@ func (d *Definitions) ForEach(fn func(definition Definition, i int)) {
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the Definition in the position given.
+func (d *Definitions) Insert(item Definition, pos int) {}
+
 // Join attaches the tail of the receiver list "d" to the head of the otherList.
 func (d *Definitions) Join(otherList *Definitions) {
-	current := d
+	pos := d.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := d
+	for d != nil {
+		d.pos = pos
+		pos--
+		last = d
+		d = d.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (d *Definitions) Len() int {
+	if d == nil {
+		return 0
+	}
+	return d.pos + 1
+}
+
+// Reverse reverses this linked list of Definition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (d *Definitions) Reverse() *Definitions {
+	current := d
+
+	var prev *Definitions
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // DefinitionsFromSlice returns a Definitions list from a slice of Definition.
@@ -150,55 +202,25 @@ func DefinitionsFromSlice(sl []Definition) *Definitions {
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (d *Definitions) Len() int {
-	if d == nil {
-		return 0
-	}
-
-	var length int
-
-	current := d
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of Definition. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (d *Definitions) Reverse() *Definitions {
-	current := d
-
-	var prev *Definitions
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // Directives is a linked list that contains Directive values.
 type Directives struct {
 	Data Directive
-	Next *Directives
+	next *Directives
+	pos  int
 }
 
 // Add appends a Directive to this linked list and returns this new head.
 func (d *Directives) Add(data Directive) *Directives {
+	var pos int
+
+	if d != nil {
+		pos = d.pos + 1
+	}
+
 	return &Directives{
 		Data: data,
-		Next: d,
+		next: d,
+		pos:  pos,
 	}
 }
 
@@ -214,24 +236,61 @@ func (d *Directives) ForEach(fn func(directive Directive, i int)) {
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the Directive in the position given.
+func (d *Directives) Insert(item Directive, pos int) {}
+
 // Join attaches the tail of the receiver list "d" to the head of the otherList.
 func (d *Directives) Join(otherList *Directives) {
-	current := d
+	pos := d.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := d
+	for d != nil {
+		d.pos = pos
+		pos--
+		last = d
+		d = d.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (d *Directives) Len() int {
+	if d == nil {
+		return 0
+	}
+	return d.pos + 1
+}
+
+// Reverse reverses this linked list of Directive. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (d *Directives) Reverse() *Directives {
+	current := d
+
+	var prev *Directives
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // DirectivesFromSlice returns a Directives list from a slice of Directive.
@@ -243,55 +302,25 @@ func DirectivesFromSlice(sl []Directive) *Directives {
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (d *Directives) Len() int {
-	if d == nil {
-		return 0
-	}
-
-	var length int
-
-	current := d
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of Directive. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (d *Directives) Reverse() *Directives {
-	current := d
-
-	var prev *Directives
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // DirectiveLocations is a linked list that contains DirectiveLocation values.
 type DirectiveLocations struct {
 	Data DirectiveLocation
-	Next *DirectiveLocations
+	next *DirectiveLocations
+	pos  int
 }
 
 // Add appends a DirectiveLocation to this linked list and returns this new head.
 func (dl *DirectiveLocations) Add(data DirectiveLocation) *DirectiveLocations {
+	var pos int
+
+	if dl != nil {
+		pos = dl.pos + 1
+	}
+
 	return &DirectiveLocations{
 		Data: data,
-		Next: dl,
+		next: dl,
+		pos:  pos,
 	}
 }
 
@@ -307,24 +336,61 @@ func (dl *DirectiveLocations) ForEach(fn func(directiveLocation DirectiveLocatio
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the DirectiveLocation in the position given.
+func (dl *DirectiveLocations) Insert(item DirectiveLocation, pos int) {}
+
 // Join attaches the tail of the receiver list "dl" to the head of the otherList.
 func (dl *DirectiveLocations) Join(otherList *DirectiveLocations) {
-	current := dl
+	pos := dl.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := dl
+	for dl != nil {
+		dl.pos = pos
+		pos--
+		last = dl
+		dl = dl.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (dl *DirectiveLocations) Len() int {
+	if dl == nil {
+		return 0
+	}
+	return dl.pos + 1
+}
+
+// Reverse reverses this linked list of DirectiveLocation. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (dl *DirectiveLocations) Reverse() *DirectiveLocations {
+	current := dl
+
+	var prev *DirectiveLocations
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // DirectiveLocationsFromSlice returns a DirectiveLocations list from a slice of DirectiveLocation.
@@ -336,55 +402,25 @@ func DirectiveLocationsFromSlice(sl []DirectiveLocation) *DirectiveLocations {
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (dl *DirectiveLocations) Len() int {
-	if dl == nil {
-		return 0
-	}
-
-	var length int
-
-	current := dl
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of DirectiveLocation. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (dl *DirectiveLocations) Reverse() *DirectiveLocations {
-	current := dl
-
-	var prev *DirectiveLocations
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // EnumValueDefinitions is a linked list that contains EnumValueDefinition values.
 type EnumValueDefinitions struct {
 	Data EnumValueDefinition
-	Next *EnumValueDefinitions
+	next *EnumValueDefinitions
+	pos  int
 }
 
 // Add appends a EnumValueDefinition to this linked list and returns this new head.
 func (evd *EnumValueDefinitions) Add(data EnumValueDefinition) *EnumValueDefinitions {
+	var pos int
+
+	if evd != nil {
+		pos = evd.pos + 1
+	}
+
 	return &EnumValueDefinitions{
 		Data: data,
-		Next: evd,
+		next: evd,
+		pos:  pos,
 	}
 }
 
@@ -400,24 +436,61 @@ func (evd *EnumValueDefinitions) ForEach(fn func(enumValueDefinition EnumValueDe
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the EnumValueDefinition in the position given.
+func (evd *EnumValueDefinitions) Insert(item EnumValueDefinition, pos int) {}
+
 // Join attaches the tail of the receiver list "evd" to the head of the otherList.
 func (evd *EnumValueDefinitions) Join(otherList *EnumValueDefinitions) {
-	current := evd
+	pos := evd.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := evd
+	for evd != nil {
+		evd.pos = pos
+		pos--
+		last = evd
+		evd = evd.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (evd *EnumValueDefinitions) Len() int {
+	if evd == nil {
+		return 0
+	}
+	return evd.pos + 1
+}
+
+// Reverse reverses this linked list of EnumValueDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (evd *EnumValueDefinitions) Reverse() *EnumValueDefinitions {
+	current := evd
+
+	var prev *EnumValueDefinitions
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // EnumValueDefinitionsFromSlice returns a EnumValueDefinitions list from a slice of EnumValueDefinition.
@@ -429,55 +502,25 @@ func EnumValueDefinitionsFromSlice(sl []EnumValueDefinition) *EnumValueDefinitio
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (evd *EnumValueDefinitions) Len() int {
-	if evd == nil {
-		return 0
-	}
-
-	var length int
-
-	current := evd
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of EnumValueDefinition. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (evd *EnumValueDefinitions) Reverse() *EnumValueDefinitions {
-	current := evd
-
-	var prev *EnumValueDefinitions
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // FieldDefinitions is a linked list that contains FieldDefinition values.
 type FieldDefinitions struct {
 	Data FieldDefinition
-	Next *FieldDefinitions
+	next *FieldDefinitions
+	pos  int
 }
 
 // Add appends a FieldDefinition to this linked list and returns this new head.
 func (fd *FieldDefinitions) Add(data FieldDefinition) *FieldDefinitions {
+	var pos int
+
+	if fd != nil {
+		pos = fd.pos + 1
+	}
+
 	return &FieldDefinitions{
 		Data: data,
-		Next: fd,
+		next: fd,
+		pos:  pos,
 	}
 }
 
@@ -493,24 +536,61 @@ func (fd *FieldDefinitions) ForEach(fn func(fieldDefinition FieldDefinition, i i
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the FieldDefinition in the position given.
+func (fd *FieldDefinitions) Insert(item FieldDefinition, pos int) {}
+
 // Join attaches the tail of the receiver list "fd" to the head of the otherList.
 func (fd *FieldDefinitions) Join(otherList *FieldDefinitions) {
-	current := fd
+	pos := fd.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := fd
+	for fd != nil {
+		fd.pos = pos
+		pos--
+		last = fd
+		fd = fd.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (fd *FieldDefinitions) Len() int {
+	if fd == nil {
+		return 0
+	}
+	return fd.pos + 1
+}
+
+// Reverse reverses this linked list of FieldDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (fd *FieldDefinitions) Reverse() *FieldDefinitions {
+	current := fd
+
+	var prev *FieldDefinitions
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // FieldDefinitionsFromSlice returns a FieldDefinitions list from a slice of FieldDefinition.
@@ -522,55 +602,25 @@ func FieldDefinitionsFromSlice(sl []FieldDefinition) *FieldDefinitions {
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (fd *FieldDefinitions) Len() int {
-	if fd == nil {
-		return 0
-	}
-
-	var length int
-
-	current := fd
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of FieldDefinition. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (fd *FieldDefinitions) Reverse() *FieldDefinitions {
-	current := fd
-
-	var prev *FieldDefinitions
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // InputValueDefinitions is a linked list that contains InputValueDefinition values.
 type InputValueDefinitions struct {
 	Data InputValueDefinition
-	Next *InputValueDefinitions
+	next *InputValueDefinitions
+	pos  int
 }
 
 // Add appends a InputValueDefinition to this linked list and returns this new head.
 func (ivd *InputValueDefinitions) Add(data InputValueDefinition) *InputValueDefinitions {
+	var pos int
+
+	if ivd != nil {
+		pos = ivd.pos + 1
+	}
+
 	return &InputValueDefinitions{
 		Data: data,
-		Next: ivd,
+		next: ivd,
+		pos:  pos,
 	}
 }
 
@@ -586,24 +636,61 @@ func (ivd *InputValueDefinitions) ForEach(fn func(inputValueDefinition InputValu
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the InputValueDefinition in the position given.
+func (ivd *InputValueDefinitions) Insert(item InputValueDefinition, pos int) {}
+
 // Join attaches the tail of the receiver list "ivd" to the head of the otherList.
 func (ivd *InputValueDefinitions) Join(otherList *InputValueDefinitions) {
-	current := ivd
+	pos := ivd.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := ivd
+	for ivd != nil {
+		ivd.pos = pos
+		pos--
+		last = ivd
+		ivd = ivd.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (ivd *InputValueDefinitions) Len() int {
+	if ivd == nil {
+		return 0
+	}
+	return ivd.pos + 1
+}
+
+// Reverse reverses this linked list of InputValueDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (ivd *InputValueDefinitions) Reverse() *InputValueDefinitions {
+	current := ivd
+
+	var prev *InputValueDefinitions
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // InputValueDefinitionsFromSlice returns a InputValueDefinitions list from a slice of InputValueDefinition.
@@ -615,55 +702,25 @@ func InputValueDefinitionsFromSlice(sl []InputValueDefinition) *InputValueDefini
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (ivd *InputValueDefinitions) Len() int {
-	if ivd == nil {
-		return 0
-	}
-
-	var length int
-
-	current := ivd
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of InputValueDefinition. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (ivd *InputValueDefinitions) Reverse() *InputValueDefinitions {
-	current := ivd
-
-	var prev *InputValueDefinitions
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // OperationTypeDefinitions is a linked list that contains OperationTypeDefinition values.
 type OperationTypeDefinitions struct {
 	Data OperationTypeDefinition
-	Next *OperationTypeDefinitions
+	next *OperationTypeDefinitions
+	pos  int
 }
 
 // Add appends a OperationTypeDefinition to this linked list and returns this new head.
 func (otd *OperationTypeDefinitions) Add(data OperationTypeDefinition) *OperationTypeDefinitions {
+	var pos int
+
+	if otd != nil {
+		pos = otd.pos + 1
+	}
+
 	return &OperationTypeDefinitions{
 		Data: data,
-		Next: otd,
+		next: otd,
+		pos:  pos,
 	}
 }
 
@@ -679,24 +736,61 @@ func (otd *OperationTypeDefinitions) ForEach(fn func(operationTypeDefinition Ope
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the OperationTypeDefinition in the position given.
+func (otd *OperationTypeDefinitions) Insert(item OperationTypeDefinition, pos int) {}
+
 // Join attaches the tail of the receiver list "otd" to the head of the otherList.
 func (otd *OperationTypeDefinitions) Join(otherList *OperationTypeDefinitions) {
-	current := otd
+	pos := otd.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := otd
+	for otd != nil {
+		otd.pos = pos
+		pos--
+		last = otd
+		otd = otd.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (otd *OperationTypeDefinitions) Len() int {
+	if otd == nil {
+		return 0
+	}
+	return otd.pos + 1
+}
+
+// Reverse reverses this linked list of OperationTypeDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (otd *OperationTypeDefinitions) Reverse() *OperationTypeDefinitions {
+	current := otd
+
+	var prev *OperationTypeDefinitions
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // OperationTypeDefinitionsFromSlice returns a OperationTypeDefinitions list from a slice of OperationTypeDefinition.
@@ -708,55 +802,25 @@ func OperationTypeDefinitionsFromSlice(sl []OperationTypeDefinition) *OperationT
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (otd *OperationTypeDefinitions) Len() int {
-	if otd == nil {
-		return 0
-	}
-
-	var length int
-
-	current := otd
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of OperationTypeDefinition. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (otd *OperationTypeDefinitions) Reverse() *OperationTypeDefinitions {
-	current := otd
-
-	var prev *OperationTypeDefinitions
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // RootOperationTypeDefinitions is a linked list that contains RootOperationTypeDefinition values.
 type RootOperationTypeDefinitions struct {
 	Data RootOperationTypeDefinition
-	Next *RootOperationTypeDefinitions
+	next *RootOperationTypeDefinitions
+	pos  int
 }
 
 // Add appends a RootOperationTypeDefinition to this linked list and returns this new head.
 func (rotd *RootOperationTypeDefinitions) Add(data RootOperationTypeDefinition) *RootOperationTypeDefinitions {
+	var pos int
+
+	if rotd != nil {
+		pos = rotd.pos + 1
+	}
+
 	return &RootOperationTypeDefinitions{
 		Data: data,
-		Next: rotd,
+		next: rotd,
+		pos:  pos,
 	}
 }
 
@@ -772,24 +836,61 @@ func (rotd *RootOperationTypeDefinitions) ForEach(fn func(rootOperationTypeDefin
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the RootOperationTypeDefinition in the position given.
+func (rotd *RootOperationTypeDefinitions) Insert(item RootOperationTypeDefinition, pos int) {}
+
 // Join attaches the tail of the receiver list "rotd" to the head of the otherList.
 func (rotd *RootOperationTypeDefinitions) Join(otherList *RootOperationTypeDefinitions) {
-	current := rotd
+	pos := rotd.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := rotd
+	for rotd != nil {
+		rotd.pos = pos
+		pos--
+		last = rotd
+		rotd = rotd.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (rotd *RootOperationTypeDefinitions) Len() int {
+	if rotd == nil {
+		return 0
+	}
+	return rotd.pos + 1
+}
+
+// Reverse reverses this linked list of RootOperationTypeDefinition. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (rotd *RootOperationTypeDefinitions) Reverse() *RootOperationTypeDefinitions {
+	current := rotd
+
+	var prev *RootOperationTypeDefinitions
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // RootOperationTypeDefinitionsFromSlice returns a RootOperationTypeDefinitions list from a slice of RootOperationTypeDefinition.
@@ -801,55 +902,25 @@ func RootOperationTypeDefinitionsFromSlice(sl []RootOperationTypeDefinition) *Ro
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (rotd *RootOperationTypeDefinitions) Len() int {
-	if rotd == nil {
-		return 0
-	}
-
-	var length int
-
-	current := rotd
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of RootOperationTypeDefinition. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (rotd *RootOperationTypeDefinitions) Reverse() *RootOperationTypeDefinitions {
-	current := rotd
-
-	var prev *RootOperationTypeDefinitions
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // Selections is a linked list that contains Selection values.
 type Selections struct {
 	Data Selection
-	Next *Selections
+	next *Selections
+	pos  int
 }
 
 // Add appends a Selection to this linked list and returns this new head.
 func (s *Selections) Add(data Selection) *Selections {
+	var pos int
+
+	if s != nil {
+		pos = s.pos + 1
+	}
+
 	return &Selections{
 		Data: data,
-		Next: s,
+		next: s,
+		pos:  pos,
 	}
 }
 
@@ -865,24 +936,61 @@ func (s *Selections) ForEach(fn func(selection Selection, i int)) {
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the Selection in the position given.
+func (s *Selections) Insert(item Selection, pos int) {}
+
 // Join attaches the tail of the receiver list "s" to the head of the otherList.
 func (s *Selections) Join(otherList *Selections) {
-	current := s
+	pos := s.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := s
+	for s != nil {
+		s.pos = pos
+		pos--
+		last = s
+		s = s.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (s *Selections) Len() int {
+	if s == nil {
+		return 0
+	}
+	return s.pos + 1
+}
+
+// Reverse reverses this linked list of Selection. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (s *Selections) Reverse() *Selections {
+	current := s
+
+	var prev *Selections
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // SelectionsFromSlice returns a Selections list from a slice of Selection.
@@ -894,55 +1002,25 @@ func SelectionsFromSlice(sl []Selection) *Selections {
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (s *Selections) Len() int {
-	if s == nil {
-		return 0
-	}
-
-	var length int
-
-	current := s
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of Selection. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (s *Selections) Reverse() *Selections {
-	current := s
-
-	var prev *Selections
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // Types is a linked list that contains Type values.
 type Types struct {
 	Data Type
-	Next *Types
+	next *Types
+	pos  int
 }
 
 // Add appends a Type to this linked list and returns this new head.
 func (t *Types) Add(data Type) *Types {
+	var pos int
+
+	if t != nil {
+		pos = t.pos + 1
+	}
+
 	return &Types{
 		Data: data,
-		Next: t,
+		next: t,
+		pos:  pos,
 	}
 }
 
@@ -958,24 +1036,61 @@ func (t *Types) ForEach(fn func(t Type, i int)) {
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
+// Insert places the Type in the position given.
+func (t *Types) Insert(item Type, pos int) {}
+
 // Join attaches the tail of the receiver list "t" to the head of the otherList.
 func (t *Types) Join(otherList *Types) {
-	current := t
+	pos := t.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := t
+	for t != nil {
+		t.pos = pos
+		pos--
+		last = t
+		t = t.next
 	}
 
-	current.Next = otherList
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (t *Types) Len() int {
+	if t == nil {
+		return 0
+	}
+	return t.pos + 1
+}
+
+// Reverse reverses this linked list of Type. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (t *Types) Reverse() *Types {
+	current := t
+
+	var prev *Types
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // TypesFromSlice returns a Types list from a slice of Type.
@@ -987,55 +1102,25 @@ func TypesFromSlice(sl []Type) *Types {
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (t *Types) Len() int {
-	if t == nil {
-		return 0
-	}
-
-	var length int
-
-	current := t
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of Type. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (t *Types) Reverse() *Types {
-	current := t
-
-	var prev *Types
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
-}
-
 // VariableDefinitions is a linked list that contains VariableDefinition values.
 type VariableDefinitions struct {
 	Data VariableDefinition
-	Next *VariableDefinitions
+	next *VariableDefinitions
+	pos  int
 }
 
 // Add appends a VariableDefinition to this linked list and returns this new head.
 func (vd *VariableDefinitions) Add(data VariableDefinition) *VariableDefinitions {
+	var pos int
+
+	if vd != nil {
+		pos = vd.pos + 1
+	}
+
 	return &VariableDefinitions{
 		Data: data,
-		Next: vd,
+		next: vd,
+		pos:  pos,
 	}
 }
 
@@ -1051,33 +1136,31 @@ func (vd *VariableDefinitions) ForEach(fn func(variableDefinition VariableDefini
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
+
+// Insert places the VariableDefinition in the position given.
+func (vd *VariableDefinitions) Insert(item VariableDefinition, pos int) {}
 
 // Join attaches the tail of the receiver list "vd" to the head of the otherList.
 func (vd *VariableDefinitions) Join(otherList *VariableDefinitions) {
-	current := vd
+	pos := vd.Len() + otherList.Len() - 1
 
-	for current.Next != nil {
-		current = current.Next
+	last := vd
+	for vd != nil {
+		vd.pos = pos
+		pos--
+		last = vd
+		vd = vd.next
 	}
 
-	current.Next = otherList
-}
-
-// VariableDefinitionsFromSlice returns a VariableDefinitions list from a slice of VariableDefinition.
-func VariableDefinitionsFromSlice(sl []VariableDefinition) *VariableDefinitions {
-	var list *VariableDefinitions
-	for _, v := range sl {
-		list = list.Add(v)
-	}
-	return list.Reverse()
+	last.next = otherList
 }
 
 // Len returns the length of this linked list.
@@ -1085,20 +1168,7 @@ func (vd *VariableDefinitions) Len() int {
 	if vd == nil {
 		return 0
 	}
-
-	var length int
-
-	current := vd
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
+	return vd.pos + 1
 }
 
 // Reverse reverses this linked list of VariableDefinition. Usually when the linked list is being
@@ -1108,12 +1178,26 @@ func (vd *VariableDefinitions) Reverse() *VariableDefinitions {
 	current := vd
 
 	var prev *VariableDefinitions
+	var pos int
+
 	for current != nil {
-		next := current.Next
-		current.Next = prev
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
 		prev = current
 		current = next
 	}
 
 	return prev
+}
+
+// VariableDefinitionsFromSlice returns a VariableDefinitions list from a slice of VariableDefinition.
+func VariableDefinitionsFromSlice(sl []VariableDefinition) *VariableDefinitions {
+	var list *VariableDefinitions
+	for _, v := range sl {
+		list = list.Add(v)
+	}
+	return list.Reverse()
 }
