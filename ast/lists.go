@@ -10,28 +10,28 @@ type Arguments struct {
 }
 
 // Add appends a Argument to this linked list and returns this new head.
-func (a *Arguments) Add(data Argument) *Arguments {
+func (as *Arguments) Add(data Argument) *Arguments {
 	var pos int
 
-	if a != nil {
-		pos = a.pos + 1
+	if as != nil {
+		pos = as.pos + 1
 	}
 
 	return &Arguments{
 		Data: data,
-		next: a,
+		next: as,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (a *Arguments) ForEach(fn func(argument Argument, i int)) {
-	if a == nil {
+func (as *Arguments) ForEach(fn func(a Argument, i int)) {
+	if as == nil {
 		return
 	}
 
 	iter := 0
-	current := a
+	current := as
 
 	for {
 		fn(current.Data, iter)
@@ -45,37 +45,65 @@ func (a *Arguments) ForEach(fn func(argument Argument, i int)) {
 	}
 }
 
-// Insert places the Argument in the position given.
-func (a *Arguments) Insert(item Argument, pos int) {}
+// Insert places the Argument in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (as *Arguments) Insert(a Argument, pos int) *Arguments {
+	if pos >= as.Len() || as == nil {
+		return as.Add(a)
+	}
 
-// Join attaches the tail of the receiver list "a" to the head of the otherList.
-func (a *Arguments) Join(otherList *Arguments) {
-	pos := a.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := a
-	for a != nil {
-		a.pos = pos
+	mid := as
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	as.pos -= mid.pos
+
+	bot = bot.Add(a)
+	as.Join(bot)
+
+	return as
+}
+
+// Join attaches the tail of the receiver list "as" to the head of the otherList.
+func (as *Arguments) Join(otherList *Arguments) {
+	if as == nil {
+		return
+	}
+
+	pos := as.Len() + otherList.Len() - 1
+
+	last := as
+	for as != nil {
+		as.pos = pos
 		pos--
-		last = a
-		a = a.next
+		last = as
+		as = as.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (a *Arguments) Len() int {
-	if a == nil {
+func (as *Arguments) Len() int {
+	if as == nil {
 		return 0
 	}
-	return a.pos + 1
+	return as.pos + 1
 }
 
 // Reverse reverses this linked list of Argument. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (a *Arguments) Reverse() *Arguments {
-	current := a
+func (as *Arguments) Reverse() *Arguments {
+	current := as
 
 	var prev *Arguments
 	var pos int
@@ -110,28 +138,28 @@ type Definitions struct {
 }
 
 // Add appends a Definition to this linked list and returns this new head.
-func (d *Definitions) Add(data Definition) *Definitions {
+func (ds *Definitions) Add(data Definition) *Definitions {
 	var pos int
 
-	if d != nil {
-		pos = d.pos + 1
+	if ds != nil {
+		pos = ds.pos + 1
 	}
 
 	return &Definitions{
 		Data: data,
-		next: d,
+		next: ds,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (d *Definitions) ForEach(fn func(definition Definition, i int)) {
-	if d == nil {
+func (ds *Definitions) ForEach(fn func(d Definition, i int)) {
+	if ds == nil {
 		return
 	}
 
 	iter := 0
-	current := d
+	current := ds
 
 	for {
 		fn(current.Data, iter)
@@ -145,37 +173,65 @@ func (d *Definitions) ForEach(fn func(definition Definition, i int)) {
 	}
 }
 
-// Insert places the Definition in the position given.
-func (d *Definitions) Insert(item Definition, pos int) {}
+// Insert places the Definition in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (ds *Definitions) Insert(d Definition, pos int) *Definitions {
+	if pos >= ds.Len() || ds == nil {
+		return ds.Add(d)
+	}
 
-// Join attaches the tail of the receiver list "d" to the head of the otherList.
-func (d *Definitions) Join(otherList *Definitions) {
-	pos := d.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := d
-	for d != nil {
-		d.pos = pos
+	mid := ds
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	ds.pos -= mid.pos
+
+	bot = bot.Add(d)
+	ds.Join(bot)
+
+	return ds
+}
+
+// Join attaches the tail of the receiver list "ds" to the head of the otherList.
+func (ds *Definitions) Join(otherList *Definitions) {
+	if ds == nil {
+		return
+	}
+
+	pos := ds.Len() + otherList.Len() - 1
+
+	last := ds
+	for ds != nil {
+		ds.pos = pos
 		pos--
-		last = d
-		d = d.next
+		last = ds
+		ds = ds.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (d *Definitions) Len() int {
-	if d == nil {
+func (ds *Definitions) Len() int {
+	if ds == nil {
 		return 0
 	}
-	return d.pos + 1
+	return ds.pos + 1
 }
 
 // Reverse reverses this linked list of Definition. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (d *Definitions) Reverse() *Definitions {
-	current := d
+func (ds *Definitions) Reverse() *Definitions {
+	current := ds
 
 	var prev *Definitions
 	var pos int
@@ -210,28 +266,28 @@ type Directives struct {
 }
 
 // Add appends a Directive to this linked list and returns this new head.
-func (d *Directives) Add(data Directive) *Directives {
+func (ds *Directives) Add(data Directive) *Directives {
 	var pos int
 
-	if d != nil {
-		pos = d.pos + 1
+	if ds != nil {
+		pos = ds.pos + 1
 	}
 
 	return &Directives{
 		Data: data,
-		next: d,
+		next: ds,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (d *Directives) ForEach(fn func(directive Directive, i int)) {
-	if d == nil {
+func (ds *Directives) ForEach(fn func(d Directive, i int)) {
+	if ds == nil {
 		return
 	}
 
 	iter := 0
-	current := d
+	current := ds
 
 	for {
 		fn(current.Data, iter)
@@ -245,37 +301,65 @@ func (d *Directives) ForEach(fn func(directive Directive, i int)) {
 	}
 }
 
-// Insert places the Directive in the position given.
-func (d *Directives) Insert(item Directive, pos int) {}
+// Insert places the Directive in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (ds *Directives) Insert(d Directive, pos int) *Directives {
+	if pos >= ds.Len() || ds == nil {
+		return ds.Add(d)
+	}
 
-// Join attaches the tail of the receiver list "d" to the head of the otherList.
-func (d *Directives) Join(otherList *Directives) {
-	pos := d.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := d
-	for d != nil {
-		d.pos = pos
+	mid := ds
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	ds.pos -= mid.pos
+
+	bot = bot.Add(d)
+	ds.Join(bot)
+
+	return ds
+}
+
+// Join attaches the tail of the receiver list "ds" to the head of the otherList.
+func (ds *Directives) Join(otherList *Directives) {
+	if ds == nil {
+		return
+	}
+
+	pos := ds.Len() + otherList.Len() - 1
+
+	last := ds
+	for ds != nil {
+		ds.pos = pos
 		pos--
-		last = d
-		d = d.next
+		last = ds
+		ds = ds.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (d *Directives) Len() int {
-	if d == nil {
+func (ds *Directives) Len() int {
+	if ds == nil {
 		return 0
 	}
-	return d.pos + 1
+	return ds.pos + 1
 }
 
 // Reverse reverses this linked list of Directive. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (d *Directives) Reverse() *Directives {
-	current := d
+func (ds *Directives) Reverse() *Directives {
+	current := ds
 
 	var prev *Directives
 	var pos int
@@ -310,28 +394,28 @@ type DirectiveLocations struct {
 }
 
 // Add appends a DirectiveLocation to this linked list and returns this new head.
-func (dl *DirectiveLocations) Add(data DirectiveLocation) *DirectiveLocations {
+func (dls *DirectiveLocations) Add(data DirectiveLocation) *DirectiveLocations {
 	var pos int
 
-	if dl != nil {
-		pos = dl.pos + 1
+	if dls != nil {
+		pos = dls.pos + 1
 	}
 
 	return &DirectiveLocations{
 		Data: data,
-		next: dl,
+		next: dls,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (dl *DirectiveLocations) ForEach(fn func(directiveLocation DirectiveLocation, i int)) {
-	if dl == nil {
+func (dls *DirectiveLocations) ForEach(fn func(dl DirectiveLocation, i int)) {
+	if dls == nil {
 		return
 	}
 
 	iter := 0
-	current := dl
+	current := dls
 
 	for {
 		fn(current.Data, iter)
@@ -345,37 +429,65 @@ func (dl *DirectiveLocations) ForEach(fn func(directiveLocation DirectiveLocatio
 	}
 }
 
-// Insert places the DirectiveLocation in the position given.
-func (dl *DirectiveLocations) Insert(item DirectiveLocation, pos int) {}
+// Insert places the DirectiveLocation in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (dls *DirectiveLocations) Insert(dl DirectiveLocation, pos int) *DirectiveLocations {
+	if pos >= dls.Len() || dls == nil {
+		return dls.Add(dl)
+	}
 
-// Join attaches the tail of the receiver list "dl" to the head of the otherList.
-func (dl *DirectiveLocations) Join(otherList *DirectiveLocations) {
-	pos := dl.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := dl
-	for dl != nil {
-		dl.pos = pos
+	mid := dls
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	dls.pos -= mid.pos
+
+	bot = bot.Add(dl)
+	dls.Join(bot)
+
+	return dls
+}
+
+// Join attaches the tail of the receiver list "dls" to the head of the otherList.
+func (dls *DirectiveLocations) Join(otherList *DirectiveLocations) {
+	if dls == nil {
+		return
+	}
+
+	pos := dls.Len() + otherList.Len() - 1
+
+	last := dls
+	for dls != nil {
+		dls.pos = pos
 		pos--
-		last = dl
-		dl = dl.next
+		last = dls
+		dls = dls.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (dl *DirectiveLocations) Len() int {
-	if dl == nil {
+func (dls *DirectiveLocations) Len() int {
+	if dls == nil {
 		return 0
 	}
-	return dl.pos + 1
+	return dls.pos + 1
 }
 
 // Reverse reverses this linked list of DirectiveLocation. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (dl *DirectiveLocations) Reverse() *DirectiveLocations {
-	current := dl
+func (dls *DirectiveLocations) Reverse() *DirectiveLocations {
+	current := dls
 
 	var prev *DirectiveLocations
 	var pos int
@@ -410,28 +522,28 @@ type EnumValueDefinitions struct {
 }
 
 // Add appends a EnumValueDefinition to this linked list and returns this new head.
-func (evd *EnumValueDefinitions) Add(data EnumValueDefinition) *EnumValueDefinitions {
+func (evds *EnumValueDefinitions) Add(data EnumValueDefinition) *EnumValueDefinitions {
 	var pos int
 
-	if evd != nil {
-		pos = evd.pos + 1
+	if evds != nil {
+		pos = evds.pos + 1
 	}
 
 	return &EnumValueDefinitions{
 		Data: data,
-		next: evd,
+		next: evds,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (evd *EnumValueDefinitions) ForEach(fn func(enumValueDefinition EnumValueDefinition, i int)) {
-	if evd == nil {
+func (evds *EnumValueDefinitions) ForEach(fn func(evd EnumValueDefinition, i int)) {
+	if evds == nil {
 		return
 	}
 
 	iter := 0
-	current := evd
+	current := evds
 
 	for {
 		fn(current.Data, iter)
@@ -445,37 +557,65 @@ func (evd *EnumValueDefinitions) ForEach(fn func(enumValueDefinition EnumValueDe
 	}
 }
 
-// Insert places the EnumValueDefinition in the position given.
-func (evd *EnumValueDefinitions) Insert(item EnumValueDefinition, pos int) {}
+// Insert places the EnumValueDefinition in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (evds *EnumValueDefinitions) Insert(evd EnumValueDefinition, pos int) *EnumValueDefinitions {
+	if pos >= evds.Len() || evds == nil {
+		return evds.Add(evd)
+	}
 
-// Join attaches the tail of the receiver list "evd" to the head of the otherList.
-func (evd *EnumValueDefinitions) Join(otherList *EnumValueDefinitions) {
-	pos := evd.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := evd
-	for evd != nil {
-		evd.pos = pos
+	mid := evds
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	evds.pos -= mid.pos
+
+	bot = bot.Add(evd)
+	evds.Join(bot)
+
+	return evds
+}
+
+// Join attaches the tail of the receiver list "evds" to the head of the otherList.
+func (evds *EnumValueDefinitions) Join(otherList *EnumValueDefinitions) {
+	if evds == nil {
+		return
+	}
+
+	pos := evds.Len() + otherList.Len() - 1
+
+	last := evds
+	for evds != nil {
+		evds.pos = pos
 		pos--
-		last = evd
-		evd = evd.next
+		last = evds
+		evds = evds.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (evd *EnumValueDefinitions) Len() int {
-	if evd == nil {
+func (evds *EnumValueDefinitions) Len() int {
+	if evds == nil {
 		return 0
 	}
-	return evd.pos + 1
+	return evds.pos + 1
 }
 
 // Reverse reverses this linked list of EnumValueDefinition. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (evd *EnumValueDefinitions) Reverse() *EnumValueDefinitions {
-	current := evd
+func (evds *EnumValueDefinitions) Reverse() *EnumValueDefinitions {
+	current := evds
 
 	var prev *EnumValueDefinitions
 	var pos int
@@ -510,28 +650,28 @@ type FieldDefinitions struct {
 }
 
 // Add appends a FieldDefinition to this linked list and returns this new head.
-func (fd *FieldDefinitions) Add(data FieldDefinition) *FieldDefinitions {
+func (fds *FieldDefinitions) Add(data FieldDefinition) *FieldDefinitions {
 	var pos int
 
-	if fd != nil {
-		pos = fd.pos + 1
+	if fds != nil {
+		pos = fds.pos + 1
 	}
 
 	return &FieldDefinitions{
 		Data: data,
-		next: fd,
+		next: fds,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (fd *FieldDefinitions) ForEach(fn func(fieldDefinition FieldDefinition, i int)) {
-	if fd == nil {
+func (fds *FieldDefinitions) ForEach(fn func(fd FieldDefinition, i int)) {
+	if fds == nil {
 		return
 	}
 
 	iter := 0
-	current := fd
+	current := fds
 
 	for {
 		fn(current.Data, iter)
@@ -545,37 +685,65 @@ func (fd *FieldDefinitions) ForEach(fn func(fieldDefinition FieldDefinition, i i
 	}
 }
 
-// Insert places the FieldDefinition in the position given.
-func (fd *FieldDefinitions) Insert(item FieldDefinition, pos int) {}
+// Insert places the FieldDefinition in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (fds *FieldDefinitions) Insert(fd FieldDefinition, pos int) *FieldDefinitions {
+	if pos >= fds.Len() || fds == nil {
+		return fds.Add(fd)
+	}
 
-// Join attaches the tail of the receiver list "fd" to the head of the otherList.
-func (fd *FieldDefinitions) Join(otherList *FieldDefinitions) {
-	pos := fd.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := fd
-	for fd != nil {
-		fd.pos = pos
+	mid := fds
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	fds.pos -= mid.pos
+
+	bot = bot.Add(fd)
+	fds.Join(bot)
+
+	return fds
+}
+
+// Join attaches the tail of the receiver list "fds" to the head of the otherList.
+func (fds *FieldDefinitions) Join(otherList *FieldDefinitions) {
+	if fds == nil {
+		return
+	}
+
+	pos := fds.Len() + otherList.Len() - 1
+
+	last := fds
+	for fds != nil {
+		fds.pos = pos
 		pos--
-		last = fd
-		fd = fd.next
+		last = fds
+		fds = fds.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (fd *FieldDefinitions) Len() int {
-	if fd == nil {
+func (fds *FieldDefinitions) Len() int {
+	if fds == nil {
 		return 0
 	}
-	return fd.pos + 1
+	return fds.pos + 1
 }
 
 // Reverse reverses this linked list of FieldDefinition. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (fd *FieldDefinitions) Reverse() *FieldDefinitions {
-	current := fd
+func (fds *FieldDefinitions) Reverse() *FieldDefinitions {
+	current := fds
 
 	var prev *FieldDefinitions
 	var pos int
@@ -610,28 +778,28 @@ type InputValueDefinitions struct {
 }
 
 // Add appends a InputValueDefinition to this linked list and returns this new head.
-func (ivd *InputValueDefinitions) Add(data InputValueDefinition) *InputValueDefinitions {
+func (ivds *InputValueDefinitions) Add(data InputValueDefinition) *InputValueDefinitions {
 	var pos int
 
-	if ivd != nil {
-		pos = ivd.pos + 1
+	if ivds != nil {
+		pos = ivds.pos + 1
 	}
 
 	return &InputValueDefinitions{
 		Data: data,
-		next: ivd,
+		next: ivds,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (ivd *InputValueDefinitions) ForEach(fn func(inputValueDefinition InputValueDefinition, i int)) {
-	if ivd == nil {
+func (ivds *InputValueDefinitions) ForEach(fn func(ivd InputValueDefinition, i int)) {
+	if ivds == nil {
 		return
 	}
 
 	iter := 0
-	current := ivd
+	current := ivds
 
 	for {
 		fn(current.Data, iter)
@@ -645,37 +813,65 @@ func (ivd *InputValueDefinitions) ForEach(fn func(inputValueDefinition InputValu
 	}
 }
 
-// Insert places the InputValueDefinition in the position given.
-func (ivd *InputValueDefinitions) Insert(item InputValueDefinition, pos int) {}
+// Insert places the InputValueDefinition in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (ivds *InputValueDefinitions) Insert(ivd InputValueDefinition, pos int) *InputValueDefinitions {
+	if pos >= ivds.Len() || ivds == nil {
+		return ivds.Add(ivd)
+	}
 
-// Join attaches the tail of the receiver list "ivd" to the head of the otherList.
-func (ivd *InputValueDefinitions) Join(otherList *InputValueDefinitions) {
-	pos := ivd.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := ivd
-	for ivd != nil {
-		ivd.pos = pos
+	mid := ivds
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	ivds.pos -= mid.pos
+
+	bot = bot.Add(ivd)
+	ivds.Join(bot)
+
+	return ivds
+}
+
+// Join attaches the tail of the receiver list "ivds" to the head of the otherList.
+func (ivds *InputValueDefinitions) Join(otherList *InputValueDefinitions) {
+	if ivds == nil {
+		return
+	}
+
+	pos := ivds.Len() + otherList.Len() - 1
+
+	last := ivds
+	for ivds != nil {
+		ivds.pos = pos
 		pos--
-		last = ivd
-		ivd = ivd.next
+		last = ivds
+		ivds = ivds.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (ivd *InputValueDefinitions) Len() int {
-	if ivd == nil {
+func (ivds *InputValueDefinitions) Len() int {
+	if ivds == nil {
 		return 0
 	}
-	return ivd.pos + 1
+	return ivds.pos + 1
 }
 
 // Reverse reverses this linked list of InputValueDefinition. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (ivd *InputValueDefinitions) Reverse() *InputValueDefinitions {
-	current := ivd
+func (ivds *InputValueDefinitions) Reverse() *InputValueDefinitions {
+	current := ivds
 
 	var prev *InputValueDefinitions
 	var pos int
@@ -710,28 +906,28 @@ type OperationTypeDefinitions struct {
 }
 
 // Add appends a OperationTypeDefinition to this linked list and returns this new head.
-func (otd *OperationTypeDefinitions) Add(data OperationTypeDefinition) *OperationTypeDefinitions {
+func (otds *OperationTypeDefinitions) Add(data OperationTypeDefinition) *OperationTypeDefinitions {
 	var pos int
 
-	if otd != nil {
-		pos = otd.pos + 1
+	if otds != nil {
+		pos = otds.pos + 1
 	}
 
 	return &OperationTypeDefinitions{
 		Data: data,
-		next: otd,
+		next: otds,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (otd *OperationTypeDefinitions) ForEach(fn func(operationTypeDefinition OperationTypeDefinition, i int)) {
-	if otd == nil {
+func (otds *OperationTypeDefinitions) ForEach(fn func(otd OperationTypeDefinition, i int)) {
+	if otds == nil {
 		return
 	}
 
 	iter := 0
-	current := otd
+	current := otds
 
 	for {
 		fn(current.Data, iter)
@@ -745,37 +941,65 @@ func (otd *OperationTypeDefinitions) ForEach(fn func(operationTypeDefinition Ope
 	}
 }
 
-// Insert places the OperationTypeDefinition in the position given.
-func (otd *OperationTypeDefinitions) Insert(item OperationTypeDefinition, pos int) {}
+// Insert places the OperationTypeDefinition in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (otds *OperationTypeDefinitions) Insert(otd OperationTypeDefinition, pos int) *OperationTypeDefinitions {
+	if pos >= otds.Len() || otds == nil {
+		return otds.Add(otd)
+	}
 
-// Join attaches the tail of the receiver list "otd" to the head of the otherList.
-func (otd *OperationTypeDefinitions) Join(otherList *OperationTypeDefinitions) {
-	pos := otd.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := otd
-	for otd != nil {
-		otd.pos = pos
+	mid := otds
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	otds.pos -= mid.pos
+
+	bot = bot.Add(otd)
+	otds.Join(bot)
+
+	return otds
+}
+
+// Join attaches the tail of the receiver list "otds" to the head of the otherList.
+func (otds *OperationTypeDefinitions) Join(otherList *OperationTypeDefinitions) {
+	if otds == nil {
+		return
+	}
+
+	pos := otds.Len() + otherList.Len() - 1
+
+	last := otds
+	for otds != nil {
+		otds.pos = pos
 		pos--
-		last = otd
-		otd = otd.next
+		last = otds
+		otds = otds.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (otd *OperationTypeDefinitions) Len() int {
-	if otd == nil {
+func (otds *OperationTypeDefinitions) Len() int {
+	if otds == nil {
 		return 0
 	}
-	return otd.pos + 1
+	return otds.pos + 1
 }
 
 // Reverse reverses this linked list of OperationTypeDefinition. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (otd *OperationTypeDefinitions) Reverse() *OperationTypeDefinitions {
-	current := otd
+func (otds *OperationTypeDefinitions) Reverse() *OperationTypeDefinitions {
+	current := otds
 
 	var prev *OperationTypeDefinitions
 	var pos int
@@ -810,28 +1034,28 @@ type RootOperationTypeDefinitions struct {
 }
 
 // Add appends a RootOperationTypeDefinition to this linked list and returns this new head.
-func (rotd *RootOperationTypeDefinitions) Add(data RootOperationTypeDefinition) *RootOperationTypeDefinitions {
+func (rotds *RootOperationTypeDefinitions) Add(data RootOperationTypeDefinition) *RootOperationTypeDefinitions {
 	var pos int
 
-	if rotd != nil {
-		pos = rotd.pos + 1
+	if rotds != nil {
+		pos = rotds.pos + 1
 	}
 
 	return &RootOperationTypeDefinitions{
 		Data: data,
-		next: rotd,
+		next: rotds,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (rotd *RootOperationTypeDefinitions) ForEach(fn func(rootOperationTypeDefinition RootOperationTypeDefinition, i int)) {
-	if rotd == nil {
+func (rotds *RootOperationTypeDefinitions) ForEach(fn func(rotd RootOperationTypeDefinition, i int)) {
+	if rotds == nil {
 		return
 	}
 
 	iter := 0
-	current := rotd
+	current := rotds
 
 	for {
 		fn(current.Data, iter)
@@ -845,37 +1069,65 @@ func (rotd *RootOperationTypeDefinitions) ForEach(fn func(rootOperationTypeDefin
 	}
 }
 
-// Insert places the RootOperationTypeDefinition in the position given.
-func (rotd *RootOperationTypeDefinitions) Insert(item RootOperationTypeDefinition, pos int) {}
+// Insert places the RootOperationTypeDefinition in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (rotds *RootOperationTypeDefinitions) Insert(rotd RootOperationTypeDefinition, pos int) *RootOperationTypeDefinitions {
+	if pos >= rotds.Len() || rotds == nil {
+		return rotds.Add(rotd)
+	}
 
-// Join attaches the tail of the receiver list "rotd" to the head of the otherList.
-func (rotd *RootOperationTypeDefinitions) Join(otherList *RootOperationTypeDefinitions) {
-	pos := rotd.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := rotd
-	for rotd != nil {
-		rotd.pos = pos
+	mid := rotds
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	rotds.pos -= mid.pos
+
+	bot = bot.Add(rotd)
+	rotds.Join(bot)
+
+	return rotds
+}
+
+// Join attaches the tail of the receiver list "rotds" to the head of the otherList.
+func (rotds *RootOperationTypeDefinitions) Join(otherList *RootOperationTypeDefinitions) {
+	if rotds == nil {
+		return
+	}
+
+	pos := rotds.Len() + otherList.Len() - 1
+
+	last := rotds
+	for rotds != nil {
+		rotds.pos = pos
 		pos--
-		last = rotd
-		rotd = rotd.next
+		last = rotds
+		rotds = rotds.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (rotd *RootOperationTypeDefinitions) Len() int {
-	if rotd == nil {
+func (rotds *RootOperationTypeDefinitions) Len() int {
+	if rotds == nil {
 		return 0
 	}
-	return rotd.pos + 1
+	return rotds.pos + 1
 }
 
 // Reverse reverses this linked list of RootOperationTypeDefinition. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (rotd *RootOperationTypeDefinitions) Reverse() *RootOperationTypeDefinitions {
-	current := rotd
+func (rotds *RootOperationTypeDefinitions) Reverse() *RootOperationTypeDefinitions {
+	current := rotds
 
 	var prev *RootOperationTypeDefinitions
 	var pos int
@@ -910,28 +1162,28 @@ type Selections struct {
 }
 
 // Add appends a Selection to this linked list and returns this new head.
-func (s *Selections) Add(data Selection) *Selections {
+func (ss *Selections) Add(data Selection) *Selections {
 	var pos int
 
-	if s != nil {
-		pos = s.pos + 1
+	if ss != nil {
+		pos = ss.pos + 1
 	}
 
 	return &Selections{
 		Data: data,
-		next: s,
+		next: ss,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (s *Selections) ForEach(fn func(selection Selection, i int)) {
-	if s == nil {
+func (ss *Selections) ForEach(fn func(s Selection, i int)) {
+	if ss == nil {
 		return
 	}
 
 	iter := 0
-	current := s
+	current := ss
 
 	for {
 		fn(current.Data, iter)
@@ -945,37 +1197,65 @@ func (s *Selections) ForEach(fn func(selection Selection, i int)) {
 	}
 }
 
-// Insert places the Selection in the position given.
-func (s *Selections) Insert(item Selection, pos int) {}
+// Insert places the Selection in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (ss *Selections) Insert(s Selection, pos int) *Selections {
+	if pos >= ss.Len() || ss == nil {
+		return ss.Add(s)
+	}
 
-// Join attaches the tail of the receiver list "s" to the head of the otherList.
-func (s *Selections) Join(otherList *Selections) {
-	pos := s.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := s
-	for s != nil {
-		s.pos = pos
+	mid := ss
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	ss.pos -= mid.pos
+
+	bot = bot.Add(s)
+	ss.Join(bot)
+
+	return ss
+}
+
+// Join attaches the tail of the receiver list "ss" to the head of the otherList.
+func (ss *Selections) Join(otherList *Selections) {
+	if ss == nil {
+		return
+	}
+
+	pos := ss.Len() + otherList.Len() - 1
+
+	last := ss
+	for ss != nil {
+		ss.pos = pos
 		pos--
-		last = s
-		s = s.next
+		last = ss
+		ss = ss.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (s *Selections) Len() int {
-	if s == nil {
+func (ss *Selections) Len() int {
+	if ss == nil {
 		return 0
 	}
-	return s.pos + 1
+	return ss.pos + 1
 }
 
 // Reverse reverses this linked list of Selection. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (s *Selections) Reverse() *Selections {
-	current := s
+func (ss *Selections) Reverse() *Selections {
+	current := ss
 
 	var prev *Selections
 	var pos int
@@ -1010,28 +1290,28 @@ type Types struct {
 }
 
 // Add appends a Type to this linked list and returns this new head.
-func (t *Types) Add(data Type) *Types {
+func (ts *Types) Add(data Type) *Types {
 	var pos int
 
-	if t != nil {
-		pos = t.pos + 1
+	if ts != nil {
+		pos = ts.pos + 1
 	}
 
 	return &Types{
 		Data: data,
-		next: t,
+		next: ts,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (t *Types) ForEach(fn func(t Type, i int)) {
-	if t == nil {
+func (ts *Types) ForEach(fn func(t Type, i int)) {
+	if ts == nil {
 		return
 	}
 
 	iter := 0
-	current := t
+	current := ts
 
 	for {
 		fn(current.Data, iter)
@@ -1045,37 +1325,65 @@ func (t *Types) ForEach(fn func(t Type, i int)) {
 	}
 }
 
-// Insert places the Type in the position given.
-func (t *Types) Insert(item Type, pos int) {}
+// Insert places the Type in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (ts *Types) Insert(t Type, pos int) *Types {
+	if pos >= ts.Len() || ts == nil {
+		return ts.Add(t)
+	}
 
-// Join attaches the tail of the receiver list "t" to the head of the otherList.
-func (t *Types) Join(otherList *Types) {
-	pos := t.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := t
-	for t != nil {
-		t.pos = pos
+	mid := ts
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	ts.pos -= mid.pos
+
+	bot = bot.Add(t)
+	ts.Join(bot)
+
+	return ts
+}
+
+// Join attaches the tail of the receiver list "ts" to the head of the otherList.
+func (ts *Types) Join(otherList *Types) {
+	if ts == nil {
+		return
+	}
+
+	pos := ts.Len() + otherList.Len() - 1
+
+	last := ts
+	for ts != nil {
+		ts.pos = pos
 		pos--
-		last = t
-		t = t.next
+		last = ts
+		ts = ts.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (t *Types) Len() int {
-	if t == nil {
+func (ts *Types) Len() int {
+	if ts == nil {
 		return 0
 	}
-	return t.pos + 1
+	return ts.pos + 1
 }
 
 // Reverse reverses this linked list of Type. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (t *Types) Reverse() *Types {
-	current := t
+func (ts *Types) Reverse() *Types {
+	current := ts
 
 	var prev *Types
 	var pos int
@@ -1110,28 +1418,28 @@ type VariableDefinitions struct {
 }
 
 // Add appends a VariableDefinition to this linked list and returns this new head.
-func (vd *VariableDefinitions) Add(data VariableDefinition) *VariableDefinitions {
+func (vds *VariableDefinitions) Add(data VariableDefinition) *VariableDefinitions {
 	var pos int
 
-	if vd != nil {
-		pos = vd.pos + 1
+	if vds != nil {
+		pos = vds.pos + 1
 	}
 
 	return &VariableDefinitions{
 		Data: data,
-		next: vd,
+		next: vds,
 		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (vd *VariableDefinitions) ForEach(fn func(variableDefinition VariableDefinition, i int)) {
-	if vd == nil {
+func (vds *VariableDefinitions) ForEach(fn func(vd VariableDefinition, i int)) {
+	if vds == nil {
 		return
 	}
 
 	iter := 0
-	current := vd
+	current := vds
 
 	for {
 		fn(current.Data, iter)
@@ -1145,37 +1453,65 @@ func (vd *VariableDefinitions) ForEach(fn func(variableDefinition VariableDefini
 	}
 }
 
-// Insert places the VariableDefinition in the position given.
-func (vd *VariableDefinitions) Insert(item VariableDefinition, pos int) {}
+// Insert places the VariableDefinition in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (vds *VariableDefinitions) Insert(vd VariableDefinition, pos int) *VariableDefinitions {
+	if pos >= vds.Len() || vds == nil {
+		return vds.Add(vd)
+	}
 
-// Join attaches the tail of the receiver list "vd" to the head of the otherList.
-func (vd *VariableDefinitions) Join(otherList *VariableDefinitions) {
-	pos := vd.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := vd
-	for vd != nil {
-		vd.pos = pos
+	mid := vds
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	vds.pos -= mid.pos
+
+	bot = bot.Add(vd)
+	vds.Join(bot)
+
+	return vds
+}
+
+// Join attaches the tail of the receiver list "vds" to the head of the otherList.
+func (vds *VariableDefinitions) Join(otherList *VariableDefinitions) {
+	if vds == nil {
+		return
+	}
+
+	pos := vds.Len() + otherList.Len() - 1
+
+	last := vds
+	for vds != nil {
+		vds.pos = pos
 		pos--
-		last = vd
-		vd = vd.next
+		last = vds
+		vds = vds.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func (vd *VariableDefinitions) Len() int {
-	if vd == nil {
+func (vds *VariableDefinitions) Len() int {
+	if vds == nil {
 		return 0
 	}
-	return vd.pos + 1
+	return vds.pos + 1
 }
 
 // Reverse reverses this linked list of VariableDefinition. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (vd *VariableDefinitions) Reverse() *VariableDefinitions {
-	current := vd
+func (vds *VariableDefinitions) Reverse() *VariableDefinitions {
+	current := vds
 
 	var prev *VariableDefinitions
 	var pos int

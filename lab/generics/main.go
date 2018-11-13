@@ -50,14 +50,6 @@ func main() {
 	}
 }
 
-// Add
-// ForEach
-// Insert
-// Join
-// Len
-// Reverse
-// ArgumentsFromSlice // not method
-
 var linkedList = template.Must(template.New("linkedList").Parse(`
 // {{.TypeName}}s is a linked list that contains {{.TypeName}} values.
 type {{.TypeName}}s struct {
@@ -67,28 +59,28 @@ type {{.TypeName}}s struct {
 }
 
 // Add appends a {{.TypeName}} to this linked list and returns this new head.
-func ({{.AbridgedTN}} *{{.TypeName}}s) Add(data {{.TypeName}}) *{{.TypeName}}s {
+func ({{.AbridgedTN}}s *{{.TypeName}}s) Add(data {{.TypeName}}) *{{.TypeName}}s {
 	var pos int
 
-	if {{.AbridgedTN}} != nil {
-		pos = {{.AbridgedTN}}.pos + 1
+	if {{.AbridgedTN}}s != nil {
+		pos = {{.AbridgedTN}}s.pos + 1
 	}
 
 	return &{{.TypeName}}s{
 		Data: data,
-		next: {{.AbridgedTN}},
+		next: {{.AbridgedTN}}s,
 		pos: pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func ({{.AbridgedTN}} *{{.TypeName}}s) ForEach(fn func({{.TypeNameLCF}} {{.TypeName}}, i int)) {
-	if {{.AbridgedTN}} == nil {
+func ({{.AbridgedTN}}s *{{.TypeName}}s) ForEach(fn func({{.AbridgedTN}} {{.TypeName}}, i int)) {
+	if {{.AbridgedTN}}s == nil {
 		return
 	}
 
 	iter := 0
-	current := {{.AbridgedTN}}
+	current := {{.AbridgedTN}}s
 
 	for {
 		fn(current.Data, iter)
@@ -102,37 +94,65 @@ func ({{.AbridgedTN}} *{{.TypeName}}s) ForEach(fn func({{.TypeNameLCF}} {{.TypeN
 	}
 }
 
-// Insert places the {{.TypeName}} in the position given.
-func ({{.AbridgedTN}} *{{.TypeName}}s) Insert(item {{.TypeName}}, pos int) {}
+// Insert places the {{.TypeName}} in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func ({{.AbridgedTN}}s *{{.TypeName}}s) Insert({{.AbridgedTN}} {{.TypeName}}, pos int) *{{.TypeName}}s {
+	if pos >= {{.AbridgedTN}}s.Len() || {{.AbridgedTN}}s == nil {
+		return {{.AbridgedTN}}s.Add({{.AbridgedTN}})
+	}
 
-// Join attaches the tail of the receiver list "{{.AbridgedTN}}" to the head of the otherList.
-func ({{.AbridgedTN}} *{{.TypeName}}s) Join(otherList *{{.TypeName}}s) {
-	pos := {{.AbridgedTN}}.Len() + otherList.Len() - 1
+	if pos < 0 {
+		pos = 0
+	}
 
-	last := {{.AbridgedTN}}
-	for {{.AbridgedTN}} != nil {
-		{{.AbridgedTN}}.pos = pos
+	mid := {{.AbridgedTN}}s
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	{{.AbridgedTN}}s.pos -= mid.pos
+
+	bot = bot.Add({{.AbridgedTN}})
+	{{.AbridgedTN}}s.Join(bot)
+
+	return {{.AbridgedTN}}s
+}
+
+// Join attaches the tail of the receiver list "{{.AbridgedTN}}s" to the head of the otherList.
+func ({{.AbridgedTN}}s *{{.TypeName}}s) Join(otherList *{{.TypeName}}s) {
+	if {{.AbridgedTN}}s == nil {
+		return
+	}
+	
+	pos := {{.AbridgedTN}}s.Len() + otherList.Len() - 1
+
+	last := {{.AbridgedTN}}s
+	for {{.AbridgedTN}}s != nil {
+		{{.AbridgedTN}}s.pos = pos
 		pos--
-		last = {{.AbridgedTN}}
-		{{.AbridgedTN}} = {{.AbridgedTN}}.next
+		last = {{.AbridgedTN}}s
+		{{.AbridgedTN}}s = {{.AbridgedTN}}s.next
 	}
 
 	last.next = otherList
 }
 
 // Len returns the length of this linked list.
-func ({{.AbridgedTN}} *{{.TypeName}}s) Len() int {
-	if {{.AbridgedTN}} == nil {
+func ({{.AbridgedTN}}s *{{.TypeName}}s) Len() int {
+	if {{.AbridgedTN}}s == nil {
 		return 0
 	}
-	return {{.AbridgedTN}}.pos + 1
+	return {{.AbridgedTN}}s.pos + 1
 }
 
 // Reverse reverses this linked list of {{.TypeName}}. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func ({{.AbridgedTN}} *{{.TypeName}}s) Reverse() *{{.TypeName}}s {
-	current := {{.AbridgedTN}}
+func ({{.AbridgedTN}}s *{{.TypeName}}s) Reverse() *{{.TypeName}}s {
+	current := {{.AbridgedTN}}s
 
 	var prev *{{.TypeName}}s
 	var pos int
