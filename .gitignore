@@ -14,7 +14,10 @@
 lexer/cmd/cmd
 lexer/out/out
 lab/block/block
+lab/codegen/codegen
 lab/generics/generics
+lab/goast/goast
+lab/walkergen/walkergen
 
 # Third-party dependencies
 node_modules/

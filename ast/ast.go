@@ -5,16 +5,17 @@ import "github.com/bucketd/go-graphqlparser/graphql"
 // 2.2 Document
 // http://facebook.github.io/graphql/June2018/#sec-Language.Document
 
+// @wg:ignore
 type Document struct {
 	Definitions *Definitions
 }
 
 const (
-	// @wg:kind ExecutableDefinition
+	// @wg:field ExecutableDefinition
 	DefinitionKindExecutable DefinitionKind = iota
-	// @wg:kind TypeSystemDefinition
+	// @wg:field TypeSystemDefinition
 	DefinitionKindTypeSystem
-	// @wg:kind TypeSystemExtension
+	// @wg:field TypeSystemExtension
 	DefinitionKindTypeSystemExtension
 )
 
@@ -46,9 +47,9 @@ type Definition struct {
 // http://facebook.github.io/graphql/June2018/#sec-Language.Fragments
 
 const (
-	// @wg:kind OperationDefinition
+	// @wg:field OperationDefinition
 	ExecutableDefinitionKindOperation ExecutableDefinitionKind = iota
-	// @wg:kind FragmentDefinition
+	// @wg:field FragmentDefinition
 	ExecutableDefinitionKindFragment
 )
 
@@ -99,7 +100,6 @@ func (t OperationDefinitionKind) String() string {
 	return "invalid"
 }
 
-// @wg:leaf
 type OperationDefinition struct {
 	Name                string
 	VariableDefinitions *VariableDefinitions
@@ -213,6 +213,7 @@ type Value struct {
 	Kind         ValueKind
 }
 
+// @wg:ignore
 type ObjectField struct {
 	Name  string
 	Value Value
