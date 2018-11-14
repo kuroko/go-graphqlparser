@@ -5,47 +5,120 @@ package graphql
 // Errors is a linked list that contains Error values.
 type Errors struct {
 	Data Error
-	Next *Errors
+	next *Errors
+	pos  int
 }
 
 // Add appends a Error to this linked list and returns this new head.
-func (e *Errors) Add(data Error) *Errors {
+func (es *Errors) Add(data Error) *Errors {
+	var pos int
+
+	if es != nil {
+		pos = es.pos + 1
+	}
+
 	return &Errors{
 		Data: data,
-		Next: e,
+		next: es,
+		pos:  pos,
 	}
 }
 
 // ForEach applies the given map function to each item in this linked list.
-func (e *Errors) ForEach(fn func(err Error, i int)) {
-	if e == nil {
+func (es *Errors) ForEach(fn func(e Error, i int)) {
+	if es == nil {
 		return
 	}
 
 	iter := 0
-	current := e
+	current := es
 
 	for {
 		fn(current.Data, iter)
 
-		if current.Next == nil {
+		if current.next == nil {
 			break
 		}
 
 		iter++
-		current = current.Next
+		current = current.next
 	}
 }
 
-// Join attaches the tail of the receiver list "e" to the head of the otherList.
-func (e *Errors) Join(otherList *Errors) {
-	current := e
-
-	for current.Next != nil {
-		current = current.Next
+// Insert places the Error in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (es *Errors) Insert(e Error, pos int) *Errors {
+	if pos >= es.Len() || es == nil {
+		return es.Add(e)
 	}
 
-	current.Next = otherList
+	if pos < 0 {
+		pos = 0
+	}
+
+	mid := es
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	es.pos -= mid.pos
+
+	bot = bot.Add(e)
+	es.Join(bot)
+
+	return es
+}
+
+// Join attaches the tail of the receiver list "es" to the head of the otherList.
+func (es *Errors) Join(otherList *Errors) {
+	if es == nil {
+		return
+	}
+
+	pos := es.Len() + otherList.Len() - 1
+
+	last := es
+	for es != nil {
+		es.pos = pos
+		pos--
+		last = es
+		es = es.next
+	}
+
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (es *Errors) Len() int {
+	if es == nil {
+		return 0
+	}
+	return es.pos + 1
+}
+
+// Reverse reverses this linked list of Error. Usually when the linked list is being
+// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
+// "right" order.
+func (es *Errors) Reverse() *Errors {
+	current := es
+
+	var prev *Errors
+	var pos int
+
+	for current != nil {
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
+		prev = current
+		current = next
+	}
+
+	return prev
 }
 
 // ErrorsFromSlice returns a Errors list from a slice of Error.
@@ -57,88 +130,123 @@ func ErrorsFromSlice(sl []Error) *Errors {
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (e *Errors) Len() int {
-	if e == nil {
-		return 0
+// Locations is a linked list that contains Location values.
+type Locations struct {
+	Data Location
+	next *Locations
+	pos  int
+}
+
+// Add appends a Location to this linked list and returns this new head.
+func (ls *Locations) Add(data Location) *Locations {
+	var pos int
+
+	if ls != nil {
+		pos = ls.pos + 1
 	}
 
-	var length int
+	return &Locations{
+		Data: data,
+		next: ls,
+		pos:  pos,
+	}
+}
 
-	current := e
+// ForEach applies the given map function to each item in this linked list.
+func (ls *Locations) ForEach(fn func(l Location, i int)) {
+	if ls == nil {
+		return
+	}
+
+	iter := 0
+	current := ls
+
 	for {
-		length++
-		if current.Next == nil {
+		fn(current.Data, iter)
+
+		if current.next == nil {
 			break
 		}
 
-		current = current.Next
+		iter++
+		current = current.next
 	}
-
-	return length
 }
 
-// Reverse reverses this linked list of Error. Usually when the linked list is being
+// Insert places the Location in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (ls *Locations) Insert(l Location, pos int) *Locations {
+	if pos >= ls.Len() || ls == nil {
+		return ls.Add(l)
+	}
+
+	if pos < 0 {
+		pos = 0
+	}
+
+	mid := ls
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	ls.pos -= mid.pos
+
+	bot = bot.Add(l)
+	ls.Join(bot)
+
+	return ls
+}
+
+// Join attaches the tail of the receiver list "ls" to the head of the otherList.
+func (ls *Locations) Join(otherList *Locations) {
+	if ls == nil {
+		return
+	}
+
+	pos := ls.Len() + otherList.Len() - 1
+
+	last := ls
+	for ls != nil {
+		ls.pos = pos
+		pos--
+		last = ls
+		ls = ls.next
+	}
+
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (ls *Locations) Len() int {
+	if ls == nil {
+		return 0
+	}
+	return ls.pos + 1
+}
+
+// Reverse reverses this linked list of Location. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (e *Errors) Reverse() *Errors {
-	current := e
+func (ls *Locations) Reverse() *Locations {
+	current := ls
 
-	var prev *Errors
+	var prev *Locations
+	var pos int
+
 	for current != nil {
-		next := current.Next
-		current.Next = prev
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
 		prev = current
 		current = next
 	}
 
 	return prev
-}
-
-// Locations is a linked list that contains Location values.
-type Locations struct {
-	Data Location
-	Next *Locations
-}
-
-// Add appends a Location to this linked list and returns this new head.
-func (l *Locations) Add(data Location) *Locations {
-	return &Locations{
-		Data: data,
-		Next: l,
-	}
-}
-
-// ForEach applies the given map function to each item in this linked list.
-func (l *Locations) ForEach(fn func(location Location, i int)) {
-	if l == nil {
-		return
-	}
-
-	iter := 0
-	current := l
-
-	for {
-		fn(current.Data, iter)
-
-		if current.Next == nil {
-			break
-		}
-
-		iter++
-		current = current.Next
-	}
-}
-
-// Join attaches the tail of the receiver list "l" to the head of the otherList.
-func (l *Locations) Join(otherList *Locations) {
-	current := l
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
 }
 
 // LocationsFromSlice returns a Locations list from a slice of Location.
@@ -150,88 +258,123 @@ func LocationsFromSlice(sl []Location) *Locations {
 	return list.Reverse()
 }
 
-// Len returns the length of this linked list.
-func (l *Locations) Len() int {
-	if l == nil {
-		return 0
+// PathNodes is a linked list that contains PathNode values.
+type PathNodes struct {
+	Data PathNode
+	next *PathNodes
+	pos  int
+}
+
+// Add appends a PathNode to this linked list and returns this new head.
+func (pns *PathNodes) Add(data PathNode) *PathNodes {
+	var pos int
+
+	if pns != nil {
+		pos = pns.pos + 1
 	}
 
-	var length int
+	return &PathNodes{
+		Data: data,
+		next: pns,
+		pos:  pos,
+	}
+}
 
-	current := l
+// ForEach applies the given map function to each item in this linked list.
+func (pns *PathNodes) ForEach(fn func(pn PathNode, i int)) {
+	if pns == nil {
+		return
+	}
+
+	iter := 0
+	current := pns
+
 	for {
-		length++
-		if current.Next == nil {
+		fn(current.Data, iter)
+
+		if current.next == nil {
 			break
 		}
 
-		current = current.Next
+		iter++
+		current = current.next
 	}
-
-	return length
 }
 
-// Reverse reverses this linked list of Location. Usually when the linked list is being
+// Insert places the PathNode in the position given by pos.
+// The method will insert at top if pos is greater than or equal to list length.
+// The method will insert at bottom if the pos is less than 0.
+func (pns *PathNodes) Insert(pn PathNode, pos int) *PathNodes {
+	if pos >= pns.Len() || pns == nil {
+		return pns.Add(pn)
+	}
+
+	if pos < 0 {
+		pos = 0
+	}
+
+	mid := pns
+	for mid.pos != pos {
+		mid = mid.next
+	}
+
+	bot := mid.next
+	mid.next = nil
+	pns.pos -= mid.pos
+
+	bot = bot.Add(pn)
+	pns.Join(bot)
+
+	return pns
+}
+
+// Join attaches the tail of the receiver list "pns" to the head of the otherList.
+func (pns *PathNodes) Join(otherList *PathNodes) {
+	if pns == nil {
+		return
+	}
+
+	pos := pns.Len() + otherList.Len() - 1
+
+	last := pns
+	for pns != nil {
+		pns.pos = pos
+		pos--
+		last = pns
+		pns = pns.next
+	}
+
+	last.next = otherList
+}
+
+// Len returns the length of this linked list.
+func (pns *PathNodes) Len() int {
+	if pns == nil {
+		return 0
+	}
+	return pns.pos + 1
+}
+
+// Reverse reverses this linked list of PathNode. Usually when the linked list is being
 // constructed the result will be last-to-first, so we'll want to reverse it to get it in the
 // "right" order.
-func (l *Locations) Reverse() *Locations {
-	current := l
+func (pns *PathNodes) Reverse() *PathNodes {
+	current := pns
 
-	var prev *Locations
+	var prev *PathNodes
+	var pos int
+
 	for current != nil {
-		next := current.Next
-		current.Next = prev
+		current.pos = pos
+		pos++
+
+		next := current.next
+		current.next = prev
 		prev = current
 		current = next
 	}
 
 	return prev
-}
-
-// PathNodes is a linked list that contains PathNode values.
-type PathNodes struct {
-	Data PathNode
-	Next *PathNodes
-}
-
-// Add appends a PathNode to this linked list and returns this new head.
-func (pn *PathNodes) Add(data PathNode) *PathNodes {
-	return &PathNodes{
-		Data: data,
-		Next: pn,
-	}
-}
-
-// ForEach applies the given map function to each item in this linked list.
-func (pn *PathNodes) ForEach(fn func(pathNode PathNode, i int)) {
-	if pn == nil {
-		return
-	}
-
-	iter := 0
-	current := pn
-
-	for {
-		fn(current.Data, iter)
-
-		if current.Next == nil {
-			break
-		}
-
-		iter++
-		current = current.Next
-	}
-}
-
-// Join attaches the tail of the receiver list "pn" to the head of the otherList.
-func (pn *PathNodes) Join(otherList *PathNodes) {
-	current := pn
-
-	for current.Next != nil {
-		current = current.Next
-	}
-
-	current.Next = otherList
 }
 
 // PathNodesFromSlice returns a PathNodes list from a slice of PathNode.
@@ -241,42 +384,4 @@ func PathNodesFromSlice(sl []PathNode) *PathNodes {
 		list = list.Add(v)
 	}
 	return list.Reverse()
-}
-
-// Len returns the length of this linked list.
-func (pn *PathNodes) Len() int {
-	if pn == nil {
-		return 0
-	}
-
-	var length int
-
-	current := pn
-	for {
-		length++
-		if current.Next == nil {
-			break
-		}
-
-		current = current.Next
-	}
-
-	return length
-}
-
-// Reverse reverses this linked list of PathNode. Usually when the linked list is being
-// constructed the result will be last-to-first, so we'll want to reverse it to get it in the
-// "right" order.
-func (pn *PathNodes) Reverse() *PathNodes {
-	current := pn
-
-	var prev *PathNodes
-	for current != nil {
-		next := current.Next
-		current.Next = prev
-		prev = current
-		current = next
-	}
-
-	return prev
 }
