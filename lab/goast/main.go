@@ -31,8 +31,9 @@ func NewSymbolTable() SymbolTable {
 }
 
 type Const struct {
-	Name   string
-	WGKind string
+	Name string
+	// TODO(elliot): Populate this.
+	Field string
 }
 
 type Struct struct {
