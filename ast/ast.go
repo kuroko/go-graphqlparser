@@ -65,11 +65,6 @@ func (k ExecutableDefinitionKind) String() string {
 	return "invalid"
 }
 
-// NOTE: When using walker generator thing by walking the Go AST, when we encounter a `Kind` field,
-// by default we'll assume it's going to pass the current type into the walk function (i.e. itself,
-// in this case, ExecutableDefinition) and the walker function name will come from the const name.
-// We'll take "Kind" out of the name, and take the bit after "Kind" and put that on the front, e.g.
-// "OperationExecutableDefinition" and "FragmentExecutableDefinition".
 type ExecutableDefinition struct {
 	FragmentDefinition  *FragmentDefinition
 	OperationDefinition *OperationDefinition
