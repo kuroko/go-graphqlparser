@@ -8,8 +8,6 @@ import (
 	"os"
 	"path"
 	"strings"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -31,8 +29,7 @@ func NewSymbolTable() SymbolTable {
 }
 
 type Const struct {
-	Name string
-	// TODO(elliot): Populate this.
+	Name  string
 	Field string
 }
 
@@ -81,9 +78,14 @@ func main() {
 	_ = astSymbols
 	_ = listSymbols
 
-	spew.Dump(astSymbols)
+	//spew.Dump(astSymbols)
 	//spew.Dump(listSymbols)
 	//spew.Dump(astFile)
+	// for k, v := range astSymbols.Consts {
+	// 	for _, cst := range v {
+	// 		fmt.Printf("\nname: %v\nfield: %v\ntype: %v\n", cst.Name, cst.Field, k)
+	// 	}
+	// }
 }
 
 // readFile ...
@@ -132,7 +134,6 @@ func processConstDeclaration(symbols *SymbolTable, decl *ast.GenDecl) {
 					continue
 				}
 			}
-
 			processValueSpec(symbols, t, v)
 		}
 	}
@@ -176,13 +177,30 @@ func processTypeSpec(symbols *SymbolTable, tspec *ast.TypeSpec) {
 
 func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec) {
 	var consts []Const
+
+	field := processFieldName(vspec)
+
 	for _, name := range vspec.Names {
 		consts = append(consts, Const{
-			Name: name.Name,
+			Name:  name.Name,
+			Field: field,
 		})
 	}
 
 	symbols.Consts[t.TypeName] = append(symbols.Consts[t.TypeName], consts...)
+}
+
+func processFieldName(vspec *ast.ValueSpec) string {
+	if vspec.Doc != nil {
+		for _, comment := range vspec.Doc.List {
+			if strings.Contains(comment.Text, "@wg:field") {
+				return strings.Split(comment.Text, " ")[2]
+			}
+		}
+	}
+
+	f := strings.Split(vspec.Names[0].Name, "Kind")
+	return f[1] + f[0]
 }
 
 // processStructType ...

@@ -25,3 +25,6 @@ vendor/
 
 # We're a library, so we shouldn't have the go.sum file committed
 go.sum
+
+# Dev stuff
+.vscode
