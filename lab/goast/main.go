@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -83,7 +84,7 @@ func main() {
 	//spew.Dump(astFile)
 	// for k, v := range astSymbols.Consts {
 	// 	for _, cst := range v {
-	// 		fmt.Printf("\nname: %v\nfield: %v\ntype: %v\n", cst.Name, cst.Field, k)
+	// 		fmt.Printf("\nname:  %v\nfield: %v\ntype:  %v\n", cst.Name, cst.Field, k)
 	// 	}
 	// }
 }
@@ -96,6 +97,7 @@ func readFile(fileName string) (*ast.File, error) {
 // createSymbolTable ...
 func createSymbolTable(file *ast.File) (SymbolTable, error) {
 	symbols := NewSymbolTable()
+	var err error
 
 	for _, decl := range file.Decls {
 		gdecl, ok := decl.(*ast.GenDecl)
@@ -105,11 +107,14 @@ func createSymbolTable(file *ast.File) (SymbolTable, error) {
 
 		switch gdecl.Tok {
 		case token.CONST:
-			processConstDeclaration(&symbols, gdecl)
+			err = processConstDeclaration(&symbols, gdecl)
 		case token.TYPE:
-			processTypeDeclaration(&symbols, gdecl)
+			err = processTypeDeclaration(&symbols, gdecl)
 		default:
 			continue
+		}
+		if err != nil {
+			return symbols, err
 		}
 	}
 
@@ -117,9 +122,9 @@ func createSymbolTable(file *ast.File) (SymbolTable, error) {
 }
 
 // processConstDeclaration ...
-func processConstDeclaration(symbols *SymbolTable, decl *ast.GenDecl) {
+func processConstDeclaration(symbols *SymbolTable, decl *ast.GenDecl) error {
 	if len(decl.Specs) < 1 {
-		return
+		return nil
 	}
 
 	var t Type
@@ -134,19 +139,23 @@ func processConstDeclaration(symbols *SymbolTable, decl *ast.GenDecl) {
 					continue
 				}
 			}
-			processValueSpec(symbols, t, v)
+			err := processValueSpec(symbols, t, v)
+			if err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
 // processTypeDeclaration ...
-func processTypeDeclaration(symbols *SymbolTable, decl *ast.GenDecl) {
+func processTypeDeclaration(symbols *SymbolTable, decl *ast.GenDecl) error {
 	// TODO(elliot): Move into some kind of function that extracts this stuff into a struct or
 	// something? Then just make a simple if statement here.
 	if decl.Doc != nil {
 		for _, comment := range decl.Doc.List {
 			if strings.Contains(comment.Text, "@wg:ignore") {
-				return
+				return nil
 			}
 		}
 	}
@@ -154,13 +163,17 @@ func processTypeDeclaration(symbols *SymbolTable, decl *ast.GenDecl) {
 	for _, spec := range decl.Specs {
 		switch v := spec.(type) {
 		case *ast.TypeSpec:
-			processTypeSpec(symbols, v)
+			err := processTypeSpec(symbols, v)
+			if err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
 // processTypeSpec ...
-func processTypeSpec(symbols *SymbolTable, tspec *ast.TypeSpec) {
+func processTypeSpec(symbols *SymbolTable, tspec *ast.TypeSpec) error {
 	// Get the name of the type.
 	name := tspec.Name.Name
 
@@ -171,14 +184,21 @@ func processTypeSpec(symbols *SymbolTable, tspec *ast.TypeSpec) {
 
 	switch v := tspec.Type.(type) {
 	case *ast.StructType:
-		processStructType(symbols, name, v)
+		err := processStructType(symbols, name, v)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec) {
+func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec) error {
 	var consts []Const
 
-	field := processFieldName(vspec)
+	field, err := processFieldName(vspec)
+	if err != nil {
+		return err
+	}
 
 	for _, name := range vspec.Names {
 		consts = append(consts, Const{
@@ -188,23 +208,31 @@ func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec) {
 	}
 
 	symbols.Consts[t.TypeName] = append(symbols.Consts[t.TypeName], consts...)
+	return nil
 }
 
-func processFieldName(vspec *ast.ValueSpec) string {
+func processFieldName(vspec *ast.ValueSpec) (string, error) {
 	if vspec.Doc != nil {
 		for _, comment := range vspec.Doc.List {
 			if strings.Contains(comment.Text, "@wg:field") {
-				return strings.Split(comment.Text, " ")[2]
+				f := strings.Split(comment.Text, " ")
+				if len(f) < 3 {
+					return "", fmt.Errorf("wg metadata '%v' invalid", comment.Text)
+				}
+				return f[2], nil
 			}
 		}
 	}
 
 	f := strings.Split(vspec.Names[0].Name, "Kind")
-	return f[1] + f[0]
+	if len(f) < 2 {
+		return "", fmt.Errorf("name %v not properly formatted, should have Kind flanked by a word either side", vspec.Names[0].Name)
+	}
+	return f[1] + f[0], nil
 }
 
 // processStructType ...
-func processStructType(symbols *SymbolTable, name string, st *ast.StructType) {
+func processStructType(symbols *SymbolTable, name string, st *ast.StructType) error {
 	// For a struct switch.
 	for _, field := range st.Fields.List {
 		for _, fieldIdent := range field.Names {
@@ -213,6 +241,7 @@ func processStructType(symbols *SymbolTable, name string, st *ast.StructType) {
 			}
 		}
 	}
+	return nil
 }
 
 // processExpr ...
