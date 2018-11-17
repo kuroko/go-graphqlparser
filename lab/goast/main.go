@@ -1,14 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"html/template"
+	"io"
 	"log"
 	"os"
 	"path"
+	"sort"
 	"strings"
+	"unicode"
 )
 
 const (
@@ -50,6 +55,10 @@ type Type struct {
 	IsPointer bool
 }
 
+type Symbols struct {
+	ast, list SymbolTable
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		log.Println("you must specify a path to the ast package")
@@ -76,17 +85,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_ = astSymbols
-	_ = listSymbols
+	symbols := Symbols{
+		ast:  astSymbols,
+		list: listSymbols,
+	}
 
-	//spew.Dump(astSymbols)
-	//spew.Dump(listSymbols)
-	//spew.Dump(astFile)
-	// for k, v := range astSymbols.Consts {
-	// 	for _, cst := range v {
-	// 		fmt.Printf("\nname:  %v\nfield: %v\ntype:  %v\n", cst.Name, cst.Field, k)
-	// 	}
-	// }
+	gen(&symbols)
 }
 
 // readFile ...
@@ -273,3 +277,89 @@ func processExpr(expr ast.Expr) (Type, bool) {
 		IsPointer: isPointer,
 	}, true
 }
+
+func fgen(w io.Writer, s *Symbols) {
+	generate(w, s)
+}
+
+func gen(s *Symbols) {
+	fgen(os.Stdout, s)
+}
+
+func sgen(s *Symbols) string {
+	buf := bytes.Buffer{}
+
+	fgen(&buf, s)
+
+	return buf.String()
+}
+
+func generate(w io.Writer, s *Symbols) {
+	var foo []string
+	for tn := range s.ast.Structs {
+		foo = append(foo, tn)
+	}
+	sort.Strings(foo)
+
+	var bar []walkTemplateData
+	for _, tn := range foo {
+		litn := tn + "s"
+		if _, hasList := s.list.Structs[litn]; hasList {
+			bar = append(bar, walkTemplateData{
+				Name:     litn,
+				Pointer:  true,
+				ListType: true,
+			})
+		}
+
+		bar = append(bar, walkTemplateData{
+			Name:    tn,
+			Pointer: isFieldPointer(s, tn),
+		})
+	}
+
+	for i, baz := range bar {
+		walkTemplate.Execute(w, baz)
+		if i == 10 {
+			return
+		}
+	}
+}
+
+func isFieldPointer(s *Symbols, tn string) bool {
+	for _, strc := range s.ast.Structs {
+		if fld, ok := strc.Fields[tn]; ok {
+			return fld.IsPointer
+		}
+	}
+	return false
+}
+
+type walkTemplateData struct {
+	Name     string
+	Pointer  bool
+	ListType bool
+}
+
+func (ttd walkTemplateData) ShortTN() string {
+	stn := strings.Map(abridger, ttd.Name)
+	if ttd.ListType {
+		return stn + "s"
+	}
+	return stn
+}
+
+func abridger(r rune) rune {
+	if unicode.IsUpper(r) {
+		return unicode.ToLower(r)
+	}
+	return -1
+}
+
+var walkTemplate = template.Must(template.New("walkTemplate").Parse(`
+// walk{{.Name}} ...
+func (w *Walker) walk{{.Name}}(ctx *Context, {{.ShortTN}} {{if .Pointer}}*{{end}}ast.{{.Name}}) {
+	w.On{{.Name}}Enter(ctx, {{.ShortTN}})
+	w.On{{.Name}}Leave(ctx, {{.ShortTN}})
+}
+`))
