@@ -294,6 +294,9 @@ func sgen(s *Symbols) string {
 	return buf.String()
 }
 
+// TODO: check output.
+// TODO: clean code.
+// TODO: kind types still coming through on struct data.
 func generate(w io.Writer, s *Symbols) {
 	var foo []string
 	for tn := range s.ast.Structs {
@@ -316,22 +319,24 @@ func generate(w io.Writer, s *Symbols) {
 			)
 		}
 
-		bar = append(bar,
-			walkTemplateData{
-				Type: Type{
-					TypeName:  tn,
-					IsArray:   isFieldArray(s, tn),
-					IsPointer: isFieldPointer(s, tn),
-				},
+		wtd := walkTemplateData{
+			Type: Type{
+				TypeName:  tn,
+				IsArray:   isFieldArray(s, tn),
+				IsPointer: isFieldPointer(s, tn),
 			},
-		)
+		}
+
+		if f, ok := s.ast.Structs[tn].Fields["Kind"]; ok {
+			wtd.IsSwitcher = true
+			wtd.Consts = s.ast.Consts[f.TypeName]
+		}
+
+		bar = append(bar, wtd)
 	}
 
-	for i, baz := range bar {
+	for _, baz := range bar {
 		walkTemplate.Execute(w, baz)
-		if i == 10 {
-			return
-		}
 	}
 }
 
@@ -355,7 +360,9 @@ func isFieldArray(s *Symbols, tn string) bool {
 
 type walkTemplateData struct {
 	Type
-	ListType bool
+	ListType   bool
+	IsSwitcher bool
+	Consts     []Const
 }
 
 func (ttd walkTemplateData) ShortTN() string {
@@ -392,6 +399,10 @@ func (w *Walker) walk{{.TypeName}}(ctx *Context, {{.ShortTN}} {{if .IsArray}}[]{
 	{{if .ListType}}{{.ShortTN}}.ForEach(func({{.ShortTNMinusS}} ast.{{.TypeNameMinusS}}, i int) {
 		w.walk{{.TypeNameMinusS}}(ctx, {{.ShortTNMinusS}})
 	})
+	{{$parent := .}}{{else if .Consts}}switch {{.ShortTN}}.Kind {
+	{{range .Consts}}case ast.{{.Name}}:
+		w.walk{{.Name}}(ctx, {{$.ShortTN}}.{{.Field}})
+	{{end}}}
 	{{end}}w.On{{.TypeName}}Leave(ctx, {{.ShortTN}})
 }
 `))
