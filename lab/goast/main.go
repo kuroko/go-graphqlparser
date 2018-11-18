@@ -296,7 +296,6 @@ func sgen(s *Symbols) string {
 
 // TODO: check output.
 // TODO: clean code.
-// TODO: kind types still coming through on struct data.
 func generate(w io.Writer, s *Symbols) {
 	var foo []string
 	for tn := range s.ast.Structs {
