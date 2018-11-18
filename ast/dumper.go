@@ -71,20 +71,20 @@ func (d *dumper) dumpDefinition(definition Definition) {
 func (d *dumper) dumpExecutableDefinition(def *ExecutableDefinition) {
 	switch def.Kind {
 	case ExecutableDefinitionKindOperation:
-		d.dumpOperationDefinition(def)
+		d.dumpOperationDefinition(def.OperationDefinition)
 	case ExecutableDefinitionKindFragment:
-		d.dumpFragmentDefinition(def)
+		d.dumpFragmentDefinition(def.FragmentDefinition)
 	}
 }
 
 // 2.3 Operations
-func (d *dumper) dumpOperationDefinition(def *ExecutableDefinition) {
+func (d *dumper) dumpOperationDefinition(def *OperationDefinition) {
 	var shorthand bool
 	if d.defs == 1 {
 		shorthand = true
 	}
 
-	switch def.OperationType {
+	switch def.Kind {
 	case OperationDefinitionKindQuery:
 		if !shorthand || def.Name != "" {
 			io.WriteString(d.w, "query ")
@@ -234,7 +234,7 @@ func (d *dumper) dumpInlineFragment(selection Selection) {
 	d.dumpSelections(selection.SelectionSet)
 }
 
-func (d *dumper) dumpFragmentDefinition(def *ExecutableDefinition) {
+func (d *dumper) dumpFragmentDefinition(def *FragmentDefinition) {
 	io.WriteString(d.w, "fragment")
 	io.WriteString(d.w, " ")
 
