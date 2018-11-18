@@ -305,17 +305,26 @@ func generate(w io.Writer, s *Symbols) {
 	for _, tn := range foo {
 		litn := tn + "s"
 		if _, hasList := s.list.Structs[litn]; hasList {
-			bar = append(bar, walkTemplateData{
-				Name:     litn,
-				Pointer:  true,
-				ListType: true,
-			})
+			bar = append(bar,
+				walkTemplateData{
+					Type: Type{
+						TypeName:  litn,
+						IsPointer: true,
+					},
+					ListType: true,
+				},
+			)
 		}
 
-		bar = append(bar, walkTemplateData{
-			Name:    tn,
-			Pointer: isFieldPointer(s, tn),
-		})
+		bar = append(bar,
+			walkTemplateData{
+				Type: Type{
+					TypeName:  tn,
+					IsArray:   isFieldArray(s, tn),
+					IsPointer: isFieldPointer(s, tn),
+				},
+			},
+		)
 	}
 
 	for i, baz := range bar {
@@ -335,18 +344,38 @@ func isFieldPointer(s *Symbols, tn string) bool {
 	return false
 }
 
+func isFieldArray(s *Symbols, tn string) bool {
+	for _, strc := range s.ast.Structs {
+		if fld, ok := strc.Fields[tn]; ok {
+			return fld.IsArray
+		}
+	}
+	return false
+}
+
 type walkTemplateData struct {
-	Name     string
-	Pointer  bool
+	Type
 	ListType bool
 }
 
 func (ttd walkTemplateData) ShortTN() string {
-	stn := strings.Map(abridger, ttd.Name)
+	stn := strings.Map(abridger, ttd.TypeName)
 	if ttd.ListType {
 		return stn + "s"
 	}
 	return stn
+}
+
+func allButLastLetter(s string) string {
+	return s[:len(s)-1]
+}
+
+func (ttd walkTemplateData) TypeNameMinusS() string {
+	return allButLastLetter(ttd.TypeName)
+}
+
+func (ttd walkTemplateData) ShortTNMinusS() string {
+	return allButLastLetter(ttd.ShortTN())
 }
 
 func abridger(r rune) rune {
@@ -357,9 +386,12 @@ func abridger(r rune) rune {
 }
 
 var walkTemplate = template.Must(template.New("walkTemplate").Parse(`
-// walk{{.Name}} ...
-func (w *Walker) walk{{.Name}}(ctx *Context, {{.ShortTN}} {{if .Pointer}}*{{end}}ast.{{.Name}}) {
-	w.On{{.Name}}Enter(ctx, {{.ShortTN}})
-	w.On{{.Name}}Leave(ctx, {{.ShortTN}})
+// walk{{.TypeName}} ...
+func (w *Walker) walk{{.TypeName}}(ctx *Context, {{.ShortTN}} {{if .IsArray}}[]{{end}}{{if .IsPointer}}*{{end}}ast.{{.TypeName}}) {
+	w.On{{.TypeName}}Enter(ctx, {{.ShortTN}})
+	{{if .ListType}}{{.ShortTN}}.ForEach(func({{.ShortTNMinusS}} ast.{{.TypeNameMinusS}}, i int) {
+		w.walk{{.TypeNameMinusS}}(ctx, {{.ShortTNMinusS}})
+	})
+	{{end}}w.On{{.TypeName}}Leave(ctx, {{.ShortTN}})
 }
 `))
