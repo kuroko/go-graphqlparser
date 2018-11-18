@@ -10,17 +10,22 @@ import (
 	"strings"
 )
 
+// Symbols is a collection of symbol tables for walker generation from multiple files, just here for
+// convenience when passing the symbol tables around.
 type Symbols struct {
 	AST  SymbolTable
 	List SymbolTable
 }
 
+// SymbolTable takes the information we need from the Go AST, and represents it in an easy to access
+// structure for the walker generator.
 type SymbolTable struct {
 	Package string
 	Consts  map[string][]Const
 	Structs map[string]Struct
 }
 
+// NewSymbolTable returns a new SymbolTable value with the maps on it initialised.
 func NewSymbolTable() SymbolTable {
 	return SymbolTable{
 		Consts:  make(map[string][]Const),
@@ -28,21 +33,25 @@ func NewSymbolTable() SymbolTable {
 	}
 }
 
+// Const represents the information we need from the Go AST for constants.
 type Const struct {
 	Name  string
 	Field string
 }
 
+// Struct represents the information we need from the Go AST for structs.
 type Struct struct {
 	Fields map[string]Type
 }
 
+// NewStruct returns a new Struct value with the map on it initialised.
 func NewStruct() Struct {
 	return Struct{
 		Fields: make(map[string]Type),
 	}
 }
 
+// Type represents the information we need from the Go AST for types.
 type Type struct {
 	TypeName  string
 	IsArray   bool
