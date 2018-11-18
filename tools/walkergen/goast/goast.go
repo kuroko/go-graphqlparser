@@ -1,25 +1,19 @@
-package main
+package goast
 
 import (
-	"bytes"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"html/template"
-	"io"
-	"log"
 	"os"
 	"path"
-	"sort"
 	"strings"
-	"unicode"
 )
 
-const (
-	astFileName   = "ast.go"
-	listsFileName = "lists.go"
-)
+type Symbols struct {
+	AST  SymbolTable
+	List SymbolTable
+}
 
 type SymbolTable struct {
 	Package string
@@ -55,51 +49,13 @@ type Type struct {
 	IsPointer bool
 }
 
-type Symbols struct {
-	ast, list SymbolTable
-}
-
-func main() {
-	if len(os.Args) < 2 {
-		log.Println("you must specify a path to the ast package")
-		os.Exit(1)
-	}
-
-	astFile, err := readFile(astFileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	astSymbols, err := createSymbolTable(astFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	listFile, err := readFile(listsFileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	listSymbols, err := createSymbolTable(listFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	symbols := Symbols{
-		ast:  astSymbols,
-		list: listSymbols,
-	}
-
-	gen(&symbols)
-}
-
-// readFile ...
-func readFile(fileName string) (*ast.File, error) {
+// ReadFile ...
+func ReadFile(fileName string) (*ast.File, error) {
 	return parser.ParseFile(token.NewFileSet(), path.Join(os.Args[1], fileName), nil, parser.ParseComments)
 }
 
-// createSymbolTable ...
-func createSymbolTable(file *ast.File) (SymbolTable, error) {
+// CreateSymbolTable ...
+func CreateSymbolTable(file *ast.File) (SymbolTable, error) {
 	symbols := NewSymbolTable()
 	var err error
 
@@ -277,132 +233,3 @@ func processExpr(expr ast.Expr) (Type, bool) {
 		IsPointer: isPointer,
 	}, true
 }
-
-func fgen(w io.Writer, s *Symbols) {
-	generate(w, s)
-}
-
-func gen(s *Symbols) {
-	fgen(os.Stdout, s)
-}
-
-func sgen(s *Symbols) string {
-	buf := bytes.Buffer{}
-
-	fgen(&buf, s)
-
-	return buf.String()
-}
-
-// TODO: check output.
-// TODO: clean code.
-func generate(w io.Writer, s *Symbols) {
-	var foo []string
-	for tn := range s.ast.Structs {
-		foo = append(foo, tn)
-	}
-
-	sort.Strings(foo)
-
-	var bar []walkTemplateData
-	for _, tn := range foo {
-		litn := tn + "s"
-		if _, hasList := s.list.Structs[litn]; hasList {
-			bar = append(bar,
-				walkTemplateData{
-					Type: Type{
-						TypeName:  litn,
-						IsPointer: true,
-					},
-					ListType: true,
-				},
-			)
-		}
-
-		wtd := walkTemplateData{
-			Type: Type{
-				TypeName:  tn,
-				IsArray:   isFieldArray(s, tn),
-				IsPointer: isFieldPointer(s, tn),
-			},
-		}
-
-		if f, ok := s.ast.Structs[tn].Fields["Kind"]; ok {
-			wtd.IsSwitcher = true
-			wtd.Consts = s.ast.Consts[f.TypeName]
-		}
-
-		bar = append(bar, wtd)
-	}
-
-	for _, baz := range bar {
-		walkTemplate.Execute(w, baz)
-	}
-}
-
-func isFieldPointer(s *Symbols, tn string) bool {
-	for _, strc := range s.ast.Structs {
-		if fld, ok := strc.Fields[tn]; ok {
-			return fld.IsPointer
-		}
-	}
-	return false
-}
-
-func isFieldArray(s *Symbols, tn string) bool {
-	for _, strc := range s.ast.Structs {
-		if fld, ok := strc.Fields[tn]; ok {
-			return fld.IsArray
-		}
-	}
-	return false
-}
-
-type walkTemplateData struct {
-	Type
-	ListType   bool
-	IsSwitcher bool
-	Consts     []Const
-}
-
-func (ttd walkTemplateData) ShortTN() string {
-	stn := strings.Map(abridger, ttd.TypeName)
-	if ttd.ListType {
-		return stn + "s"
-	}
-	return stn
-}
-
-func allButLastLetter(s string) string {
-	return s[:len(s)-1]
-}
-
-func (ttd walkTemplateData) TypeNameMinusS() string {
-	return allButLastLetter(ttd.TypeName)
-}
-
-func (ttd walkTemplateData) ShortTNMinusS() string {
-	return allButLastLetter(ttd.ShortTN())
-}
-
-func abridger(r rune) rune {
-	if unicode.IsUpper(r) {
-		return unicode.ToLower(r)
-	}
-	return -1
-}
-
-var walkTemplate = template.Must(template.New("walkTemplate").Parse(`
-// walk{{.TypeName}} ...
-func (w *Walker) walk{{.TypeName}}(ctx *Context, {{.ShortTN}} {{if .IsArray}}[]{{end}}{{if .IsPointer}}*{{end}}ast.{{.TypeName}}) {
-	w.On{{.TypeName}}Enter(ctx, {{.ShortTN}})
-	{{if .ListType}}{{.ShortTN}}.ForEach(func({{.ShortTNMinusS}} ast.{{.TypeNameMinusS}}, i int) {
-		w.walk{{.TypeNameMinusS}}(ctx, {{.ShortTNMinusS}})
-	})
-	{{$parent := .}}{{else if .Consts}}switch {{.ShortTN}}.Kind {
-	{{range .Consts}}case ast.{{.Name}}:
-		w.walk{{.Name}}(ctx, {{$.ShortTN}}.{{.Field}})
-	{{end}}}
-	{{end}}w.On{{.TypeName}}Leave(ctx, {{.ShortTN}})
-}
-`))
