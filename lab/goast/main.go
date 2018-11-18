@@ -181,13 +181,13 @@ func processTypeSpec(symbols *SymbolTable, tspec *ast.TypeSpec) error {
 	// Get the name of the type.
 	name := tspec.Name.Name
 
-	// If the type doesn't already exist in the symbol table, then we need to add it.
-	if _, ok := symbols.Structs[name]; !ok {
-		symbols.Structs[name] = NewStruct()
-	}
-
 	switch v := tspec.Type.(type) {
 	case *ast.StructType:
+		// If the type doesn't already exist in the symbol table, then we need to add it.
+		if _, ok := symbols.Structs[name]; !ok {
+			symbols.Structs[name] = NewStruct()
+		}
+
 		err := processStructType(symbols, name, v)
 		if err != nil {
 			return err
@@ -302,6 +302,7 @@ func generate(w io.Writer, s *Symbols) {
 	for tn := range s.ast.Structs {
 		foo = append(foo, tn)
 	}
+
 	sort.Strings(foo)
 
 	var bar []walkTemplateData
