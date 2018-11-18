@@ -162,12 +162,14 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefiniti
 	}
 
 	return &ast.ExecutableDefinition{
-		Kind:                ast.ExecutableDefinitionKindOperation,
-		OperationType:       opType,
-		Name:                name,
-		VariableDefinitions: variableDefinitions,
-		Directives:          directives,
-		SelectionSet:        selectionSet,
+		Kind: ast.ExecutableDefinitionKindOperation,
+		OperationDefinition: &ast.OperationDefinition{
+			Kind:                opType,
+			Name:                name,
+			VariableDefinitions: variableDefinitions,
+			Directives:          directives,
+			SelectionSet:        selectionSet,
+		},
 	}, nil
 }
 
@@ -218,14 +220,15 @@ func (p *Parser) parseFragmentDefinition() (*ast.ExecutableDefinition, error) {
 		return nil, err
 	}
 
-	definition := &ast.ExecutableDefinition{}
-	definition.Kind = ast.ExecutableDefinitionKindFragment
-	definition.Name = tok.Literal
-	definition.TypeCondition = condition
-	definition.Directives = directives
-	definition.SelectionSet = selections
-
-	return definition, nil
+	return &ast.ExecutableDefinition{
+		Kind: ast.ExecutableDefinitionKindFragment,
+		FragmentDefinition: &ast.FragmentDefinition{
+			Name:          tok.Literal,
+			TypeCondition: condition,
+			Directives:    directives,
+			SelectionSet:  selections,
+		},
+	}, nil
 }
 
 // parseTypeCondition ...
