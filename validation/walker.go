@@ -6,41 +6,41 @@ import "github.com/bucketd/go-graphqlparser/ast"
 
 // Walker holds event handlers for entering and leaving AST nodes.
 type Walker struct {
-	argumentsEventHandlers ArgumentsEventHandlers
-	argumentEventHandlers ArgumentEventHandlers
-	definitionsEventHandlers DefinitionsEventHandlers
-	definitionEventHandlers DefinitionEventHandlers
-	directivesEventHandlers DirectivesEventHandlers
-	directiveEventHandlers DirectiveEventHandlers
-	directiveDefinitionEventHandlers DirectiveDefinitionEventHandlers
-	documentEventHandlers DocumentEventHandlers
-	enumValueDefinitionsEventHandlers EnumValueDefinitionsEventHandlers
-	enumValueDefinitionEventHandlers EnumValueDefinitionEventHandlers
-	executableDefinitionEventHandlers ExecutableDefinitionEventHandlers
-	fieldDefinitionsEventHandlers FieldDefinitionsEventHandlers
-	fieldDefinitionEventHandlers FieldDefinitionEventHandlers
-	fragmentDefinitionEventHandlers FragmentDefinitionEventHandlers
-	inputValueDefinitionsEventHandlers InputValueDefinitionsEventHandlers
-	inputValueDefinitionEventHandlers InputValueDefinitionEventHandlers
-	operationDefinitionEventHandlers OperationDefinitionEventHandlers
-	operationTypeDefinitionsEventHandlers OperationTypeDefinitionsEventHandlers
-	operationTypeDefinitionEventHandlers OperationTypeDefinitionEventHandlers
+	argumentsEventHandlers                    ArgumentsEventHandlers
+	argumentEventHandlers                     ArgumentEventHandlers
+	definitionsEventHandlers                  DefinitionsEventHandlers
+	definitionEventHandlers                   DefinitionEventHandlers
+	directivesEventHandlers                   DirectivesEventHandlers
+	directiveEventHandlers                    DirectiveEventHandlers
+	directiveDefinitionEventHandlers          DirectiveDefinitionEventHandlers
+	documentEventHandlers                     DocumentEventHandlers
+	enumValueDefinitionsEventHandlers         EnumValueDefinitionsEventHandlers
+	enumValueDefinitionEventHandlers          EnumValueDefinitionEventHandlers
+	executableDefinitionEventHandlers         ExecutableDefinitionEventHandlers
+	fieldDefinitionsEventHandlers             FieldDefinitionsEventHandlers
+	fieldDefinitionEventHandlers              FieldDefinitionEventHandlers
+	fragmentDefinitionEventHandlers           FragmentDefinitionEventHandlers
+	inputValueDefinitionsEventHandlers        InputValueDefinitionsEventHandlers
+	inputValueDefinitionEventHandlers         InputValueDefinitionEventHandlers
+	operationDefinitionEventHandlers          OperationDefinitionEventHandlers
+	operationTypeDefinitionsEventHandlers     OperationTypeDefinitionsEventHandlers
+	operationTypeDefinitionEventHandlers      OperationTypeDefinitionEventHandlers
 	rootOperationTypeDefinitionsEventHandlers RootOperationTypeDefinitionsEventHandlers
-	rootOperationTypeDefinitionEventHandlers RootOperationTypeDefinitionEventHandlers
-	schemaDefinitionEventHandlers SchemaDefinitionEventHandlers
-	schemaExtensionEventHandlers SchemaExtensionEventHandlers
-	selectionsEventHandlers SelectionsEventHandlers
-	selectionEventHandlers SelectionEventHandlers
-	typesEventHandlers TypesEventHandlers
-	typeEventHandlers TypeEventHandlers
-	typeConditionEventHandlers TypeConditionEventHandlers
-	typeDefinitionEventHandlers TypeDefinitionEventHandlers
-	typeExtensionEventHandlers TypeExtensionEventHandlers
-	typeSystemDefinitionEventHandlers TypeSystemDefinitionEventHandlers
-	typeSystemExtensionEventHandlers TypeSystemExtensionEventHandlers
-	valueEventHandlers ValueEventHandlers
-	variableDefinitionsEventHandlers VariableDefinitionsEventHandlers
-	variableDefinitionEventHandlers VariableDefinitionEventHandlers
+	rootOperationTypeDefinitionEventHandlers  RootOperationTypeDefinitionEventHandlers
+	schemaDefinitionEventHandlers             SchemaDefinitionEventHandlers
+	schemaExtensionEventHandlers              SchemaExtensionEventHandlers
+	selectionsEventHandlers                   SelectionsEventHandlers
+	selectionEventHandlers                    SelectionEventHandlers
+	typesEventHandlers                        TypesEventHandlers
+	typeEventHandlers                         TypeEventHandlers
+	typeConditionEventHandlers                TypeConditionEventHandlers
+	typeDefinitionEventHandlers               TypeDefinitionEventHandlers
+	typeExtensionEventHandlers                TypeExtensionEventHandlers
+	typeSystemDefinitionEventHandlers         TypeSystemDefinitionEventHandlers
+	typeSystemExtensionEventHandlers          TypeSystemExtensionEventHandlers
+	valueEventHandlers                        ValueEventHandlers
+	variableDefinitionsEventHandlers          VariableDefinitionsEventHandlers
+	variableDefinitionEventHandlers           VariableDefinitionEventHandlers
 }
 
 // NewWalker returns a new Walker instance.
