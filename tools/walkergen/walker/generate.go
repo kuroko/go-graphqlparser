@@ -72,6 +72,7 @@ func Generate(w io.Writer, packageName string, noImports bool, s *goast.Symbols)
 	}
 
 	templates := []*template.Template{
+		eventHandlersTmpl,
 		walkFnTmpl,
 	}
 

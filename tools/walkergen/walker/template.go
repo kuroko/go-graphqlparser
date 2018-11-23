@@ -1,10 +1,11 @@
 package walker
 
 import (
-	"github.com/Masterminds/sprig"
 	"strings"
 	"text/template"
 	"unicode"
+
+	"github.com/Masterminds/sprig"
 
 	"github.com/bucketd/go-graphqlparser/tools/walkergen/goast"
 )
@@ -37,6 +38,43 @@ func NewWalker(rules []RuleFunc) *Walker {
 	}
 
 	return walker
+}
+`))
+
+// eventHandlersTmpl is the template used to generate the event handler functions for the walker,
+// and the corresponding types that have the event handler functions attached.
+var eventHandlersTmpl = template.Must(template.New("eventHandlersTmpl").Funcs(sprig.TxtFuncMap()).Parse(`
+// {{.TypeName}}EventHandler function can handle enter/leave events for {{.TypeName}}.
+type {{.TypeName}}EventHandler func(*Context, {{if .IsPointer}}*{{end}}ast.{{.TypeName}})
+
+// {{.TypeName}}EventHandlers stores the enter and leave events handlers.
+type {{.TypeName}}EventHandlers struct {
+	enter []{{.TypeName}}EventHandler
+	leave []{{.TypeName}}EventHandler
+}
+
+// Add{{.TypeName}}EnterEventHandler adds an event handler to be called when entering {{.TypeName}} nodes.
+func (w *Walker) Add{{.TypeName}}EnterEventHandler(h {{.TypeName}}EventHandler) {
+	w.{{untitle .TypeName}}EventHandlers.enter = append(w.{{untitle .TypeName}}EventHandlers.enter, h)
+}
+
+// Add{{.TypeName}}LeaveEventHandler adds an event handler to be called when leaving {{.TypeName}} nodes.
+func (w *Walker) Add{{.TypeName}}LeaveEventHandler(h {{.TypeName}}EventHandler) {
+	w.{{untitle .TypeName}}EventHandlers.leave = append(w.{{untitle .TypeName}}EventHandlers.leave, h)
+}
+
+// On{{.TypeName}}Enter calls the enter event handlers registered for this node type.
+func (w *Walker) On{{.TypeName}}Enter(ctx *Context, {{.ShortTypeName}} {{if .IsPointer}}*{{end}}ast.{{.TypeName}}) {
+	for _, handler := range w.{{untitle .TypeName}}EventHandlers.enter {
+		handler(ctx, {{.ShortTypeName}})
+	}
+}
+
+// On{{.TypeName}}Leave calls the leave event handlers registered for this node type.
+func (w *Walker) On{{.TypeName}}Leave(ctx *Context, {{.ShortTypeName}} {{if .IsPointer}}*{{end}}ast.{{.TypeName}}) {
+	for _, handler := range w.{{untitle .TypeName}}EventHandlers.leave {
+		handler(ctx, {{.ShortTypeName}})
+	}
 }
 `))
 

@@ -1,4 +1,4 @@
-package validation
+package foo
 
 import "github.com/bucketd/go-graphqlparser/ast"
 
