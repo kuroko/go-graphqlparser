@@ -25,13 +25,11 @@ func main() {
 	flag.Parse()
 
 	if astPath == "" {
-		log.Println("you must specify a path to the ast package")
-		os.Exit(1)
+		log.Fatalln("walkergen: you must specify a path to the ast package")
 	}
 
 	if packageName == "" {
-		log.Println("you must specify a package name for the generated code")
-		os.Exit(1)
+		log.Fatalln("walkergen: you must specify a package name for the generated code")
 	}
 
 	astFile, err := goast.ReadFile(astPath, astFileName)
