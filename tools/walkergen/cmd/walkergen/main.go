@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 
@@ -14,12 +15,26 @@ const (
 )
 
 func main() {
-	if len(os.Args) < 2 {
+	var astPath string
+	var packageName string
+	var noImports bool
+
+	flag.StringVar(&astPath, "ast-path", "", "The path to the AST package on the filesystem.")
+	flag.StringVar(&packageName, "package", "", "The package name to use in the generated code.")
+	flag.BoolVar(&noImports, "no-imports", false, "Use this flag to exclude imports.")
+	flag.Parse()
+
+	if astPath == "" {
 		log.Println("you must specify a path to the ast package")
 		os.Exit(1)
 	}
 
-	astFile, err := goast.ReadFile(astFileName)
+	if packageName == "" {
+		log.Println("you must specify a package name for the generated code")
+		os.Exit(1)
+	}
+
+	astFile, err := goast.ReadFile(astPath, astFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,7 +44,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	listFile, err := goast.ReadFile(listsFileName)
+	listFile, err := goast.ReadFile(astPath, listsFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -45,5 +60,5 @@ func main() {
 	}
 
 	// Output walker.
-	walker.Generate(os.Stdout, &symbols)
+	walker.Generate(os.Stdout, packageName, noImports, &symbols)
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -122,10 +123,15 @@ func main() {
 
 	// Walker middle
 	for i, tn := range tns {
-		handlers.Execute(os.Stdout, map[string]string{
+		err := handlers.Execute(os.Stdout, map[string]string{
 			"TypeNameLCF": lcfirst(tn),
 			"TypeName":    tn,
 		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if i < len(tns) {
 			fmt.Fprintf(os.Stdout, "\n\t")
 		}
@@ -136,13 +142,17 @@ func main() {
 
 	// Event handlers
 	for _, tn := range tns {
-		eventHandlers.Execute(os.Stdout, map[string]string{
+		err := eventHandlers.Execute(os.Stdout, map[string]string{
 			"TypeNameLCF":  lcfirst(tn),
 			"TypeName":     tn,
 			"RealTypeName": realTypeName(tn),
 			"AbridgedTN":   sane(strings.Map(abridger, tn)),
 			"Pointer":      ptrIf(ti[tn].isPointer),
 		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 

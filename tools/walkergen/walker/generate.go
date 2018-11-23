@@ -1,14 +1,27 @@
 package walker
 
 import (
+	"fmt"
 	"io"
+	"log"
+	"os"
 	"sort"
+	"strings"
+	"text/template"
 
 	"github.com/bucketd/go-graphqlparser/tools/walkergen/goast"
 )
 
 // TODO: check output.
-func Generate(w io.Writer, s *goast.Symbols) {
+func Generate(w io.Writer, packageName string, noImports bool, s *goast.Symbols) {
+	// Header and package name
+	fmt.Fprintf(os.Stdout, strings.TrimSpace(header))
+	fmt.Fprintf(os.Stdout, "\npackage %s\n", packageName)
+
+	if !noImports {
+		fmt.Fprintf(os.Stdout, "%s", imports)
+	}
+
 	var typeNames []string
 	for tn := range s.AST.Structs {
 		typeNames = append(typeNames, tn)
@@ -16,10 +29,11 @@ func Generate(w io.Writer, s *goast.Symbols) {
 
 	sort.Strings(typeNames)
 
+	// Construct our template data, based on the symbol table.
 	// For each struct type name...
-	var wtds []walkTemplateData
+	var tds []templateData
 	for _, tn := range typeNames {
-		wtd := walkTemplateData{
+		td := templateData{
 			Type: goast.Type{
 				TypeName:  tn,
 				IsArray:   isFieldArray(s, tn),
@@ -31,9 +45,9 @@ func Generate(w io.Writer, s *goast.Symbols) {
 
 		// Does a list type exist for this type?
 		if _, ok := s.List.Structs[listName]; ok {
-			wtds = append(wtds,
-				walkTemplateData{
-					NodeType: &wtd,
+			tds = append(tds,
+				templateData{
+					NodeType: &td,
 					Type: goast.Type{
 						TypeName:  listName,
 						IsPointer: true,
@@ -45,15 +59,29 @@ func Generate(w io.Writer, s *goast.Symbols) {
 
 		// If we have a field called "Kind", then we need to generate a switch statement too.
 		if f, ok := s.AST.Structs[tn].Fields["Kind"]; ok {
-			wtd.IsSwitcher = true
-			wtd.Consts = s.AST.Consts[f.TypeName]
+			td.IsSwitcher = true
+			td.Consts = s.AST.Consts[f.TypeName]
 		}
 
-		wtds = append(wtds, wtd)
+		tds = append(tds, td)
 	}
 
-	for _, baz := range wtds {
-		walkFnTmpl.Execute(w, baz)
+	err := walkerTypeTmpl.Execute(w, tds)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	templates := []*template.Template{
+		walkFnTmpl,
+	}
+
+	for _, td := range tds {
+		for _, tmpl := range templates {
+			err := tmpl.Execute(w, td)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 }
 

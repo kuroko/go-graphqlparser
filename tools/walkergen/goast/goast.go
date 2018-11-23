@@ -5,7 +5,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"os"
 	"path"
 	"strings"
 )
@@ -59,8 +58,8 @@ type Type struct {
 }
 
 // ReadFile ...
-func ReadFile(fileName string) (*ast.File, error) {
-	return parser.ParseFile(token.NewFileSet(), path.Join(os.Args[1], fileName), nil, parser.ParseComments)
+func ReadFile(filePath, fileName string) (*ast.File, error) {
+	return parser.ParseFile(token.NewFileSet(), path.Join(filePath, fileName), nil, parser.ParseComments)
 }
 
 // CreateSymbolTable ...
