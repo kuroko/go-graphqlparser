@@ -13,6 +13,7 @@ type Walker struct {
 	directivesEventHandlers DirectivesEventHandlers
 	directiveEventHandlers DirectiveEventHandlers
 	directiveDefinitionEventHandlers DirectiveDefinitionEventHandlers
+	documentEventHandlers DocumentEventHandlers
 	enumValueDefinitionsEventHandlers EnumValueDefinitionsEventHandlers
 	enumValueDefinitionEventHandlers EnumValueDefinitionEventHandlers
 	executableDefinitionEventHandlers ExecutableDefinitionEventHandlers
@@ -72,16 +73,16 @@ func (w *Walker) AddArgumentsLeaveEventHandler(h ArgumentsEventHandler) {
 }
 
 // OnArgumentsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnArgumentsEnter(ctx *Context, n *ast.Arguments) {
+func (w *Walker) OnArgumentsEnter(ctx *Context, as *ast.Arguments) {
 	for _, handler := range w.argumentsEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, as)
 	}
 }
 
 // OnArgumentsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnArgumentsLeave(ctx *Context, n *ast.Arguments) {
+func (w *Walker) OnArgumentsLeave(ctx *Context, as *ast.Arguments) {
 	for _, handler := range w.argumentsEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, as)
 	}
 }
 
@@ -114,16 +115,16 @@ func (w *Walker) AddArgumentLeaveEventHandler(h ArgumentEventHandler) {
 }
 
 // OnArgumentEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnArgumentEnter(ctx *Context, n ast.Argument) {
+func (w *Walker) OnArgumentEnter(ctx *Context, a ast.Argument) {
 	for _, handler := range w.argumentEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, a)
 	}
 }
 
 // OnArgumentLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnArgumentLeave(ctx *Context, n ast.Argument) {
+func (w *Walker) OnArgumentLeave(ctx *Context, a ast.Argument) {
 	for _, handler := range w.argumentEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, a)
 	}
 }
 
@@ -153,16 +154,16 @@ func (w *Walker) AddDefinitionsLeaveEventHandler(h DefinitionsEventHandler) {
 }
 
 // OnDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDefinitionsEnter(ctx *Context, n *ast.Definitions) {
+func (w *Walker) OnDefinitionsEnter(ctx *Context, ds *ast.Definitions) {
 	for _, handler := range w.definitionsEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, ds)
 	}
 }
 
 // OnDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDefinitionsLeave(ctx *Context, n *ast.Definitions) {
+func (w *Walker) OnDefinitionsLeave(ctx *Context, ds *ast.Definitions) {
 	for _, handler := range w.definitionsEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, ds)
 	}
 }
 
@@ -195,16 +196,16 @@ func (w *Walker) AddDefinitionLeaveEventHandler(h DefinitionEventHandler) {
 }
 
 // OnDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDefinitionEnter(ctx *Context, n ast.Definition) {
+func (w *Walker) OnDefinitionEnter(ctx *Context, d ast.Definition) {
 	for _, handler := range w.definitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, d)
 	}
 }
 
 // OnDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDefinitionLeave(ctx *Context, n ast.Definition) {
+func (w *Walker) OnDefinitionLeave(ctx *Context, d ast.Definition) {
 	for _, handler := range w.definitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, d)
 	}
 }
 
@@ -213,11 +214,11 @@ func (w *Walker) walkDefinition(ctx *Context, d ast.Definition) {
 	w.OnDefinitionEnter(ctx, d)
 	switch d.Kind {
 	case ast.DefinitionKindExecutable:
-		w.walkDefinitionKindExecutable(ctx, d.ExecutableDefinition)
+		w.walkExecutableDefinition(ctx, d.ExecutableDefinition)
 	case ast.DefinitionKindTypeSystem:
-		w.walkDefinitionKindTypeSystem(ctx, d.TypeSystemDefinition)
+		w.walkTypeSystemDefinition(ctx, d.TypeSystemDefinition)
 	case ast.DefinitionKindTypeSystemExtension:
-		w.walkDefinitionKindTypeSystemExtension(ctx, d.TypeSystemExtension)
+		w.walkTypeSystemExtension(ctx, d.TypeSystemExtension)
 	}
 	w.OnDefinitionLeave(ctx, d)
 }
@@ -242,16 +243,16 @@ func (w *Walker) AddDirectivesLeaveEventHandler(h DirectivesEventHandler) {
 }
 
 // OnDirectivesEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDirectivesEnter(ctx *Context, n *ast.Directives) {
+func (w *Walker) OnDirectivesEnter(ctx *Context, ds *ast.Directives) {
 	for _, handler := range w.directivesEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, ds)
 	}
 }
 
 // OnDirectivesLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDirectivesLeave(ctx *Context, n *ast.Directives) {
+func (w *Walker) OnDirectivesLeave(ctx *Context, ds *ast.Directives) {
 	for _, handler := range w.directivesEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, ds)
 	}
 }
 
@@ -284,16 +285,16 @@ func (w *Walker) AddDirectiveLeaveEventHandler(h DirectiveEventHandler) {
 }
 
 // OnDirectiveEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDirectiveEnter(ctx *Context, n ast.Directive) {
+func (w *Walker) OnDirectiveEnter(ctx *Context, d ast.Directive) {
 	for _, handler := range w.directiveEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, d)
 	}
 }
 
 // OnDirectiveLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDirectiveLeave(ctx *Context, n ast.Directive) {
+func (w *Walker) OnDirectiveLeave(ctx *Context, d ast.Directive) {
 	for _, handler := range w.directiveEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, d)
 	}
 }
 
@@ -323,16 +324,16 @@ func (w *Walker) AddDirectiveDefinitionLeaveEventHandler(h DirectiveDefinitionEv
 }
 
 // OnDirectiveDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDirectiveDefinitionEnter(ctx *Context, n *ast.DirectiveDefinition) {
+func (w *Walker) OnDirectiveDefinitionEnter(ctx *Context, dd *ast.DirectiveDefinition) {
 	for _, handler := range w.directiveDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, dd)
 	}
 }
 
 // OnDirectiveDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDirectiveDefinitionLeave(ctx *Context, n *ast.DirectiveDefinition) {
+func (w *Walker) OnDirectiveDefinitionLeave(ctx *Context, dd *ast.DirectiveDefinition) {
 	for _, handler := range w.directiveDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, dd)
 	}
 }
 
@@ -340,6 +341,45 @@ func (w *Walker) OnDirectiveDefinitionLeave(ctx *Context, n *ast.DirectiveDefini
 func (w *Walker) walkDirectiveDefinition(ctx *Context, dd *ast.DirectiveDefinition) {
 	w.OnDirectiveDefinitionEnter(ctx, dd)
 	w.OnDirectiveDefinitionLeave(ctx, dd)
+}
+
+// DocumentEventHandler function can handle enter/leave events for Document.
+type DocumentEventHandler func(*Context, ast.Document)
+
+// DocumentEventHandlers stores the enter and leave events handlers.
+type DocumentEventHandlers struct {
+	enter []DocumentEventHandler
+	leave []DocumentEventHandler
+}
+
+// AddDocumentEnterEventHandler adds an event handler to be called when entering Document nodes.
+func (w *Walker) AddDocumentEnterEventHandler(h DocumentEventHandler) {
+	w.documentEventHandlers.enter = append(w.documentEventHandlers.enter, h)
+}
+
+// AddDocumentLeaveEventHandler adds an event handler to be called when leaving Document nodes.
+func (w *Walker) AddDocumentLeaveEventHandler(h DocumentEventHandler) {
+	w.documentEventHandlers.leave = append(w.documentEventHandlers.leave, h)
+}
+
+// OnDocumentEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnDocumentEnter(ctx *Context, d ast.Document) {
+	for _, handler := range w.documentEventHandlers.enter {
+		handler(ctx, d)
+	}
+}
+
+// OnDocumentLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnDocumentLeave(ctx *Context, d ast.Document) {
+	for _, handler := range w.documentEventHandlers.leave {
+		handler(ctx, d)
+	}
+}
+
+// walkDocument ...
+func (w *Walker) walkDocument(ctx *Context, d ast.Document) {
+	w.OnDocumentEnter(ctx, d)
+	w.OnDocumentLeave(ctx, d)
 }
 
 // EnumValueDefinitionsEventHandler function can handle enter/leave events for EnumValueDefinitions.
@@ -362,16 +402,16 @@ func (w *Walker) AddEnumValueDefinitionsLeaveEventHandler(h EnumValueDefinitions
 }
 
 // OnEnumValueDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnEnumValueDefinitionsEnter(ctx *Context, n *ast.EnumValueDefinitions) {
+func (w *Walker) OnEnumValueDefinitionsEnter(ctx *Context, evds *ast.EnumValueDefinitions) {
 	for _, handler := range w.enumValueDefinitionsEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, evds)
 	}
 }
 
 // OnEnumValueDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnEnumValueDefinitionsLeave(ctx *Context, n *ast.EnumValueDefinitions) {
+func (w *Walker) OnEnumValueDefinitionsLeave(ctx *Context, evds *ast.EnumValueDefinitions) {
 	for _, handler := range w.enumValueDefinitionsEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, evds)
 	}
 }
 
@@ -404,16 +444,16 @@ func (w *Walker) AddEnumValueDefinitionLeaveEventHandler(h EnumValueDefinitionEv
 }
 
 // OnEnumValueDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnEnumValueDefinitionEnter(ctx *Context, n ast.EnumValueDefinition) {
+func (w *Walker) OnEnumValueDefinitionEnter(ctx *Context, evd ast.EnumValueDefinition) {
 	for _, handler := range w.enumValueDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, evd)
 	}
 }
 
 // OnEnumValueDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnEnumValueDefinitionLeave(ctx *Context, n ast.EnumValueDefinition) {
+func (w *Walker) OnEnumValueDefinitionLeave(ctx *Context, evd ast.EnumValueDefinition) {
 	for _, handler := range w.enumValueDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, evd)
 	}
 }
 
@@ -443,16 +483,16 @@ func (w *Walker) AddExecutableDefinitionLeaveEventHandler(h ExecutableDefinition
 }
 
 // OnExecutableDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnExecutableDefinitionEnter(ctx *Context, n *ast.ExecutableDefinition) {
+func (w *Walker) OnExecutableDefinitionEnter(ctx *Context, ed *ast.ExecutableDefinition) {
 	for _, handler := range w.executableDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, ed)
 	}
 }
 
 // OnExecutableDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnExecutableDefinitionLeave(ctx *Context, n *ast.ExecutableDefinition) {
+func (w *Walker) OnExecutableDefinitionLeave(ctx *Context, ed *ast.ExecutableDefinition) {
 	for _, handler := range w.executableDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, ed)
 	}
 }
 
@@ -461,9 +501,9 @@ func (w *Walker) walkExecutableDefinition(ctx *Context, ed *ast.ExecutableDefini
 	w.OnExecutableDefinitionEnter(ctx, ed)
 	switch ed.Kind {
 	case ast.ExecutableDefinitionKindOperation:
-		w.walkExecutableDefinitionKindOperation(ctx, ed.OperationDefinition)
+		w.walkOperationDefinition(ctx, ed.OperationDefinition)
 	case ast.ExecutableDefinitionKindFragment:
-		w.walkExecutableDefinitionKindFragment(ctx, ed.FragmentDefinition)
+		w.walkFragmentDefinition(ctx, ed.FragmentDefinition)
 	}
 	w.OnExecutableDefinitionLeave(ctx, ed)
 }
@@ -488,16 +528,16 @@ func (w *Walker) AddFieldDefinitionsLeaveEventHandler(h FieldDefinitionsEventHan
 }
 
 // OnFieldDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnFieldDefinitionsEnter(ctx *Context, n *ast.FieldDefinitions) {
+func (w *Walker) OnFieldDefinitionsEnter(ctx *Context, fds *ast.FieldDefinitions) {
 	for _, handler := range w.fieldDefinitionsEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, fds)
 	}
 }
 
 // OnFieldDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnFieldDefinitionsLeave(ctx *Context, n *ast.FieldDefinitions) {
+func (w *Walker) OnFieldDefinitionsLeave(ctx *Context, fds *ast.FieldDefinitions) {
 	for _, handler := range w.fieldDefinitionsEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, fds)
 	}
 }
 
@@ -530,16 +570,16 @@ func (w *Walker) AddFieldDefinitionLeaveEventHandler(h FieldDefinitionEventHandl
 }
 
 // OnFieldDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnFieldDefinitionEnter(ctx *Context, n ast.FieldDefinition) {
+func (w *Walker) OnFieldDefinitionEnter(ctx *Context, fd ast.FieldDefinition) {
 	for _, handler := range w.fieldDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, fd)
 	}
 }
 
 // OnFieldDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnFieldDefinitionLeave(ctx *Context, n ast.FieldDefinition) {
+func (w *Walker) OnFieldDefinitionLeave(ctx *Context, fd ast.FieldDefinition) {
 	for _, handler := range w.fieldDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, fd)
 	}
 }
 
@@ -569,16 +609,16 @@ func (w *Walker) AddFragmentDefinitionLeaveEventHandler(h FragmentDefinitionEven
 }
 
 // OnFragmentDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnFragmentDefinitionEnter(ctx *Context, n *ast.FragmentDefinition) {
+func (w *Walker) OnFragmentDefinitionEnter(ctx *Context, fd *ast.FragmentDefinition) {
 	for _, handler := range w.fragmentDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, fd)
 	}
 }
 
 // OnFragmentDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnFragmentDefinitionLeave(ctx *Context, n *ast.FragmentDefinition) {
+func (w *Walker) OnFragmentDefinitionLeave(ctx *Context, fd *ast.FragmentDefinition) {
 	for _, handler := range w.fragmentDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, fd)
 	}
 }
 
@@ -608,16 +648,16 @@ func (w *Walker) AddInputValueDefinitionsLeaveEventHandler(h InputValueDefinitio
 }
 
 // OnInputValueDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnInputValueDefinitionsEnter(ctx *Context, n *ast.InputValueDefinitions) {
+func (w *Walker) OnInputValueDefinitionsEnter(ctx *Context, ivds *ast.InputValueDefinitions) {
 	for _, handler := range w.inputValueDefinitionsEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, ivds)
 	}
 }
 
 // OnInputValueDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnInputValueDefinitionsLeave(ctx *Context, n *ast.InputValueDefinitions) {
+func (w *Walker) OnInputValueDefinitionsLeave(ctx *Context, ivds *ast.InputValueDefinitions) {
 	for _, handler := range w.inputValueDefinitionsEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, ivds)
 	}
 }
 
@@ -650,16 +690,16 @@ func (w *Walker) AddInputValueDefinitionLeaveEventHandler(h InputValueDefinition
 }
 
 // OnInputValueDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnInputValueDefinitionEnter(ctx *Context, n ast.InputValueDefinition) {
+func (w *Walker) OnInputValueDefinitionEnter(ctx *Context, ivd ast.InputValueDefinition) {
 	for _, handler := range w.inputValueDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, ivd)
 	}
 }
 
 // OnInputValueDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnInputValueDefinitionLeave(ctx *Context, n ast.InputValueDefinition) {
+func (w *Walker) OnInputValueDefinitionLeave(ctx *Context, ivd ast.InputValueDefinition) {
 	for _, handler := range w.inputValueDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, ivd)
 	}
 }
 
@@ -689,30 +729,22 @@ func (w *Walker) AddOperationDefinitionLeaveEventHandler(h OperationDefinitionEv
 }
 
 // OnOperationDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnOperationDefinitionEnter(ctx *Context, n *ast.OperationDefinition) {
+func (w *Walker) OnOperationDefinitionEnter(ctx *Context, od *ast.OperationDefinition) {
 	for _, handler := range w.operationDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, od)
 	}
 }
 
 // OnOperationDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnOperationDefinitionLeave(ctx *Context, n *ast.OperationDefinition) {
+func (w *Walker) OnOperationDefinitionLeave(ctx *Context, od *ast.OperationDefinition) {
 	for _, handler := range w.operationDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, od)
 	}
 }
 
 // walkOperationDefinition ...
 func (w *Walker) walkOperationDefinition(ctx *Context, od *ast.OperationDefinition) {
 	w.OnOperationDefinitionEnter(ctx, od)
-	switch od.Kind {
-	case ast.OperationDefinitionKindQuery:
-		w.walkOperationDefinitionKindQuery(ctx, od.QueryOperationDefinition)
-	case ast.OperationDefinitionKindMutation:
-		w.walkOperationDefinitionKindMutation(ctx, od.MutationOperationDefinition)
-	case ast.OperationDefinitionKindSubscription:
-		w.walkOperationDefinitionKindSubscription(ctx, od.SubscriptionOperationDefinition)
-	}
 	w.OnOperationDefinitionLeave(ctx, od)
 }
 
@@ -736,16 +768,16 @@ func (w *Walker) AddOperationTypeDefinitionsLeaveEventHandler(h OperationTypeDef
 }
 
 // OnOperationTypeDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnOperationTypeDefinitionsEnter(ctx *Context, n *ast.OperationTypeDefinitions) {
+func (w *Walker) OnOperationTypeDefinitionsEnter(ctx *Context, otds *ast.OperationTypeDefinitions) {
 	for _, handler := range w.operationTypeDefinitionsEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, otds)
 	}
 }
 
 // OnOperationTypeDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnOperationTypeDefinitionsLeave(ctx *Context, n *ast.OperationTypeDefinitions) {
+func (w *Walker) OnOperationTypeDefinitionsLeave(ctx *Context, otds *ast.OperationTypeDefinitions) {
 	for _, handler := range w.operationTypeDefinitionsEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, otds)
 	}
 }
 
@@ -778,16 +810,16 @@ func (w *Walker) AddOperationTypeDefinitionLeaveEventHandler(h OperationTypeDefi
 }
 
 // OnOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnOperationTypeDefinitionEnter(ctx *Context, n ast.OperationTypeDefinition) {
+func (w *Walker) OnOperationTypeDefinitionEnter(ctx *Context, otd ast.OperationTypeDefinition) {
 	for _, handler := range w.operationTypeDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, otd)
 	}
 }
 
 // OnOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnOperationTypeDefinitionLeave(ctx *Context, n ast.OperationTypeDefinition) {
+func (w *Walker) OnOperationTypeDefinitionLeave(ctx *Context, otd ast.OperationTypeDefinition) {
 	for _, handler := range w.operationTypeDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, otd)
 	}
 }
 
@@ -817,16 +849,16 @@ func (w *Walker) AddRootOperationTypeDefinitionsLeaveEventHandler(h RootOperatio
 }
 
 // OnRootOperationTypeDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnRootOperationTypeDefinitionsEnter(ctx *Context, n *ast.RootOperationTypeDefinitions) {
+func (w *Walker) OnRootOperationTypeDefinitionsEnter(ctx *Context, rotds *ast.RootOperationTypeDefinitions) {
 	for _, handler := range w.rootOperationTypeDefinitionsEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, rotds)
 	}
 }
 
 // OnRootOperationTypeDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnRootOperationTypeDefinitionsLeave(ctx *Context, n *ast.RootOperationTypeDefinitions) {
+func (w *Walker) OnRootOperationTypeDefinitionsLeave(ctx *Context, rotds *ast.RootOperationTypeDefinitions) {
 	for _, handler := range w.rootOperationTypeDefinitionsEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, rotds)
 	}
 }
 
@@ -859,16 +891,16 @@ func (w *Walker) AddRootOperationTypeDefinitionLeaveEventHandler(h RootOperation
 }
 
 // OnRootOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnRootOperationTypeDefinitionEnter(ctx *Context, n ast.RootOperationTypeDefinition) {
+func (w *Walker) OnRootOperationTypeDefinitionEnter(ctx *Context, rotd ast.RootOperationTypeDefinition) {
 	for _, handler := range w.rootOperationTypeDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, rotd)
 	}
 }
 
 // OnRootOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnRootOperationTypeDefinitionLeave(ctx *Context, n ast.RootOperationTypeDefinition) {
+func (w *Walker) OnRootOperationTypeDefinitionLeave(ctx *Context, rotd ast.RootOperationTypeDefinition) {
 	for _, handler := range w.rootOperationTypeDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, rotd)
 	}
 }
 
@@ -898,16 +930,16 @@ func (w *Walker) AddSchemaDefinitionLeaveEventHandler(h SchemaDefinitionEventHan
 }
 
 // OnSchemaDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnSchemaDefinitionEnter(ctx *Context, n *ast.SchemaDefinition) {
+func (w *Walker) OnSchemaDefinitionEnter(ctx *Context, sd *ast.SchemaDefinition) {
 	for _, handler := range w.schemaDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, sd)
 	}
 }
 
 // OnSchemaDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnSchemaDefinitionLeave(ctx *Context, n *ast.SchemaDefinition) {
+func (w *Walker) OnSchemaDefinitionLeave(ctx *Context, sd *ast.SchemaDefinition) {
 	for _, handler := range w.schemaDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, sd)
 	}
 }
 
@@ -937,16 +969,16 @@ func (w *Walker) AddSchemaExtensionLeaveEventHandler(h SchemaExtensionEventHandl
 }
 
 // OnSchemaExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnSchemaExtensionEnter(ctx *Context, n *ast.SchemaExtension) {
+func (w *Walker) OnSchemaExtensionEnter(ctx *Context, se *ast.SchemaExtension) {
 	for _, handler := range w.schemaExtensionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, se)
 	}
 }
 
 // OnSchemaExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnSchemaExtensionLeave(ctx *Context, n *ast.SchemaExtension) {
+func (w *Walker) OnSchemaExtensionLeave(ctx *Context, se *ast.SchemaExtension) {
 	for _, handler := range w.schemaExtensionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, se)
 	}
 }
 
@@ -976,16 +1008,16 @@ func (w *Walker) AddSelectionsLeaveEventHandler(h SelectionsEventHandler) {
 }
 
 // OnSelectionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnSelectionsEnter(ctx *Context, n *ast.Selections) {
+func (w *Walker) OnSelectionsEnter(ctx *Context, ss *ast.Selections) {
 	for _, handler := range w.selectionsEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, ss)
 	}
 }
 
 // OnSelectionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnSelectionsLeave(ctx *Context, n *ast.Selections) {
+func (w *Walker) OnSelectionsLeave(ctx *Context, ss *ast.Selections) {
 	for _, handler := range w.selectionsEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, ss)
 	}
 }
 
@@ -1018,30 +1050,22 @@ func (w *Walker) AddSelectionLeaveEventHandler(h SelectionEventHandler) {
 }
 
 // OnSelectionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnSelectionEnter(ctx *Context, n ast.Selection) {
+func (w *Walker) OnSelectionEnter(ctx *Context, s ast.Selection) {
 	for _, handler := range w.selectionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, s)
 	}
 }
 
 // OnSelectionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnSelectionLeave(ctx *Context, n ast.Selection) {
+func (w *Walker) OnSelectionLeave(ctx *Context, s ast.Selection) {
 	for _, handler := range w.selectionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, s)
 	}
 }
 
 // walkSelection ...
 func (w *Walker) walkSelection(ctx *Context, s ast.Selection) {
 	w.OnSelectionEnter(ctx, s)
-	switch s.Kind {
-	case ast.SelectionKindField:
-		w.walkSelectionKindField(ctx, s.FieldSelection)
-	case ast.SelectionKindFragmentSpread:
-		w.walkSelectionKindFragmentSpread(ctx, s.FragmentSpreadSelection)
-	case ast.SelectionKindInlineFragment:
-		w.walkSelectionKindInlineFragment(ctx, s.InlineFragmentSelection)
-	}
 	w.OnSelectionLeave(ctx, s)
 }
 
@@ -1065,16 +1089,16 @@ func (w *Walker) AddTypesLeaveEventHandler(h TypesEventHandler) {
 }
 
 // OnTypesEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypesEnter(ctx *Context, n *ast.Types) {
+func (w *Walker) OnTypesEnter(ctx *Context, ts *ast.Types) {
 	for _, handler := range w.typesEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, ts)
 	}
 }
 
 // OnTypesLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypesLeave(ctx *Context, n *ast.Types) {
+func (w *Walker) OnTypesLeave(ctx *Context, ts *ast.Types) {
 	for _, handler := range w.typesEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, ts)
 	}
 }
 
@@ -1107,28 +1131,22 @@ func (w *Walker) AddTypeLeaveEventHandler(h TypeEventHandler) {
 }
 
 // OnTypeEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypeEnter(ctx *Context, n ast.Type) {
+func (w *Walker) OnTypeEnter(ctx *Context, t ast.Type) {
 	for _, handler := range w.typeEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, t)
 	}
 }
 
 // OnTypeLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypeLeave(ctx *Context, n ast.Type) {
+func (w *Walker) OnTypeLeave(ctx *Context, t ast.Type) {
 	for _, handler := range w.typeEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, t)
 	}
 }
 
 // walkType ...
 func (w *Walker) walkType(ctx *Context, t ast.Type) {
 	w.OnTypeEnter(ctx, t)
-	switch t.Kind {
-	case ast.TypeKindNamed:
-		w.walkTypeKindNamed(ctx, t.NamedType)
-	case ast.TypeKindList:
-		w.walkTypeKindList(ctx, t.ListType)
-	}
 	w.OnTypeLeave(ctx, t)
 }
 
@@ -1152,16 +1170,16 @@ func (w *Walker) AddTypeConditionLeaveEventHandler(h TypeConditionEventHandler) 
 }
 
 // OnTypeConditionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypeConditionEnter(ctx *Context, n *ast.TypeCondition) {
+func (w *Walker) OnTypeConditionEnter(ctx *Context, tc *ast.TypeCondition) {
 	for _, handler := range w.typeConditionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, tc)
 	}
 }
 
 // OnTypeConditionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypeConditionLeave(ctx *Context, n *ast.TypeCondition) {
+func (w *Walker) OnTypeConditionLeave(ctx *Context, tc *ast.TypeCondition) {
 	for _, handler := range w.typeConditionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, tc)
 	}
 }
 
@@ -1191,36 +1209,22 @@ func (w *Walker) AddTypeDefinitionLeaveEventHandler(h TypeDefinitionEventHandler
 }
 
 // OnTypeDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypeDefinitionEnter(ctx *Context, n *ast.TypeDefinition) {
+func (w *Walker) OnTypeDefinitionEnter(ctx *Context, td *ast.TypeDefinition) {
 	for _, handler := range w.typeDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, td)
 	}
 }
 
 // OnTypeDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypeDefinitionLeave(ctx *Context, n *ast.TypeDefinition) {
+func (w *Walker) OnTypeDefinitionLeave(ctx *Context, td *ast.TypeDefinition) {
 	for _, handler := range w.typeDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, td)
 	}
 }
 
 // walkTypeDefinition ...
 func (w *Walker) walkTypeDefinition(ctx *Context, td *ast.TypeDefinition) {
 	w.OnTypeDefinitionEnter(ctx, td)
-	switch td.Kind {
-	case ast.TypeDefinitionKindScalar:
-		w.walkTypeDefinitionKindScalar(ctx, td.ScalarTypeDefinition)
-	case ast.TypeDefinitionKindObject:
-		w.walkTypeDefinitionKindObject(ctx, td.ObjectTypeDefinition)
-	case ast.TypeDefinitionKindInterface:
-		w.walkTypeDefinitionKindInterface(ctx, td.InterfaceTypeDefinition)
-	case ast.TypeDefinitionKindUnion:
-		w.walkTypeDefinitionKindUnion(ctx, td.UnionTypeDefinition)
-	case ast.TypeDefinitionKindEnum:
-		w.walkTypeDefinitionKindEnum(ctx, td.EnumTypeDefinition)
-	case ast.TypeDefinitionKindInputObject:
-		w.walkTypeDefinitionKindInputObject(ctx, td.InputObjectTypeDefinition)
-	}
 	w.OnTypeDefinitionLeave(ctx, td)
 }
 
@@ -1244,36 +1248,22 @@ func (w *Walker) AddTypeExtensionLeaveEventHandler(h TypeExtensionEventHandler) 
 }
 
 // OnTypeExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypeExtensionEnter(ctx *Context, n *ast.TypeExtension) {
+func (w *Walker) OnTypeExtensionEnter(ctx *Context, te *ast.TypeExtension) {
 	for _, handler := range w.typeExtensionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, te)
 	}
 }
 
 // OnTypeExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypeExtensionLeave(ctx *Context, n *ast.TypeExtension) {
+func (w *Walker) OnTypeExtensionLeave(ctx *Context, te *ast.TypeExtension) {
 	for _, handler := range w.typeExtensionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, te)
 	}
 }
 
 // walkTypeExtension ...
 func (w *Walker) walkTypeExtension(ctx *Context, te *ast.TypeExtension) {
 	w.OnTypeExtensionEnter(ctx, te)
-	switch te.Kind {
-	case ast.TypeExtensionKindScalar:
-		w.walkTypeExtensionKindScalar(ctx, te.ScalarTypeExtension)
-	case ast.TypeExtensionKindObject:
-		w.walkTypeExtensionKindObject(ctx, te.ObjectTypeExtension)
-	case ast.TypeExtensionKindInterface:
-		w.walkTypeExtensionKindInterface(ctx, te.InterfaceTypeExtension)
-	case ast.TypeExtensionKindUnion:
-		w.walkTypeExtensionKindUnion(ctx, te.UnionTypeExtension)
-	case ast.TypeExtensionKindEnum:
-		w.walkTypeExtensionKindEnum(ctx, te.EnumTypeExtension)
-	case ast.TypeExtensionKindInputObject:
-		w.walkTypeExtensionKindInputObject(ctx, te.InputObjectTypeExtension)
-	}
 	w.OnTypeExtensionLeave(ctx, te)
 }
 
@@ -1297,16 +1287,16 @@ func (w *Walker) AddTypeSystemDefinitionLeaveEventHandler(h TypeSystemDefinition
 }
 
 // OnTypeSystemDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypeSystemDefinitionEnter(ctx *Context, n *ast.TypeSystemDefinition) {
+func (w *Walker) OnTypeSystemDefinitionEnter(ctx *Context, tsd *ast.TypeSystemDefinition) {
 	for _, handler := range w.typeSystemDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, tsd)
 	}
 }
 
 // OnTypeSystemDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypeSystemDefinitionLeave(ctx *Context, n *ast.TypeSystemDefinition) {
+func (w *Walker) OnTypeSystemDefinitionLeave(ctx *Context, tsd *ast.TypeSystemDefinition) {
 	for _, handler := range w.typeSystemDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, tsd)
 	}
 }
 
@@ -1315,11 +1305,11 @@ func (w *Walker) walkTypeSystemDefinition(ctx *Context, tsd *ast.TypeSystemDefin
 	w.OnTypeSystemDefinitionEnter(ctx, tsd)
 	switch tsd.Kind {
 	case ast.TypeSystemDefinitionKindSchema:
-		w.walkTypeSystemDefinitionKindSchema(ctx, tsd.SchemaTypeSystemDefinition)
+		w.walkSchemaDefinition(ctx, tsd.SchemaDefinition)
 	case ast.TypeSystemDefinitionKindType:
-		w.walkTypeSystemDefinitionKindType(ctx, tsd.TypeTypeSystemDefinition)
+		w.walkTypeDefinition(ctx, tsd.TypeDefinition)
 	case ast.TypeSystemDefinitionKindDirective:
-		w.walkTypeSystemDefinitionKindDirective(ctx, tsd.DirectiveTypeSystemDefinition)
+		w.walkDirectiveDefinition(ctx, tsd.DirectiveDefinition)
 	}
 	w.OnTypeSystemDefinitionLeave(ctx, tsd)
 }
@@ -1344,16 +1334,16 @@ func (w *Walker) AddTypeSystemExtensionLeaveEventHandler(h TypeSystemExtensionEv
 }
 
 // OnTypeSystemExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypeSystemExtensionEnter(ctx *Context, n *ast.TypeSystemExtension) {
+func (w *Walker) OnTypeSystemExtensionEnter(ctx *Context, tse *ast.TypeSystemExtension) {
 	for _, handler := range w.typeSystemExtensionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, tse)
 	}
 }
 
 // OnTypeSystemExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypeSystemExtensionLeave(ctx *Context, n *ast.TypeSystemExtension) {
+func (w *Walker) OnTypeSystemExtensionLeave(ctx *Context, tse *ast.TypeSystemExtension) {
 	for _, handler := range w.typeSystemExtensionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, tse)
 	}
 }
 
@@ -1362,9 +1352,9 @@ func (w *Walker) walkTypeSystemExtension(ctx *Context, tse *ast.TypeSystemExtens
 	w.OnTypeSystemExtensionEnter(ctx, tse)
 	switch tse.Kind {
 	case ast.TypeSystemExtensionKindSchema:
-		w.walkTypeSystemExtensionKindSchema(ctx, tse.SchemaTypeSystemExtension)
+		w.walkSchemaExtension(ctx, tse.SchemaExtension)
 	case ast.TypeSystemExtensionKindType:
-		w.walkTypeSystemExtensionKindType(ctx, tse.TypeTypeSystemExtension)
+		w.walkTypeExtension(ctx, tse.TypeExtension)
 	}
 	w.OnTypeSystemExtensionLeave(ctx, tse)
 }
@@ -1389,42 +1379,22 @@ func (w *Walker) AddValueLeaveEventHandler(h ValueEventHandler) {
 }
 
 // OnValueEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnValueEnter(ctx *Context, n ast.Value) {
+func (w *Walker) OnValueEnter(ctx *Context, v ast.Value) {
 	for _, handler := range w.valueEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, v)
 	}
 }
 
 // OnValueLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnValueLeave(ctx *Context, n ast.Value) {
+func (w *Walker) OnValueLeave(ctx *Context, v ast.Value) {
 	for _, handler := range w.valueEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, v)
 	}
 }
 
 // walkValue ...
 func (w *Walker) walkValue(ctx *Context, v ast.Value) {
 	w.OnValueEnter(ctx, v)
-	switch v.Kind {
-	case ast.ValueKindVariable:
-		w.walkValueKindVariable(ctx, v.VariableValue)
-	case ast.ValueKindInt:
-		w.walkValueKindInt(ctx, v.IntValue)
-	case ast.ValueKindFloat:
-		w.walkValueKindFloat(ctx, v.FloatValue)
-	case ast.ValueKindString:
-		w.walkValueKindString(ctx, v.StringValue)
-	case ast.ValueKindBoolean:
-		w.walkValueKindBoolean(ctx, v.BooleanValue)
-	case ast.ValueKindNull:
-		w.walkValueKindNull(ctx, v.NullValue)
-	case ast.ValueKindEnum:
-		w.walkValueKindEnum(ctx, v.EnumValue)
-	case ast.ValueKindList:
-		w.walkValueKindList(ctx, v.ListValue)
-	case ast.ValueKindObject:
-		w.walkValueKindObject(ctx, v.ObjectValue)
-	}
 	w.OnValueLeave(ctx, v)
 }
 
@@ -1448,16 +1418,16 @@ func (w *Walker) AddVariableDefinitionsLeaveEventHandler(h VariableDefinitionsEv
 }
 
 // OnVariableDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnVariableDefinitionsEnter(ctx *Context, n *ast.VariableDefinitions) {
+func (w *Walker) OnVariableDefinitionsEnter(ctx *Context, vds *ast.VariableDefinitions) {
 	for _, handler := range w.variableDefinitionsEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, vds)
 	}
 }
 
 // OnVariableDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnVariableDefinitionsLeave(ctx *Context, n *ast.VariableDefinitions) {
+func (w *Walker) OnVariableDefinitionsLeave(ctx *Context, vds *ast.VariableDefinitions) {
 	for _, handler := range w.variableDefinitionsEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, vds)
 	}
 }
 
@@ -1490,16 +1460,16 @@ func (w *Walker) AddVariableDefinitionLeaveEventHandler(h VariableDefinitionEven
 }
 
 // OnVariableDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnVariableDefinitionEnter(ctx *Context, n ast.VariableDefinition) {
+func (w *Walker) OnVariableDefinitionEnter(ctx *Context, vd ast.VariableDefinition) {
 	for _, handler := range w.variableDefinitionEventHandlers.enter {
-		handler(ctx, n)
+		handler(ctx, vd)
 	}
 }
 
 // OnVariableDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnVariableDefinitionLeave(ctx *Context, n ast.VariableDefinition) {
+func (w *Walker) OnVariableDefinitionLeave(ctx *Context, vd ast.VariableDefinition) {
 	for _, handler := range w.variableDefinitionEventHandlers.leave {
-		handler(ctx, n)
+		handler(ctx, vd)
 	}
 }
 

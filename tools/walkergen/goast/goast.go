@@ -20,16 +20,36 @@ type Symbols struct {
 // structure for the walker generator.
 type SymbolTable struct {
 	Package string
-	Consts  map[string][]Const
+	Consts  map[string]Consts
 	Structs map[string]Struct
 }
 
 // NewSymbolTable returns a new SymbolTable value with the maps on it initialised.
 func NewSymbolTable() SymbolTable {
 	return SymbolTable{
-		Consts:  make(map[string][]Const),
+		Consts:  make(map[string]Consts),
 		Structs: make(map[string]Struct),
 	}
+}
+
+// Annotations contains any annotations that are relevant to a section of Go code being processed.
+type Annotations struct {
+	Field  string
+	Ignore bool
+}
+
+// Consts is a slice of Const, with some additional methods.
+type Consts []Const
+
+// HasNonSelfConsts returns true if any of these Consts have a Field that isn't set to self.
+func (cs Consts) HasNonSelfConsts() bool {
+	for _, c := range cs {
+		if c.Field != "self" {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Const represents the information we need from the Go AST for constants.
@@ -89,10 +109,36 @@ func CreateSymbolTable(file *ast.File) (SymbolTable, error) {
 	return symbols, nil
 }
 
+// readAnnotations ...
+func readAnnotations(cg *ast.CommentGroup, annotations Annotations) (Annotations, error) {
+	if cg != nil {
+		for _, comment := range cg.List {
+			switch {
+			case strings.Contains(comment.Text, "@wg:ignore"):
+				annotations.Ignore = true
+			case strings.Contains(comment.Text, "@wg:field"):
+				f := strings.Split(comment.Text, " ")
+				if len(f) < 3 {
+					return annotations, fmt.Errorf("wg metadata '%v' invalid", comment.Text)
+				}
+
+				annotations.Field = f[2]
+			}
+		}
+	}
+
+	return annotations, nil
+}
+
 // processConstDeclaration ...
 func processConstDeclaration(symbols *SymbolTable, decl *ast.GenDecl) error {
 	if len(decl.Specs) < 1 {
 		return nil
+	}
+
+	annotations, err := readAnnotations(decl.Doc, Annotations{})
+	if err != nil {
+		return err
 	}
 
 	var t Type
@@ -107,7 +153,7 @@ func processConstDeclaration(symbols *SymbolTable, decl *ast.GenDecl) error {
 					continue
 				}
 			}
-			err := processValueSpec(symbols, t, v)
+			err := processValueSpec(symbols, t, v, annotations)
 			if err != nil {
 				return err
 			}
@@ -118,14 +164,13 @@ func processConstDeclaration(symbols *SymbolTable, decl *ast.GenDecl) error {
 
 // processTypeDeclaration ...
 func processTypeDeclaration(symbols *SymbolTable, decl *ast.GenDecl) error {
-	// TODO(elliot): Move into some kind of function that extracts this stuff into a struct or
-	// something? Then just make a simple if statement here.
-	if decl.Doc != nil {
-		for _, comment := range decl.Doc.List {
-			if strings.Contains(comment.Text, "@wg:ignore") {
-				return nil
-			}
-		}
+	annotations, err := readAnnotations(decl.Doc, Annotations{})
+	if err != nil {
+		return err
+	}
+
+	if annotations.Ignore {
+		return nil
 	}
 
 	for _, spec := range decl.Specs {
@@ -160,10 +205,10 @@ func processTypeSpec(symbols *SymbolTable, tspec *ast.TypeSpec) error {
 	return nil
 }
 
-func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec) error {
+func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec, annotations Annotations) error {
 	var consts []Const
 
-	field, err := processFieldName(vspec)
+	field, err := processFieldName(vspec, annotations)
 	if err != nil {
 		return err
 	}
@@ -179,19 +224,17 @@ func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec) error 
 	return nil
 }
 
-func processFieldName(vspec *ast.ValueSpec) (string, error) {
-	if vspec.Doc != nil {
-		for _, comment := range vspec.Doc.List {
-			if strings.Contains(comment.Text, "@wg:field") {
-				f := strings.Split(comment.Text, " ")
-				if len(f) < 3 {
-					return "", fmt.Errorf("wg metadata '%v' invalid", comment.Text)
-				}
-				return f[2], nil
-			}
-		}
+func processFieldName(vspec *ast.ValueSpec, annotations Annotations) (string, error) {
+	annotations, err := readAnnotations(vspec.Doc, annotations)
+	if err != nil {
+		return "", err
 	}
 
+	if annotations.Field != "" {
+		return annotations.Field, nil
+	}
+
+	// Otherwise, construct a sane field name out of the constant's name.
 	f := strings.Split(vspec.Names[0].Name, "Kind")
 	if len(f) < 2 {
 		return "", fmt.Errorf("name %v not properly formatted, should have Kind flanked by a word either side", vspec.Names[0].Name)

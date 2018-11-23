@@ -5,7 +5,6 @@ import "github.com/bucketd/go-graphqlparser/graphql"
 // 2.2 Document
 // http://facebook.github.io/graphql/June2018/#sec-Language.Document
 
-// @wg:ignore
 type Document struct {
 	Definitions *Definitions
 }
@@ -79,6 +78,7 @@ type FragmentDefinition struct {
 	SelectionSet  *Selections
 }
 
+// @wg:field self
 const (
 	OperationDefinitionKindQuery OperationDefinitionKind = iota
 	OperationDefinitionKindMutation
@@ -111,6 +111,7 @@ type OperationDefinition struct {
 // 2.4 Selection Sets
 // http://facebook.github.io/graphql/June2018/#sec-Selection-Sets
 
+// @wg:field self
 const (
 	SelectionKindField SelectionKind = iota
 	SelectionKindFragmentSpread
@@ -163,6 +164,7 @@ type TypeCondition struct {
 // http://facebook.github.io/graphql/June2018/#sec-Input-Values
 
 // Value :
+// @wg:field self
 const (
 	ValueKindVariable ValueKind = iota
 	ValueKindInt
@@ -231,6 +233,7 @@ type VariableDefinition struct {
 // 2.11 Type References
 // http://facebook.github.io/graphql/June2018/#sec-Type-References
 
+// @wg:field self
 const (
 	TypeKindNamed TypeKind = iota
 	TypeKindList
@@ -269,8 +272,11 @@ type Directive struct {
 // http://facebook.github.io/graphql/June2018/#TypeSystemDefinition
 
 const (
+	// @wg:field SchemaDefinition
 	TypeSystemDefinitionKindSchema TypeSystemDefinitionKind = iota
+	// @wg:field TypeDefinition
 	TypeSystemDefinitionKindType
+	// @wg:field DirectiveDefinition
 	TypeSystemDefinitionKindDirective
 )
 
@@ -298,7 +304,9 @@ type TypeSystemDefinition struct {
 
 // 3.1 Type System Extensions
 const (
+	// @wg:field SchemaExtension
 	TypeSystemExtensionKindSchema TypeSystemExtensionKind = iota
+	// @wg:field TypeExtension
 	TypeSystemExtensionKindType
 )
 
@@ -339,6 +347,7 @@ type OperationTypeDefinition struct {
 // 3.4 Types
 // http://facebook.github.io/graphql/June2018/#sec-Types
 
+// @wg:field self
 const (
 	TypeDefinitionKindScalar TypeDefinitionKind = iota
 	TypeDefinitionKindObject
@@ -377,6 +386,7 @@ type EnumValueDefinition struct {
 }
 
 // 3.4.3 Type Extensions
+// @wg:field self
 const (
 	TypeExtensionKindScalar TypeExtensionKind = iota
 	TypeExtensionKindObject

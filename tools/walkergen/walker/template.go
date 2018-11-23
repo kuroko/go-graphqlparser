@@ -85,10 +85,10 @@ func (w *Walker) walk{{.TypeName}}(ctx *Context, {{.ShortTypeName}} {{if .IsArra
 	{{if .IsListType}}{{.ShortTypeName}}.ForEach(func({{.NodeType.ShortTypeName}} ast.{{.NodeType.TypeName}}, i int) {
 		w.walk{{.NodeType.TypeName}}(ctx, {{.NodeType.ShortTypeName}})
 	})
-	{{$parent := .}}{{else if .Consts}}switch {{.ShortTypeName}}.Kind {
-	{{range .Consts}}case ast.{{.Name}}:
-		w.walk{{.Name}}(ctx, {{$.ShortTypeName}}.{{.Field}})
-	{{end}}}
+	{{else if .Consts.HasNonSelfConsts}}switch {{.ShortTypeName}}.Kind {
+	{{range .Consts}}{{if ne .Field "self"}}case ast.{{.Name}}:
+		w.walk{{.Field}}(ctx, {{$.ShortTypeName}}.{{.Field}})
+	{{end}}{{end}}}
 	{{end}}w.On{{.TypeName}}Leave(ctx, {{.ShortTypeName}})
 }
 `))
@@ -97,7 +97,7 @@ func (w *Walker) walk{{.TypeName}}(ctx *Context, {{.ShortTypeName}} {{if .IsArra
 type templateData struct {
 	goast.Type
 	// Consts contains the constants related to this type.
-	Consts []goast.Const
+	Consts goast.Consts
 	// NodeType is populated if this type is a list type (i.e. IsListType = true).
 	NodeType *templateData
 	// IsListType is true if this type is a linked list type.
