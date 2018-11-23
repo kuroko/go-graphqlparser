@@ -6,7 +6,6 @@ import (
 	"unicode"
 
 	"github.com/Masterminds/sprig"
-
 	"github.com/bucketd/go-graphqlparser/tools/walkergen/goast"
 )
 
