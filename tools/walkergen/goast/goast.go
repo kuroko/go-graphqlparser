@@ -58,6 +58,12 @@ type Const struct {
 	Field string
 }
 
+// SelfName ...
+func (c Const) SelfName() string {
+	n, _ := constructSaneFieldName(c.Name)
+	return n
+}
+
 // Struct represents the information we need from the Go AST for structs.
 type Struct struct {
 	Fields map[string]Type
@@ -233,11 +239,14 @@ func processFieldName(vspec *ast.ValueSpec, annotations Annotations) (string, er
 	if annotations.Field != "" {
 		return annotations.Field, nil
 	}
+	return constructSaneFieldName(vspec.Names[0].Name)
+}
 
-	// Otherwise, construct a sane field name out of the constant's name.
-	f := strings.Split(vspec.Names[0].Name, "Kind")
+// constructSaneFieldName creates a nicer name from the const name.
+func constructSaneFieldName(nonSane string) (string, error) {
+	f := strings.Split(nonSane, "Kind")
 	if len(f) < 2 {
-		return "", fmt.Errorf("name %v not properly formatted, should have Kind flanked by a word either side", vspec.Names[0].Name)
+		return "", fmt.Errorf("name %v not properly formatted, should have Kind flanked by a word either side", nonSane)
 	}
 	return f[1] + f[0], nil
 }

@@ -745,6 +745,14 @@ func (w *Walker) OnOperationDefinitionLeave(ctx *Context, od *ast.OperationDefin
 // walkOperationDefinition ...
 func (w *Walker) walkOperationDefinition(ctx *Context, od *ast.OperationDefinition) {
 	w.OnOperationDefinitionEnter(ctx, od)
+	switch od.Kind {
+	case ast.OperationDefinitionKindQuery:
+		w.walkQueryOperationDefinition(ctx, od)
+	case ast.OperationDefinitionKindMutation:
+		w.walkMutationOperationDefinition(ctx, od)
+	case ast.OperationDefinitionKindSubscription:
+		w.walkSubscriptionOperationDefinition(ctx, od)
+	}
 	w.OnOperationDefinitionLeave(ctx, od)
 }
 
@@ -1066,6 +1074,14 @@ func (w *Walker) OnSelectionLeave(ctx *Context, s ast.Selection) {
 // walkSelection ...
 func (w *Walker) walkSelection(ctx *Context, s ast.Selection) {
 	w.OnSelectionEnter(ctx, s)
+	switch s.Kind {
+	case ast.SelectionKindField:
+		w.walkFieldSelection(ctx, s)
+	case ast.SelectionKindFragmentSpread:
+		w.walkFragmentSpreadSelection(ctx, s)
+	case ast.SelectionKindInlineFragment:
+		w.walkInlineFragmentSelection(ctx, s)
+	}
 	w.OnSelectionLeave(ctx, s)
 }
 
@@ -1147,6 +1163,12 @@ func (w *Walker) OnTypeLeave(ctx *Context, t ast.Type) {
 // walkType ...
 func (w *Walker) walkType(ctx *Context, t ast.Type) {
 	w.OnTypeEnter(ctx, t)
+	switch t.Kind {
+	case ast.TypeKindNamed:
+		w.walkNamedType(ctx, t)
+	case ast.TypeKindList:
+		w.walkListType(ctx, t)
+	}
 	w.OnTypeLeave(ctx, t)
 }
 
@@ -1225,6 +1247,20 @@ func (w *Walker) OnTypeDefinitionLeave(ctx *Context, td *ast.TypeDefinition) {
 // walkTypeDefinition ...
 func (w *Walker) walkTypeDefinition(ctx *Context, td *ast.TypeDefinition) {
 	w.OnTypeDefinitionEnter(ctx, td)
+	switch td.Kind {
+	case ast.TypeDefinitionKindScalar:
+		w.walkScalarTypeDefinition(ctx, td)
+	case ast.TypeDefinitionKindObject:
+		w.walkObjectTypeDefinition(ctx, td)
+	case ast.TypeDefinitionKindInterface:
+		w.walkInterfaceTypeDefinition(ctx, td)
+	case ast.TypeDefinitionKindUnion:
+		w.walkUnionTypeDefinition(ctx, td)
+	case ast.TypeDefinitionKindEnum:
+		w.walkEnumTypeDefinition(ctx, td)
+	case ast.TypeDefinitionKindInputObject:
+		w.walkInputObjectTypeDefinition(ctx, td)
+	}
 	w.OnTypeDefinitionLeave(ctx, td)
 }
 
@@ -1264,6 +1300,20 @@ func (w *Walker) OnTypeExtensionLeave(ctx *Context, te *ast.TypeExtension) {
 // walkTypeExtension ...
 func (w *Walker) walkTypeExtension(ctx *Context, te *ast.TypeExtension) {
 	w.OnTypeExtensionEnter(ctx, te)
+	switch te.Kind {
+	case ast.TypeExtensionKindScalar:
+		w.walkScalarTypeExtension(ctx, te)
+	case ast.TypeExtensionKindObject:
+		w.walkObjectTypeExtension(ctx, te)
+	case ast.TypeExtensionKindInterface:
+		w.walkInterfaceTypeExtension(ctx, te)
+	case ast.TypeExtensionKindUnion:
+		w.walkUnionTypeExtension(ctx, te)
+	case ast.TypeExtensionKindEnum:
+		w.walkEnumTypeExtension(ctx, te)
+	case ast.TypeExtensionKindInputObject:
+		w.walkInputObjectTypeExtension(ctx, te)
+	}
 	w.OnTypeExtensionLeave(ctx, te)
 }
 
@@ -1395,6 +1445,26 @@ func (w *Walker) OnValueLeave(ctx *Context, v ast.Value) {
 // walkValue ...
 func (w *Walker) walkValue(ctx *Context, v ast.Value) {
 	w.OnValueEnter(ctx, v)
+	switch v.Kind {
+	case ast.ValueKindVariable:
+		w.walkVariableValue(ctx, v)
+	case ast.ValueKindInt:
+		w.walkIntValue(ctx, v)
+	case ast.ValueKindFloat:
+		w.walkFloatValue(ctx, v)
+	case ast.ValueKindString:
+		w.walkStringValue(ctx, v)
+	case ast.ValueKindBoolean:
+		w.walkBooleanValue(ctx, v)
+	case ast.ValueKindNull:
+		w.walkNullValue(ctx, v)
+	case ast.ValueKindEnum:
+		w.walkEnumValue(ctx, v)
+	case ast.ValueKindList:
+		w.walkListValue(ctx, v)
+	case ast.ValueKindObject:
+		w.walkObjectValue(ctx, v)
+	}
 	w.OnValueLeave(ctx, v)
 }
 

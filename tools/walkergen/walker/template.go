@@ -85,10 +85,10 @@ func (w *Walker) walk{{.TypeName}}(ctx *Context, {{.ShortTypeName}} {{if .IsArra
 	{{if .IsListType}}{{.ShortTypeName}}.ForEach(func({{.NodeType.ShortTypeName}} ast.{{.NodeType.TypeName}}, i int) {
 		w.walk{{.NodeType.TypeName}}(ctx, {{.NodeType.ShortTypeName}})
 	})
-	{{else if .Consts.HasNonSelfConsts}}switch {{.ShortTypeName}}.Kind {
-	{{range .Consts}}{{if ne .Field "self"}}case ast.{{.Name}}:
-		w.walk{{.Field}}(ctx, {{$.ShortTypeName}}.{{.Field}})
-	{{end}}{{end}}}
+	{{else if .Consts}}switch {{.ShortTypeName}}.Kind {
+	{{range .Consts}}case ast.{{.Name}}:
+		{{if ne .Field "self"}}w.walk{{.Field}}(ctx, {{$.ShortTypeName}}.{{.Field}}){{else}}w.walk{{.SelfName}}(ctx, {{$.ShortTypeName}}){{end}}
+	{{end}}}
 	{{end}}w.On{{.TypeName}}Leave(ctx, {{.ShortTypeName}})
 }
 `))
