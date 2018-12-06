@@ -4,7 +4,6 @@ typeNames=(
   Argument
   Definition
   Directive
-  DirectiveLocation
   EnumValueDefinition
   FieldDefinition
   InputValueDefinition

@@ -89,7 +89,11 @@ func (w *Walker) walk{{.TypeName}}(ctx *Context, {{.ShortTypeName}} {{if .IsArra
 	{{range .Consts}}case ast.{{.Name}}:
 		{{if ne .Field "self"}}w.walk{{.Field}}(ctx, {{$.ShortTypeName}}.{{.Field}}){{else}}w.walk{{.SelfName}}(ctx, {{$.ShortTypeName}}){{end}}
 	{{end}}}
-	{{end}}w.On{{.TypeName}}Leave(ctx, {{.ShortTypeName}})
+	{{else}}
+	{{- $parent := .}}{{range .Fields}}w.walk{{.Type.TypeName}}(ctx, {{$parent.ShortTypeName}}.{{.Name}})
+	{{end}}
+	{{- end -}}
+	w.On{{.TypeName}}Leave(ctx, {{.ShortTypeName}})
 }
 `))
 
@@ -98,6 +102,8 @@ type templateData struct {
 	goast.Type
 	// Consts contains the constants related to this type.
 	Consts goast.Consts
+	// Fields ...
+	Fields []field
 	// NodeType is populated if this type is a list type (i.e. IsListType = true).
 	NodeType *templateData
 	// IsListType is true if this type is a linked list type.
@@ -114,6 +120,12 @@ func (ttd templateData) ShortTypeName() string {
 	}
 
 	return stn
+}
+
+// field ...
+type field struct {
+	Name string
+	Type goast.Type
 }
 
 // abridger is a strings.Map function that is used to return a variable name from a type name that

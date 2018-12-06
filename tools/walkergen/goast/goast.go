@@ -9,13 +9,6 @@ import (
 	"strings"
 )
 
-// Symbols is a collection of symbol tables for walker generation from multiple files, just here for
-// convenience when passing the symbol tables around.
-type Symbols struct {
-	AST  SymbolTable
-	List SymbolTable
-}
-
 // SymbolTable takes the information we need from the Go AST, and represents it in an easy to access
 // structure for the walker generator.
 type SymbolTable struct {
@@ -89,8 +82,7 @@ func ReadFile(filePath, fileName string) (*ast.File, error) {
 }
 
 // CreateSymbolTable ...
-func CreateSymbolTable(file *ast.File) (SymbolTable, error) {
-	symbols := NewSymbolTable()
+func CreateSymbolTable(file *ast.File, symbols *SymbolTable) error {
 	var err error
 
 	for _, decl := range file.Decls {
@@ -101,18 +93,19 @@ func CreateSymbolTable(file *ast.File) (SymbolTable, error) {
 
 		switch gdecl.Tok {
 		case token.CONST:
-			err = processConstDeclaration(&symbols, gdecl)
+			err = processConstDeclaration(symbols, gdecl)
 		case token.TYPE:
-			err = processTypeDeclaration(&symbols, gdecl)
+			err = processTypeDeclaration(symbols, gdecl)
 		default:
 			continue
 		}
+
 		if err != nil {
-			return symbols, err
+			return err
 		}
 	}
 
-	return symbols, nil
+	return nil
 }
 
 // readAnnotations ...

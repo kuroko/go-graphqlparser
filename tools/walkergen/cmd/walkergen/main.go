@@ -37,24 +37,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	astSymbols, err := goast.CreateSymbolTable(astFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	listFile, err := goast.ReadFile(astPath, listsFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	listSymbols, err := goast.CreateSymbolTable(listFile)
+	symbols := goast.NewSymbolTable()
+
+	err = goast.CreateSymbolTable(astFile, &symbols)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	symbols := goast.Symbols{
-		AST:  astSymbols,
-		List: listSymbols,
+	err = goast.CreateSymbolTable(listFile, &symbols)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// Output walker.

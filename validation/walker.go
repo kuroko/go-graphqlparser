@@ -6,41 +6,41 @@ import "github.com/bucketd/go-graphqlparser/ast"
 
 // Walker holds event handlers for entering and leaving AST nodes.
 type Walker struct {
-	argumentsEventHandlers                    ArgumentsEventHandlers
-	argumentEventHandlers                     ArgumentEventHandlers
-	definitionsEventHandlers                  DefinitionsEventHandlers
-	definitionEventHandlers                   DefinitionEventHandlers
-	directivesEventHandlers                   DirectivesEventHandlers
-	directiveEventHandlers                    DirectiveEventHandlers
-	directiveDefinitionEventHandlers          DirectiveDefinitionEventHandlers
-	documentEventHandlers                     DocumentEventHandlers
-	enumValueDefinitionsEventHandlers         EnumValueDefinitionsEventHandlers
-	enumValueDefinitionEventHandlers          EnumValueDefinitionEventHandlers
-	executableDefinitionEventHandlers         ExecutableDefinitionEventHandlers
-	fieldDefinitionsEventHandlers             FieldDefinitionsEventHandlers
-	fieldDefinitionEventHandlers              FieldDefinitionEventHandlers
-	fragmentDefinitionEventHandlers           FragmentDefinitionEventHandlers
-	inputValueDefinitionsEventHandlers        InputValueDefinitionsEventHandlers
-	inputValueDefinitionEventHandlers         InputValueDefinitionEventHandlers
-	operationDefinitionEventHandlers          OperationDefinitionEventHandlers
-	operationTypeDefinitionsEventHandlers     OperationTypeDefinitionsEventHandlers
-	operationTypeDefinitionEventHandlers      OperationTypeDefinitionEventHandlers
+	fieldDefinitionEventHandlers FieldDefinitionEventHandlers
+	argumentsEventHandlers ArgumentsEventHandlers
+	enumValueDefinitionsEventHandlers EnumValueDefinitionsEventHandlers
+	selectionsEventHandlers SelectionsEventHandlers
+	operationDefinitionEventHandlers OperationDefinitionEventHandlers
+	typeEventHandlers TypeEventHandlers
+	directiveDefinitionEventHandlers DirectiveDefinitionEventHandlers
+	fieldDefinitionsEventHandlers FieldDefinitionsEventHandlers
+	definitionEventHandlers DefinitionEventHandlers
+	directiveEventHandlers DirectiveEventHandlers
+	typeConditionEventHandlers TypeConditionEventHandlers
+	variableDefinitionEventHandlers VariableDefinitionEventHandlers
+	operationTypeDefinitionEventHandlers OperationTypeDefinitionEventHandlers
+	enumValueDefinitionEventHandlers EnumValueDefinitionEventHandlers
+	directivesEventHandlers DirectivesEventHandlers
 	rootOperationTypeDefinitionsEventHandlers RootOperationTypeDefinitionsEventHandlers
-	rootOperationTypeDefinitionEventHandlers  RootOperationTypeDefinitionEventHandlers
-	schemaDefinitionEventHandlers             SchemaDefinitionEventHandlers
-	schemaExtensionEventHandlers              SchemaExtensionEventHandlers
-	selectionsEventHandlers                   SelectionsEventHandlers
-	selectionEventHandlers                    SelectionEventHandlers
-	typesEventHandlers                        TypesEventHandlers
-	typeEventHandlers                         TypeEventHandlers
-	typeConditionEventHandlers                TypeConditionEventHandlers
-	typeDefinitionEventHandlers               TypeDefinitionEventHandlers
-	typeExtensionEventHandlers                TypeExtensionEventHandlers
-	typeSystemDefinitionEventHandlers         TypeSystemDefinitionEventHandlers
-	typeSystemExtensionEventHandlers          TypeSystemExtensionEventHandlers
-	valueEventHandlers                        ValueEventHandlers
-	variableDefinitionsEventHandlers          VariableDefinitionsEventHandlers
-	variableDefinitionEventHandlers           VariableDefinitionEventHandlers
+	fragmentDefinitionEventHandlers FragmentDefinitionEventHandlers
+	argumentEventHandlers ArgumentEventHandlers
+	typeSystemExtensionEventHandlers TypeSystemExtensionEventHandlers
+	inputValueDefinitionsEventHandlers InputValueDefinitionsEventHandlers
+	schemaExtensionEventHandlers SchemaExtensionEventHandlers
+	documentEventHandlers DocumentEventHandlers
+	typeSystemDefinitionEventHandlers TypeSystemDefinitionEventHandlers
+	operationTypeDefinitionsEventHandlers OperationTypeDefinitionsEventHandlers
+	schemaDefinitionEventHandlers SchemaDefinitionEventHandlers
+	typeDefinitionEventHandlers TypeDefinitionEventHandlers
+	typeExtensionEventHandlers TypeExtensionEventHandlers
+	variableDefinitionsEventHandlers VariableDefinitionsEventHandlers
+	executableDefinitionEventHandlers ExecutableDefinitionEventHandlers
+	selectionEventHandlers SelectionEventHandlers
+	inputValueDefinitionEventHandlers InputValueDefinitionEventHandlers
+	definitionsEventHandlers DefinitionsEventHandlers
+	typesEventHandlers TypesEventHandlers
+	valueEventHandlers ValueEventHandlers
+	rootOperationTypeDefinitionEventHandlers RootOperationTypeDefinitionEventHandlers
 }
 
 // NewWalker returns a new Walker instance.
@@ -51,6 +51,48 @@ func NewWalker(rules []RuleFunc) *Walker {
 	}
 
 	return walker
+}
+
+// FieldDefinitionEventHandler function can handle enter/leave events for FieldDefinition.
+type FieldDefinitionEventHandler func(*Context, ast.FieldDefinition)
+
+// FieldDefinitionEventHandlers stores the enter and leave events handlers.
+type FieldDefinitionEventHandlers struct {
+	enter []FieldDefinitionEventHandler
+	leave []FieldDefinitionEventHandler
+}
+
+// AddFieldDefinitionEnterEventHandler adds an event handler to be called when entering FieldDefinition nodes.
+func (w *Walker) AddFieldDefinitionEnterEventHandler(h FieldDefinitionEventHandler) {
+	w.fieldDefinitionEventHandlers.enter = append(w.fieldDefinitionEventHandlers.enter, h)
+}
+
+// AddFieldDefinitionLeaveEventHandler adds an event handler to be called when leaving FieldDefinition nodes.
+func (w *Walker) AddFieldDefinitionLeaveEventHandler(h FieldDefinitionEventHandler) {
+	w.fieldDefinitionEventHandlers.leave = append(w.fieldDefinitionEventHandlers.leave, h)
+}
+
+// OnFieldDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnFieldDefinitionEnter(ctx *Context, fd ast.FieldDefinition) {
+	for _, handler := range w.fieldDefinitionEventHandlers.enter {
+		handler(ctx, fd)
+	}
+}
+
+// OnFieldDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnFieldDefinitionLeave(ctx *Context, fd ast.FieldDefinition) {
+	for _, handler := range w.fieldDefinitionEventHandlers.leave {
+		handler(ctx, fd)
+	}
+}
+
+// walkFieldDefinition ...
+func (w *Walker) walkFieldDefinition(ctx *Context, fd ast.FieldDefinition) {
+	w.OnFieldDefinitionEnter(ctx, fd)
+	w.walkDirectives(ctx, fd.Directives)
+	w.walkType(ctx, fd.Type)
+	w.walkInputValueDefinitions(ctx, fd.ArgumentsDefinition)
+	w.OnFieldDefinitionLeave(ctx, fd)
 }
 
 // ArgumentsEventHandler function can handle enter/leave events for Arguments.
@@ -95,293 +137,6 @@ func (w *Walker) walkArguments(ctx *Context, as *ast.Arguments) {
 	w.OnArgumentsLeave(ctx, as)
 }
 
-// ArgumentEventHandler function can handle enter/leave events for Argument.
-type ArgumentEventHandler func(*Context, ast.Argument)
-
-// ArgumentEventHandlers stores the enter and leave events handlers.
-type ArgumentEventHandlers struct {
-	enter []ArgumentEventHandler
-	leave []ArgumentEventHandler
-}
-
-// AddArgumentEnterEventHandler adds an event handler to be called when entering Argument nodes.
-func (w *Walker) AddArgumentEnterEventHandler(h ArgumentEventHandler) {
-	w.argumentEventHandlers.enter = append(w.argumentEventHandlers.enter, h)
-}
-
-// AddArgumentLeaveEventHandler adds an event handler to be called when leaving Argument nodes.
-func (w *Walker) AddArgumentLeaveEventHandler(h ArgumentEventHandler) {
-	w.argumentEventHandlers.leave = append(w.argumentEventHandlers.leave, h)
-}
-
-// OnArgumentEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnArgumentEnter(ctx *Context, a ast.Argument) {
-	for _, handler := range w.argumentEventHandlers.enter {
-		handler(ctx, a)
-	}
-}
-
-// OnArgumentLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnArgumentLeave(ctx *Context, a ast.Argument) {
-	for _, handler := range w.argumentEventHandlers.leave {
-		handler(ctx, a)
-	}
-}
-
-// walkArgument ...
-func (w *Walker) walkArgument(ctx *Context, a ast.Argument) {
-	w.OnArgumentEnter(ctx, a)
-	w.OnArgumentLeave(ctx, a)
-}
-
-// DefinitionsEventHandler function can handle enter/leave events for Definitions.
-type DefinitionsEventHandler func(*Context, *ast.Definitions)
-
-// DefinitionsEventHandlers stores the enter and leave events handlers.
-type DefinitionsEventHandlers struct {
-	enter []DefinitionsEventHandler
-	leave []DefinitionsEventHandler
-}
-
-// AddDefinitionsEnterEventHandler adds an event handler to be called when entering Definitions nodes.
-func (w *Walker) AddDefinitionsEnterEventHandler(h DefinitionsEventHandler) {
-	w.definitionsEventHandlers.enter = append(w.definitionsEventHandlers.enter, h)
-}
-
-// AddDefinitionsLeaveEventHandler adds an event handler to be called when leaving Definitions nodes.
-func (w *Walker) AddDefinitionsLeaveEventHandler(h DefinitionsEventHandler) {
-	w.definitionsEventHandlers.leave = append(w.definitionsEventHandlers.leave, h)
-}
-
-// OnDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDefinitionsEnter(ctx *Context, ds *ast.Definitions) {
-	for _, handler := range w.definitionsEventHandlers.enter {
-		handler(ctx, ds)
-	}
-}
-
-// OnDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDefinitionsLeave(ctx *Context, ds *ast.Definitions) {
-	for _, handler := range w.definitionsEventHandlers.leave {
-		handler(ctx, ds)
-	}
-}
-
-// walkDefinitions ...
-func (w *Walker) walkDefinitions(ctx *Context, ds *ast.Definitions) {
-	w.OnDefinitionsEnter(ctx, ds)
-	ds.ForEach(func(d ast.Definition, i int) {
-		w.walkDefinition(ctx, d)
-	})
-	w.OnDefinitionsLeave(ctx, ds)
-}
-
-// DefinitionEventHandler function can handle enter/leave events for Definition.
-type DefinitionEventHandler func(*Context, ast.Definition)
-
-// DefinitionEventHandlers stores the enter and leave events handlers.
-type DefinitionEventHandlers struct {
-	enter []DefinitionEventHandler
-	leave []DefinitionEventHandler
-}
-
-// AddDefinitionEnterEventHandler adds an event handler to be called when entering Definition nodes.
-func (w *Walker) AddDefinitionEnterEventHandler(h DefinitionEventHandler) {
-	w.definitionEventHandlers.enter = append(w.definitionEventHandlers.enter, h)
-}
-
-// AddDefinitionLeaveEventHandler adds an event handler to be called when leaving Definition nodes.
-func (w *Walker) AddDefinitionLeaveEventHandler(h DefinitionEventHandler) {
-	w.definitionEventHandlers.leave = append(w.definitionEventHandlers.leave, h)
-}
-
-// OnDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDefinitionEnter(ctx *Context, d ast.Definition) {
-	for _, handler := range w.definitionEventHandlers.enter {
-		handler(ctx, d)
-	}
-}
-
-// OnDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDefinitionLeave(ctx *Context, d ast.Definition) {
-	for _, handler := range w.definitionEventHandlers.leave {
-		handler(ctx, d)
-	}
-}
-
-// walkDefinition ...
-func (w *Walker) walkDefinition(ctx *Context, d ast.Definition) {
-	w.OnDefinitionEnter(ctx, d)
-	switch d.Kind {
-	case ast.DefinitionKindExecutable:
-		w.walkExecutableDefinition(ctx, d.ExecutableDefinition)
-	case ast.DefinitionKindTypeSystem:
-		w.walkTypeSystemDefinition(ctx, d.TypeSystemDefinition)
-	case ast.DefinitionKindTypeSystemExtension:
-		w.walkTypeSystemExtension(ctx, d.TypeSystemExtension)
-	}
-	w.OnDefinitionLeave(ctx, d)
-}
-
-// DirectivesEventHandler function can handle enter/leave events for Directives.
-type DirectivesEventHandler func(*Context, *ast.Directives)
-
-// DirectivesEventHandlers stores the enter and leave events handlers.
-type DirectivesEventHandlers struct {
-	enter []DirectivesEventHandler
-	leave []DirectivesEventHandler
-}
-
-// AddDirectivesEnterEventHandler adds an event handler to be called when entering Directives nodes.
-func (w *Walker) AddDirectivesEnterEventHandler(h DirectivesEventHandler) {
-	w.directivesEventHandlers.enter = append(w.directivesEventHandlers.enter, h)
-}
-
-// AddDirectivesLeaveEventHandler adds an event handler to be called when leaving Directives nodes.
-func (w *Walker) AddDirectivesLeaveEventHandler(h DirectivesEventHandler) {
-	w.directivesEventHandlers.leave = append(w.directivesEventHandlers.leave, h)
-}
-
-// OnDirectivesEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDirectivesEnter(ctx *Context, ds *ast.Directives) {
-	for _, handler := range w.directivesEventHandlers.enter {
-		handler(ctx, ds)
-	}
-}
-
-// OnDirectivesLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDirectivesLeave(ctx *Context, ds *ast.Directives) {
-	for _, handler := range w.directivesEventHandlers.leave {
-		handler(ctx, ds)
-	}
-}
-
-// walkDirectives ...
-func (w *Walker) walkDirectives(ctx *Context, ds *ast.Directives) {
-	w.OnDirectivesEnter(ctx, ds)
-	ds.ForEach(func(d ast.Directive, i int) {
-		w.walkDirective(ctx, d)
-	})
-	w.OnDirectivesLeave(ctx, ds)
-}
-
-// DirectiveEventHandler function can handle enter/leave events for Directive.
-type DirectiveEventHandler func(*Context, ast.Directive)
-
-// DirectiveEventHandlers stores the enter and leave events handlers.
-type DirectiveEventHandlers struct {
-	enter []DirectiveEventHandler
-	leave []DirectiveEventHandler
-}
-
-// AddDirectiveEnterEventHandler adds an event handler to be called when entering Directive nodes.
-func (w *Walker) AddDirectiveEnterEventHandler(h DirectiveEventHandler) {
-	w.directiveEventHandlers.enter = append(w.directiveEventHandlers.enter, h)
-}
-
-// AddDirectiveLeaveEventHandler adds an event handler to be called when leaving Directive nodes.
-func (w *Walker) AddDirectiveLeaveEventHandler(h DirectiveEventHandler) {
-	w.directiveEventHandlers.leave = append(w.directiveEventHandlers.leave, h)
-}
-
-// OnDirectiveEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDirectiveEnter(ctx *Context, d ast.Directive) {
-	for _, handler := range w.directiveEventHandlers.enter {
-		handler(ctx, d)
-	}
-}
-
-// OnDirectiveLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDirectiveLeave(ctx *Context, d ast.Directive) {
-	for _, handler := range w.directiveEventHandlers.leave {
-		handler(ctx, d)
-	}
-}
-
-// walkDirective ...
-func (w *Walker) walkDirective(ctx *Context, d ast.Directive) {
-	w.OnDirectiveEnter(ctx, d)
-	w.OnDirectiveLeave(ctx, d)
-}
-
-// DirectiveDefinitionEventHandler function can handle enter/leave events for DirectiveDefinition.
-type DirectiveDefinitionEventHandler func(*Context, *ast.DirectiveDefinition)
-
-// DirectiveDefinitionEventHandlers stores the enter and leave events handlers.
-type DirectiveDefinitionEventHandlers struct {
-	enter []DirectiveDefinitionEventHandler
-	leave []DirectiveDefinitionEventHandler
-}
-
-// AddDirectiveDefinitionEnterEventHandler adds an event handler to be called when entering DirectiveDefinition nodes.
-func (w *Walker) AddDirectiveDefinitionEnterEventHandler(h DirectiveDefinitionEventHandler) {
-	w.directiveDefinitionEventHandlers.enter = append(w.directiveDefinitionEventHandlers.enter, h)
-}
-
-// AddDirectiveDefinitionLeaveEventHandler adds an event handler to be called when leaving DirectiveDefinition nodes.
-func (w *Walker) AddDirectiveDefinitionLeaveEventHandler(h DirectiveDefinitionEventHandler) {
-	w.directiveDefinitionEventHandlers.leave = append(w.directiveDefinitionEventHandlers.leave, h)
-}
-
-// OnDirectiveDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDirectiveDefinitionEnter(ctx *Context, dd *ast.DirectiveDefinition) {
-	for _, handler := range w.directiveDefinitionEventHandlers.enter {
-		handler(ctx, dd)
-	}
-}
-
-// OnDirectiveDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDirectiveDefinitionLeave(ctx *Context, dd *ast.DirectiveDefinition) {
-	for _, handler := range w.directiveDefinitionEventHandlers.leave {
-		handler(ctx, dd)
-	}
-}
-
-// walkDirectiveDefinition ...
-func (w *Walker) walkDirectiveDefinition(ctx *Context, dd *ast.DirectiveDefinition) {
-	w.OnDirectiveDefinitionEnter(ctx, dd)
-	w.OnDirectiveDefinitionLeave(ctx, dd)
-}
-
-// DocumentEventHandler function can handle enter/leave events for Document.
-type DocumentEventHandler func(*Context, ast.Document)
-
-// DocumentEventHandlers stores the enter and leave events handlers.
-type DocumentEventHandlers struct {
-	enter []DocumentEventHandler
-	leave []DocumentEventHandler
-}
-
-// AddDocumentEnterEventHandler adds an event handler to be called when entering Document nodes.
-func (w *Walker) AddDocumentEnterEventHandler(h DocumentEventHandler) {
-	w.documentEventHandlers.enter = append(w.documentEventHandlers.enter, h)
-}
-
-// AddDocumentLeaveEventHandler adds an event handler to be called when leaving Document nodes.
-func (w *Walker) AddDocumentLeaveEventHandler(h DocumentEventHandler) {
-	w.documentEventHandlers.leave = append(w.documentEventHandlers.leave, h)
-}
-
-// OnDocumentEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnDocumentEnter(ctx *Context, d ast.Document) {
-	for _, handler := range w.documentEventHandlers.enter {
-		handler(ctx, d)
-	}
-}
-
-// OnDocumentLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnDocumentLeave(ctx *Context, d ast.Document) {
-	for _, handler := range w.documentEventHandlers.leave {
-		handler(ctx, d)
-	}
-}
-
-// walkDocument ...
-func (w *Walker) walkDocument(ctx *Context, d ast.Document) {
-	w.OnDocumentEnter(ctx, d)
-	w.OnDocumentLeave(ctx, d)
-}
-
 // EnumValueDefinitionsEventHandler function can handle enter/leave events for EnumValueDefinitions.
 type EnumValueDefinitionsEventHandler func(*Context, *ast.EnumValueDefinitions)
 
@@ -424,289 +179,46 @@ func (w *Walker) walkEnumValueDefinitions(ctx *Context, evds *ast.EnumValueDefin
 	w.OnEnumValueDefinitionsLeave(ctx, evds)
 }
 
-// EnumValueDefinitionEventHandler function can handle enter/leave events for EnumValueDefinition.
-type EnumValueDefinitionEventHandler func(*Context, ast.EnumValueDefinition)
+// SelectionsEventHandler function can handle enter/leave events for Selections.
+type SelectionsEventHandler func(*Context, *ast.Selections)
 
-// EnumValueDefinitionEventHandlers stores the enter and leave events handlers.
-type EnumValueDefinitionEventHandlers struct {
-	enter []EnumValueDefinitionEventHandler
-	leave []EnumValueDefinitionEventHandler
+// SelectionsEventHandlers stores the enter and leave events handlers.
+type SelectionsEventHandlers struct {
+	enter []SelectionsEventHandler
+	leave []SelectionsEventHandler
 }
 
-// AddEnumValueDefinitionEnterEventHandler adds an event handler to be called when entering EnumValueDefinition nodes.
-func (w *Walker) AddEnumValueDefinitionEnterEventHandler(h EnumValueDefinitionEventHandler) {
-	w.enumValueDefinitionEventHandlers.enter = append(w.enumValueDefinitionEventHandlers.enter, h)
+// AddSelectionsEnterEventHandler adds an event handler to be called when entering Selections nodes.
+func (w *Walker) AddSelectionsEnterEventHandler(h SelectionsEventHandler) {
+	w.selectionsEventHandlers.enter = append(w.selectionsEventHandlers.enter, h)
 }
 
-// AddEnumValueDefinitionLeaveEventHandler adds an event handler to be called when leaving EnumValueDefinition nodes.
-func (w *Walker) AddEnumValueDefinitionLeaveEventHandler(h EnumValueDefinitionEventHandler) {
-	w.enumValueDefinitionEventHandlers.leave = append(w.enumValueDefinitionEventHandlers.leave, h)
+// AddSelectionsLeaveEventHandler adds an event handler to be called when leaving Selections nodes.
+func (w *Walker) AddSelectionsLeaveEventHandler(h SelectionsEventHandler) {
+	w.selectionsEventHandlers.leave = append(w.selectionsEventHandlers.leave, h)
 }
 
-// OnEnumValueDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnEnumValueDefinitionEnter(ctx *Context, evd ast.EnumValueDefinition) {
-	for _, handler := range w.enumValueDefinitionEventHandlers.enter {
-		handler(ctx, evd)
+// OnSelectionsEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnSelectionsEnter(ctx *Context, ss *ast.Selections) {
+	for _, handler := range w.selectionsEventHandlers.enter {
+		handler(ctx, ss)
 	}
 }
 
-// OnEnumValueDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnEnumValueDefinitionLeave(ctx *Context, evd ast.EnumValueDefinition) {
-	for _, handler := range w.enumValueDefinitionEventHandlers.leave {
-		handler(ctx, evd)
+// OnSelectionsLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnSelectionsLeave(ctx *Context, ss *ast.Selections) {
+	for _, handler := range w.selectionsEventHandlers.leave {
+		handler(ctx, ss)
 	}
 }
 
-// walkEnumValueDefinition ...
-func (w *Walker) walkEnumValueDefinition(ctx *Context, evd ast.EnumValueDefinition) {
-	w.OnEnumValueDefinitionEnter(ctx, evd)
-	w.OnEnumValueDefinitionLeave(ctx, evd)
-}
-
-// ExecutableDefinitionEventHandler function can handle enter/leave events for ExecutableDefinition.
-type ExecutableDefinitionEventHandler func(*Context, *ast.ExecutableDefinition)
-
-// ExecutableDefinitionEventHandlers stores the enter and leave events handlers.
-type ExecutableDefinitionEventHandlers struct {
-	enter []ExecutableDefinitionEventHandler
-	leave []ExecutableDefinitionEventHandler
-}
-
-// AddExecutableDefinitionEnterEventHandler adds an event handler to be called when entering ExecutableDefinition nodes.
-func (w *Walker) AddExecutableDefinitionEnterEventHandler(h ExecutableDefinitionEventHandler) {
-	w.executableDefinitionEventHandlers.enter = append(w.executableDefinitionEventHandlers.enter, h)
-}
-
-// AddExecutableDefinitionLeaveEventHandler adds an event handler to be called when leaving ExecutableDefinition nodes.
-func (w *Walker) AddExecutableDefinitionLeaveEventHandler(h ExecutableDefinitionEventHandler) {
-	w.executableDefinitionEventHandlers.leave = append(w.executableDefinitionEventHandlers.leave, h)
-}
-
-// OnExecutableDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnExecutableDefinitionEnter(ctx *Context, ed *ast.ExecutableDefinition) {
-	for _, handler := range w.executableDefinitionEventHandlers.enter {
-		handler(ctx, ed)
-	}
-}
-
-// OnExecutableDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnExecutableDefinitionLeave(ctx *Context, ed *ast.ExecutableDefinition) {
-	for _, handler := range w.executableDefinitionEventHandlers.leave {
-		handler(ctx, ed)
-	}
-}
-
-// walkExecutableDefinition ...
-func (w *Walker) walkExecutableDefinition(ctx *Context, ed *ast.ExecutableDefinition) {
-	w.OnExecutableDefinitionEnter(ctx, ed)
-	switch ed.Kind {
-	case ast.ExecutableDefinitionKindOperation:
-		w.walkOperationDefinition(ctx, ed.OperationDefinition)
-	case ast.ExecutableDefinitionKindFragment:
-		w.walkFragmentDefinition(ctx, ed.FragmentDefinition)
-	}
-	w.OnExecutableDefinitionLeave(ctx, ed)
-}
-
-// FieldDefinitionsEventHandler function can handle enter/leave events for FieldDefinitions.
-type FieldDefinitionsEventHandler func(*Context, *ast.FieldDefinitions)
-
-// FieldDefinitionsEventHandlers stores the enter and leave events handlers.
-type FieldDefinitionsEventHandlers struct {
-	enter []FieldDefinitionsEventHandler
-	leave []FieldDefinitionsEventHandler
-}
-
-// AddFieldDefinitionsEnterEventHandler adds an event handler to be called when entering FieldDefinitions nodes.
-func (w *Walker) AddFieldDefinitionsEnterEventHandler(h FieldDefinitionsEventHandler) {
-	w.fieldDefinitionsEventHandlers.enter = append(w.fieldDefinitionsEventHandlers.enter, h)
-}
-
-// AddFieldDefinitionsLeaveEventHandler adds an event handler to be called when leaving FieldDefinitions nodes.
-func (w *Walker) AddFieldDefinitionsLeaveEventHandler(h FieldDefinitionsEventHandler) {
-	w.fieldDefinitionsEventHandlers.leave = append(w.fieldDefinitionsEventHandlers.leave, h)
-}
-
-// OnFieldDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnFieldDefinitionsEnter(ctx *Context, fds *ast.FieldDefinitions) {
-	for _, handler := range w.fieldDefinitionsEventHandlers.enter {
-		handler(ctx, fds)
-	}
-}
-
-// OnFieldDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnFieldDefinitionsLeave(ctx *Context, fds *ast.FieldDefinitions) {
-	for _, handler := range w.fieldDefinitionsEventHandlers.leave {
-		handler(ctx, fds)
-	}
-}
-
-// walkFieldDefinitions ...
-func (w *Walker) walkFieldDefinitions(ctx *Context, fds *ast.FieldDefinitions) {
-	w.OnFieldDefinitionsEnter(ctx, fds)
-	fds.ForEach(func(fd ast.FieldDefinition, i int) {
-		w.walkFieldDefinition(ctx, fd)
+// walkSelections ...
+func (w *Walker) walkSelections(ctx *Context, ss *ast.Selections) {
+	w.OnSelectionsEnter(ctx, ss)
+	ss.ForEach(func(s ast.Selection, i int) {
+		w.walkSelection(ctx, s)
 	})
-	w.OnFieldDefinitionsLeave(ctx, fds)
-}
-
-// FieldDefinitionEventHandler function can handle enter/leave events for FieldDefinition.
-type FieldDefinitionEventHandler func(*Context, ast.FieldDefinition)
-
-// FieldDefinitionEventHandlers stores the enter and leave events handlers.
-type FieldDefinitionEventHandlers struct {
-	enter []FieldDefinitionEventHandler
-	leave []FieldDefinitionEventHandler
-}
-
-// AddFieldDefinitionEnterEventHandler adds an event handler to be called when entering FieldDefinition nodes.
-func (w *Walker) AddFieldDefinitionEnterEventHandler(h FieldDefinitionEventHandler) {
-	w.fieldDefinitionEventHandlers.enter = append(w.fieldDefinitionEventHandlers.enter, h)
-}
-
-// AddFieldDefinitionLeaveEventHandler adds an event handler to be called when leaving FieldDefinition nodes.
-func (w *Walker) AddFieldDefinitionLeaveEventHandler(h FieldDefinitionEventHandler) {
-	w.fieldDefinitionEventHandlers.leave = append(w.fieldDefinitionEventHandlers.leave, h)
-}
-
-// OnFieldDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnFieldDefinitionEnter(ctx *Context, fd ast.FieldDefinition) {
-	for _, handler := range w.fieldDefinitionEventHandlers.enter {
-		handler(ctx, fd)
-	}
-}
-
-// OnFieldDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnFieldDefinitionLeave(ctx *Context, fd ast.FieldDefinition) {
-	for _, handler := range w.fieldDefinitionEventHandlers.leave {
-		handler(ctx, fd)
-	}
-}
-
-// walkFieldDefinition ...
-func (w *Walker) walkFieldDefinition(ctx *Context, fd ast.FieldDefinition) {
-	w.OnFieldDefinitionEnter(ctx, fd)
-	w.OnFieldDefinitionLeave(ctx, fd)
-}
-
-// FragmentDefinitionEventHandler function can handle enter/leave events for FragmentDefinition.
-type FragmentDefinitionEventHandler func(*Context, *ast.FragmentDefinition)
-
-// FragmentDefinitionEventHandlers stores the enter and leave events handlers.
-type FragmentDefinitionEventHandlers struct {
-	enter []FragmentDefinitionEventHandler
-	leave []FragmentDefinitionEventHandler
-}
-
-// AddFragmentDefinitionEnterEventHandler adds an event handler to be called when entering FragmentDefinition nodes.
-func (w *Walker) AddFragmentDefinitionEnterEventHandler(h FragmentDefinitionEventHandler) {
-	w.fragmentDefinitionEventHandlers.enter = append(w.fragmentDefinitionEventHandlers.enter, h)
-}
-
-// AddFragmentDefinitionLeaveEventHandler adds an event handler to be called when leaving FragmentDefinition nodes.
-func (w *Walker) AddFragmentDefinitionLeaveEventHandler(h FragmentDefinitionEventHandler) {
-	w.fragmentDefinitionEventHandlers.leave = append(w.fragmentDefinitionEventHandlers.leave, h)
-}
-
-// OnFragmentDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnFragmentDefinitionEnter(ctx *Context, fd *ast.FragmentDefinition) {
-	for _, handler := range w.fragmentDefinitionEventHandlers.enter {
-		handler(ctx, fd)
-	}
-}
-
-// OnFragmentDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnFragmentDefinitionLeave(ctx *Context, fd *ast.FragmentDefinition) {
-	for _, handler := range w.fragmentDefinitionEventHandlers.leave {
-		handler(ctx, fd)
-	}
-}
-
-// walkFragmentDefinition ...
-func (w *Walker) walkFragmentDefinition(ctx *Context, fd *ast.FragmentDefinition) {
-	w.OnFragmentDefinitionEnter(ctx, fd)
-	w.OnFragmentDefinitionLeave(ctx, fd)
-}
-
-// InputValueDefinitionsEventHandler function can handle enter/leave events for InputValueDefinitions.
-type InputValueDefinitionsEventHandler func(*Context, *ast.InputValueDefinitions)
-
-// InputValueDefinitionsEventHandlers stores the enter and leave events handlers.
-type InputValueDefinitionsEventHandlers struct {
-	enter []InputValueDefinitionsEventHandler
-	leave []InputValueDefinitionsEventHandler
-}
-
-// AddInputValueDefinitionsEnterEventHandler adds an event handler to be called when entering InputValueDefinitions nodes.
-func (w *Walker) AddInputValueDefinitionsEnterEventHandler(h InputValueDefinitionsEventHandler) {
-	w.inputValueDefinitionsEventHandlers.enter = append(w.inputValueDefinitionsEventHandlers.enter, h)
-}
-
-// AddInputValueDefinitionsLeaveEventHandler adds an event handler to be called when leaving InputValueDefinitions nodes.
-func (w *Walker) AddInputValueDefinitionsLeaveEventHandler(h InputValueDefinitionsEventHandler) {
-	w.inputValueDefinitionsEventHandlers.leave = append(w.inputValueDefinitionsEventHandlers.leave, h)
-}
-
-// OnInputValueDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnInputValueDefinitionsEnter(ctx *Context, ivds *ast.InputValueDefinitions) {
-	for _, handler := range w.inputValueDefinitionsEventHandlers.enter {
-		handler(ctx, ivds)
-	}
-}
-
-// OnInputValueDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnInputValueDefinitionsLeave(ctx *Context, ivds *ast.InputValueDefinitions) {
-	for _, handler := range w.inputValueDefinitionsEventHandlers.leave {
-		handler(ctx, ivds)
-	}
-}
-
-// walkInputValueDefinitions ...
-func (w *Walker) walkInputValueDefinitions(ctx *Context, ivds *ast.InputValueDefinitions) {
-	w.OnInputValueDefinitionsEnter(ctx, ivds)
-	ivds.ForEach(func(ivd ast.InputValueDefinition, i int) {
-		w.walkInputValueDefinition(ctx, ivd)
-	})
-	w.OnInputValueDefinitionsLeave(ctx, ivds)
-}
-
-// InputValueDefinitionEventHandler function can handle enter/leave events for InputValueDefinition.
-type InputValueDefinitionEventHandler func(*Context, ast.InputValueDefinition)
-
-// InputValueDefinitionEventHandlers stores the enter and leave events handlers.
-type InputValueDefinitionEventHandlers struct {
-	enter []InputValueDefinitionEventHandler
-	leave []InputValueDefinitionEventHandler
-}
-
-// AddInputValueDefinitionEnterEventHandler adds an event handler to be called when entering InputValueDefinition nodes.
-func (w *Walker) AddInputValueDefinitionEnterEventHandler(h InputValueDefinitionEventHandler) {
-	w.inputValueDefinitionEventHandlers.enter = append(w.inputValueDefinitionEventHandlers.enter, h)
-}
-
-// AddInputValueDefinitionLeaveEventHandler adds an event handler to be called when leaving InputValueDefinition nodes.
-func (w *Walker) AddInputValueDefinitionLeaveEventHandler(h InputValueDefinitionEventHandler) {
-	w.inputValueDefinitionEventHandlers.leave = append(w.inputValueDefinitionEventHandlers.leave, h)
-}
-
-// OnInputValueDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnInputValueDefinitionEnter(ctx *Context, ivd ast.InputValueDefinition) {
-	for _, handler := range w.inputValueDefinitionEventHandlers.enter {
-		handler(ctx, ivd)
-	}
-}
-
-// OnInputValueDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnInputValueDefinitionLeave(ctx *Context, ivd ast.InputValueDefinition) {
-	for _, handler := range w.inputValueDefinitionEventHandlers.leave {
-		handler(ctx, ivd)
-	}
-}
-
-// walkInputValueDefinition ...
-func (w *Walker) walkInputValueDefinition(ctx *Context, ivd ast.InputValueDefinition) {
-	w.OnInputValueDefinitionEnter(ctx, ivd)
-	w.OnInputValueDefinitionLeave(ctx, ivd)
+	w.OnSelectionsLeave(ctx, ss)
 }
 
 // OperationDefinitionEventHandler function can handle enter/leave events for OperationDefinition.
@@ -756,377 +268,6 @@ func (w *Walker) walkOperationDefinition(ctx *Context, od *ast.OperationDefiniti
 	w.OnOperationDefinitionLeave(ctx, od)
 }
 
-// OperationTypeDefinitionsEventHandler function can handle enter/leave events for OperationTypeDefinitions.
-type OperationTypeDefinitionsEventHandler func(*Context, *ast.OperationTypeDefinitions)
-
-// OperationTypeDefinitionsEventHandlers stores the enter and leave events handlers.
-type OperationTypeDefinitionsEventHandlers struct {
-	enter []OperationTypeDefinitionsEventHandler
-	leave []OperationTypeDefinitionsEventHandler
-}
-
-// AddOperationTypeDefinitionsEnterEventHandler adds an event handler to be called when entering OperationTypeDefinitions nodes.
-func (w *Walker) AddOperationTypeDefinitionsEnterEventHandler(h OperationTypeDefinitionsEventHandler) {
-	w.operationTypeDefinitionsEventHandlers.enter = append(w.operationTypeDefinitionsEventHandlers.enter, h)
-}
-
-// AddOperationTypeDefinitionsLeaveEventHandler adds an event handler to be called when leaving OperationTypeDefinitions nodes.
-func (w *Walker) AddOperationTypeDefinitionsLeaveEventHandler(h OperationTypeDefinitionsEventHandler) {
-	w.operationTypeDefinitionsEventHandlers.leave = append(w.operationTypeDefinitionsEventHandlers.leave, h)
-}
-
-// OnOperationTypeDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnOperationTypeDefinitionsEnter(ctx *Context, otds *ast.OperationTypeDefinitions) {
-	for _, handler := range w.operationTypeDefinitionsEventHandlers.enter {
-		handler(ctx, otds)
-	}
-}
-
-// OnOperationTypeDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnOperationTypeDefinitionsLeave(ctx *Context, otds *ast.OperationTypeDefinitions) {
-	for _, handler := range w.operationTypeDefinitionsEventHandlers.leave {
-		handler(ctx, otds)
-	}
-}
-
-// walkOperationTypeDefinitions ...
-func (w *Walker) walkOperationTypeDefinitions(ctx *Context, otds *ast.OperationTypeDefinitions) {
-	w.OnOperationTypeDefinitionsEnter(ctx, otds)
-	otds.ForEach(func(otd ast.OperationTypeDefinition, i int) {
-		w.walkOperationTypeDefinition(ctx, otd)
-	})
-	w.OnOperationTypeDefinitionsLeave(ctx, otds)
-}
-
-// OperationTypeDefinitionEventHandler function can handle enter/leave events for OperationTypeDefinition.
-type OperationTypeDefinitionEventHandler func(*Context, ast.OperationTypeDefinition)
-
-// OperationTypeDefinitionEventHandlers stores the enter and leave events handlers.
-type OperationTypeDefinitionEventHandlers struct {
-	enter []OperationTypeDefinitionEventHandler
-	leave []OperationTypeDefinitionEventHandler
-}
-
-// AddOperationTypeDefinitionEnterEventHandler adds an event handler to be called when entering OperationTypeDefinition nodes.
-func (w *Walker) AddOperationTypeDefinitionEnterEventHandler(h OperationTypeDefinitionEventHandler) {
-	w.operationTypeDefinitionEventHandlers.enter = append(w.operationTypeDefinitionEventHandlers.enter, h)
-}
-
-// AddOperationTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving OperationTypeDefinition nodes.
-func (w *Walker) AddOperationTypeDefinitionLeaveEventHandler(h OperationTypeDefinitionEventHandler) {
-	w.operationTypeDefinitionEventHandlers.leave = append(w.operationTypeDefinitionEventHandlers.leave, h)
-}
-
-// OnOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnOperationTypeDefinitionEnter(ctx *Context, otd ast.OperationTypeDefinition) {
-	for _, handler := range w.operationTypeDefinitionEventHandlers.enter {
-		handler(ctx, otd)
-	}
-}
-
-// OnOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnOperationTypeDefinitionLeave(ctx *Context, otd ast.OperationTypeDefinition) {
-	for _, handler := range w.operationTypeDefinitionEventHandlers.leave {
-		handler(ctx, otd)
-	}
-}
-
-// walkOperationTypeDefinition ...
-func (w *Walker) walkOperationTypeDefinition(ctx *Context, otd ast.OperationTypeDefinition) {
-	w.OnOperationTypeDefinitionEnter(ctx, otd)
-	w.OnOperationTypeDefinitionLeave(ctx, otd)
-}
-
-// RootOperationTypeDefinitionsEventHandler function can handle enter/leave events for RootOperationTypeDefinitions.
-type RootOperationTypeDefinitionsEventHandler func(*Context, *ast.RootOperationTypeDefinitions)
-
-// RootOperationTypeDefinitionsEventHandlers stores the enter and leave events handlers.
-type RootOperationTypeDefinitionsEventHandlers struct {
-	enter []RootOperationTypeDefinitionsEventHandler
-	leave []RootOperationTypeDefinitionsEventHandler
-}
-
-// AddRootOperationTypeDefinitionsEnterEventHandler adds an event handler to be called when entering RootOperationTypeDefinitions nodes.
-func (w *Walker) AddRootOperationTypeDefinitionsEnterEventHandler(h RootOperationTypeDefinitionsEventHandler) {
-	w.rootOperationTypeDefinitionsEventHandlers.enter = append(w.rootOperationTypeDefinitionsEventHandlers.enter, h)
-}
-
-// AddRootOperationTypeDefinitionsLeaveEventHandler adds an event handler to be called when leaving RootOperationTypeDefinitions nodes.
-func (w *Walker) AddRootOperationTypeDefinitionsLeaveEventHandler(h RootOperationTypeDefinitionsEventHandler) {
-	w.rootOperationTypeDefinitionsEventHandlers.leave = append(w.rootOperationTypeDefinitionsEventHandlers.leave, h)
-}
-
-// OnRootOperationTypeDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnRootOperationTypeDefinitionsEnter(ctx *Context, rotds *ast.RootOperationTypeDefinitions) {
-	for _, handler := range w.rootOperationTypeDefinitionsEventHandlers.enter {
-		handler(ctx, rotds)
-	}
-}
-
-// OnRootOperationTypeDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnRootOperationTypeDefinitionsLeave(ctx *Context, rotds *ast.RootOperationTypeDefinitions) {
-	for _, handler := range w.rootOperationTypeDefinitionsEventHandlers.leave {
-		handler(ctx, rotds)
-	}
-}
-
-// walkRootOperationTypeDefinitions ...
-func (w *Walker) walkRootOperationTypeDefinitions(ctx *Context, rotds *ast.RootOperationTypeDefinitions) {
-	w.OnRootOperationTypeDefinitionsEnter(ctx, rotds)
-	rotds.ForEach(func(rotd ast.RootOperationTypeDefinition, i int) {
-		w.walkRootOperationTypeDefinition(ctx, rotd)
-	})
-	w.OnRootOperationTypeDefinitionsLeave(ctx, rotds)
-}
-
-// RootOperationTypeDefinitionEventHandler function can handle enter/leave events for RootOperationTypeDefinition.
-type RootOperationTypeDefinitionEventHandler func(*Context, ast.RootOperationTypeDefinition)
-
-// RootOperationTypeDefinitionEventHandlers stores the enter and leave events handlers.
-type RootOperationTypeDefinitionEventHandlers struct {
-	enter []RootOperationTypeDefinitionEventHandler
-	leave []RootOperationTypeDefinitionEventHandler
-}
-
-// AddRootOperationTypeDefinitionEnterEventHandler adds an event handler to be called when entering RootOperationTypeDefinition nodes.
-func (w *Walker) AddRootOperationTypeDefinitionEnterEventHandler(h RootOperationTypeDefinitionEventHandler) {
-	w.rootOperationTypeDefinitionEventHandlers.enter = append(w.rootOperationTypeDefinitionEventHandlers.enter, h)
-}
-
-// AddRootOperationTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving RootOperationTypeDefinition nodes.
-func (w *Walker) AddRootOperationTypeDefinitionLeaveEventHandler(h RootOperationTypeDefinitionEventHandler) {
-	w.rootOperationTypeDefinitionEventHandlers.leave = append(w.rootOperationTypeDefinitionEventHandlers.leave, h)
-}
-
-// OnRootOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnRootOperationTypeDefinitionEnter(ctx *Context, rotd ast.RootOperationTypeDefinition) {
-	for _, handler := range w.rootOperationTypeDefinitionEventHandlers.enter {
-		handler(ctx, rotd)
-	}
-}
-
-// OnRootOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnRootOperationTypeDefinitionLeave(ctx *Context, rotd ast.RootOperationTypeDefinition) {
-	for _, handler := range w.rootOperationTypeDefinitionEventHandlers.leave {
-		handler(ctx, rotd)
-	}
-}
-
-// walkRootOperationTypeDefinition ...
-func (w *Walker) walkRootOperationTypeDefinition(ctx *Context, rotd ast.RootOperationTypeDefinition) {
-	w.OnRootOperationTypeDefinitionEnter(ctx, rotd)
-	w.OnRootOperationTypeDefinitionLeave(ctx, rotd)
-}
-
-// SchemaDefinitionEventHandler function can handle enter/leave events for SchemaDefinition.
-type SchemaDefinitionEventHandler func(*Context, *ast.SchemaDefinition)
-
-// SchemaDefinitionEventHandlers stores the enter and leave events handlers.
-type SchemaDefinitionEventHandlers struct {
-	enter []SchemaDefinitionEventHandler
-	leave []SchemaDefinitionEventHandler
-}
-
-// AddSchemaDefinitionEnterEventHandler adds an event handler to be called when entering SchemaDefinition nodes.
-func (w *Walker) AddSchemaDefinitionEnterEventHandler(h SchemaDefinitionEventHandler) {
-	w.schemaDefinitionEventHandlers.enter = append(w.schemaDefinitionEventHandlers.enter, h)
-}
-
-// AddSchemaDefinitionLeaveEventHandler adds an event handler to be called when leaving SchemaDefinition nodes.
-func (w *Walker) AddSchemaDefinitionLeaveEventHandler(h SchemaDefinitionEventHandler) {
-	w.schemaDefinitionEventHandlers.leave = append(w.schemaDefinitionEventHandlers.leave, h)
-}
-
-// OnSchemaDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnSchemaDefinitionEnter(ctx *Context, sd *ast.SchemaDefinition) {
-	for _, handler := range w.schemaDefinitionEventHandlers.enter {
-		handler(ctx, sd)
-	}
-}
-
-// OnSchemaDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnSchemaDefinitionLeave(ctx *Context, sd *ast.SchemaDefinition) {
-	for _, handler := range w.schemaDefinitionEventHandlers.leave {
-		handler(ctx, sd)
-	}
-}
-
-// walkSchemaDefinition ...
-func (w *Walker) walkSchemaDefinition(ctx *Context, sd *ast.SchemaDefinition) {
-	w.OnSchemaDefinitionEnter(ctx, sd)
-	w.OnSchemaDefinitionLeave(ctx, sd)
-}
-
-// SchemaExtensionEventHandler function can handle enter/leave events for SchemaExtension.
-type SchemaExtensionEventHandler func(*Context, *ast.SchemaExtension)
-
-// SchemaExtensionEventHandlers stores the enter and leave events handlers.
-type SchemaExtensionEventHandlers struct {
-	enter []SchemaExtensionEventHandler
-	leave []SchemaExtensionEventHandler
-}
-
-// AddSchemaExtensionEnterEventHandler adds an event handler to be called when entering SchemaExtension nodes.
-func (w *Walker) AddSchemaExtensionEnterEventHandler(h SchemaExtensionEventHandler) {
-	w.schemaExtensionEventHandlers.enter = append(w.schemaExtensionEventHandlers.enter, h)
-}
-
-// AddSchemaExtensionLeaveEventHandler adds an event handler to be called when leaving SchemaExtension nodes.
-func (w *Walker) AddSchemaExtensionLeaveEventHandler(h SchemaExtensionEventHandler) {
-	w.schemaExtensionEventHandlers.leave = append(w.schemaExtensionEventHandlers.leave, h)
-}
-
-// OnSchemaExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnSchemaExtensionEnter(ctx *Context, se *ast.SchemaExtension) {
-	for _, handler := range w.schemaExtensionEventHandlers.enter {
-		handler(ctx, se)
-	}
-}
-
-// OnSchemaExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnSchemaExtensionLeave(ctx *Context, se *ast.SchemaExtension) {
-	for _, handler := range w.schemaExtensionEventHandlers.leave {
-		handler(ctx, se)
-	}
-}
-
-// walkSchemaExtension ...
-func (w *Walker) walkSchemaExtension(ctx *Context, se *ast.SchemaExtension) {
-	w.OnSchemaExtensionEnter(ctx, se)
-	w.OnSchemaExtensionLeave(ctx, se)
-}
-
-// SelectionsEventHandler function can handle enter/leave events for Selections.
-type SelectionsEventHandler func(*Context, *ast.Selections)
-
-// SelectionsEventHandlers stores the enter and leave events handlers.
-type SelectionsEventHandlers struct {
-	enter []SelectionsEventHandler
-	leave []SelectionsEventHandler
-}
-
-// AddSelectionsEnterEventHandler adds an event handler to be called when entering Selections nodes.
-func (w *Walker) AddSelectionsEnterEventHandler(h SelectionsEventHandler) {
-	w.selectionsEventHandlers.enter = append(w.selectionsEventHandlers.enter, h)
-}
-
-// AddSelectionsLeaveEventHandler adds an event handler to be called when leaving Selections nodes.
-func (w *Walker) AddSelectionsLeaveEventHandler(h SelectionsEventHandler) {
-	w.selectionsEventHandlers.leave = append(w.selectionsEventHandlers.leave, h)
-}
-
-// OnSelectionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnSelectionsEnter(ctx *Context, ss *ast.Selections) {
-	for _, handler := range w.selectionsEventHandlers.enter {
-		handler(ctx, ss)
-	}
-}
-
-// OnSelectionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnSelectionsLeave(ctx *Context, ss *ast.Selections) {
-	for _, handler := range w.selectionsEventHandlers.leave {
-		handler(ctx, ss)
-	}
-}
-
-// walkSelections ...
-func (w *Walker) walkSelections(ctx *Context, ss *ast.Selections) {
-	w.OnSelectionsEnter(ctx, ss)
-	ss.ForEach(func(s ast.Selection, i int) {
-		w.walkSelection(ctx, s)
-	})
-	w.OnSelectionsLeave(ctx, ss)
-}
-
-// SelectionEventHandler function can handle enter/leave events for Selection.
-type SelectionEventHandler func(*Context, ast.Selection)
-
-// SelectionEventHandlers stores the enter and leave events handlers.
-type SelectionEventHandlers struct {
-	enter []SelectionEventHandler
-	leave []SelectionEventHandler
-}
-
-// AddSelectionEnterEventHandler adds an event handler to be called when entering Selection nodes.
-func (w *Walker) AddSelectionEnterEventHandler(h SelectionEventHandler) {
-	w.selectionEventHandlers.enter = append(w.selectionEventHandlers.enter, h)
-}
-
-// AddSelectionLeaveEventHandler adds an event handler to be called when leaving Selection nodes.
-func (w *Walker) AddSelectionLeaveEventHandler(h SelectionEventHandler) {
-	w.selectionEventHandlers.leave = append(w.selectionEventHandlers.leave, h)
-}
-
-// OnSelectionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnSelectionEnter(ctx *Context, s ast.Selection) {
-	for _, handler := range w.selectionEventHandlers.enter {
-		handler(ctx, s)
-	}
-}
-
-// OnSelectionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnSelectionLeave(ctx *Context, s ast.Selection) {
-	for _, handler := range w.selectionEventHandlers.leave {
-		handler(ctx, s)
-	}
-}
-
-// walkSelection ...
-func (w *Walker) walkSelection(ctx *Context, s ast.Selection) {
-	w.OnSelectionEnter(ctx, s)
-	switch s.Kind {
-	case ast.SelectionKindField:
-		w.walkFieldSelection(ctx, s)
-	case ast.SelectionKindFragmentSpread:
-		w.walkFragmentSpreadSelection(ctx, s)
-	case ast.SelectionKindInlineFragment:
-		w.walkInlineFragmentSelection(ctx, s)
-	}
-	w.OnSelectionLeave(ctx, s)
-}
-
-// TypesEventHandler function can handle enter/leave events for Types.
-type TypesEventHandler func(*Context, *ast.Types)
-
-// TypesEventHandlers stores the enter and leave events handlers.
-type TypesEventHandlers struct {
-	enter []TypesEventHandler
-	leave []TypesEventHandler
-}
-
-// AddTypesEnterEventHandler adds an event handler to be called when entering Types nodes.
-func (w *Walker) AddTypesEnterEventHandler(h TypesEventHandler) {
-	w.typesEventHandlers.enter = append(w.typesEventHandlers.enter, h)
-}
-
-// AddTypesLeaveEventHandler adds an event handler to be called when leaving Types nodes.
-func (w *Walker) AddTypesLeaveEventHandler(h TypesEventHandler) {
-	w.typesEventHandlers.leave = append(w.typesEventHandlers.leave, h)
-}
-
-// OnTypesEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypesEnter(ctx *Context, ts *ast.Types) {
-	for _, handler := range w.typesEventHandlers.enter {
-		handler(ctx, ts)
-	}
-}
-
-// OnTypesLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypesLeave(ctx *Context, ts *ast.Types) {
-	for _, handler := range w.typesEventHandlers.leave {
-		handler(ctx, ts)
-	}
-}
-
-// walkTypes ...
-func (w *Walker) walkTypes(ctx *Context, ts *ast.Types) {
-	w.OnTypesEnter(ctx, ts)
-	ts.ForEach(func(t ast.Type, i int) {
-		w.walkType(ctx, t)
-	})
-	w.OnTypesLeave(ctx, ts)
-}
-
 // TypeEventHandler function can handle enter/leave events for Type.
 type TypeEventHandler func(*Context, ast.Type)
 
@@ -1172,6 +313,175 @@ func (w *Walker) walkType(ctx *Context, t ast.Type) {
 	w.OnTypeLeave(ctx, t)
 }
 
+// DirectiveDefinitionEventHandler function can handle enter/leave events for DirectiveDefinition.
+type DirectiveDefinitionEventHandler func(*Context, *ast.DirectiveDefinition)
+
+// DirectiveDefinitionEventHandlers stores the enter and leave events handlers.
+type DirectiveDefinitionEventHandlers struct {
+	enter []DirectiveDefinitionEventHandler
+	leave []DirectiveDefinitionEventHandler
+}
+
+// AddDirectiveDefinitionEnterEventHandler adds an event handler to be called when entering DirectiveDefinition nodes.
+func (w *Walker) AddDirectiveDefinitionEnterEventHandler(h DirectiveDefinitionEventHandler) {
+	w.directiveDefinitionEventHandlers.enter = append(w.directiveDefinitionEventHandlers.enter, h)
+}
+
+// AddDirectiveDefinitionLeaveEventHandler adds an event handler to be called when leaving DirectiveDefinition nodes.
+func (w *Walker) AddDirectiveDefinitionLeaveEventHandler(h DirectiveDefinitionEventHandler) {
+	w.directiveDefinitionEventHandlers.leave = append(w.directiveDefinitionEventHandlers.leave, h)
+}
+
+// OnDirectiveDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnDirectiveDefinitionEnter(ctx *Context, dd *ast.DirectiveDefinition) {
+	for _, handler := range w.directiveDefinitionEventHandlers.enter {
+		handler(ctx, dd)
+	}
+}
+
+// OnDirectiveDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnDirectiveDefinitionLeave(ctx *Context, dd *ast.DirectiveDefinition) {
+	for _, handler := range w.directiveDefinitionEventHandlers.leave {
+		handler(ctx, dd)
+	}
+}
+
+// walkDirectiveDefinition ...
+func (w *Walker) walkDirectiveDefinition(ctx *Context, dd *ast.DirectiveDefinition) {
+	w.OnDirectiveDefinitionEnter(ctx, dd)
+	w.walkInputValueDefinitions(ctx, dd.ArgumentsDefinition)
+	w.OnDirectiveDefinitionLeave(ctx, dd)
+}
+
+// FieldDefinitionsEventHandler function can handle enter/leave events for FieldDefinitions.
+type FieldDefinitionsEventHandler func(*Context, *ast.FieldDefinitions)
+
+// FieldDefinitionsEventHandlers stores the enter and leave events handlers.
+type FieldDefinitionsEventHandlers struct {
+	enter []FieldDefinitionsEventHandler
+	leave []FieldDefinitionsEventHandler
+}
+
+// AddFieldDefinitionsEnterEventHandler adds an event handler to be called when entering FieldDefinitions nodes.
+func (w *Walker) AddFieldDefinitionsEnterEventHandler(h FieldDefinitionsEventHandler) {
+	w.fieldDefinitionsEventHandlers.enter = append(w.fieldDefinitionsEventHandlers.enter, h)
+}
+
+// AddFieldDefinitionsLeaveEventHandler adds an event handler to be called when leaving FieldDefinitions nodes.
+func (w *Walker) AddFieldDefinitionsLeaveEventHandler(h FieldDefinitionsEventHandler) {
+	w.fieldDefinitionsEventHandlers.leave = append(w.fieldDefinitionsEventHandlers.leave, h)
+}
+
+// OnFieldDefinitionsEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnFieldDefinitionsEnter(ctx *Context, fds *ast.FieldDefinitions) {
+	for _, handler := range w.fieldDefinitionsEventHandlers.enter {
+		handler(ctx, fds)
+	}
+}
+
+// OnFieldDefinitionsLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnFieldDefinitionsLeave(ctx *Context, fds *ast.FieldDefinitions) {
+	for _, handler := range w.fieldDefinitionsEventHandlers.leave {
+		handler(ctx, fds)
+	}
+}
+
+// walkFieldDefinitions ...
+func (w *Walker) walkFieldDefinitions(ctx *Context, fds *ast.FieldDefinitions) {
+	w.OnFieldDefinitionsEnter(ctx, fds)
+	fds.ForEach(func(fd ast.FieldDefinition, i int) {
+		w.walkFieldDefinition(ctx, fd)
+	})
+	w.OnFieldDefinitionsLeave(ctx, fds)
+}
+
+// DefinitionEventHandler function can handle enter/leave events for Definition.
+type DefinitionEventHandler func(*Context, ast.Definition)
+
+// DefinitionEventHandlers stores the enter and leave events handlers.
+type DefinitionEventHandlers struct {
+	enter []DefinitionEventHandler
+	leave []DefinitionEventHandler
+}
+
+// AddDefinitionEnterEventHandler adds an event handler to be called when entering Definition nodes.
+func (w *Walker) AddDefinitionEnterEventHandler(h DefinitionEventHandler) {
+	w.definitionEventHandlers.enter = append(w.definitionEventHandlers.enter, h)
+}
+
+// AddDefinitionLeaveEventHandler adds an event handler to be called when leaving Definition nodes.
+func (w *Walker) AddDefinitionLeaveEventHandler(h DefinitionEventHandler) {
+	w.definitionEventHandlers.leave = append(w.definitionEventHandlers.leave, h)
+}
+
+// OnDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnDefinitionEnter(ctx *Context, d ast.Definition) {
+	for _, handler := range w.definitionEventHandlers.enter {
+		handler(ctx, d)
+	}
+}
+
+// OnDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnDefinitionLeave(ctx *Context, d ast.Definition) {
+	for _, handler := range w.definitionEventHandlers.leave {
+		handler(ctx, d)
+	}
+}
+
+// walkDefinition ...
+func (w *Walker) walkDefinition(ctx *Context, d ast.Definition) {
+	w.OnDefinitionEnter(ctx, d)
+	switch d.Kind {
+	case ast.DefinitionKindExecutable:
+		w.walkExecutableDefinition(ctx, d.ExecutableDefinition)
+	case ast.DefinitionKindTypeSystem:
+		w.walkTypeSystemDefinition(ctx, d.TypeSystemDefinition)
+	case ast.DefinitionKindTypeSystemExtension:
+		w.walkTypeSystemExtension(ctx, d.TypeSystemExtension)
+	}
+	w.OnDefinitionLeave(ctx, d)
+}
+
+// DirectiveEventHandler function can handle enter/leave events for Directive.
+type DirectiveEventHandler func(*Context, ast.Directive)
+
+// DirectiveEventHandlers stores the enter and leave events handlers.
+type DirectiveEventHandlers struct {
+	enter []DirectiveEventHandler
+	leave []DirectiveEventHandler
+}
+
+// AddDirectiveEnterEventHandler adds an event handler to be called when entering Directive nodes.
+func (w *Walker) AddDirectiveEnterEventHandler(h DirectiveEventHandler) {
+	w.directiveEventHandlers.enter = append(w.directiveEventHandlers.enter, h)
+}
+
+// AddDirectiveLeaveEventHandler adds an event handler to be called when leaving Directive nodes.
+func (w *Walker) AddDirectiveLeaveEventHandler(h DirectiveEventHandler) {
+	w.directiveEventHandlers.leave = append(w.directiveEventHandlers.leave, h)
+}
+
+// OnDirectiveEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnDirectiveEnter(ctx *Context, d ast.Directive) {
+	for _, handler := range w.directiveEventHandlers.enter {
+		handler(ctx, d)
+	}
+}
+
+// OnDirectiveLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnDirectiveLeave(ctx *Context, d ast.Directive) {
+	for _, handler := range w.directiveEventHandlers.leave {
+		handler(ctx, d)
+	}
+}
+
+// walkDirective ...
+func (w *Walker) walkDirective(ctx *Context, d ast.Directive) {
+	w.OnDirectiveEnter(ctx, d)
+	w.walkArguments(ctx, d.Arguments)
+	w.OnDirectiveLeave(ctx, d)
+}
+
 // TypeConditionEventHandler function can handle enter/leave events for TypeCondition.
 type TypeConditionEventHandler func(*Context, *ast.TypeCondition)
 
@@ -1208,7 +518,593 @@ func (w *Walker) OnTypeConditionLeave(ctx *Context, tc *ast.TypeCondition) {
 // walkTypeCondition ...
 func (w *Walker) walkTypeCondition(ctx *Context, tc *ast.TypeCondition) {
 	w.OnTypeConditionEnter(ctx, tc)
+	w.walkType(ctx, tc.NamedType)
 	w.OnTypeConditionLeave(ctx, tc)
+}
+
+// VariableDefinitionEventHandler function can handle enter/leave events for VariableDefinition.
+type VariableDefinitionEventHandler func(*Context, ast.VariableDefinition)
+
+// VariableDefinitionEventHandlers stores the enter and leave events handlers.
+type VariableDefinitionEventHandlers struct {
+	enter []VariableDefinitionEventHandler
+	leave []VariableDefinitionEventHandler
+}
+
+// AddVariableDefinitionEnterEventHandler adds an event handler to be called when entering VariableDefinition nodes.
+func (w *Walker) AddVariableDefinitionEnterEventHandler(h VariableDefinitionEventHandler) {
+	w.variableDefinitionEventHandlers.enter = append(w.variableDefinitionEventHandlers.enter, h)
+}
+
+// AddVariableDefinitionLeaveEventHandler adds an event handler to be called when leaving VariableDefinition nodes.
+func (w *Walker) AddVariableDefinitionLeaveEventHandler(h VariableDefinitionEventHandler) {
+	w.variableDefinitionEventHandlers.leave = append(w.variableDefinitionEventHandlers.leave, h)
+}
+
+// OnVariableDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnVariableDefinitionEnter(ctx *Context, vd ast.VariableDefinition) {
+	for _, handler := range w.variableDefinitionEventHandlers.enter {
+		handler(ctx, vd)
+	}
+}
+
+// OnVariableDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnVariableDefinitionLeave(ctx *Context, vd ast.VariableDefinition) {
+	for _, handler := range w.variableDefinitionEventHandlers.leave {
+		handler(ctx, vd)
+	}
+}
+
+// walkVariableDefinition ...
+func (w *Walker) walkVariableDefinition(ctx *Context, vd ast.VariableDefinition) {
+	w.OnVariableDefinitionEnter(ctx, vd)
+	w.walkValue(ctx, vd.DefaultValue)
+	w.walkType(ctx, vd.Type)
+	w.OnVariableDefinitionLeave(ctx, vd)
+}
+
+// OperationTypeDefinitionEventHandler function can handle enter/leave events for OperationTypeDefinition.
+type OperationTypeDefinitionEventHandler func(*Context, ast.OperationTypeDefinition)
+
+// OperationTypeDefinitionEventHandlers stores the enter and leave events handlers.
+type OperationTypeDefinitionEventHandlers struct {
+	enter []OperationTypeDefinitionEventHandler
+	leave []OperationTypeDefinitionEventHandler
+}
+
+// AddOperationTypeDefinitionEnterEventHandler adds an event handler to be called when entering OperationTypeDefinition nodes.
+func (w *Walker) AddOperationTypeDefinitionEnterEventHandler(h OperationTypeDefinitionEventHandler) {
+	w.operationTypeDefinitionEventHandlers.enter = append(w.operationTypeDefinitionEventHandlers.enter, h)
+}
+
+// AddOperationTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving OperationTypeDefinition nodes.
+func (w *Walker) AddOperationTypeDefinitionLeaveEventHandler(h OperationTypeDefinitionEventHandler) {
+	w.operationTypeDefinitionEventHandlers.leave = append(w.operationTypeDefinitionEventHandlers.leave, h)
+}
+
+// OnOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnOperationTypeDefinitionEnter(ctx *Context, otd ast.OperationTypeDefinition) {
+	for _, handler := range w.operationTypeDefinitionEventHandlers.enter {
+		handler(ctx, otd)
+	}
+}
+
+// OnOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnOperationTypeDefinitionLeave(ctx *Context, otd ast.OperationTypeDefinition) {
+	for _, handler := range w.operationTypeDefinitionEventHandlers.leave {
+		handler(ctx, otd)
+	}
+}
+
+// walkOperationTypeDefinition ...
+func (w *Walker) walkOperationTypeDefinition(ctx *Context, otd ast.OperationTypeDefinition) {
+	w.OnOperationTypeDefinitionEnter(ctx, otd)
+	w.walkType(ctx, otd.NamedType)
+	w.OnOperationTypeDefinitionLeave(ctx, otd)
+}
+
+// EnumValueDefinitionEventHandler function can handle enter/leave events for EnumValueDefinition.
+type EnumValueDefinitionEventHandler func(*Context, ast.EnumValueDefinition)
+
+// EnumValueDefinitionEventHandlers stores the enter and leave events handlers.
+type EnumValueDefinitionEventHandlers struct {
+	enter []EnumValueDefinitionEventHandler
+	leave []EnumValueDefinitionEventHandler
+}
+
+// AddEnumValueDefinitionEnterEventHandler adds an event handler to be called when entering EnumValueDefinition nodes.
+func (w *Walker) AddEnumValueDefinitionEnterEventHandler(h EnumValueDefinitionEventHandler) {
+	w.enumValueDefinitionEventHandlers.enter = append(w.enumValueDefinitionEventHandlers.enter, h)
+}
+
+// AddEnumValueDefinitionLeaveEventHandler adds an event handler to be called when leaving EnumValueDefinition nodes.
+func (w *Walker) AddEnumValueDefinitionLeaveEventHandler(h EnumValueDefinitionEventHandler) {
+	w.enumValueDefinitionEventHandlers.leave = append(w.enumValueDefinitionEventHandlers.leave, h)
+}
+
+// OnEnumValueDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnEnumValueDefinitionEnter(ctx *Context, evd ast.EnumValueDefinition) {
+	for _, handler := range w.enumValueDefinitionEventHandlers.enter {
+		handler(ctx, evd)
+	}
+}
+
+// OnEnumValueDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnEnumValueDefinitionLeave(ctx *Context, evd ast.EnumValueDefinition) {
+	for _, handler := range w.enumValueDefinitionEventHandlers.leave {
+		handler(ctx, evd)
+	}
+}
+
+// walkEnumValueDefinition ...
+func (w *Walker) walkEnumValueDefinition(ctx *Context, evd ast.EnumValueDefinition) {
+	w.OnEnumValueDefinitionEnter(ctx, evd)
+	w.walkDirectives(ctx, evd.Directives)
+	w.OnEnumValueDefinitionLeave(ctx, evd)
+}
+
+// DirectivesEventHandler function can handle enter/leave events for Directives.
+type DirectivesEventHandler func(*Context, *ast.Directives)
+
+// DirectivesEventHandlers stores the enter and leave events handlers.
+type DirectivesEventHandlers struct {
+	enter []DirectivesEventHandler
+	leave []DirectivesEventHandler
+}
+
+// AddDirectivesEnterEventHandler adds an event handler to be called when entering Directives nodes.
+func (w *Walker) AddDirectivesEnterEventHandler(h DirectivesEventHandler) {
+	w.directivesEventHandlers.enter = append(w.directivesEventHandlers.enter, h)
+}
+
+// AddDirectivesLeaveEventHandler adds an event handler to be called when leaving Directives nodes.
+func (w *Walker) AddDirectivesLeaveEventHandler(h DirectivesEventHandler) {
+	w.directivesEventHandlers.leave = append(w.directivesEventHandlers.leave, h)
+}
+
+// OnDirectivesEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnDirectivesEnter(ctx *Context, ds *ast.Directives) {
+	for _, handler := range w.directivesEventHandlers.enter {
+		handler(ctx, ds)
+	}
+}
+
+// OnDirectivesLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnDirectivesLeave(ctx *Context, ds *ast.Directives) {
+	for _, handler := range w.directivesEventHandlers.leave {
+		handler(ctx, ds)
+	}
+}
+
+// walkDirectives ...
+func (w *Walker) walkDirectives(ctx *Context, ds *ast.Directives) {
+	w.OnDirectivesEnter(ctx, ds)
+	ds.ForEach(func(d ast.Directive, i int) {
+		w.walkDirective(ctx, d)
+	})
+	w.OnDirectivesLeave(ctx, ds)
+}
+
+// RootOperationTypeDefinitionsEventHandler function can handle enter/leave events for RootOperationTypeDefinitions.
+type RootOperationTypeDefinitionsEventHandler func(*Context, *ast.RootOperationTypeDefinitions)
+
+// RootOperationTypeDefinitionsEventHandlers stores the enter and leave events handlers.
+type RootOperationTypeDefinitionsEventHandlers struct {
+	enter []RootOperationTypeDefinitionsEventHandler
+	leave []RootOperationTypeDefinitionsEventHandler
+}
+
+// AddRootOperationTypeDefinitionsEnterEventHandler adds an event handler to be called when entering RootOperationTypeDefinitions nodes.
+func (w *Walker) AddRootOperationTypeDefinitionsEnterEventHandler(h RootOperationTypeDefinitionsEventHandler) {
+	w.rootOperationTypeDefinitionsEventHandlers.enter = append(w.rootOperationTypeDefinitionsEventHandlers.enter, h)
+}
+
+// AddRootOperationTypeDefinitionsLeaveEventHandler adds an event handler to be called when leaving RootOperationTypeDefinitions nodes.
+func (w *Walker) AddRootOperationTypeDefinitionsLeaveEventHandler(h RootOperationTypeDefinitionsEventHandler) {
+	w.rootOperationTypeDefinitionsEventHandlers.leave = append(w.rootOperationTypeDefinitionsEventHandlers.leave, h)
+}
+
+// OnRootOperationTypeDefinitionsEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnRootOperationTypeDefinitionsEnter(ctx *Context, rotds *ast.RootOperationTypeDefinitions) {
+	for _, handler := range w.rootOperationTypeDefinitionsEventHandlers.enter {
+		handler(ctx, rotds)
+	}
+}
+
+// OnRootOperationTypeDefinitionsLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnRootOperationTypeDefinitionsLeave(ctx *Context, rotds *ast.RootOperationTypeDefinitions) {
+	for _, handler := range w.rootOperationTypeDefinitionsEventHandlers.leave {
+		handler(ctx, rotds)
+	}
+}
+
+// walkRootOperationTypeDefinitions ...
+func (w *Walker) walkRootOperationTypeDefinitions(ctx *Context, rotds *ast.RootOperationTypeDefinitions) {
+	w.OnRootOperationTypeDefinitionsEnter(ctx, rotds)
+	rotds.ForEach(func(rotd ast.RootOperationTypeDefinition, i int) {
+		w.walkRootOperationTypeDefinition(ctx, rotd)
+	})
+	w.OnRootOperationTypeDefinitionsLeave(ctx, rotds)
+}
+
+// FragmentDefinitionEventHandler function can handle enter/leave events for FragmentDefinition.
+type FragmentDefinitionEventHandler func(*Context, *ast.FragmentDefinition)
+
+// FragmentDefinitionEventHandlers stores the enter and leave events handlers.
+type FragmentDefinitionEventHandlers struct {
+	enter []FragmentDefinitionEventHandler
+	leave []FragmentDefinitionEventHandler
+}
+
+// AddFragmentDefinitionEnterEventHandler adds an event handler to be called when entering FragmentDefinition nodes.
+func (w *Walker) AddFragmentDefinitionEnterEventHandler(h FragmentDefinitionEventHandler) {
+	w.fragmentDefinitionEventHandlers.enter = append(w.fragmentDefinitionEventHandlers.enter, h)
+}
+
+// AddFragmentDefinitionLeaveEventHandler adds an event handler to be called when leaving FragmentDefinition nodes.
+func (w *Walker) AddFragmentDefinitionLeaveEventHandler(h FragmentDefinitionEventHandler) {
+	w.fragmentDefinitionEventHandlers.leave = append(w.fragmentDefinitionEventHandlers.leave, h)
+}
+
+// OnFragmentDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnFragmentDefinitionEnter(ctx *Context, fd *ast.FragmentDefinition) {
+	for _, handler := range w.fragmentDefinitionEventHandlers.enter {
+		handler(ctx, fd)
+	}
+}
+
+// OnFragmentDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnFragmentDefinitionLeave(ctx *Context, fd *ast.FragmentDefinition) {
+	for _, handler := range w.fragmentDefinitionEventHandlers.leave {
+		handler(ctx, fd)
+	}
+}
+
+// walkFragmentDefinition ...
+func (w *Walker) walkFragmentDefinition(ctx *Context, fd *ast.FragmentDefinition) {
+	w.OnFragmentDefinitionEnter(ctx, fd)
+	w.walkTypeCondition(ctx, fd.TypeCondition)
+	w.walkDirectives(ctx, fd.Directives)
+	w.walkSelections(ctx, fd.SelectionSet)
+	w.OnFragmentDefinitionLeave(ctx, fd)
+}
+
+// ArgumentEventHandler function can handle enter/leave events for Argument.
+type ArgumentEventHandler func(*Context, ast.Argument)
+
+// ArgumentEventHandlers stores the enter and leave events handlers.
+type ArgumentEventHandlers struct {
+	enter []ArgumentEventHandler
+	leave []ArgumentEventHandler
+}
+
+// AddArgumentEnterEventHandler adds an event handler to be called when entering Argument nodes.
+func (w *Walker) AddArgumentEnterEventHandler(h ArgumentEventHandler) {
+	w.argumentEventHandlers.enter = append(w.argumentEventHandlers.enter, h)
+}
+
+// AddArgumentLeaveEventHandler adds an event handler to be called when leaving Argument nodes.
+func (w *Walker) AddArgumentLeaveEventHandler(h ArgumentEventHandler) {
+	w.argumentEventHandlers.leave = append(w.argumentEventHandlers.leave, h)
+}
+
+// OnArgumentEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnArgumentEnter(ctx *Context, a ast.Argument) {
+	for _, handler := range w.argumentEventHandlers.enter {
+		handler(ctx, a)
+	}
+}
+
+// OnArgumentLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnArgumentLeave(ctx *Context, a ast.Argument) {
+	for _, handler := range w.argumentEventHandlers.leave {
+		handler(ctx, a)
+	}
+}
+
+// walkArgument ...
+func (w *Walker) walkArgument(ctx *Context, a ast.Argument) {
+	w.OnArgumentEnter(ctx, a)
+	w.walkValue(ctx, a.Value)
+	w.OnArgumentLeave(ctx, a)
+}
+
+// TypeSystemExtensionEventHandler function can handle enter/leave events for TypeSystemExtension.
+type TypeSystemExtensionEventHandler func(*Context, *ast.TypeSystemExtension)
+
+// TypeSystemExtensionEventHandlers stores the enter and leave events handlers.
+type TypeSystemExtensionEventHandlers struct {
+	enter []TypeSystemExtensionEventHandler
+	leave []TypeSystemExtensionEventHandler
+}
+
+// AddTypeSystemExtensionEnterEventHandler adds an event handler to be called when entering TypeSystemExtension nodes.
+func (w *Walker) AddTypeSystemExtensionEnterEventHandler(h TypeSystemExtensionEventHandler) {
+	w.typeSystemExtensionEventHandlers.enter = append(w.typeSystemExtensionEventHandlers.enter, h)
+}
+
+// AddTypeSystemExtensionLeaveEventHandler adds an event handler to be called when leaving TypeSystemExtension nodes.
+func (w *Walker) AddTypeSystemExtensionLeaveEventHandler(h TypeSystemExtensionEventHandler) {
+	w.typeSystemExtensionEventHandlers.leave = append(w.typeSystemExtensionEventHandlers.leave, h)
+}
+
+// OnTypeSystemExtensionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnTypeSystemExtensionEnter(ctx *Context, tse *ast.TypeSystemExtension) {
+	for _, handler := range w.typeSystemExtensionEventHandlers.enter {
+		handler(ctx, tse)
+	}
+}
+
+// OnTypeSystemExtensionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnTypeSystemExtensionLeave(ctx *Context, tse *ast.TypeSystemExtension) {
+	for _, handler := range w.typeSystemExtensionEventHandlers.leave {
+		handler(ctx, tse)
+	}
+}
+
+// walkTypeSystemExtension ...
+func (w *Walker) walkTypeSystemExtension(ctx *Context, tse *ast.TypeSystemExtension) {
+	w.OnTypeSystemExtensionEnter(ctx, tse)
+	switch tse.Kind {
+	case ast.TypeSystemExtensionKindSchema:
+		w.walkSchemaExtension(ctx, tse.SchemaExtension)
+	case ast.TypeSystemExtensionKindType:
+		w.walkTypeExtension(ctx, tse.TypeExtension)
+	}
+	w.OnTypeSystemExtensionLeave(ctx, tse)
+}
+
+// InputValueDefinitionsEventHandler function can handle enter/leave events for InputValueDefinitions.
+type InputValueDefinitionsEventHandler func(*Context, *ast.InputValueDefinitions)
+
+// InputValueDefinitionsEventHandlers stores the enter and leave events handlers.
+type InputValueDefinitionsEventHandlers struct {
+	enter []InputValueDefinitionsEventHandler
+	leave []InputValueDefinitionsEventHandler
+}
+
+// AddInputValueDefinitionsEnterEventHandler adds an event handler to be called when entering InputValueDefinitions nodes.
+func (w *Walker) AddInputValueDefinitionsEnterEventHandler(h InputValueDefinitionsEventHandler) {
+	w.inputValueDefinitionsEventHandlers.enter = append(w.inputValueDefinitionsEventHandlers.enter, h)
+}
+
+// AddInputValueDefinitionsLeaveEventHandler adds an event handler to be called when leaving InputValueDefinitions nodes.
+func (w *Walker) AddInputValueDefinitionsLeaveEventHandler(h InputValueDefinitionsEventHandler) {
+	w.inputValueDefinitionsEventHandlers.leave = append(w.inputValueDefinitionsEventHandlers.leave, h)
+}
+
+// OnInputValueDefinitionsEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnInputValueDefinitionsEnter(ctx *Context, ivds *ast.InputValueDefinitions) {
+	for _, handler := range w.inputValueDefinitionsEventHandlers.enter {
+		handler(ctx, ivds)
+	}
+}
+
+// OnInputValueDefinitionsLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnInputValueDefinitionsLeave(ctx *Context, ivds *ast.InputValueDefinitions) {
+	for _, handler := range w.inputValueDefinitionsEventHandlers.leave {
+		handler(ctx, ivds)
+	}
+}
+
+// walkInputValueDefinitions ...
+func (w *Walker) walkInputValueDefinitions(ctx *Context, ivds *ast.InputValueDefinitions) {
+	w.OnInputValueDefinitionsEnter(ctx, ivds)
+	ivds.ForEach(func(ivd ast.InputValueDefinition, i int) {
+		w.walkInputValueDefinition(ctx, ivd)
+	})
+	w.OnInputValueDefinitionsLeave(ctx, ivds)
+}
+
+// SchemaExtensionEventHandler function can handle enter/leave events for SchemaExtension.
+type SchemaExtensionEventHandler func(*Context, *ast.SchemaExtension)
+
+// SchemaExtensionEventHandlers stores the enter and leave events handlers.
+type SchemaExtensionEventHandlers struct {
+	enter []SchemaExtensionEventHandler
+	leave []SchemaExtensionEventHandler
+}
+
+// AddSchemaExtensionEnterEventHandler adds an event handler to be called when entering SchemaExtension nodes.
+func (w *Walker) AddSchemaExtensionEnterEventHandler(h SchemaExtensionEventHandler) {
+	w.schemaExtensionEventHandlers.enter = append(w.schemaExtensionEventHandlers.enter, h)
+}
+
+// AddSchemaExtensionLeaveEventHandler adds an event handler to be called when leaving SchemaExtension nodes.
+func (w *Walker) AddSchemaExtensionLeaveEventHandler(h SchemaExtensionEventHandler) {
+	w.schemaExtensionEventHandlers.leave = append(w.schemaExtensionEventHandlers.leave, h)
+}
+
+// OnSchemaExtensionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnSchemaExtensionEnter(ctx *Context, se *ast.SchemaExtension) {
+	for _, handler := range w.schemaExtensionEventHandlers.enter {
+		handler(ctx, se)
+	}
+}
+
+// OnSchemaExtensionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnSchemaExtensionLeave(ctx *Context, se *ast.SchemaExtension) {
+	for _, handler := range w.schemaExtensionEventHandlers.leave {
+		handler(ctx, se)
+	}
+}
+
+// walkSchemaExtension ...
+func (w *Walker) walkSchemaExtension(ctx *Context, se *ast.SchemaExtension) {
+	w.OnSchemaExtensionEnter(ctx, se)
+	w.walkDirectives(ctx, se.Directives)
+	w.walkOperationTypeDefinitions(ctx, se.OperationTypeDefinitions)
+	w.OnSchemaExtensionLeave(ctx, se)
+}
+
+// DocumentEventHandler function can handle enter/leave events for Document.
+type DocumentEventHandler func(*Context, ast.Document)
+
+// DocumentEventHandlers stores the enter and leave events handlers.
+type DocumentEventHandlers struct {
+	enter []DocumentEventHandler
+	leave []DocumentEventHandler
+}
+
+// AddDocumentEnterEventHandler adds an event handler to be called when entering Document nodes.
+func (w *Walker) AddDocumentEnterEventHandler(h DocumentEventHandler) {
+	w.documentEventHandlers.enter = append(w.documentEventHandlers.enter, h)
+}
+
+// AddDocumentLeaveEventHandler adds an event handler to be called when leaving Document nodes.
+func (w *Walker) AddDocumentLeaveEventHandler(h DocumentEventHandler) {
+	w.documentEventHandlers.leave = append(w.documentEventHandlers.leave, h)
+}
+
+// OnDocumentEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnDocumentEnter(ctx *Context, d ast.Document) {
+	for _, handler := range w.documentEventHandlers.enter {
+		handler(ctx, d)
+	}
+}
+
+// OnDocumentLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnDocumentLeave(ctx *Context, d ast.Document) {
+	for _, handler := range w.documentEventHandlers.leave {
+		handler(ctx, d)
+	}
+}
+
+// walkDocument ...
+func (w *Walker) walkDocument(ctx *Context, d ast.Document) {
+	w.OnDocumentEnter(ctx, d)
+	w.walkDefinitions(ctx, d.Definitions)
+	w.OnDocumentLeave(ctx, d)
+}
+
+// TypeSystemDefinitionEventHandler function can handle enter/leave events for TypeSystemDefinition.
+type TypeSystemDefinitionEventHandler func(*Context, *ast.TypeSystemDefinition)
+
+// TypeSystemDefinitionEventHandlers stores the enter and leave events handlers.
+type TypeSystemDefinitionEventHandlers struct {
+	enter []TypeSystemDefinitionEventHandler
+	leave []TypeSystemDefinitionEventHandler
+}
+
+// AddTypeSystemDefinitionEnterEventHandler adds an event handler to be called when entering TypeSystemDefinition nodes.
+func (w *Walker) AddTypeSystemDefinitionEnterEventHandler(h TypeSystemDefinitionEventHandler) {
+	w.typeSystemDefinitionEventHandlers.enter = append(w.typeSystemDefinitionEventHandlers.enter, h)
+}
+
+// AddTypeSystemDefinitionLeaveEventHandler adds an event handler to be called when leaving TypeSystemDefinition nodes.
+func (w *Walker) AddTypeSystemDefinitionLeaveEventHandler(h TypeSystemDefinitionEventHandler) {
+	w.typeSystemDefinitionEventHandlers.leave = append(w.typeSystemDefinitionEventHandlers.leave, h)
+}
+
+// OnTypeSystemDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnTypeSystemDefinitionEnter(ctx *Context, tsd *ast.TypeSystemDefinition) {
+	for _, handler := range w.typeSystemDefinitionEventHandlers.enter {
+		handler(ctx, tsd)
+	}
+}
+
+// OnTypeSystemDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnTypeSystemDefinitionLeave(ctx *Context, tsd *ast.TypeSystemDefinition) {
+	for _, handler := range w.typeSystemDefinitionEventHandlers.leave {
+		handler(ctx, tsd)
+	}
+}
+
+// walkTypeSystemDefinition ...
+func (w *Walker) walkTypeSystemDefinition(ctx *Context, tsd *ast.TypeSystemDefinition) {
+	w.OnTypeSystemDefinitionEnter(ctx, tsd)
+	switch tsd.Kind {
+	case ast.TypeSystemDefinitionKindSchema:
+		w.walkSchemaDefinition(ctx, tsd.SchemaDefinition)
+	case ast.TypeSystemDefinitionKindType:
+		w.walkTypeDefinition(ctx, tsd.TypeDefinition)
+	case ast.TypeSystemDefinitionKindDirective:
+		w.walkDirectiveDefinition(ctx, tsd.DirectiveDefinition)
+	}
+	w.OnTypeSystemDefinitionLeave(ctx, tsd)
+}
+
+// OperationTypeDefinitionsEventHandler function can handle enter/leave events for OperationTypeDefinitions.
+type OperationTypeDefinitionsEventHandler func(*Context, *ast.OperationTypeDefinitions)
+
+// OperationTypeDefinitionsEventHandlers stores the enter and leave events handlers.
+type OperationTypeDefinitionsEventHandlers struct {
+	enter []OperationTypeDefinitionsEventHandler
+	leave []OperationTypeDefinitionsEventHandler
+}
+
+// AddOperationTypeDefinitionsEnterEventHandler adds an event handler to be called when entering OperationTypeDefinitions nodes.
+func (w *Walker) AddOperationTypeDefinitionsEnterEventHandler(h OperationTypeDefinitionsEventHandler) {
+	w.operationTypeDefinitionsEventHandlers.enter = append(w.operationTypeDefinitionsEventHandlers.enter, h)
+}
+
+// AddOperationTypeDefinitionsLeaveEventHandler adds an event handler to be called when leaving OperationTypeDefinitions nodes.
+func (w *Walker) AddOperationTypeDefinitionsLeaveEventHandler(h OperationTypeDefinitionsEventHandler) {
+	w.operationTypeDefinitionsEventHandlers.leave = append(w.operationTypeDefinitionsEventHandlers.leave, h)
+}
+
+// OnOperationTypeDefinitionsEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnOperationTypeDefinitionsEnter(ctx *Context, otds *ast.OperationTypeDefinitions) {
+	for _, handler := range w.operationTypeDefinitionsEventHandlers.enter {
+		handler(ctx, otds)
+	}
+}
+
+// OnOperationTypeDefinitionsLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnOperationTypeDefinitionsLeave(ctx *Context, otds *ast.OperationTypeDefinitions) {
+	for _, handler := range w.operationTypeDefinitionsEventHandlers.leave {
+		handler(ctx, otds)
+	}
+}
+
+// walkOperationTypeDefinitions ...
+func (w *Walker) walkOperationTypeDefinitions(ctx *Context, otds *ast.OperationTypeDefinitions) {
+	w.OnOperationTypeDefinitionsEnter(ctx, otds)
+	otds.ForEach(func(otd ast.OperationTypeDefinition, i int) {
+		w.walkOperationTypeDefinition(ctx, otd)
+	})
+	w.OnOperationTypeDefinitionsLeave(ctx, otds)
+}
+
+// SchemaDefinitionEventHandler function can handle enter/leave events for SchemaDefinition.
+type SchemaDefinitionEventHandler func(*Context, *ast.SchemaDefinition)
+
+// SchemaDefinitionEventHandlers stores the enter and leave events handlers.
+type SchemaDefinitionEventHandlers struct {
+	enter []SchemaDefinitionEventHandler
+	leave []SchemaDefinitionEventHandler
+}
+
+// AddSchemaDefinitionEnterEventHandler adds an event handler to be called when entering SchemaDefinition nodes.
+func (w *Walker) AddSchemaDefinitionEnterEventHandler(h SchemaDefinitionEventHandler) {
+	w.schemaDefinitionEventHandlers.enter = append(w.schemaDefinitionEventHandlers.enter, h)
+}
+
+// AddSchemaDefinitionLeaveEventHandler adds an event handler to be called when leaving SchemaDefinition nodes.
+func (w *Walker) AddSchemaDefinitionLeaveEventHandler(h SchemaDefinitionEventHandler) {
+	w.schemaDefinitionEventHandlers.leave = append(w.schemaDefinitionEventHandlers.leave, h)
+}
+
+// OnSchemaDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnSchemaDefinitionEnter(ctx *Context, sd *ast.SchemaDefinition) {
+	for _, handler := range w.schemaDefinitionEventHandlers.enter {
+		handler(ctx, sd)
+	}
+}
+
+// OnSchemaDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnSchemaDefinitionLeave(ctx *Context, sd *ast.SchemaDefinition) {
+	for _, handler := range w.schemaDefinitionEventHandlers.leave {
+		handler(ctx, sd)
+	}
+}
+
+// walkSchemaDefinition ...
+func (w *Walker) walkSchemaDefinition(ctx *Context, sd *ast.SchemaDefinition) {
+	w.OnSchemaDefinitionEnter(ctx, sd)
+	w.walkDirectives(ctx, sd.Directives)
+	w.walkRootOperationTypeDefinitions(ctx, sd.RootOperationTypeDefinitions)
+	w.OnSchemaDefinitionLeave(ctx, sd)
 }
 
 // TypeDefinitionEventHandler function can handle enter/leave events for TypeDefinition.
@@ -1317,96 +1213,264 @@ func (w *Walker) walkTypeExtension(ctx *Context, te *ast.TypeExtension) {
 	w.OnTypeExtensionLeave(ctx, te)
 }
 
-// TypeSystemDefinitionEventHandler function can handle enter/leave events for TypeSystemDefinition.
-type TypeSystemDefinitionEventHandler func(*Context, *ast.TypeSystemDefinition)
+// VariableDefinitionsEventHandler function can handle enter/leave events for VariableDefinitions.
+type VariableDefinitionsEventHandler func(*Context, *ast.VariableDefinitions)
 
-// TypeSystemDefinitionEventHandlers stores the enter and leave events handlers.
-type TypeSystemDefinitionEventHandlers struct {
-	enter []TypeSystemDefinitionEventHandler
-	leave []TypeSystemDefinitionEventHandler
+// VariableDefinitionsEventHandlers stores the enter and leave events handlers.
+type VariableDefinitionsEventHandlers struct {
+	enter []VariableDefinitionsEventHandler
+	leave []VariableDefinitionsEventHandler
 }
 
-// AddTypeSystemDefinitionEnterEventHandler adds an event handler to be called when entering TypeSystemDefinition nodes.
-func (w *Walker) AddTypeSystemDefinitionEnterEventHandler(h TypeSystemDefinitionEventHandler) {
-	w.typeSystemDefinitionEventHandlers.enter = append(w.typeSystemDefinitionEventHandlers.enter, h)
+// AddVariableDefinitionsEnterEventHandler adds an event handler to be called when entering VariableDefinitions nodes.
+func (w *Walker) AddVariableDefinitionsEnterEventHandler(h VariableDefinitionsEventHandler) {
+	w.variableDefinitionsEventHandlers.enter = append(w.variableDefinitionsEventHandlers.enter, h)
 }
 
-// AddTypeSystemDefinitionLeaveEventHandler adds an event handler to be called when leaving TypeSystemDefinition nodes.
-func (w *Walker) AddTypeSystemDefinitionLeaveEventHandler(h TypeSystemDefinitionEventHandler) {
-	w.typeSystemDefinitionEventHandlers.leave = append(w.typeSystemDefinitionEventHandlers.leave, h)
+// AddVariableDefinitionsLeaveEventHandler adds an event handler to be called when leaving VariableDefinitions nodes.
+func (w *Walker) AddVariableDefinitionsLeaveEventHandler(h VariableDefinitionsEventHandler) {
+	w.variableDefinitionsEventHandlers.leave = append(w.variableDefinitionsEventHandlers.leave, h)
 }
 
-// OnTypeSystemDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypeSystemDefinitionEnter(ctx *Context, tsd *ast.TypeSystemDefinition) {
-	for _, handler := range w.typeSystemDefinitionEventHandlers.enter {
-		handler(ctx, tsd)
+// OnVariableDefinitionsEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnVariableDefinitionsEnter(ctx *Context, vds *ast.VariableDefinitions) {
+	for _, handler := range w.variableDefinitionsEventHandlers.enter {
+		handler(ctx, vds)
 	}
 }
 
-// OnTypeSystemDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypeSystemDefinitionLeave(ctx *Context, tsd *ast.TypeSystemDefinition) {
-	for _, handler := range w.typeSystemDefinitionEventHandlers.leave {
-		handler(ctx, tsd)
+// OnVariableDefinitionsLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnVariableDefinitionsLeave(ctx *Context, vds *ast.VariableDefinitions) {
+	for _, handler := range w.variableDefinitionsEventHandlers.leave {
+		handler(ctx, vds)
 	}
 }
 
-// walkTypeSystemDefinition ...
-func (w *Walker) walkTypeSystemDefinition(ctx *Context, tsd *ast.TypeSystemDefinition) {
-	w.OnTypeSystemDefinitionEnter(ctx, tsd)
-	switch tsd.Kind {
-	case ast.TypeSystemDefinitionKindSchema:
-		w.walkSchemaDefinition(ctx, tsd.SchemaDefinition)
-	case ast.TypeSystemDefinitionKindType:
-		w.walkTypeDefinition(ctx, tsd.TypeDefinition)
-	case ast.TypeSystemDefinitionKindDirective:
-		w.walkDirectiveDefinition(ctx, tsd.DirectiveDefinition)
-	}
-	w.OnTypeSystemDefinitionLeave(ctx, tsd)
+// walkVariableDefinitions ...
+func (w *Walker) walkVariableDefinitions(ctx *Context, vds *ast.VariableDefinitions) {
+	w.OnVariableDefinitionsEnter(ctx, vds)
+	vds.ForEach(func(vd ast.VariableDefinition, i int) {
+		w.walkVariableDefinition(ctx, vd)
+	})
+	w.OnVariableDefinitionsLeave(ctx, vds)
 }
 
-// TypeSystemExtensionEventHandler function can handle enter/leave events for TypeSystemExtension.
-type TypeSystemExtensionEventHandler func(*Context, *ast.TypeSystemExtension)
+// ExecutableDefinitionEventHandler function can handle enter/leave events for ExecutableDefinition.
+type ExecutableDefinitionEventHandler func(*Context, *ast.ExecutableDefinition)
 
-// TypeSystemExtensionEventHandlers stores the enter and leave events handlers.
-type TypeSystemExtensionEventHandlers struct {
-	enter []TypeSystemExtensionEventHandler
-	leave []TypeSystemExtensionEventHandler
+// ExecutableDefinitionEventHandlers stores the enter and leave events handlers.
+type ExecutableDefinitionEventHandlers struct {
+	enter []ExecutableDefinitionEventHandler
+	leave []ExecutableDefinitionEventHandler
 }
 
-// AddTypeSystemExtensionEnterEventHandler adds an event handler to be called when entering TypeSystemExtension nodes.
-func (w *Walker) AddTypeSystemExtensionEnterEventHandler(h TypeSystemExtensionEventHandler) {
-	w.typeSystemExtensionEventHandlers.enter = append(w.typeSystemExtensionEventHandlers.enter, h)
+// AddExecutableDefinitionEnterEventHandler adds an event handler to be called when entering ExecutableDefinition nodes.
+func (w *Walker) AddExecutableDefinitionEnterEventHandler(h ExecutableDefinitionEventHandler) {
+	w.executableDefinitionEventHandlers.enter = append(w.executableDefinitionEventHandlers.enter, h)
 }
 
-// AddTypeSystemExtensionLeaveEventHandler adds an event handler to be called when leaving TypeSystemExtension nodes.
-func (w *Walker) AddTypeSystemExtensionLeaveEventHandler(h TypeSystemExtensionEventHandler) {
-	w.typeSystemExtensionEventHandlers.leave = append(w.typeSystemExtensionEventHandlers.leave, h)
+// AddExecutableDefinitionLeaveEventHandler adds an event handler to be called when leaving ExecutableDefinition nodes.
+func (w *Walker) AddExecutableDefinitionLeaveEventHandler(h ExecutableDefinitionEventHandler) {
+	w.executableDefinitionEventHandlers.leave = append(w.executableDefinitionEventHandlers.leave, h)
 }
 
-// OnTypeSystemExtensionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnTypeSystemExtensionEnter(ctx *Context, tse *ast.TypeSystemExtension) {
-	for _, handler := range w.typeSystemExtensionEventHandlers.enter {
-		handler(ctx, tse)
+// OnExecutableDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnExecutableDefinitionEnter(ctx *Context, ed *ast.ExecutableDefinition) {
+	for _, handler := range w.executableDefinitionEventHandlers.enter {
+		handler(ctx, ed)
 	}
 }
 
-// OnTypeSystemExtensionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnTypeSystemExtensionLeave(ctx *Context, tse *ast.TypeSystemExtension) {
-	for _, handler := range w.typeSystemExtensionEventHandlers.leave {
-		handler(ctx, tse)
+// OnExecutableDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnExecutableDefinitionLeave(ctx *Context, ed *ast.ExecutableDefinition) {
+	for _, handler := range w.executableDefinitionEventHandlers.leave {
+		handler(ctx, ed)
 	}
 }
 
-// walkTypeSystemExtension ...
-func (w *Walker) walkTypeSystemExtension(ctx *Context, tse *ast.TypeSystemExtension) {
-	w.OnTypeSystemExtensionEnter(ctx, tse)
-	switch tse.Kind {
-	case ast.TypeSystemExtensionKindSchema:
-		w.walkSchemaExtension(ctx, tse.SchemaExtension)
-	case ast.TypeSystemExtensionKindType:
-		w.walkTypeExtension(ctx, tse.TypeExtension)
+// walkExecutableDefinition ...
+func (w *Walker) walkExecutableDefinition(ctx *Context, ed *ast.ExecutableDefinition) {
+	w.OnExecutableDefinitionEnter(ctx, ed)
+	switch ed.Kind {
+	case ast.ExecutableDefinitionKindOperation:
+		w.walkOperationDefinition(ctx, ed.OperationDefinition)
+	case ast.ExecutableDefinitionKindFragment:
+		w.walkFragmentDefinition(ctx, ed.FragmentDefinition)
 	}
-	w.OnTypeSystemExtensionLeave(ctx, tse)
+	w.OnExecutableDefinitionLeave(ctx, ed)
+}
+
+// SelectionEventHandler function can handle enter/leave events for Selection.
+type SelectionEventHandler func(*Context, ast.Selection)
+
+// SelectionEventHandlers stores the enter and leave events handlers.
+type SelectionEventHandlers struct {
+	enter []SelectionEventHandler
+	leave []SelectionEventHandler
+}
+
+// AddSelectionEnterEventHandler adds an event handler to be called when entering Selection nodes.
+func (w *Walker) AddSelectionEnterEventHandler(h SelectionEventHandler) {
+	w.selectionEventHandlers.enter = append(w.selectionEventHandlers.enter, h)
+}
+
+// AddSelectionLeaveEventHandler adds an event handler to be called when leaving Selection nodes.
+func (w *Walker) AddSelectionLeaveEventHandler(h SelectionEventHandler) {
+	w.selectionEventHandlers.leave = append(w.selectionEventHandlers.leave, h)
+}
+
+// OnSelectionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnSelectionEnter(ctx *Context, s ast.Selection) {
+	for _, handler := range w.selectionEventHandlers.enter {
+		handler(ctx, s)
+	}
+}
+
+// OnSelectionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnSelectionLeave(ctx *Context, s ast.Selection) {
+	for _, handler := range w.selectionEventHandlers.leave {
+		handler(ctx, s)
+	}
+}
+
+// walkSelection ...
+func (w *Walker) walkSelection(ctx *Context, s ast.Selection) {
+	w.OnSelectionEnter(ctx, s)
+	switch s.Kind {
+	case ast.SelectionKindField:
+		w.walkFieldSelection(ctx, s)
+	case ast.SelectionKindFragmentSpread:
+		w.walkFragmentSpreadSelection(ctx, s)
+	case ast.SelectionKindInlineFragment:
+		w.walkInlineFragmentSelection(ctx, s)
+	}
+	w.OnSelectionLeave(ctx, s)
+}
+
+// InputValueDefinitionEventHandler function can handle enter/leave events for InputValueDefinition.
+type InputValueDefinitionEventHandler func(*Context, ast.InputValueDefinition)
+
+// InputValueDefinitionEventHandlers stores the enter and leave events handlers.
+type InputValueDefinitionEventHandlers struct {
+	enter []InputValueDefinitionEventHandler
+	leave []InputValueDefinitionEventHandler
+}
+
+// AddInputValueDefinitionEnterEventHandler adds an event handler to be called when entering InputValueDefinition nodes.
+func (w *Walker) AddInputValueDefinitionEnterEventHandler(h InputValueDefinitionEventHandler) {
+	w.inputValueDefinitionEventHandlers.enter = append(w.inputValueDefinitionEventHandlers.enter, h)
+}
+
+// AddInputValueDefinitionLeaveEventHandler adds an event handler to be called when leaving InputValueDefinition nodes.
+func (w *Walker) AddInputValueDefinitionLeaveEventHandler(h InputValueDefinitionEventHandler) {
+	w.inputValueDefinitionEventHandlers.leave = append(w.inputValueDefinitionEventHandlers.leave, h)
+}
+
+// OnInputValueDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnInputValueDefinitionEnter(ctx *Context, ivd ast.InputValueDefinition) {
+	for _, handler := range w.inputValueDefinitionEventHandlers.enter {
+		handler(ctx, ivd)
+	}
+}
+
+// OnInputValueDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnInputValueDefinitionLeave(ctx *Context, ivd ast.InputValueDefinition) {
+	for _, handler := range w.inputValueDefinitionEventHandlers.leave {
+		handler(ctx, ivd)
+	}
+}
+
+// walkInputValueDefinition ...
+func (w *Walker) walkInputValueDefinition(ctx *Context, ivd ast.InputValueDefinition) {
+	w.OnInputValueDefinitionEnter(ctx, ivd)
+	w.walkType(ctx, ivd.Type)
+	w.walkDirectives(ctx, ivd.Directives)
+	w.walkValue(ctx, ivd.DefaultValue)
+	w.OnInputValueDefinitionLeave(ctx, ivd)
+}
+
+// DefinitionsEventHandler function can handle enter/leave events for Definitions.
+type DefinitionsEventHandler func(*Context, *ast.Definitions)
+
+// DefinitionsEventHandlers stores the enter and leave events handlers.
+type DefinitionsEventHandlers struct {
+	enter []DefinitionsEventHandler
+	leave []DefinitionsEventHandler
+}
+
+// AddDefinitionsEnterEventHandler adds an event handler to be called when entering Definitions nodes.
+func (w *Walker) AddDefinitionsEnterEventHandler(h DefinitionsEventHandler) {
+	w.definitionsEventHandlers.enter = append(w.definitionsEventHandlers.enter, h)
+}
+
+// AddDefinitionsLeaveEventHandler adds an event handler to be called when leaving Definitions nodes.
+func (w *Walker) AddDefinitionsLeaveEventHandler(h DefinitionsEventHandler) {
+	w.definitionsEventHandlers.leave = append(w.definitionsEventHandlers.leave, h)
+}
+
+// OnDefinitionsEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnDefinitionsEnter(ctx *Context, ds *ast.Definitions) {
+	for _, handler := range w.definitionsEventHandlers.enter {
+		handler(ctx, ds)
+	}
+}
+
+// OnDefinitionsLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnDefinitionsLeave(ctx *Context, ds *ast.Definitions) {
+	for _, handler := range w.definitionsEventHandlers.leave {
+		handler(ctx, ds)
+	}
+}
+
+// walkDefinitions ...
+func (w *Walker) walkDefinitions(ctx *Context, ds *ast.Definitions) {
+	w.OnDefinitionsEnter(ctx, ds)
+	ds.ForEach(func(d ast.Definition, i int) {
+		w.walkDefinition(ctx, d)
+	})
+	w.OnDefinitionsLeave(ctx, ds)
+}
+
+// TypesEventHandler function can handle enter/leave events for Types.
+type TypesEventHandler func(*Context, *ast.Types)
+
+// TypesEventHandlers stores the enter and leave events handlers.
+type TypesEventHandlers struct {
+	enter []TypesEventHandler
+	leave []TypesEventHandler
+}
+
+// AddTypesEnterEventHandler adds an event handler to be called when entering Types nodes.
+func (w *Walker) AddTypesEnterEventHandler(h TypesEventHandler) {
+	w.typesEventHandlers.enter = append(w.typesEventHandlers.enter, h)
+}
+
+// AddTypesLeaveEventHandler adds an event handler to be called when leaving Types nodes.
+func (w *Walker) AddTypesLeaveEventHandler(h TypesEventHandler) {
+	w.typesEventHandlers.leave = append(w.typesEventHandlers.leave, h)
+}
+
+// OnTypesEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnTypesEnter(ctx *Context, ts *ast.Types) {
+	for _, handler := range w.typesEventHandlers.enter {
+		handler(ctx, ts)
+	}
+}
+
+// OnTypesLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnTypesLeave(ctx *Context, ts *ast.Types) {
+	for _, handler := range w.typesEventHandlers.leave {
+		handler(ctx, ts)
+	}
+}
+
+// walkTypes ...
+func (w *Walker) walkTypes(ctx *Context, ts *ast.Types) {
+	w.OnTypesEnter(ctx, ts)
+	ts.ForEach(func(t ast.Type, i int) {
+		w.walkType(ctx, t)
+	})
+	w.OnTypesLeave(ctx, ts)
 }
 
 // ValueEventHandler function can handle enter/leave events for Value.
@@ -1468,83 +1532,42 @@ func (w *Walker) walkValue(ctx *Context, v ast.Value) {
 	w.OnValueLeave(ctx, v)
 }
 
-// VariableDefinitionsEventHandler function can handle enter/leave events for VariableDefinitions.
-type VariableDefinitionsEventHandler func(*Context, *ast.VariableDefinitions)
+// RootOperationTypeDefinitionEventHandler function can handle enter/leave events for RootOperationTypeDefinition.
+type RootOperationTypeDefinitionEventHandler func(*Context, ast.RootOperationTypeDefinition)
 
-// VariableDefinitionsEventHandlers stores the enter and leave events handlers.
-type VariableDefinitionsEventHandlers struct {
-	enter []VariableDefinitionsEventHandler
-	leave []VariableDefinitionsEventHandler
+// RootOperationTypeDefinitionEventHandlers stores the enter and leave events handlers.
+type RootOperationTypeDefinitionEventHandlers struct {
+	enter []RootOperationTypeDefinitionEventHandler
+	leave []RootOperationTypeDefinitionEventHandler
 }
 
-// AddVariableDefinitionsEnterEventHandler adds an event handler to be called when entering VariableDefinitions nodes.
-func (w *Walker) AddVariableDefinitionsEnterEventHandler(h VariableDefinitionsEventHandler) {
-	w.variableDefinitionsEventHandlers.enter = append(w.variableDefinitionsEventHandlers.enter, h)
+// AddRootOperationTypeDefinitionEnterEventHandler adds an event handler to be called when entering RootOperationTypeDefinition nodes.
+func (w *Walker) AddRootOperationTypeDefinitionEnterEventHandler(h RootOperationTypeDefinitionEventHandler) {
+	w.rootOperationTypeDefinitionEventHandlers.enter = append(w.rootOperationTypeDefinitionEventHandlers.enter, h)
 }
 
-// AddVariableDefinitionsLeaveEventHandler adds an event handler to be called when leaving VariableDefinitions nodes.
-func (w *Walker) AddVariableDefinitionsLeaveEventHandler(h VariableDefinitionsEventHandler) {
-	w.variableDefinitionsEventHandlers.leave = append(w.variableDefinitionsEventHandlers.leave, h)
+// AddRootOperationTypeDefinitionLeaveEventHandler adds an event handler to be called when leaving RootOperationTypeDefinition nodes.
+func (w *Walker) AddRootOperationTypeDefinitionLeaveEventHandler(h RootOperationTypeDefinitionEventHandler) {
+	w.rootOperationTypeDefinitionEventHandlers.leave = append(w.rootOperationTypeDefinitionEventHandlers.leave, h)
 }
 
-// OnVariableDefinitionsEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnVariableDefinitionsEnter(ctx *Context, vds *ast.VariableDefinitions) {
-	for _, handler := range w.variableDefinitionsEventHandlers.enter {
-		handler(ctx, vds)
+// OnRootOperationTypeDefinitionEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnRootOperationTypeDefinitionEnter(ctx *Context, rotd ast.RootOperationTypeDefinition) {
+	for _, handler := range w.rootOperationTypeDefinitionEventHandlers.enter {
+		handler(ctx, rotd)
 	}
 }
 
-// OnVariableDefinitionsLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnVariableDefinitionsLeave(ctx *Context, vds *ast.VariableDefinitions) {
-	for _, handler := range w.variableDefinitionsEventHandlers.leave {
-		handler(ctx, vds)
+// OnRootOperationTypeDefinitionLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnRootOperationTypeDefinitionLeave(ctx *Context, rotd ast.RootOperationTypeDefinition) {
+	for _, handler := range w.rootOperationTypeDefinitionEventHandlers.leave {
+		handler(ctx, rotd)
 	}
 }
 
-// walkVariableDefinitions ...
-func (w *Walker) walkVariableDefinitions(ctx *Context, vds *ast.VariableDefinitions) {
-	w.OnVariableDefinitionsEnter(ctx, vds)
-	vds.ForEach(func(vd ast.VariableDefinition, i int) {
-		w.walkVariableDefinition(ctx, vd)
-	})
-	w.OnVariableDefinitionsLeave(ctx, vds)
-}
-
-// VariableDefinitionEventHandler function can handle enter/leave events for VariableDefinition.
-type VariableDefinitionEventHandler func(*Context, ast.VariableDefinition)
-
-// VariableDefinitionEventHandlers stores the enter and leave events handlers.
-type VariableDefinitionEventHandlers struct {
-	enter []VariableDefinitionEventHandler
-	leave []VariableDefinitionEventHandler
-}
-
-// AddVariableDefinitionEnterEventHandler adds an event handler to be called when entering VariableDefinition nodes.
-func (w *Walker) AddVariableDefinitionEnterEventHandler(h VariableDefinitionEventHandler) {
-	w.variableDefinitionEventHandlers.enter = append(w.variableDefinitionEventHandlers.enter, h)
-}
-
-// AddVariableDefinitionLeaveEventHandler adds an event handler to be called when leaving VariableDefinition nodes.
-func (w *Walker) AddVariableDefinitionLeaveEventHandler(h VariableDefinitionEventHandler) {
-	w.variableDefinitionEventHandlers.leave = append(w.variableDefinitionEventHandlers.leave, h)
-}
-
-// OnVariableDefinitionEnter calls the enter event handlers registered for this node type.
-func (w *Walker) OnVariableDefinitionEnter(ctx *Context, vd ast.VariableDefinition) {
-	for _, handler := range w.variableDefinitionEventHandlers.enter {
-		handler(ctx, vd)
-	}
-}
-
-// OnVariableDefinitionLeave calls the leave event handlers registered for this node type.
-func (w *Walker) OnVariableDefinitionLeave(ctx *Context, vd ast.VariableDefinition) {
-	for _, handler := range w.variableDefinitionEventHandlers.leave {
-		handler(ctx, vd)
-	}
-}
-
-// walkVariableDefinition ...
-func (w *Walker) walkVariableDefinition(ctx *Context, vd ast.VariableDefinition) {
-	w.OnVariableDefinitionEnter(ctx, vd)
-	w.OnVariableDefinitionLeave(ctx, vd)
+// walkRootOperationTypeDefinition ...
+func (w *Walker) walkRootOperationTypeDefinition(ctx *Context, rotd ast.RootOperationTypeDefinition) {
+	w.OnRootOperationTypeDefinitionEnter(ctx, rotd)
+	w.walkType(ctx, rotd.NamedType)
+	w.OnRootOperationTypeDefinitionLeave(ctx, rotd)
 }
