@@ -1,12 +1,11 @@
 package walker
 
 import (
-	"strings"
+	"fmt"
+	"io"
 	"text/template"
-	"unicode"
 
 	"github.com/Masterminds/sprig"
-	"github.com/bucketd/go-graphqlparser/tools/walkergen/goast"
 )
 
 // header is a comment placed at the top of the file to signal to other Go tools, and users to not
@@ -26,7 +25,7 @@ import "github.com/bucketd/go-graphqlparser/ast"
 var walkerTypeTmpl = template.Must(template.New("walkerTypeTmpl").Funcs(sprig.TxtFuncMap()).Parse(`
 // Walker holds event handlers for entering and leaving AST nodes.
 type Walker struct { {{- range .}}
-	{{untitle .TypeName}}EventHandlers {{.TypeName}}EventHandlers{{end}}
+	{{untitle .FuncName}}EventHandlers {{.FuncName}}EventHandlers{{end}}
 }
 
 // NewWalker returns a new Walker instance.
@@ -38,102 +37,192 @@ func NewWalker(rules []RuleFunc) *Walker {
 
 	return walker
 }
+
+// Walk traverses an entire AST document for the purposes of validation.
+func (w *Walker) Walk(ctx *Context, doc ast.Document) {
+	w.walkDocument(ctx, doc)
+}
 `))
 
 // eventHandlersTmpl is the template used to generate the event handler functions for the walker,
 // and the corresponding types that have the event handler functions attached.
 var eventHandlersTmpl = template.Must(template.New("eventHandlersTmpl").Funcs(sprig.TxtFuncMap()).Parse(`
-// {{.TypeName}}EventHandler function can handle enter/leave events for {{.TypeName}}.
-type {{.TypeName}}EventHandler func(*Context, {{if .IsPointer}}*{{end}}ast.{{.TypeName}})
+// {{.FuncName}}EventHandler function can handle enter/leave events for {{.FuncName}}.
+type {{.FuncName}}EventHandler func(*Context, {{if .IsAlwaysPointer}}*{{end}}ast.{{.TypeName}})
 
-// {{.TypeName}}EventHandlers stores the enter and leave events handlers.
-type {{.TypeName}}EventHandlers struct {
-	enter []{{.TypeName}}EventHandler
-	leave []{{.TypeName}}EventHandler
+// {{.FuncName}}EventHandlers stores the enter and leave events handlers.
+type {{.FuncName}}EventHandlers struct {
+	enter []{{.FuncName}}EventHandler
+	leave []{{.FuncName}}EventHandler
 }
 
-// Add{{.TypeName}}EnterEventHandler adds an event handler to be called when entering {{.TypeName}} nodes.
-func (w *Walker) Add{{.TypeName}}EnterEventHandler(h {{.TypeName}}EventHandler) {
-	w.{{untitle .TypeName}}EventHandlers.enter = append(w.{{untitle .TypeName}}EventHandlers.enter, h)
+// Add{{.FuncName}}EnterEventHandler adds an event handler to be called when entering {{.FuncName}} nodes.
+func (w *Walker) Add{{.FuncName}}EnterEventHandler(h {{.FuncName}}EventHandler) {
+	w.{{untitle .FuncName}}EventHandlers.enter = append(w.{{untitle .FuncName}}EventHandlers.enter, h)
 }
 
-// Add{{.TypeName}}LeaveEventHandler adds an event handler to be called when leaving {{.TypeName}} nodes.
-func (w *Walker) Add{{.TypeName}}LeaveEventHandler(h {{.TypeName}}EventHandler) {
-	w.{{untitle .TypeName}}EventHandlers.leave = append(w.{{untitle .TypeName}}EventHandlers.leave, h)
+// Add{{.FuncName}}LeaveEventHandler adds an event handler to be called when leaving {{.FuncName}} nodes.
+func (w *Walker) Add{{.FuncName}}LeaveEventHandler(h {{.FuncName}}EventHandler) {
+	w.{{untitle .FuncName}}EventHandlers.leave = append(w.{{untitle .FuncName}}EventHandlers.leave, h)
 }
 
-// On{{.TypeName}}Enter calls the enter event handlers registered for this node type.
-func (w *Walker) On{{.TypeName}}Enter(ctx *Context, {{.ShortTypeName}} {{if .IsPointer}}*{{end}}ast.{{.TypeName}}) {
-	for _, handler := range w.{{untitle .TypeName}}EventHandlers.enter {
+// On{{.FuncName}}Enter calls the enter event handlers registered for this node type.
+func (w *Walker) On{{.FuncName}}Enter(ctx *Context, {{.ShortTypeName}} {{if .IsAlwaysPointer}}*{{end}}ast.{{.TypeName}}) {
+	for _, handler := range w.{{untitle .FuncName}}EventHandlers.enter {
 		handler(ctx, {{.ShortTypeName}})
 	}
 }
 
-// On{{.TypeName}}Leave calls the leave event handlers registered for this node type.
-func (w *Walker) On{{.TypeName}}Leave(ctx *Context, {{.ShortTypeName}} {{if .IsPointer}}*{{end}}ast.{{.TypeName}}) {
-	for _, handler := range w.{{untitle .TypeName}}EventHandlers.leave {
+// On{{.FuncName}}Leave calls the leave event handlers registered for this node type.
+func (w *Walker) On{{.FuncName}}Leave(ctx *Context, {{.ShortTypeName}} {{if .IsAlwaysPointer}}*{{end}}ast.{{.TypeName}}) {
+	for _, handler := range w.{{untitle .FuncName}}EventHandlers.leave {
 		handler(ctx, {{.ShortTypeName}})
 	}
 }
 `))
 
-// walkFnTmpl is the template for generating a walker function.
-var walkFnTmpl = template.Must(template.New("walkFnTmpl").Funcs(sprig.TxtFuncMap()).Parse(`
-// walk{{.TypeName}} ...
-func (w *Walker) walk{{.TypeName}}(ctx *Context, {{.ShortTypeName}} {{if .IsArray}}[]{{end}}{{if .IsPointer}}*{{end}}ast.{{.TypeName}}) {
-	w.On{{.TypeName}}Enter(ctx, {{.ShortTypeName}})
-	{{if .IsListType}}{{.ShortTypeName}}.ForEach(func({{.NodeType.ShortTypeName}} ast.{{.NodeType.TypeName}}, i int) {
-		w.walk{{.NodeType.TypeName}}(ctx, {{.NodeType.ShortTypeName}})
+// walkFnHeadTmpl is the template for generating the head of a walker function.
+var walkFnHeadTmpl = template.Must(template.New("walkFnHeadTmpl").Funcs(sprig.TxtFuncMap()).Parse(`
+// walk{{.FuncName}} is a function that walks {{.FuncName}} type's AST node.
+func (w *Walker) walk{{.FuncName}}(ctx *Context, {{.ShortTypeName}} {{.FullTypeName}}) {
+	w.On{{.FuncName}}Enter(ctx, {{.ShortTypeName}})
+`))
+
+// walkFnFootTmpl is the template for generating the head of a walker function.
+var walkFnFootTmpl = template.Must(template.New("walkFnFootTmpl").Funcs(sprig.TxtFuncMap()).Parse(`
+	w.On{{.FuncName}}Leave(ctx, {{.ShortTypeName}})
+}
+`))
+
+var walkFnLinkedListTmpl = template.Must(template.New("walkFnLinkedListTmpl").Parse(`
+	{{.ShortTypeName}}.ForEach(func({{.LinkedListType.ShortTypeName}} {{.LinkedListType.FullTypeName}}, i int) {
+		w.walk{{.LinkedListType.FuncName}}(ctx, {{.LinkedListType.ShortTypeName}})
 	})
-	{{else if .Consts}}switch {{.ShortTypeName}}.Kind {
-	{{range .Consts}}case ast.{{.Name}}:
-		{{if ne .Field "self"}}w.walk{{.Field}}(ctx, {{$.ShortTypeName}}.{{.Field}}){{else}}w.walk{{.SelfName}}(ctx, {{$.ShortTypeName}}){{end}}
-	{{end}}}
-	{{else}}
-	{{- $parent := .}}{{range .Fields}}w.walk{{.Type.TypeName}}(ctx, {{$parent.ShortTypeName}}.{{.Name}})
-	{{end}}
-	{{- end -}}
-	w.On{{.TypeName}}Leave(ctx, {{.ShortTypeName}})
-}
 `))
 
-// templateData contains data and methods necessary for populating walker templates.
-type templateData struct {
-	goast.Type
-	// Consts contains the constants related to this type.
-	Consts goast.Consts
-	// Fields ...
-	Fields []field
-	// NodeType is populated if this type is a list type (i.e. IsListType = true).
-	NodeType *templateData
-	// IsListType is true if this type is a linked list type.
-	IsListType bool
-	// IsSwitcher is a type that we need to generate a switch statement for.
-	IsSwitcher bool
-}
+var walkFnKindsTmpl = template.Must(template.New("walkFnKindsTmpl").Parse(`
+	switch {{.ShortTypeName}}.Kind {
+	{{range .Kinds -}}
+	case ast.{{.ConstName}}:
+		w.walk{{.Type.FuncName}}(ctx, {{$.ShortTypeName}}
+			{{- if not .IsSelf -}}
+				.{{.Field.Name}}
+			{{- end -}}
+		)
+	{{end -}}
+	}
+`))
 
-// ShortTypeName returns an abridged version of the embedded type's name.
-func (ttd templateData) ShortTypeName() string {
-	stn := strings.Map(abridger, ttd.TypeName)
-	if ttd.IsListType {
-		return stn + "s"
+// walkerFnTmpl ...
+func walkerFnTmpl(w io.Writer, wt walkerType) error {
+	err := walkFnHeadTmpl.Execute(w, wt)
+	if err != nil {
+		return err
 	}
 
-	return stn
+	if wt.IsLinkedList {
+		err := walkFnLinkedListTmpl.Execute(w, wt)
+		if err != nil {
+			return err
+		}
+	} else if len(wt.Kinds) > 0 {
+		err := walkFnKindsTmpl.Execute(w, wt)
+		if err != nil {
+			return err
+		}
+	} else if len(wt.Fields) > 0 {
+		fmt.Fprintln(w, "")
+		for _, fld := range wt.Fields {
+			needsNilCheck := fld.IsPointerType && !fld.Type.IsAlwaysPointer
+
+			deref := ""
+			indent := "\t"
+			if needsNilCheck {
+				deref = "*"
+				indent += "\t"
+				fmt.Fprintf(w, "\tif %s.%s != nil {\n", wt.ShortTypeName, fld.Name)
+			}
+
+			fmt.Fprintf(w, "%sw.walk%s(ctx, %s%s.%s)\n", indent, fld.Type.FuncName, deref, wt.ShortTypeName, fld.Name)
+
+			if needsNilCheck {
+				fmt.Fprintf(w, "\t}\n\n")
+			}
+		}
+	}
+
+	err = walkFnFootTmpl.Execute(w, wt)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// field ...
-type field struct {
+// walkerType holds information about an AST type and is used for generating the walker.
+type walkerType struct {
+	// TypeName is the type name without any decoration (e.g. without `[]`, `*`, and/or `ast.`)
+	TypeName string
+	// FuncName is the name used as the name of the walker function.
+	FuncName string
+	// ShortTypeName is the name that's normally used as a variable name for this type.
+	ShortTypeName string
+	// FullTypeName is the name with all decoration (i.e. with `[]`, `*`, and/or `ast.`)
+	FullTypeName string
+	// Fields is a slice of fields of this type.
+	Fields []walkerTypeField
+	// Kinds is a slice of kinds of this type.
+	Kinds []walkerTypeKind
+	// LinkedListType is set if this type is a linked list type, and contains the node type
+	// information, so that the walk function may be called for the node type.
+	LinkedListType *walkerType
+	// IsAlwaysPointer is true if this type is only ever used as a pointer in the AST. If the value
+	// is always a pointer, we should generate a nil check at the top of the walker, as a pointer
+	// value will be passed in. Otherwise, a nil check will be generated elsewhere.
+	IsAlwaysPointer bool
+	// IsLinkedList is true if this type appears to be a generated linked list type.
+	IsLinkedList bool
+}
+
+// walkerTypeField holds information about a specific field on an AST type that is pertinent to
+// generating part of a walker. Given that walkerTypeFields also have a link to another walkerType,
+// they are only used for non-built-in types (i.e. not string, int, etc.)
+type walkerTypeField struct {
+	// TypeName is the name of this field on the type it belongs to.
 	Name string
-	Type goast.Type
+	// Type holds information about the type that this field refers to.
+	Type walkerType
+	// IsPointerType is true if this field's type is a pointer type. If it is a pointer, we should
+	// check if it is always a pointer. If it is always a pointer, we can just pass it into the
+	// relevant walk function. If not, then we need to do a nil check, then dereference it to pass
+	// it to it's walk function.
+	IsPointerType bool
+	// IsSliceType is true if this field's type is a slice type. If it is a slice type, we should
+	// loop over the slice in this walk function, passing each individual item into a walk function.
+	// A slice may also be nil, so we should also do a nil check.
+	IsSliceType bool
+
+	// isASTType is set to true if the type that this field corresponds to is an AST type, and not
+	// a Go built-in type.
+	isASTType bool
+	// typeName is the name of the type that this field refers to.
+	typeName string
 }
 
-// abridger is a strings.Map function that is used to return a variable name from a type name that
-// makes sense by taking each capital letter from the given string and converting them to lowercase.
-// The input string should start with a capital letter.
-func abridger(r rune) rune {
-	if unicode.IsUpper(r) {
-		return unicode.ToLower(r)
-	}
-	return -1
+// walkerTypeKind holds information about the different "Kinds" related to a type.
+type walkerTypeKind struct {
+	// ConstName is the name of the const used to identify this kind.
+	ConstName string
+	// Type is the type that corresponds to this kind. Even with a "self" kind, we use this for the
+	// walk function name.
+	Type walkerType
+	// Field is the field that corresponds to this kind. The field may be nil, in the case of a self
+	// kind, hence IsSelfKind.
+	Field *walkerTypeField
+	// IsSelf is true if this "Kind" refers to the type that the Kind field is on. If it is false,
+	// then Field should be non-nil.
+	IsSelf bool
+
+	// fieldName is the name of the field that this kind kind corresponds to.
+	fieldName string
 }

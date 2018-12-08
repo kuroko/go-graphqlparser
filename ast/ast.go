@@ -209,11 +209,14 @@ type Value struct {
 	FloatValue float64
 	// StringValue covers variables and enums, enums are names, but not `true`, `false`, or `null`.
 	StringValue  string
-	ListValue    []Value
+	ListValue    ListValue
 	ObjectValue  []ObjectField
 	BooleanValue bool
 	Kind         ValueKind
 }
+
+// @wg:ignore
+type ListValue []Value
 
 // @wg:ignore
 type ObjectField struct {
@@ -423,8 +426,50 @@ type InputValueDefinition struct {
 // 3.13 Directives
 // http://facebook.github.io/graphql/June2018/#sec-Type-System.Directives
 
+var DirectiveLocationsByName = map[string]DirectiveLocations{
+	"QUERY":                  DirectiveLocationKindQuery,
+	"MUTATION":               DirectiveLocationKindMutation,
+	"SUBSCRIPTION":           DirectiveLocationKindSubscription,
+	"FIELD":                  DirectiveLocationKindField,
+	"FRAGMENT_DEFINITION":    DirectiveLocationKindFragmentDefinition,
+	"FRAGMENT_SPREAD":        DirectiveLocationKindFragmentSpread,
+	"INLINE_FRAGMENT":        DirectiveLocationKindInlineFragment,
+	"SCHEMA":                 DirectiveLocationKindSchema,
+	"SCALAR":                 DirectiveLocationKindScalar,
+	"OBJECT":                 DirectiveLocationKindObject,
+	"FIELD_DEFINITION":       DirectiveLocationKindFieldDefinition,
+	"ARGUMENT_DEFINITION":    DirectiveLocationKindArgumentDefinition,
+	"INTERFACE":              DirectiveLocationKindInterface,
+	"UNION":                  DirectiveLocationKindUnion,
+	"ENUM":                   DirectiveLocationKindEnum,
+	"ENUM_VALUE":             DirectiveLocationKindEnumValue,
+	"INPUT_OBJECT":           DirectiveLocationKindInputObject,
+	"INPUT_FIELD_DEFINITION": DirectiveLocationKindInputFieldDefinition,
+}
+
+var NamesByDirectiveLocations = map[DirectiveLocations]string{
+	DirectiveLocationKindQuery:                "QUERY",
+	DirectiveLocationKindMutation:             "MUTATION",
+	DirectiveLocationKindSubscription:         "SUBSCRIPTION",
+	DirectiveLocationKindField:                "FIELD",
+	DirectiveLocationKindFragmentDefinition:   "FRAGMENT_DEFINITION",
+	DirectiveLocationKindFragmentSpread:       "FRAGMENT_SPREAD",
+	DirectiveLocationKindInlineFragment:       "INLINE_FRAGMENT",
+	DirectiveLocationKindSchema:               "SCHEMA",
+	DirectiveLocationKindScalar:               "SCALAR",
+	DirectiveLocationKindObject:               "OBJECT",
+	DirectiveLocationKindFieldDefinition:      "FIELD_DEFINITION",
+	DirectiveLocationKindArgumentDefinition:   "ARGUMENT_DEFINITION",
+	DirectiveLocationKindInterface:            "INTERFACE",
+	DirectiveLocationKindUnion:                "UNION",
+	DirectiveLocationKindEnum:                 "ENUM",
+	DirectiveLocationKindEnumValue:            "ENUM_VALUE",
+	DirectiveLocationKindInputObject:          "INPUT_OBJECT",
+	DirectiveLocationKindInputFieldDefinition: "INPUT_FIELD_DEFINITION",
+}
+
 const (
-	DirectiveLocationKindQuery DirectiveLocation = iota
+	DirectiveLocationKindQuery DirectiveLocations = 1 << iota
 	DirectiveLocationKindMutation
 	DirectiveLocationKindSubscription
 	DirectiveLocationKindField
@@ -444,54 +489,15 @@ const (
 	DirectiveLocationKindInputFieldDefinition
 )
 
-type DirectiveLocation int8
+type DirectiveLocations int32
 
-func (l DirectiveLocation) String() string {
-	switch l {
-	case DirectiveLocationKindQuery:
-		return "QUERY"
-	case DirectiveLocationKindMutation:
-		return "MUTATION"
-	case DirectiveLocationKindSubscription:
-		return "SUBSCRIPTION"
-	case DirectiveLocationKindField:
-		return "FIELD"
-	case DirectiveLocationKindFragmentDefinition:
-		return "FRAGMENT_DEFINITION"
-	case DirectiveLocationKindFragmentSpread:
-		return "FRAGMENT_SPREAD"
-	case DirectiveLocationKindInlineFragment:
-		return "INLINE_FRAGMENT"
-	case DirectiveLocationKindSchema:
-		return "SCHEMA"
-	case DirectiveLocationKindScalar:
-		return "SCALAR"
-	case DirectiveLocationKindObject:
-		return "OBJECT"
-	case DirectiveLocationKindFieldDefinition:
-		return "FIELD_DEFINITION"
-	case DirectiveLocationKindArgumentDefinition:
-		return "ARGUMENT_DEFINITION"
-	case DirectiveLocationKindInterface:
-		return "INTERFACE"
-	case DirectiveLocationKindUnion:
-		return "UNION"
-	case DirectiveLocationKindEnum:
-		return "ENUM"
-	case DirectiveLocationKindEnumValue:
-		return "ENUM_VALUE"
-	case DirectiveLocationKindInputObject:
-		return "INPUT_OBJECT"
-	case DirectiveLocationKindInputFieldDefinition:
-		return "INPUT_FIELD_DEFINITION"
-	}
-
-	return "invalid"
+func (l DirectiveLocations) String() string {
+	return NamesByDirectiveLocations[l]
 }
 
 type DirectiveDefinition struct {
 	Description         string
 	Name                string
 	ArgumentsDefinition *InputValueDefinitions
-	DirectiveLocations  *DirectiveLocations
+	DirectiveLocations  DirectiveLocations
 }

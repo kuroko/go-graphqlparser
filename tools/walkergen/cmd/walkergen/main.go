@@ -44,16 +44,16 @@ func main() {
 
 	symbols := goast.NewSymbolTable()
 
-	err = goast.CreateSymbolTable(astFile, &symbols)
+	err = goast.PopulateSymbolTable(astFile, &symbols)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = goast.CreateSymbolTable(listFile, &symbols)
+	err = goast.PopulateSymbolTable(listFile, &symbols)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Output walker.
-	walker.Generate(os.Stdout, packageName, noImports, &symbols)
+	walker.Generate(os.Stdout, packageName, noImports, symbols)
 }

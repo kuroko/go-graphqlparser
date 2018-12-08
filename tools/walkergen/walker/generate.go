@@ -5,15 +5,37 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
 	"strings"
-	"text/template"
+	"unicode"
 
 	"github.com/bucketd/go-graphqlparser/tools/walkergen/goast"
 	"github.com/davecgh/go-spew/spew"
 )
 
-// TODO: check output.
-func Generate(w io.Writer, packageName string, noImports bool, s *goast.SymbolTable) {
+// Generate ...
+func Generate(w io.Writer, packageName string, noImports bool, st goast.SymbolTable) {
+	// First pass, get walker types for types that are actually defined in the symbol table. The
+	// actual list of walker types will grow once we add the "kind" types later.
+	wts := buildBaseTypes(st)
+
+	// Second pass, now we have all base types, with as much information populated as possible, we
+	// need to attach those types to fields, and kinds.
+	wts = hydrateAllTypes(wts)
+
+	// Third pass, this one adds in the types that aren't actually in the AST, as in, if we have a
+	// "self" kind type, we add all of those types too, so that we do actually generate walker
+	// functions for them.
+	wts = injectSelfKindTypes(wts)
+
+	// Then sort them all into order so that we end up with a consistent result.
+	sort.Slice(wts, func(i, j int) bool {
+		return wts[i].TypeName < wts[j].TypeName
+	})
+
+	// Avoid printing this into generated file.
+	spew.Fdump(os.Stderr, wts)
+
 	// Header and package name
 	fmt.Fprintf(os.Stdout, strings.TrimSpace(header))
 	fmt.Fprintf(os.Stdout, "\npackage %s\n", packageName)
@@ -22,121 +44,298 @@ func Generate(w io.Writer, packageName string, noImports bool, s *goast.SymbolTa
 		fmt.Fprintf(os.Stdout, "%s", imports)
 	}
 
-	var typeNames []string
-	for tn := range s.Structs {
-		typeNames = append(typeNames, tn)
-	}
-
-	// Construct our template data, based on the symbol table.
-	// For each struct type name...
-	var tds []templateData
-	for _, tn := range typeNames {
-		td := templateData{
-			Type: goast.Type{
-				TypeName:  tn,
-				IsArray:   isFieldArray(s, tn),
-				IsPointer: isFieldPointer(s, tn),
-			},
-			IsListType: isStructListType(tn, s.Structs[tn]),
-		}
-
-		// Add field information.
-		for k, f := range s.Structs[tn].Fields {
-			if _, ok := s.Structs[f.TypeName]; ok {
-				td.Fields = append(td.Fields, field{
-					Name: k,
-					Type: f,
-				})
-			}
-		}
-
-		// If we have a field called "Kind", then we need to generate a switch statement too.
-		if f, ok := s.Structs[tn].Fields["Kind"]; ok {
-			td.IsSwitcher = true
-			td.Consts = s.Consts[f.TypeName]
-
-			//for _, c := range td.Consts {
-			//	if c.Field == "self" {
-			//		tds = append(tds, templateData{})
-			//	}
-			//}
-		}
-
-		tds = append(tds, td)
-	}
-
-	for i, ltd := range tds {
-		if !ltd.IsListType {
-			continue
-		}
-
-		tn := strings.TrimRight(ltd.TypeName, "s")
-
-		// Find the non-list type for this list type.
-		for _, td := range tds {
-			if td.TypeName != tn {
-				continue
-			}
-
-			ltd.NodeType = &td
-			break
-		}
-
-		tds[i] = ltd
-	}
-
-	err := walkerTypeTmpl.Execute(w, tds)
+	err := walkerTypeTmpl.Execute(w, wts)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	templates := []*template.Template{
-		eventHandlersTmpl,
-		walkFnTmpl,
-	}
+	for _, wt := range wts {
+		err := eventHandlersTmpl.Execute(w, wt)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	spew.Fdump(os.Stderr, tds)
-
-	for _, td := range tds {
-		for _, tmpl := range templates {
-			err := tmpl.Execute(w, td)
-			if err != nil {
-				log.Fatal(err)
-			}
+		err = walkerFnTmpl(w, wt)
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 }
 
-// isFieldPointer checks the symbol table for references of the given type name on fields of other
-// types, returning true if the given type name is ever used as a pointer.
-func isFieldPointer(s *goast.SymbolTable, tn string) bool {
-	for _, strc := range s.Structs {
-		for _, f := range strc.Fields {
-			if f.TypeName == tn {
-				return f.IsPointer
+// buildBaseTypes ...
+func buildBaseTypes(st goast.SymbolTable) []walkerType {
+	var wts []walkerType
+
+	var tns []string
+	for tn := range st.Structs {
+		tns = append(tns, tn)
+	}
+
+	sort.Strings(tns)
+
+	for _, tn := range tns {
+		wt := walkerType{}
+		wt.TypeName = tn
+		wt.FuncName = tn
+		wt.Fields = buildBaseTypeFields(st.Structs[tn].Fields)
+		wt.Kinds = buildBaseTypeKinds(st.Consts[fmt.Sprintf("%sKind", tn)])
+		wt.IsAlwaysPointer = isTypeAlwaysPointer(st, tn)
+		wt.IsLinkedList = isTypeLinkedList(tn, st.Structs[tn])
+		wt.ShortTypeName = buildTypeShortName(wt)
+		wt.FullTypeName = buildTypeFullName(wt)
+
+		wts = append(wts, wt)
+	}
+
+	return wts
+}
+
+// hydrateAllTypes ...
+func hydrateAllTypes(wts []walkerType) []walkerType {
+	// Firstly, hydrate all fields, now that we can.
+	for i, wt := range wts {
+		wts[i] = hydrateAllFields(wts, wt)
+	}
+
+	// Then hydrate the kinds, with type and field information.
+	for i, wt := range wts {
+		wts[i] = hydrateAllKinds(wts, wt)
+	}
+
+	// We also want all linked list types to be attached to their types.
+	for i, wt := range wts {
+		wts[i] = hydrateLinkedListTypes(wts, wt)
+	}
+
+	return wts
+}
+
+// buildBaseTypeFields ...
+func buildBaseTypeFields(fields map[string]goast.Type) []walkerTypeField {
+	var wtfs []walkerTypeField
+
+	var fns []string
+	for fn := range fields {
+		fns = append(fns, fn)
+	}
+
+	sort.Strings(fns)
+
+	for _, fn := range fns {
+		wtf := walkerTypeField{}
+		wtf.Name = fn
+		wtf.IsPointerType = fields[fn].IsPointer
+		wtf.IsSliceType = fields[fn].IsArray
+		wtf.typeName = fields[fn].TypeName
+		// wtf.Type is set once we've gathered all types.
+
+		wtfs = append(wtfs, wtf)
+	}
+
+	return wtfs
+}
+
+// hydrateAllFields ...
+func hydrateAllFields(wts []walkerType, wt walkerType) walkerType {
+	for i, fld := range wt.Fields {
+		for _, wt := range wts {
+			if wt.TypeName == fld.typeName {
+				// We must first set the referenced type's fields and kinds to nil, otherwise we can
+				// end up with huge sub-structures. At this level, we're simply not interested in
+				// this information too.
+				wt.Fields = nil
+				wt.Kinds = nil
+
+				fld.Type = wt
+				fld.isASTType = true
+				break
+			}
+		}
+
+		wt.Fields[i] = fld
+	}
+
+	// Second pass, to clear out non-AST types.
+	for i := len(wt.Fields) - 1; i >= 0; i-- {
+		fld := wt.Fields[i]
+		if fld.isASTType {
+			continue
+		}
+
+		wt.Fields = append(wt.Fields[:i], wt.Fields[i+1:]...)
+	}
+
+	return wt
+}
+
+// buildBaseTypeKinds ...
+func buildBaseTypeKinds(consts []goast.Const) []walkerTypeKind {
+	var wtks []walkerTypeKind
+
+	sort.Slice(consts, func(i, j int) bool {
+		return consts[i].Name < consts[j].Name
+	})
+
+	for _, c := range consts {
+		wtk := walkerTypeKind{}
+		wtk.ConstName = c.Name
+		wtk.IsSelf = c.Field == "self"
+		wtk.fieldName = c.Field
+		// wtk.Type is set once we've gathered all types.
+		// wtk.Field is set once we've gathered all types and fields.
+
+		wtks = append(wtks, wtk)
+	}
+
+	return wtks
+}
+
+// hydrateAllKinds ...
+func hydrateAllKinds(wts []walkerType, wt walkerType) walkerType {
+	for i, knd := range wt.Kinds {
+		kwt := wt
+
+		for _, fld := range wt.Fields {
+			if fld.Name == knd.fieldName {
+				knd.Field = &fld
+				break
+			}
+		}
+
+		if knd.IsSelf {
+			kwt.FuncName = buildTypeKindFuncName(knd.ConstName)
+		} else {
+			kwt = knd.Field.Type
+		}
+
+		// We must first set the referenced type's fields and kinds to nil, otherwise we can
+		// end up with huge sub-structures. At this level, we're simply not interested in
+		// this information too.
+		kwt.Fields = nil
+		kwt.Kinds = nil
+
+		knd.Type = kwt
+
+		wt.Kinds[i] = knd
+	}
+
+	return wt
+}
+
+// hydrateLinkedListTypes ...
+func hydrateLinkedListTypes(wts []walkerType, wt walkerType) walkerType {
+	if !wt.IsLinkedList {
+		return wt
+	}
+
+	nodeTypeName := strings.TrimRight(wt.TypeName, "s")
+	for _, nwt := range wts {
+		rnwt := nwt
+
+		if nwt.FuncName != nodeTypeName {
+			continue
+		}
+
+		// We must first set the referenced type's fields and kinds to nil, otherwise we can
+		// end up with huge sub-structures. At this level, we're simply not interested in
+		// this information too.
+		nwt.Fields = nil
+		nwt.Kinds = nil
+
+		wt.LinkedListType = &rnwt
+	}
+
+	return wt
+}
+
+// injectSelfKindTypes ...
+func injectSelfKindTypes(wts []walkerType) []walkerType {
+	for _, wt := range wts {
+		if len(wt.Kinds) == 0 {
+			continue
+		}
+
+		for _, knd := range wt.Kinds {
+			if !knd.IsSelf {
+				continue
+			}
+
+			// Find the real type info, but update the FuncName, then remove kinds, as we don't want
+			// to recurse!
+			kwt := findWalkerTypeByName(wts, knd.Type.TypeName)
+			kwt.FuncName = buildTypeKindFuncName(knd.ConstName)
+			kwt.Kinds = nil
+
+			wts = append(wts, kwt)
+		}
+	}
+
+	return wts
+}
+
+// findWalkerTypeByName ...
+func findWalkerTypeByName(wts []walkerType, name string) walkerType {
+	var wt walkerType
+	for _, wt := range wts {
+		if wt.TypeName == name {
+			return wt
+		}
+	}
+
+	return wt
+}
+
+// buildTypeShortName ...
+func buildTypeShortName(wt walkerType) string {
+	stn := strings.Map(abridger, wt.TypeName)
+	if wt.IsLinkedList {
+		return stn + "s"
+	}
+
+	return stn
+}
+
+// buildTypeFullName ...
+func buildTypeFullName(wt walkerType) string {
+	var tn string
+	if wt.IsAlwaysPointer {
+		tn = "*"
+	}
+
+	return tn + "ast." + wt.TypeName
+}
+
+// buildTypeKindFuncName takes the name of a kind constant, and turns it into the expected format
+// for a walk function's name for that type.
+func buildTypeKindFuncName(constName string) string {
+	f := strings.Split(constName, "Kind")
+	return f[1] + f[0]
+}
+
+// isTypeAlwaysPointer ...
+// TODO(seeruk): Verify that this behaves as expected...
+func isTypeAlwaysPointer(st goast.SymbolTable, tn string) bool {
+	var referenced bool
+
+	for _, str := range st.Structs {
+		for _, fld := range str.Fields {
+			if fld.TypeName != tn {
+				continue
+			}
+
+			referenced = true
+
+			if !fld.IsPointer {
+				return false
 			}
 		}
 	}
 
-	return false
+	return referenced
 }
 
-// isFieldArray checks the symbol table for references of the given type name on fields of other
-// types, returning true if the given type name is ever used as an array.
-func isFieldArray(s *goast.SymbolTable, tn string) bool {
-	for _, strc := range s.Structs {
-		for _, f := range strc.Fields {
-			if f.TypeName == tn {
-				return f.IsArray
-			}
-		}
-	}
-
-	return false
-}
-
-// isStructListType ...
-func isStructListType(tn string, str goast.Struct) bool {
+// isTypeLinkedList ...
+func isTypeLinkedList(tn string, str goast.Struct) bool {
 	if len(str.Fields) != 3 {
 		return false
 	}
@@ -151,4 +350,14 @@ func isStructListType(tn string, str goast.Struct) bool {
 	hasCorrectPosType := pos.TypeName == "int"
 
 	return hasDataField && hasNextField && hasPosField && hasCorrectNextType && hasCorrectPosType
+}
+
+// abridger is a strings.Map function that is used to return a variable name from a type name that
+// makes sense by taking each capital letter from the given string and converting them to lowercase.
+// The input string should start with a capital letter.
+func abridger(r rune) rune {
+	if unicode.IsUpper(r) {
+		return unicode.ToLower(r)
+	}
+	return -1
 }

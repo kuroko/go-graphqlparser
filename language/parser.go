@@ -1464,52 +1464,31 @@ var directiveLocations = []string{
 	"INPUT_FIELD_DEFINITION",
 }
 
-var directiveLocationsMap = map[string]ast.DirectiveLocation{
-	"QUERY":                  ast.DirectiveLocationKindQuery,
-	"MUTATION":               ast.DirectiveLocationKindMutation,
-	"SUBSCRIPTION":           ast.DirectiveLocationKindSubscription,
-	"FIELD":                  ast.DirectiveLocationKindField,
-	"FRAGMENT_DEFINITION":    ast.DirectiveLocationKindFragmentDefinition,
-	"FRAGMENT_SPREAD":        ast.DirectiveLocationKindFragmentSpread,
-	"INLINE_FRAGMENT":        ast.DirectiveLocationKindInlineFragment,
-	"SCHEMA":                 ast.DirectiveLocationKindSchema,
-	"SCALAR":                 ast.DirectiveLocationKindScalar,
-	"OBJECT":                 ast.DirectiveLocationKindObject,
-	"FIELD_DEFINITION":       ast.DirectiveLocationKindFieldDefinition,
-	"ARGUMENT_DEFINITION":    ast.DirectiveLocationKindArgumentDefinition,
-	"INTERFACE":              ast.DirectiveLocationKindInterface,
-	"UNION":                  ast.DirectiveLocationKindUnion,
-	"ENUM":                   ast.DirectiveLocationKindEnum,
-	"ENUM_VALUE":             ast.DirectiveLocationKindEnumValue,
-	"INPUT_OBJECT":           ast.DirectiveLocationKindInputObject,
-	"INPUT_FIELD_DEFINITION": ast.DirectiveLocationKindInputFieldDefinition,
-}
-
 // parseDirectiveLocations ...
-func (p *Parser) parseDirectiveLocations() (*ast.DirectiveLocations, error) {
+func (p *Parser) parseDirectiveLocations() (ast.DirectiveLocations, error) {
 	p.skip1(TokenKindPunctuator, "|") // this one is optional
 
-	var locs *ast.DirectiveLocations
+	var locs ast.DirectiveLocations
 
 	for {
 		tok, err := p.mustConsumen(TokenKindName, directiveLocations...)
 		if err != nil {
-			return nil, p.unexpected(p.token, p.expected(TokenKindName, directiveLocations...))
+			return locs, p.unexpected(p.token, p.expected(TokenKindName, directiveLocations...))
 		}
 
-		locs = locs.Add(directiveLocationsMap[tok.Literal])
+		locs = locs | ast.DirectiveLocationsByName[tok.Literal]
 
 		if !p.skip1(TokenKindPunctuator, "|") {
 			break
 		}
 	}
 
-	return locs.Reverse(), nil
+	return locs, nil
 }
 
 /*****************************************************************************
-* Utility functions                                                          *
-*****************************************************************************/
+ * Utility functions                                                         *
+ *****************************************************************************/
 
 // consume0 ...
 func (p *Parser) consume0(t TokenKind) (Token, bool) {

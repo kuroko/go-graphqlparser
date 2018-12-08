@@ -934,8 +934,20 @@ func (d *dumper) dumpDirectiveDefinition(def *DirectiveDefinition) {
 //   | FIELD
 //   | FRAGMENT_SPREAD
 //   | INLINE_FRAGMENT
-func (d *dumper) dumpDirectiveLocations(dls *DirectiveLocations) {
-	l := dls.Len()
+func (d *dumper) dumpDirectiveLocations(dls DirectiveLocations) {
+	dll := len(NamesByDirectiveLocations)
+
+	var locs []string
+	for i := 0; i <= dll; i++ {
+		bit := dls & (1 << uint(i))
+		if bit == 0 {
+			continue
+		}
+
+		locs = append(locs, NamesByDirectiveLocations[bit])
+	}
+
+	l := len(locs)
 
 	separator := " | "
 	if l < 3 {
@@ -945,17 +957,17 @@ func (d *dumper) dumpDirectiveLocations(dls *DirectiveLocations) {
 		io.WriteString(d.w, separator)
 	}
 
-	dls.ForEach(func(dl DirectiveLocation, i int) {
-		io.WriteString(d.w, dl.String())
+	for i, loc := range locs {
+		io.WriteString(d.w, loc)
 		if i < l-1 {
 			io.WriteString(d.w, separator)
 		}
-	})
+	}
 }
 
 /*****************************************************************************
-* Utility functions                                                          *
-*****************************************************************************/
+ * Utility functions                                                         *
+ *****************************************************************************/
 
 // escapeGraphQLString takes a single-line GraphQL string and escapes all special characters that
 // need to be escapes in it, returning the result.

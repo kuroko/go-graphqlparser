@@ -13,14 +13,14 @@ import (
 // structure for the walker generator.
 type SymbolTable struct {
 	Package string
-	Consts  map[string]Consts
+	Consts  map[string][]Const
 	Structs map[string]Struct
 }
 
 // NewSymbolTable returns a new SymbolTable value with the maps on it initialised.
 func NewSymbolTable() SymbolTable {
 	return SymbolTable{
-		Consts:  make(map[string]Consts),
+		Consts:  make(map[string][]Const),
 		Structs: make(map[string]Struct),
 	}
 }
@@ -31,21 +31,9 @@ type Annotations struct {
 	Ignore bool
 }
 
-// Consts is a slice of Const, with some additional methods.
-type Consts []Const
-
-// HasNonSelfConsts returns true if any of these Consts have a Field that isn't set to self.
-func (cs Consts) HasNonSelfConsts() bool {
-	for _, c := range cs {
-		if c.Field != "self" {
-			return true
-		}
-	}
-
-	return false
-}
-
 // Const represents the information we need from the Go AST for constants.
+// TODO: This isn't really a "Const", it's more specifically a "Kind", isn't it? This looks more
+// like some template data.
 type Const struct {
 	Name  string
 	Field string
@@ -81,8 +69,8 @@ func ReadFile(filePath, fileName string) (*ast.File, error) {
 	return parser.ParseFile(token.NewFileSet(), path.Join(filePath, fileName), nil, parser.ParseComments)
 }
 
-// CreateSymbolTable ...
-func CreateSymbolTable(file *ast.File, symbols *SymbolTable) error {
+// PopulateSymbolTable ...
+func PopulateSymbolTable(file *ast.File, symbols *SymbolTable) error {
 	var err error
 
 	for _, decl := range file.Decls {
@@ -152,12 +140,14 @@ func processConstDeclaration(symbols *SymbolTable, decl *ast.GenDecl) error {
 					continue
 				}
 			}
+
 			err := processValueSpec(symbols, t, v, annotations)
 			if err != nil {
 				return err
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -220,6 +210,7 @@ func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec, annota
 	}
 
 	symbols.Consts[t.TypeName] = append(symbols.Consts[t.TypeName], consts...)
+
 	return nil
 }
 
@@ -232,6 +223,7 @@ func processFieldName(vspec *ast.ValueSpec, annotations Annotations) (string, er
 	if annotations.Field != "" {
 		return annotations.Field, nil
 	}
+
 	return constructSaneFieldName(vspec.Names[0].Name)
 }
 
