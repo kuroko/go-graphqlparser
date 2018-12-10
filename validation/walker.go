@@ -343,7 +343,9 @@ func (w *Walker) OnDirectiveLeave(ctx *Context, d ast.Directive) {
 func (w *Walker) walkDirective(ctx *Context, d ast.Directive) {
 	w.OnDirectiveEnter(ctx, d)
 
-	w.walkArguments(ctx, d.Arguments)
+	if d.Arguments != nil {
+		w.walkArguments(ctx, d.Arguments)
+	}
 
 	w.OnDirectiveLeave(ctx, d)
 }
@@ -385,7 +387,9 @@ func (w *Walker) OnDirectiveDefinitionLeave(ctx *Context, dd *ast.DirectiveDefin
 func (w *Walker) walkDirectiveDefinition(ctx *Context, dd *ast.DirectiveDefinition) {
 	w.OnDirectiveDefinitionEnter(ctx, dd)
 
-	w.walkInputValueDefinitions(ctx, dd.ArgumentsDefinition)
+	if dd.ArgumentsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, dd.ArgumentsDefinition)
+	}
 
 	w.OnDirectiveDefinitionLeave(ctx, dd)
 }
@@ -471,7 +475,9 @@ func (w *Walker) OnDocumentLeave(ctx *Context, d ast.Document) {
 func (w *Walker) walkDocument(ctx *Context, d ast.Document) {
 	w.OnDocumentEnter(ctx, d)
 
-	w.walkDefinitions(ctx, d.Definitions)
+	if d.Definitions != nil {
+		w.walkDefinitions(ctx, d.Definitions)
+	}
 
 	w.OnDocumentLeave(ctx, d)
 }
@@ -513,12 +519,29 @@ func (w *Walker) OnEnumTypeDefinitionLeave(ctx *Context, td *ast.TypeDefinition)
 func (w *Walker) walkEnumTypeDefinition(ctx *Context, td *ast.TypeDefinition) {
 	w.OnEnumTypeDefinitionEnter(ctx, td)
 
-	w.walkDirectives(ctx, td.Directives)
-	w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, td.FieldsDefinition)
-	w.walkTypes(ctx, td.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
-	w.walkTypes(ctx, td.UnionMemberTypes)
+	if td.Directives != nil {
+		w.walkDirectives(ctx, td.Directives)
+	}
+
+	if td.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
+	}
+
+	if td.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, td.FieldsDefinition)
+	}
+
+	if td.ImplementsInterface != nil {
+		w.walkTypes(ctx, td.ImplementsInterface)
+	}
+
+	if td.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
+	}
+
+	if td.UnionMemberTypes != nil {
+		w.walkTypes(ctx, td.UnionMemberTypes)
+	}
 
 	w.OnEnumTypeDefinitionLeave(ctx, td)
 }
@@ -560,12 +583,29 @@ func (w *Walker) OnEnumTypeExtensionLeave(ctx *Context, te *ast.TypeExtension) {
 func (w *Walker) walkEnumTypeExtension(ctx *Context, te *ast.TypeExtension) {
 	w.OnEnumTypeExtensionEnter(ctx, te)
 
-	w.walkDirectives(ctx, te.Directives)
-	w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, te.FieldsDefinition)
-	w.walkTypes(ctx, te.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
-	w.walkTypes(ctx, te.UnionMemberTypes)
+	if te.Directives != nil {
+		w.walkDirectives(ctx, te.Directives)
+	}
+
+	if te.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
+	}
+
+	if te.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, te.FieldsDefinition)
+	}
+
+	if te.ImplementsInterface != nil {
+		w.walkTypes(ctx, te.ImplementsInterface)
+	}
+
+	if te.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
+	}
+
+	if te.UnionMemberTypes != nil {
+		w.walkTypes(ctx, te.UnionMemberTypes)
+	}
 
 	w.OnEnumTypeExtensionLeave(ctx, te)
 }
@@ -647,7 +687,9 @@ func (w *Walker) OnEnumValueDefinitionLeave(ctx *Context, evd ast.EnumValueDefin
 func (w *Walker) walkEnumValueDefinition(ctx *Context, evd ast.EnumValueDefinition) {
 	w.OnEnumValueDefinitionEnter(ctx, evd)
 
-	w.walkDirectives(ctx, evd.Directives)
+	if evd.Directives != nil {
+		w.walkDirectives(ctx, evd.Directives)
+	}
 
 	w.OnEnumValueDefinitionLeave(ctx, evd)
 }
@@ -780,8 +822,14 @@ func (w *Walker) OnFieldDefinitionLeave(ctx *Context, fd ast.FieldDefinition) {
 func (w *Walker) walkFieldDefinition(ctx *Context, fd ast.FieldDefinition) {
 	w.OnFieldDefinitionEnter(ctx, fd)
 
-	w.walkInputValueDefinitions(ctx, fd.ArgumentsDefinition)
-	w.walkDirectives(ctx, fd.Directives)
+	if fd.ArgumentsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, fd.ArgumentsDefinition)
+	}
+
+	if fd.Directives != nil {
+		w.walkDirectives(ctx, fd.Directives)
+	}
+
 	w.walkType(ctx, fd.Type)
 
 	w.OnFieldDefinitionLeave(ctx, fd)
@@ -868,10 +916,21 @@ func (w *Walker) OnFieldSelectionLeave(ctx *Context, s ast.Selection) {
 func (w *Walker) walkFieldSelection(ctx *Context, s ast.Selection) {
 	w.OnFieldSelectionEnter(ctx, s)
 
-	w.walkArguments(ctx, s.Arguments)
-	w.walkDirectives(ctx, s.Directives)
-	w.walkSelections(ctx, s.SelectionSet)
-	w.walkTypeCondition(ctx, s.TypeCondition)
+	if s.Arguments != nil {
+		w.walkArguments(ctx, s.Arguments)
+	}
+
+	if s.Directives != nil {
+		w.walkDirectives(ctx, s.Directives)
+	}
+
+	if s.SelectionSet != nil {
+		w.walkSelections(ctx, s.SelectionSet)
+	}
+
+	if s.TypeCondition != nil {
+		w.walkTypeCondition(ctx, s.TypeCondition)
+	}
 
 	w.OnFieldSelectionLeave(ctx, s)
 }
@@ -953,9 +1012,17 @@ func (w *Walker) OnFragmentDefinitionLeave(ctx *Context, fd *ast.FragmentDefinit
 func (w *Walker) walkFragmentDefinition(ctx *Context, fd *ast.FragmentDefinition) {
 	w.OnFragmentDefinitionEnter(ctx, fd)
 
-	w.walkDirectives(ctx, fd.Directives)
-	w.walkSelections(ctx, fd.SelectionSet)
-	w.walkTypeCondition(ctx, fd.TypeCondition)
+	if fd.Directives != nil {
+		w.walkDirectives(ctx, fd.Directives)
+	}
+
+	if fd.SelectionSet != nil {
+		w.walkSelections(ctx, fd.SelectionSet)
+	}
+
+	if fd.TypeCondition != nil {
+		w.walkTypeCondition(ctx, fd.TypeCondition)
+	}
 
 	w.OnFragmentDefinitionLeave(ctx, fd)
 }
@@ -997,10 +1064,21 @@ func (w *Walker) OnFragmentSpreadSelectionLeave(ctx *Context, s ast.Selection) {
 func (w *Walker) walkFragmentSpreadSelection(ctx *Context, s ast.Selection) {
 	w.OnFragmentSpreadSelectionEnter(ctx, s)
 
-	w.walkArguments(ctx, s.Arguments)
-	w.walkDirectives(ctx, s.Directives)
-	w.walkSelections(ctx, s.SelectionSet)
-	w.walkTypeCondition(ctx, s.TypeCondition)
+	if s.Arguments != nil {
+		w.walkArguments(ctx, s.Arguments)
+	}
+
+	if s.Directives != nil {
+		w.walkDirectives(ctx, s.Directives)
+	}
+
+	if s.SelectionSet != nil {
+		w.walkSelections(ctx, s.SelectionSet)
+	}
+
+	if s.TypeCondition != nil {
+		w.walkTypeCondition(ctx, s.TypeCondition)
+	}
 
 	w.OnFragmentSpreadSelectionLeave(ctx, s)
 }
@@ -1042,10 +1120,21 @@ func (w *Walker) OnInlineFragmentSelectionLeave(ctx *Context, s ast.Selection) {
 func (w *Walker) walkInlineFragmentSelection(ctx *Context, s ast.Selection) {
 	w.OnInlineFragmentSelectionEnter(ctx, s)
 
-	w.walkArguments(ctx, s.Arguments)
-	w.walkDirectives(ctx, s.Directives)
-	w.walkSelections(ctx, s.SelectionSet)
-	w.walkTypeCondition(ctx, s.TypeCondition)
+	if s.Arguments != nil {
+		w.walkArguments(ctx, s.Arguments)
+	}
+
+	if s.Directives != nil {
+		w.walkDirectives(ctx, s.Directives)
+	}
+
+	if s.SelectionSet != nil {
+		w.walkSelections(ctx, s.SelectionSet)
+	}
+
+	if s.TypeCondition != nil {
+		w.walkTypeCondition(ctx, s.TypeCondition)
+	}
 
 	w.OnInlineFragmentSelectionLeave(ctx, s)
 }
@@ -1087,12 +1176,29 @@ func (w *Walker) OnInputObjectTypeDefinitionLeave(ctx *Context, td *ast.TypeDefi
 func (w *Walker) walkInputObjectTypeDefinition(ctx *Context, td *ast.TypeDefinition) {
 	w.OnInputObjectTypeDefinitionEnter(ctx, td)
 
-	w.walkDirectives(ctx, td.Directives)
-	w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, td.FieldsDefinition)
-	w.walkTypes(ctx, td.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
-	w.walkTypes(ctx, td.UnionMemberTypes)
+	if td.Directives != nil {
+		w.walkDirectives(ctx, td.Directives)
+	}
+
+	if td.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
+	}
+
+	if td.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, td.FieldsDefinition)
+	}
+
+	if td.ImplementsInterface != nil {
+		w.walkTypes(ctx, td.ImplementsInterface)
+	}
+
+	if td.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
+	}
+
+	if td.UnionMemberTypes != nil {
+		w.walkTypes(ctx, td.UnionMemberTypes)
+	}
 
 	w.OnInputObjectTypeDefinitionLeave(ctx, td)
 }
@@ -1134,12 +1240,29 @@ func (w *Walker) OnInputObjectTypeExtensionLeave(ctx *Context, te *ast.TypeExten
 func (w *Walker) walkInputObjectTypeExtension(ctx *Context, te *ast.TypeExtension) {
 	w.OnInputObjectTypeExtensionEnter(ctx, te)
 
-	w.walkDirectives(ctx, te.Directives)
-	w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, te.FieldsDefinition)
-	w.walkTypes(ctx, te.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
-	w.walkTypes(ctx, te.UnionMemberTypes)
+	if te.Directives != nil {
+		w.walkDirectives(ctx, te.Directives)
+	}
+
+	if te.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
+	}
+
+	if te.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, te.FieldsDefinition)
+	}
+
+	if te.ImplementsInterface != nil {
+		w.walkTypes(ctx, te.ImplementsInterface)
+	}
+
+	if te.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
+	}
+
+	if te.UnionMemberTypes != nil {
+		w.walkTypes(ctx, te.UnionMemberTypes)
+	}
 
 	w.OnInputObjectTypeExtensionLeave(ctx, te)
 }
@@ -1185,7 +1308,10 @@ func (w *Walker) walkInputValueDefinition(ctx *Context, ivd ast.InputValueDefini
 		w.walkValue(ctx, *ivd.DefaultValue)
 	}
 
-	w.walkDirectives(ctx, ivd.Directives)
+	if ivd.Directives != nil {
+		w.walkDirectives(ctx, ivd.Directives)
+	}
+
 	w.walkType(ctx, ivd.Type)
 
 	w.OnInputValueDefinitionLeave(ctx, ivd)
@@ -1312,12 +1438,29 @@ func (w *Walker) OnInterfaceTypeDefinitionLeave(ctx *Context, td *ast.TypeDefini
 func (w *Walker) walkInterfaceTypeDefinition(ctx *Context, td *ast.TypeDefinition) {
 	w.OnInterfaceTypeDefinitionEnter(ctx, td)
 
-	w.walkDirectives(ctx, td.Directives)
-	w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, td.FieldsDefinition)
-	w.walkTypes(ctx, td.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
-	w.walkTypes(ctx, td.UnionMemberTypes)
+	if td.Directives != nil {
+		w.walkDirectives(ctx, td.Directives)
+	}
+
+	if td.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
+	}
+
+	if td.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, td.FieldsDefinition)
+	}
+
+	if td.ImplementsInterface != nil {
+		w.walkTypes(ctx, td.ImplementsInterface)
+	}
+
+	if td.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
+	}
+
+	if td.UnionMemberTypes != nil {
+		w.walkTypes(ctx, td.UnionMemberTypes)
+	}
 
 	w.OnInterfaceTypeDefinitionLeave(ctx, td)
 }
@@ -1359,12 +1502,29 @@ func (w *Walker) OnInterfaceTypeExtensionLeave(ctx *Context, te *ast.TypeExtensi
 func (w *Walker) walkInterfaceTypeExtension(ctx *Context, te *ast.TypeExtension) {
 	w.OnInterfaceTypeExtensionEnter(ctx, te)
 
-	w.walkDirectives(ctx, te.Directives)
-	w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, te.FieldsDefinition)
-	w.walkTypes(ctx, te.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
-	w.walkTypes(ctx, te.UnionMemberTypes)
+	if te.Directives != nil {
+		w.walkDirectives(ctx, te.Directives)
+	}
+
+	if te.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
+	}
+
+	if te.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, te.FieldsDefinition)
+	}
+
+	if te.ImplementsInterface != nil {
+		w.walkTypes(ctx, te.ImplementsInterface)
+	}
+
+	if te.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
+	}
+
+	if te.UnionMemberTypes != nil {
+		w.walkTypes(ctx, te.UnionMemberTypes)
+	}
 
 	w.OnInterfaceTypeExtensionLeave(ctx, te)
 }
@@ -1450,6 +1610,8 @@ func (w *Walker) OnListValueLeave(ctx *Context, v ast.Value) {
 func (w *Walker) walkListValue(ctx *Context, v ast.Value) {
 	w.OnListValueEnter(ctx, v)
 
+	w.walkValue(ctx, v.ListValue)
+
 	w.OnListValueLeave(ctx, v)
 }
 
@@ -1490,9 +1652,17 @@ func (w *Walker) OnMutationOperationDefinitionLeave(ctx *Context, od *ast.Operat
 func (w *Walker) walkMutationOperationDefinition(ctx *Context, od *ast.OperationDefinition) {
 	w.OnMutationOperationDefinitionEnter(ctx, od)
 
-	w.walkDirectives(ctx, od.Directives)
-	w.walkSelections(ctx, od.SelectionSet)
-	w.walkVariableDefinitions(ctx, od.VariableDefinitions)
+	if od.Directives != nil {
+		w.walkDirectives(ctx, od.Directives)
+	}
+
+	if od.SelectionSet != nil {
+		w.walkSelections(ctx, od.SelectionSet)
+	}
+
+	if od.VariableDefinitions != nil {
+		w.walkVariableDefinitions(ctx, od.VariableDefinitions)
+	}
 
 	w.OnMutationOperationDefinitionLeave(ctx, od)
 }
@@ -1618,12 +1788,29 @@ func (w *Walker) OnObjectTypeDefinitionLeave(ctx *Context, td *ast.TypeDefinitio
 func (w *Walker) walkObjectTypeDefinition(ctx *Context, td *ast.TypeDefinition) {
 	w.OnObjectTypeDefinitionEnter(ctx, td)
 
-	w.walkDirectives(ctx, td.Directives)
-	w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, td.FieldsDefinition)
-	w.walkTypes(ctx, td.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
-	w.walkTypes(ctx, td.UnionMemberTypes)
+	if td.Directives != nil {
+		w.walkDirectives(ctx, td.Directives)
+	}
+
+	if td.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
+	}
+
+	if td.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, td.FieldsDefinition)
+	}
+
+	if td.ImplementsInterface != nil {
+		w.walkTypes(ctx, td.ImplementsInterface)
+	}
+
+	if td.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
+	}
+
+	if td.UnionMemberTypes != nil {
+		w.walkTypes(ctx, td.UnionMemberTypes)
+	}
 
 	w.OnObjectTypeDefinitionLeave(ctx, td)
 }
@@ -1665,12 +1852,29 @@ func (w *Walker) OnObjectTypeExtensionLeave(ctx *Context, te *ast.TypeExtension)
 func (w *Walker) walkObjectTypeExtension(ctx *Context, te *ast.TypeExtension) {
 	w.OnObjectTypeExtensionEnter(ctx, te)
 
-	w.walkDirectives(ctx, te.Directives)
-	w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, te.FieldsDefinition)
-	w.walkTypes(ctx, te.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
-	w.walkTypes(ctx, te.UnionMemberTypes)
+	if te.Directives != nil {
+		w.walkDirectives(ctx, te.Directives)
+	}
+
+	if te.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
+	}
+
+	if te.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, te.FieldsDefinition)
+	}
+
+	if te.ImplementsInterface != nil {
+		w.walkTypes(ctx, te.ImplementsInterface)
+	}
+
+	if te.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
+	}
+
+	if te.UnionMemberTypes != nil {
+		w.walkTypes(ctx, te.UnionMemberTypes)
+	}
 
 	w.OnObjectTypeExtensionLeave(ctx, te)
 }
@@ -1887,9 +2091,17 @@ func (w *Walker) OnQueryOperationDefinitionLeave(ctx *Context, od *ast.Operation
 func (w *Walker) walkQueryOperationDefinition(ctx *Context, od *ast.OperationDefinition) {
 	w.OnQueryOperationDefinitionEnter(ctx, od)
 
-	w.walkDirectives(ctx, od.Directives)
-	w.walkSelections(ctx, od.SelectionSet)
-	w.walkVariableDefinitions(ctx, od.VariableDefinitions)
+	if od.Directives != nil {
+		w.walkDirectives(ctx, od.Directives)
+	}
+
+	if od.SelectionSet != nil {
+		w.walkSelections(ctx, od.SelectionSet)
+	}
+
+	if od.VariableDefinitions != nil {
+		w.walkVariableDefinitions(ctx, od.VariableDefinitions)
+	}
 
 	w.OnQueryOperationDefinitionLeave(ctx, od)
 }
@@ -2017,12 +2229,29 @@ func (w *Walker) OnScalarTypeDefinitionLeave(ctx *Context, td *ast.TypeDefinitio
 func (w *Walker) walkScalarTypeDefinition(ctx *Context, td *ast.TypeDefinition) {
 	w.OnScalarTypeDefinitionEnter(ctx, td)
 
-	w.walkDirectives(ctx, td.Directives)
-	w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, td.FieldsDefinition)
-	w.walkTypes(ctx, td.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
-	w.walkTypes(ctx, td.UnionMemberTypes)
+	if td.Directives != nil {
+		w.walkDirectives(ctx, td.Directives)
+	}
+
+	if td.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
+	}
+
+	if td.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, td.FieldsDefinition)
+	}
+
+	if td.ImplementsInterface != nil {
+		w.walkTypes(ctx, td.ImplementsInterface)
+	}
+
+	if td.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
+	}
+
+	if td.UnionMemberTypes != nil {
+		w.walkTypes(ctx, td.UnionMemberTypes)
+	}
 
 	w.OnScalarTypeDefinitionLeave(ctx, td)
 }
@@ -2064,12 +2293,29 @@ func (w *Walker) OnScalarTypeExtensionLeave(ctx *Context, te *ast.TypeExtension)
 func (w *Walker) walkScalarTypeExtension(ctx *Context, te *ast.TypeExtension) {
 	w.OnScalarTypeExtensionEnter(ctx, te)
 
-	w.walkDirectives(ctx, te.Directives)
-	w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, te.FieldsDefinition)
-	w.walkTypes(ctx, te.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
-	w.walkTypes(ctx, te.UnionMemberTypes)
+	if te.Directives != nil {
+		w.walkDirectives(ctx, te.Directives)
+	}
+
+	if te.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
+	}
+
+	if te.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, te.FieldsDefinition)
+	}
+
+	if te.ImplementsInterface != nil {
+		w.walkTypes(ctx, te.ImplementsInterface)
+	}
+
+	if te.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
+	}
+
+	if te.UnionMemberTypes != nil {
+		w.walkTypes(ctx, te.UnionMemberTypes)
+	}
 
 	w.OnScalarTypeExtensionLeave(ctx, te)
 }
@@ -2111,8 +2357,13 @@ func (w *Walker) OnSchemaDefinitionLeave(ctx *Context, sd *ast.SchemaDefinition)
 func (w *Walker) walkSchemaDefinition(ctx *Context, sd *ast.SchemaDefinition) {
 	w.OnSchemaDefinitionEnter(ctx, sd)
 
-	w.walkDirectives(ctx, sd.Directives)
-	w.walkRootOperationTypeDefinitions(ctx, sd.RootOperationTypeDefinitions)
+	if sd.Directives != nil {
+		w.walkDirectives(ctx, sd.Directives)
+	}
+
+	if sd.RootOperationTypeDefinitions != nil {
+		w.walkRootOperationTypeDefinitions(ctx, sd.RootOperationTypeDefinitions)
+	}
 
 	w.OnSchemaDefinitionLeave(ctx, sd)
 }
@@ -2154,8 +2405,13 @@ func (w *Walker) OnSchemaExtensionLeave(ctx *Context, se *ast.SchemaExtension) {
 func (w *Walker) walkSchemaExtension(ctx *Context, se *ast.SchemaExtension) {
 	w.OnSchemaExtensionEnter(ctx, se)
 
-	w.walkDirectives(ctx, se.Directives)
-	w.walkOperationTypeDefinitions(ctx, se.OperationTypeDefinitions)
+	if se.Directives != nil {
+		w.walkDirectives(ctx, se.Directives)
+	}
+
+	if se.OperationTypeDefinitions != nil {
+		w.walkOperationTypeDefinitions(ctx, se.OperationTypeDefinitions)
+	}
 
 	w.OnSchemaExtensionLeave(ctx, se)
 }
@@ -2330,9 +2586,17 @@ func (w *Walker) OnSubscriptionOperationDefinitionLeave(ctx *Context, od *ast.Op
 func (w *Walker) walkSubscriptionOperationDefinition(ctx *Context, od *ast.OperationDefinition) {
 	w.OnSubscriptionOperationDefinitionEnter(ctx, od)
 
-	w.walkDirectives(ctx, od.Directives)
-	w.walkSelections(ctx, od.SelectionSet)
-	w.walkVariableDefinitions(ctx, od.VariableDefinitions)
+	if od.Directives != nil {
+		w.walkDirectives(ctx, od.Directives)
+	}
+
+	if od.SelectionSet != nil {
+		w.walkSelections(ctx, od.SelectionSet)
+	}
+
+	if od.VariableDefinitions != nil {
+		w.walkVariableDefinitions(ctx, od.VariableDefinitions)
+	}
 
 	w.OnSubscriptionOperationDefinitionLeave(ctx, od)
 }
@@ -2713,12 +2977,29 @@ func (w *Walker) OnUnionTypeDefinitionLeave(ctx *Context, td *ast.TypeDefinition
 func (w *Walker) walkUnionTypeDefinition(ctx *Context, td *ast.TypeDefinition) {
 	w.OnUnionTypeDefinitionEnter(ctx, td)
 
-	w.walkDirectives(ctx, td.Directives)
-	w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, td.FieldsDefinition)
-	w.walkTypes(ctx, td.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
-	w.walkTypes(ctx, td.UnionMemberTypes)
+	if td.Directives != nil {
+		w.walkDirectives(ctx, td.Directives)
+	}
+
+	if td.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, td.EnumValuesDefinition)
+	}
+
+	if td.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, td.FieldsDefinition)
+	}
+
+	if td.ImplementsInterface != nil {
+		w.walkTypes(ctx, td.ImplementsInterface)
+	}
+
+	if td.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, td.InputFieldsDefinition)
+	}
+
+	if td.UnionMemberTypes != nil {
+		w.walkTypes(ctx, td.UnionMemberTypes)
+	}
 
 	w.OnUnionTypeDefinitionLeave(ctx, td)
 }
@@ -2760,12 +3041,29 @@ func (w *Walker) OnUnionTypeExtensionLeave(ctx *Context, te *ast.TypeExtension) 
 func (w *Walker) walkUnionTypeExtension(ctx *Context, te *ast.TypeExtension) {
 	w.OnUnionTypeExtensionEnter(ctx, te)
 
-	w.walkDirectives(ctx, te.Directives)
-	w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
-	w.walkFieldDefinitions(ctx, te.FieldsDefinition)
-	w.walkTypes(ctx, te.ImplementsInterface)
-	w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
-	w.walkTypes(ctx, te.UnionMemberTypes)
+	if te.Directives != nil {
+		w.walkDirectives(ctx, te.Directives)
+	}
+
+	if te.EnumValuesDefinition != nil {
+		w.walkEnumValueDefinitions(ctx, te.EnumValuesDefinition)
+	}
+
+	if te.FieldsDefinition != nil {
+		w.walkFieldDefinitions(ctx, te.FieldsDefinition)
+	}
+
+	if te.ImplementsInterface != nil {
+		w.walkTypes(ctx, te.ImplementsInterface)
+	}
+
+	if te.InputFieldsDefinition != nil {
+		w.walkInputValueDefinitions(ctx, te.InputFieldsDefinition)
+	}
+
+	if te.UnionMemberTypes != nil {
+		w.walkTypes(ctx, te.UnionMemberTypes)
+	}
 
 	w.OnUnionTypeExtensionLeave(ctx, te)
 }

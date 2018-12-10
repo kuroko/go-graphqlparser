@@ -27,8 +27,9 @@ func NewSymbolTable() SymbolTable {
 
 // Annotations contains any annotations that are relevant to a section of Go code being processed.
 type Annotations struct {
-	Field  string
-	Ignore bool
+	Field   string
+	Ignore  bool
+	OnKinds []string
 }
 
 // Const represents the information we need from the Go AST for constants.
@@ -60,6 +61,7 @@ func NewStruct() Struct {
 // Type represents the information we need from the Go AST for types.
 type Type struct {
 	TypeName  string
+	OnKinds   []string
 	IsArray   bool
 	IsPointer bool
 }
@@ -101,12 +103,21 @@ func readAnnotations(cg *ast.CommentGroup, annotations Annotations) (Annotations
 	if cg != nil {
 		for _, comment := range cg.List {
 			switch {
+			case strings.Contains(comment.Text, "@wg:on_kinds"):
+				f := strings.Split(comment.Text, " ")
+				if len(f) < 3 {
+					return annotations, fmt.Errorf("wg metadata %q invalid", comment.Text)
+				}
+
+				annotations.OnKinds = strings.Split(f[2], ",")
+
 			case strings.Contains(comment.Text, "@wg:ignore"):
 				annotations.Ignore = true
+
 			case strings.Contains(comment.Text, "@wg:field"):
 				f := strings.Split(comment.Text, " ")
 				if len(f) < 3 {
-					return annotations, fmt.Errorf("wg metadata '%v' invalid", comment.Text)
+					return annotations, fmt.Errorf("wg metadata %q invalid", comment.Text)
 				}
 
 				annotations.Field = f[2]
@@ -240,12 +251,19 @@ func constructSaneFieldName(nonSane string) (string, error) {
 func processStructType(symbols *SymbolTable, name string, st *ast.StructType) error {
 	// For a struct switch.
 	for _, field := range st.Fields.List {
+		annotations, err := readAnnotations(field.Doc, Annotations{})
+		if err != nil {
+			return err
+		}
+
 		for _, fieldIdent := range field.Names {
 			if t, ok := processExpr(field.Type); ok {
+				t.OnKinds = annotations.OnKinds
 				symbols.Structs[name].Fields[fieldIdent.Name] = t
 			}
 		}
 	}
+
 	return nil
 }
 

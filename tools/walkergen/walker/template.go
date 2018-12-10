@@ -133,14 +133,33 @@ func walkerFnTmpl(w io.Writer, wt walkerType) error {
 	} else if len(wt.Fields) > 0 {
 		fmt.Fprintln(w, "")
 		for _, fld := range wt.Fields {
-			needsNilCheck := fld.IsPointerType && !fld.Type.IsAlwaysPointer
+			needsNilCheck := (fld.IsPointerType && !fld.Type.IsAlwaysPointer) || fld.Type.IsAlwaysPointer
+			needsDeref := fld.IsPointerType && !fld.Type.IsAlwaysPointer
 
-			deref := ""
+			if len(fld.OnKinds) > 0 {
+				var allowed bool
+				for _, kind := range fld.OnKinds {
+					if wt.FuncName == kind {
+						allowed = true
+					}
+				}
+
+				if !allowed {
+					continue
+				}
+			}
+
+			// TODO(elliot): We need to iterate over slice fields, e.g. for Value.
+
 			indent := "\t"
 			if needsNilCheck {
-				deref = "*"
 				indent += "\t"
 				fmt.Fprintf(w, "\tif %s.%s != nil {\n", wt.ShortTypeName, fld.Name)
+			}
+
+			deref := ""
+			if needsDeref {
+				deref = "*"
 			}
 
 			fmt.Fprintf(w, "%sw.walk%s(ctx, %s%s.%s)\n", indent, fld.Type.FuncName, deref, wt.ShortTypeName, fld.Name)
@@ -192,6 +211,8 @@ type walkerTypeField struct {
 	Name string
 	// Type holds information about the type that this field refers to.
 	Type walkerType
+	// OnKinds controls if a field will only be walked for a specific kind.
+	OnKinds []string
 	// IsPointerType is true if this field's type is a pointer type. If it is a pointer, we should
 	// check if it is always a pointer. If it is always a pointer, we can just pass it into the
 	// relevant walk function. If not, then we need to do a nil check, then dereference it to pass

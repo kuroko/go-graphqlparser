@@ -208,15 +208,17 @@ type Value struct {
 	IntValue   int
 	FloatValue float64
 	// StringValue covers variables and enums, enums are names, but not `true`, `false`, or `null`.
-	StringValue  string
-	ListValue    ListValue
+	StringValue string
+	// @wg:on_kinds ListValue
+	ListValue []Value
+	// @wg:on_kinds ObjectValue
 	ObjectValue  []ObjectField
 	BooleanValue bool
 	Kind         ValueKind
 }
 
 // @wg:ignore
-type ListValue []Value
+//type ListValue []Value
 
 // @wg:ignore
 type ObjectField struct {

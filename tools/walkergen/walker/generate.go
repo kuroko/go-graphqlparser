@@ -10,7 +10,6 @@ import (
 	"unicode"
 
 	"github.com/bucketd/go-graphqlparser/tools/walkergen/goast"
-	"github.com/davecgh/go-spew/spew"
 )
 
 // Generate ...
@@ -34,7 +33,7 @@ func Generate(w io.Writer, packageName string, noImports bool, st goast.SymbolTa
 	})
 
 	// Avoid printing this into generated file.
-	spew.Fdump(os.Stderr, wts)
+	//spew.Fdump(os.Stderr, wts)
 
 	// Header and package name
 	fmt.Fprintf(os.Stdout, strings.TrimSpace(header))
@@ -124,6 +123,7 @@ func buildBaseTypeFields(fields map[string]goast.Type) []walkerTypeField {
 	for _, fn := range fns {
 		wtf := walkerTypeField{}
 		wtf.Name = fn
+		wtf.OnKinds = fields[fn].OnKinds
 		wtf.IsPointerType = fields[fn].IsPointer
 		wtf.IsSliceType = fields[fn].IsArray
 		wtf.typeName = fields[fn].TypeName
