@@ -30,7 +30,7 @@ func Generate(w io.Writer, packageName string, noImports bool, st goast.SymbolTa
 
 	// Then sort them all into order so that we end up with a consistent result.
 	sort.Slice(wts, func(i, j int) bool {
-		return wts[i].TypeName < wts[j].TypeName
+		return wts[i].FuncName < wts[j].FuncName
 	})
 
 	// Avoid printing this into generated file.
