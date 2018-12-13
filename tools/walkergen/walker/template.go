@@ -149,9 +149,15 @@ func walkerFnTmpl(w io.Writer, wt walkerType) error {
 				}
 			}
 
+			indent := "\t"
+			if fld.IsSliceType {
+				indent += "\t"
+
+				fmt.Fprintf(w, "\tfor {\n")
+			}
+
 			// TODO(elliot): We need to iterate over slice fields, e.g. for Value.
 
-			indent := "\t"
 			if needsNilCheck {
 				indent += "\t"
 				fmt.Fprintf(w, "\tif %s.%s != nil {\n", wt.ShortTypeName, fld.Name)
@@ -166,6 +172,10 @@ func walkerFnTmpl(w io.Writer, wt walkerType) error {
 
 			if needsNilCheck {
 				fmt.Fprintf(w, "\t}\n\n")
+			}
+
+			if fld.IsSliceType {
+				fmt.Fprintf(w, "\t}\n")
 			}
 		}
 	}

@@ -134,8 +134,9 @@ func (k SelectionKind) String() string {
 }
 
 type Selection struct {
-	Name          string // but not "on"
-	Alias         string
+	Name  string // but not "on"
+	Alias string
+	// @wg:on_kinds FragmentSpreadSelection
 	TypeCondition *TypeCondition
 	Arguments     *Arguments
 	Directives    *Directives

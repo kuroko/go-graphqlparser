@@ -928,10 +928,6 @@ func (w *Walker) walkFieldSelection(ctx *Context, s ast.Selection) {
 		w.walkSelections(ctx, s.SelectionSet)
 	}
 
-	if s.TypeCondition != nil {
-		w.walkTypeCondition(ctx, s.TypeCondition)
-	}
-
 	w.OnFieldSelectionLeave(ctx, s)
 }
 
@@ -1130,10 +1126,6 @@ func (w *Walker) walkInlineFragmentSelection(ctx *Context, s ast.Selection) {
 
 	if s.SelectionSet != nil {
 		w.walkSelections(ctx, s.SelectionSet)
-	}
-
-	if s.TypeCondition != nil {
-		w.walkTypeCondition(ctx, s.TypeCondition)
 	}
 
 	w.OnInlineFragmentSelectionLeave(ctx, s)
@@ -1610,7 +1602,9 @@ func (w *Walker) OnListValueLeave(ctx *Context, v ast.Value) {
 func (w *Walker) walkListValue(ctx *Context, v ast.Value) {
 	w.OnListValueEnter(ctx, v)
 
-	w.walkValue(ctx, v.ListValue)
+	for i := range v.ListValue {
+		w.walkValue(ctx, v.ListValue[i])
+	}
 
 	w.OnListValueLeave(ctx, v)
 }

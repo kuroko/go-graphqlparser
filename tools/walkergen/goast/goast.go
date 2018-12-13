@@ -202,11 +202,17 @@ func processTypeSpec(symbols *SymbolTable, tspec *ast.TypeSpec) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
 func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec, annotations Annotations) error {
 	var consts []Const
+
+	annotations, err := readAnnotations(vspec.Doc, annotations)
+	if err != nil {
+		return err
+	}
 
 	field, err := processFieldName(vspec, annotations)
 	if err != nil {
@@ -226,11 +232,6 @@ func processValueSpec(symbols *SymbolTable, t Type, vspec *ast.ValueSpec, annota
 }
 
 func processFieldName(vspec *ast.ValueSpec, annotations Annotations) (string, error) {
-	annotations, err := readAnnotations(vspec.Doc, annotations)
-	if err != nil {
-		return "", err
-	}
-
 	if annotations.Field != "" {
 		return annotations.Field, nil
 	}
