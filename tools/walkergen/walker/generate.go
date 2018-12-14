@@ -27,6 +27,10 @@ func Generate(w io.Writer, packageName string, noImports bool, st goast.SymbolTa
 	// functions for them.
 	wts = injectSelfKindTypes(wts)
 
+	// Fourth pass, this one removes fields that are on a type, that shouldn't be used on that type.
+	// This will happen with different "kind" types.
+	wts = removeUnusableFields(wts)
+
 	// Then sort them all into order so that we end up with a consistent result.
 	sort.Slice(wts, func(i, j int) bool {
 		return wts[i].FuncName < wts[j].FuncName
@@ -268,6 +272,31 @@ func injectSelfKindTypes(wts []walkerType) []walkerType {
 
 			wts = append(wts, kwt)
 		}
+	}
+
+	return wts
+}
+
+// removeUnusableFields ...
+func removeUnusableFields(wts []walkerType) []walkerType {
+	for i, wt := range wts {
+		for i := len(wt.Fields) - 1; i >= 0; i-- {
+			fld := wt.Fields[i]
+			if len(fld.OnKinds) > 0 {
+				var allowed bool
+				for _, kind := range fld.OnKinds {
+					if wt.FuncName == kind {
+						allowed = true
+					}
+				}
+
+				if !allowed {
+					wt.Fields = append(wt.Fields[:i], wt.Fields[i+1:]...)
+				}
+			}
+		}
+
+		wts[i] = wt
 	}
 
 	return wts

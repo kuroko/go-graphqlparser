@@ -131,51 +131,41 @@ func walkerFnTmpl(w io.Writer, wt walkerType) error {
 			return err
 		}
 	} else if len(wt.Fields) > 0 {
-		fmt.Fprintln(w, "")
-		for _, fld := range wt.Fields {
-			needsNilCheck := (fld.IsPointerType && !fld.Type.IsAlwaysPointer) || fld.Type.IsAlwaysPointer
+		fmt.Println("")
+		for i, fld := range wt.Fields {
 			needsDeref := fld.IsPointerType && !fld.Type.IsAlwaysPointer
-
-			if len(fld.OnKinds) > 0 {
-				var allowed bool
-				for _, kind := range fld.OnKinds {
-					if wt.FuncName == kind {
-						allowed = true
-					}
-				}
-
-				if !allowed {
-					continue
-				}
-			}
-
-			indent := "\t"
-			if fld.IsSliceType {
-				indent += "\t"
-
-				fmt.Fprintf(w, "\tfor {\n")
-			}
-
-			// TODO(elliot): We need to iterate over slice fields, e.g. for Value.
-
-			if needsNilCheck {
-				indent += "\t"
-				fmt.Fprintf(w, "\tif %s.%s != nil {\n", wt.ShortTypeName, fld.Name)
-			}
+			needsNilCheck := needsDeref || fld.Type.IsAlwaysPointer
 
 			deref := ""
 			if needsDeref {
 				deref = "*"
 			}
 
-			fmt.Fprintf(w, "%sw.walk%s(ctx, %s%s.%s)\n", indent, fld.Type.FuncName, deref, wt.ShortTypeName, fld.Name)
+			accessor := ""
+			indent := "\t"
+			if fld.IsSliceType {
+				accessor = "[i]"
+				indent += "\t"
+				fmt.Fprintf(w, "\tfor i := range %s%s.%s {\n", deref, wt.ShortTypeName, fld.Name)
+			}
 
 			if needsNilCheck {
-				fmt.Fprintf(w, "\t}\n\n")
+				indent += "\t"
+				fmt.Fprintf(w, "\tif %s.%s != nil {\n", wt.ShortTypeName, fld.Name)
+			}
+
+			fmt.Fprintf(w, "%sw.walk%s(ctx, %s%s.%s%s)\n", indent, fld.Type.FuncName, deref, wt.ShortTypeName, fld.Name, accessor)
+
+			if needsNilCheck {
+				fmt.Fprintf(w, "\t}\n")
 			}
 
 			if fld.IsSliceType {
 				fmt.Fprintf(w, "\t}\n")
+			}
+
+			if i < len(wt.Fields)-1 && (needsNilCheck || fld.IsSliceType) {
+				fmt.Fprintf(w, "\n")
 			}
 		}
 	}
