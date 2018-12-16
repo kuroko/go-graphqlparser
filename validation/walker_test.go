@@ -96,7 +96,7 @@ func TestWalker_Walk(t *testing.T) {
 			`),
 			rules: func(w *Walker) {
 				w.AddStringValueEnterEventHandler(func(context *Context, value ast.Value) {
-					assert.Equal(pt, "bar", value.StringValue, "Iuhsdiufhihsudf")
+					assert.Equal(pt, "bar", value.StringValue)
 				})
 			},
 		},
