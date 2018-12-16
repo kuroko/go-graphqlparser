@@ -65,7 +65,6 @@ func TestWalker_Walk(t *testing.T) {
 				}
 			`),
 			rules: func(w *Walker) {
-
 				var count int
 				w.AddTypeEnterEventHandler(func(context *Context, gt ast.Type) {
 					count++
@@ -116,7 +115,6 @@ func TestWalker_Walk(t *testing.T) {
 			`),
 			rules: func(w *Walker) {
 				var authorName string
-
 				w.AddObjectFieldEnterEventHandler(func(context *Context, field ast.ObjectField) {
 					if field.Name == "name" {
 						authorName = field.Value.StringValue
