@@ -71,8 +71,8 @@ func (e *Error) MarshalJSON() ([]byte, error) {
 
 // Location provides information about an error as the position in a potentially multi-line string.
 type Location struct {
-	Line   uint
-	Column uint
+	Line   int
+	Column int
 }
 
 // PathNodeKind values.

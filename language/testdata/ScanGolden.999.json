@@ -4,164 +4,164 @@
     {
       "Kind": 2,
       "Literal": "mutation",
-      "Position": 9,
-      "Line": 3
+      "Line": 3,
+      "Column": 9
     },
     {
       "Kind": 1,
       "Literal": "{",
-      "Position": 18,
-      "Line": 3
+      "Line": 3,
+      "Column": 18
     },
     {
       "Kind": 2,
       "Literal": "createPost",
-      "Position": 13,
-      "Line": 4
+      "Line": 4,
+      "Column": 13
     },
     {
       "Kind": 1,
       "Literal": "(",
-      "Position": 23,
-      "Line": 4
+      "Line": 4,
+      "Column": 23
     },
     {
       "Kind": 2,
       "Literal": "id",
-      "Position": 17,
-      "Line": 5
+      "Line": 5,
+      "Column": 17
     },
     {
       "Kind": 1,
       "Literal": ":",
-      "Position": 19,
-      "Line": 5
+      "Line": 5,
+      "Column": 19
     },
     {
       "Kind": 3,
       "Literal": "1024",
-      "Position": 21,
-      "Line": 5
+      "Line": 5,
+      "Column": 21
     },
     {
       "Kind": 2,
       "Literal": "title",
-      "Position": 17,
-      "Line": 6
+      "Line": 6,
+      "Column": 17
     },
     {
       "Kind": 1,
       "Literal": ":",
-      "Position": 22,
-      "Line": 6
+      "Line": 6,
+      "Column": 22
     },
     {
       "Kind": 5,
       "Literal": "String Value",
-      "Position": 24,
-      "Line": 6
+      "Line": 6,
+      "Column": 24
     },
     {
       "Kind": 2,
       "Literal": "content",
-      "Position": 17,
-      "Line": 7
+      "Line": 7,
+      "Column": 17
     },
     {
       "Kind": 1,
       "Literal": ":",
-      "Position": 24,
-      "Line": 7
+      "Line": 7,
+      "Column": 24
     },
     {
       "Kind": 5,
       "Literal": "Hello,\n\n    Welcome to GraphQL.\n    Let's make this string a little bigger then. Because the larger this string\n    becomes, the more efficient our lexer should look...\n\nFrom, Bucketd",
-      "Position": 26,
-      "Line": 7
+      "Line": 7,
+      "Column": 26
     },
     {
       "Kind": 2,
       "Literal": "readTime",
-      "Position": 17,
-      "Line": 16
+      "Line": 16,
+      "Column": 17
     },
     {
       "Kind": 1,
       "Literal": ":",
-      "Position": 25,
-      "Line": 16
+      "Line": 16,
+      "Column": 25
     },
     {
       "Kind": 4,
       "Literal": "2.742",
-      "Position": 27,
-      "Line": 16
+      "Line": 16,
+      "Column": 27
     },
     {
       "Kind": 1,
       "Literal": ")",
-      "Position": 13,
-      "Line": 17
+      "Line": 17,
+      "Column": 13
     },
     {
       "Kind": 1,
       "Literal": "@",
-      "Position": 15,
-      "Line": 17
+      "Line": 17,
+      "Column": 15
     },
     {
       "Kind": 2,
       "Literal": "async",
-      "Position": 16,
-      "Line": 17
+      "Line": 17,
+      "Column": 16
     },
     {
       "Kind": 1,
       "Literal": "(",
-      "Position": 21,
-      "Line": 17
+      "Line": 17,
+      "Column": 21
     },
     {
       "Kind": 2,
       "Literal": "bar",
-      "Position": 22,
-      "Line": 17
+      "Line": 17,
+      "Column": 22
     },
     {
       "Kind": 1,
       "Literal": ":",
-      "Position": 25,
-      "Line": 17
+      "Line": 17,
+      "Column": 25
     },
     {
       "Kind": 1,
       "Literal": "$",
-      "Position": 27,
-      "Line": 17
+      "Line": 17,
+      "Column": 27
     },
     {
       "Kind": 2,
       "Literal": "baz",
-      "Position": 28,
-      "Line": 17
+      "Line": 17,
+      "Column": 28
     },
     {
       "Kind": 1,
       "Literal": ")",
-      "Position": 31,
-      "Line": 17
+      "Line": 17,
+      "Column": 31
     },
     {
       "Kind": 1,
       "Literal": "}",
-      "Position": 9,
-      "Line": 18
+      "Line": 18,
+      "Column": 9
     },
     {
       "Kind": 0,
       "Literal": "",
-      "Position": 5,
-      "Line": 19
+      "Line": 19,
+      "Column": 5
     }
   ],
   "Errors": null

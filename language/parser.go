@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/bucketd/go-graphqlparser/graphql"
+
 	"github.com/bucketd/go-graphqlparser/ast"
 )
 
@@ -68,11 +70,17 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 	// We can only allow a shorthand query if it's the only definition.
 	p.hasShorthandQuery = document.Definitions.Len() == 0 && p.token.Literal == "{"
 
+	location := graphql.Location{
+		Line:   p.token.Line,
+		Column: p.token.Column,
+	}
+
 	// ExecutableDefinition...
 	if p.peekn(TokenKindName, "query", "mutation", "subscription") || p.peek1(TokenKindPunctuator, "{") {
 		definition := ast.Definition{}
 		definition.Kind = ast.DefinitionKindExecutable
 		definition.ExecutableDefinition, err = p.parseOperationDefinition(p.hasShorthandQuery)
+		definition.Location = location
 
 		return definition, err
 	}
@@ -82,6 +90,7 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 		definition := ast.Definition{}
 		definition.Kind = ast.DefinitionKindExecutable
 		definition.ExecutableDefinition, err = p.parseFragmentDefinition()
+		definition.Location = location
 
 		return definition, err
 	}
@@ -91,6 +100,7 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 		definition := ast.Definition{}
 		definition.Kind = ast.DefinitionKindTypeSystemExtension
 		definition.TypeSystemExtension, err = p.parseTypeSystemExtension()
+		definition.Location = location
 
 		return definition, err
 	}
@@ -114,6 +124,7 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 		definition := ast.Definition{}
 		definition.Kind = ast.DefinitionKindTypeSystem
 		definition.TypeSystemDefinition, err = p.parseTypeSystemDefinition(description)
+		definition.Location = location
 
 		return definition, err
 	}
@@ -1662,7 +1673,7 @@ func (p *Parser) unexpected(token Token, wants ...string) error {
 	buf.WriteString("line: ")
 	buf.WriteString(strconv.Itoa(token.Line))
 	buf.WriteString(", column: ")
-	buf.WriteString(strconv.Itoa(token.Position))
+	buf.WriteString(strconv.Itoa(token.Column))
 	buf.WriteString(". Found: ")
 	buf.WriteString(token.Kind.String())
 	buf.WriteString(" '")

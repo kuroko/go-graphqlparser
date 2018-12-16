@@ -39,10 +39,10 @@ var TokenKindNames = map[TokenKind]string{
 // Token represents a small, easily categorisable data structure that is fed to the parser to
 // produce the abstract syntax tree (AST).
 type Token struct {
-	Kind     TokenKind // The token type.
-	Literal  string    // The literal value consumed.
-	Position int       // The starting position, in runes, of this token in the input.
-	Line     int       // The line number at the start of this item.
+	Kind    TokenKind // The token type.
+	Literal string    // The literal value consumed.
+	Line    int       // The line number at the start of this item.
+	Column  int       // The starting position, in runes, of this token on this line.
 }
 
 // TokenKind represents a type of token. The types are predefined as constants.

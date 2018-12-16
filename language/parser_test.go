@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
+	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/stretchr/testify/require"
+
 	goparser "github.com/graphql-go/graphql/language/parser"
 	gosource "github.com/graphql-go/graphql/language/source"
 	ast2 "github.com/vektah/gqlparser/ast"
@@ -75,6 +80,31 @@ func BenchmarkParser(b *testing.B) {
 			})
 		})
 	}
+}
+
+func TestParser_Parse(t *testing.T) {
+	t.Run("should set Location on Definition", func(t *testing.T) {
+		query := []byte(`
+			# Really testing this location stuff here...
+			{ hello }
+		`)
+
+		psr := NewParser(query)
+
+		doc, err := psr.Parse()
+		require.NoError(t, err)
+
+		var found bool
+
+		doc.Definitions.ForEach(func(d ast.Definition, i int) {
+			assert.Equal(t, 3, d.Location.Line)
+			assert.Equal(t, 4, d.Location.Column)
+
+			found = true
+		})
+
+		assert.True(t, found)
+	})
 }
 
 func runBucketdParser(b *testing.B, query []byte) {

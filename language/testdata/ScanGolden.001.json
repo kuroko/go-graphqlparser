@@ -4,14 +4,14 @@
     {
       "Kind": 3,
       "Literal": "0",
-      "Position": 1,
-      "Line": 1
+      "Line": 1,
+      "Column": 1
     },
     {
       "Kind": 0,
       "Literal": "",
-      "Position": 2,
-      "Line": 1
+      "Line": 1,
+      "Column": 2
     }
   ],
   "Errors": null

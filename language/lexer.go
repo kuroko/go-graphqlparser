@@ -102,17 +102,17 @@ func (l *Lexer) Scan() Token {
 
 	case r == eof:
 		return Token{
-			Kind:     TokenKindEOF,
-			Position: l.lpos + 1,
-			Line:     l.line,
+			Kind:   TokenKindEOF,
+			Column: l.lpos + 1,
+			Line:   l.line,
 		}
 
 	default:
 		return Token{
-			Kind:     TokenKindIllegal,
-			Literal:  string(r),
-			Position: l.lpos,
-			Line:     l.line,
+			Kind:    TokenKindIllegal,
+			Literal: string(r),
+			Column:  l.lpos,
+			Line:    l.line,
 		}
 	}
 }
@@ -139,10 +139,10 @@ func (l *Lexer) scanString(r rune) Token {
 
 		case r < ws && r != tab:
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  fmt.Sprintf("invalid character within string: %q", r),
-				Position: startLPos,
-				Line:     startLine,
+				Kind:    TokenKindIllegal,
+				Literal: fmt.Sprintf("invalid character within string: %q", r),
+				Column:  startLPos,
+				Line:    startLine,
 			}
 
 		case r == bsl:
@@ -173,10 +173,10 @@ func (l *Lexer) scanString(r rune) Token {
 
 	if !hasEscape {
 		return Token{
-			Kind:     TokenKindStringValue,
-			Literal:  btos(l.input[startPos : l.pos-1]),
-			Position: startLPos,
-			Line:     startLine,
+			Kind:    TokenKindStringValue,
+			Literal: btos(l.input[startPos : l.pos-1]),
+			Column:  startLPos,
+			Line:    startLine,
 		}
 	}
 
@@ -195,20 +195,20 @@ func (l *Lexer) scanString(r rune) Token {
 		switch {
 		case r == '"' || r == eof:
 			return Token{
-				Kind:     TokenKindStringValue,
-				Literal:  btos(bs),
-				Position: startLPos,
-				Line:     startLine,
+				Kind:    TokenKindStringValue,
+				Literal: btos(bs),
+				Column:  startLPos,
+				Line:    startLine,
 			}
 
 		case r == bsl:
 			r, err := escapedChar(l)
 			if err != nil {
 				return Token{
-					Kind:     TokenKindIllegal,
-					Literal:  err.Error(),
-					Position: startLPos,
-					Line:     startLine,
+					Kind:    TokenKindIllegal,
+					Literal: err.Error(),
+					Column:  startLPos,
+					Line:    startLine,
 				}
 			}
 
@@ -253,10 +253,10 @@ func (l *Lexer) scanBlockString(r rune) Token {
 		// Check for invalid characters in the block string, bail early.
 		if r < ws && r != tab && r != lf && r != cr {
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  fmt.Sprintf("invalid character within block string: %q", r),
-				Position: startLPos - 2,
-				Line:     startLine,
+				Kind:    TokenKindIllegal,
+				Literal: fmt.Sprintf("invalid character within block string: %q", r),
+				Column:  startLPos - 2,
+				Line:    startLine,
 			}
 		}
 
@@ -268,10 +268,10 @@ func (l *Lexer) scanBlockString(r rune) Token {
 		// Check for end of input.
 		if r == eof {
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  "unexpected eof, probably unclosed block string",
-				Position: startLPos - 2,
-				Line:     startLine,
+				Kind:    TokenKindIllegal,
+				Literal: "unexpected eof, probably unclosed block string",
+				Column:  startLPos - 2,
+				Line:    startLine,
 			}
 		}
 	}
@@ -302,20 +302,20 @@ func (l *Lexer) scanBlockString(r rune) Token {
 			}
 		} else if r == eof {
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  "unexpected eof, probably unclosed block string",
-				Position: startLPos - 2,
-				Line:     startLine,
+				Kind:    TokenKindIllegal,
+				Literal: "unexpected eof, probably unclosed block string",
+				Column:  startLPos - 2,
+				Line:    startLine,
 			}
 		} else if r == '"' && isTripQuotes(l) {
 			// Escape from the loop if we've hit the end of the block string.
 			break
 		} else if r < ws && r != tab && r != lf && r != cr {
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  fmt.Sprintf("invalid character within block string: %q", r),
-				Position: startLPos - 2,
-				Line:     startLine,
+				Kind:    TokenKindIllegal,
+				Literal: fmt.Sprintf("invalid character within block string: %q", r),
+				Column:  startLPos - 2,
+				Line:    startLine,
 			}
 		} else {
 			// Write everything else to the buffer.
@@ -324,10 +324,10 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	}
 
 	return Token{
-		Kind:     TokenKindStringValue,
-		Literal:  l.blockStringLiteral(btos(buf.Bytes())),
-		Position: startLPos - 2,
-		Line:     startLine,
+		Kind:    TokenKindStringValue,
+		Literal: l.blockStringLiteral(btos(buf.Bytes())),
+		Column:  startLPos - 2,
+		Line:    startLine,
 	}
 }
 
@@ -570,10 +570,10 @@ Loop:
 	}
 
 	return Token{
-		Kind:     TokenKindName,
-		Literal:  btos(l.input[byteStart:l.pos]),
-		Position: runeStart,
-		Line:     l.line,
+		Kind:    TokenKindName,
+		Literal: btos(l.input[byteStart:l.pos]),
+		Column:  runeStart,
+		Line:    l.line,
 	}
 }
 
@@ -589,26 +589,26 @@ func (l *Lexer) scanPunctuator(r rune, w int) Token {
 		rs := []rune{r, r2, r3}
 		if rs[1] != '.' || rs[2] != '.' {
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  fmt.Sprintf("invalid punctuator, expected \"...\" but got: %q", string(rs)),
-				Position: runeStart,
-				Line:     l.line,
+				Kind:    TokenKindIllegal,
+				Literal: fmt.Sprintf("invalid punctuator, expected \"...\" but got: %q", string(rs)),
+				Column:  runeStart,
+				Line:    l.line,
 			}
 		}
 
 		return Token{
-			Kind:     TokenKindPunctuator,
-			Literal:  "...",
-			Position: runeStart,
-			Line:     l.line,
+			Kind:    TokenKindPunctuator,
+			Literal: "...",
+			Column:  runeStart,
+			Line:    l.line,
 		}
 	}
 
 	return Token{
-		Kind:     TokenKindPunctuator,
-		Literal:  btos(l.input[byteStart-w : byteStart]),
-		Position: runeStart,
-		Line:     l.line,
+		Kind:    TokenKindPunctuator,
+		Literal: btos(l.input[byteStart-w : byteStart]),
+		Column:  runeStart,
+		Line:    l.line,
 	}
 }
 
@@ -634,10 +634,10 @@ func (l *Lexer) scanNumber(r rune) Token {
 		// If there is another digit after zero, error.
 		if r >= '0' && r <= '9' {
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  fmt.Sprintf("invalid number, unexpected digit after 0: %q", r),
-				Position: runeStart,
-				Line:     l.line,
+				Kind:    TokenKindIllegal,
+				Literal: fmt.Sprintf("invalid number, unexpected digit after 0: %q", r),
+				Column:  runeStart,
+				Line:    l.line,
 			}
 		}
 
@@ -647,10 +647,10 @@ func (l *Lexer) scanNumber(r rune) Token {
 		r, w, err = l.readDigits(r)
 		if err != nil {
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  err.Error(),
-				Position: runeStart,
-				Line:     l.line,
+				Kind:    TokenKindIllegal,
+				Literal: err.Error(),
+				Column:  runeStart,
+				Line:    l.line,
 			}
 		}
 	}
@@ -665,10 +665,10 @@ func (l *Lexer) scanNumber(r rune) Token {
 		r, w, err = l.readDigits(r)
 		if err != nil {
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  err.Error(),
-				Position: runeStart,
-				Line:     l.line,
+				Kind:    TokenKindIllegal,
+				Literal: err.Error(),
+				Column:  runeStart,
+				Line:    l.line,
 			}
 		}
 	}
@@ -688,10 +688,10 @@ func (l *Lexer) scanNumber(r rune) Token {
 		r, w, err = l.readDigits(r)
 		if err != nil {
 			return Token{
-				Kind:     TokenKindIllegal,
-				Literal:  err.Error(),
-				Position: runeStart,
-				Line:     l.line,
+				Kind:    TokenKindIllegal,
+				Literal: err.Error(),
+				Column:  runeStart,
+				Line:    l.line,
 			}
 		}
 	}
@@ -701,9 +701,9 @@ func (l *Lexer) scanNumber(r rune) Token {
 	}
 
 	t := Token{
-		Literal:  btos(l.input[byteStart:l.pos]),
-		Line:     l.line,
-		Position: runeStart,
+		Literal: btos(l.input[byteStart:l.pos]),
+		Line:    l.line,
+		Column:  runeStart,
 	}
 
 	t.Kind = TokenKindIntValue

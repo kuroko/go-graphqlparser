@@ -4,8 +4,8 @@
     {
       "Kind": 0,
       "Literal": "",
-      "Position": 15,
-      "Line": 1
+      "Line": 1,
+      "Column": 15
     }
   ],
   "Errors": null

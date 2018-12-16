@@ -4,8 +4,8 @@
     {
       "Kind": -1,
       "Literal": "invalid character within block string: '\\x00'",
-      "Position": 1,
-      "Line": 1
+      "Line": 1,
+      "Column": 1
     }
   ],
   "Errors": [

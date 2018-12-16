@@ -4,14 +4,14 @@
     {
       "Kind": 5,
       "Literal": "\t",
-      "Position": 1,
-      "Line": 1
+      "Line": 1,
+      "Column": 1
     },
     {
       "Kind": 0,
       "Literal": "",
-      "Position": 5,
-      "Line": 1
+      "Line": 1,
+      "Column": 5
     }
   ],
   "Errors": null

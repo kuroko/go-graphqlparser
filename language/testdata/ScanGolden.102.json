@@ -4,86 +4,86 @@
     {
       "Kind": 1,
       "Literal": "!",
-      "Position": 2,
-      "Line": 1
+      "Line": 1,
+      "Column": 2
     },
     {
       "Kind": 1,
       "Literal": "$",
-      "Position": 4,
-      "Line": 1
+      "Line": 1,
+      "Column": 4
     },
     {
       "Kind": 1,
       "Literal": "(",
-      "Position": 6,
-      "Line": 1
+      "Line": 1,
+      "Column": 6
     },
     {
       "Kind": 1,
       "Literal": ")",
-      "Position": 8,
-      "Line": 1
+      "Line": 1,
+      "Column": 8
     },
     {
       "Kind": 1,
       "Literal": "...",
-      "Position": 10,
-      "Line": 1
+      "Line": 1,
+      "Column": 10
     },
     {
       "Kind": 1,
       "Literal": ":",
-      "Position": 14,
-      "Line": 1
+      "Line": 1,
+      "Column": 14
     },
     {
       "Kind": 1,
       "Literal": "=",
-      "Position": 16,
-      "Line": 1
+      "Line": 1,
+      "Column": 16
     },
     {
       "Kind": 1,
       "Literal": "@",
-      "Position": 18,
-      "Line": 1
+      "Line": 1,
+      "Column": 18
     },
     {
       "Kind": 1,
       "Literal": "[",
-      "Position": 20,
-      "Line": 1
+      "Line": 1,
+      "Column": 20
     },
     {
       "Kind": 1,
       "Literal": "]",
-      "Position": 22,
-      "Line": 1
+      "Line": 1,
+      "Column": 22
     },
     {
       "Kind": 1,
       "Literal": "{",
-      "Position": 24,
-      "Line": 1
+      "Line": 1,
+      "Column": 24
     },
     {
       "Kind": 1,
       "Literal": "|",
-      "Position": 26,
-      "Line": 1
+      "Line": 1,
+      "Column": 26
     },
     {
       "Kind": 1,
       "Literal": "}",
-      "Position": 28,
-      "Line": 1
+      "Line": 1,
+      "Column": 28
     },
     {
       "Kind": 0,
       "Literal": "",
-      "Position": 29,
-      "Line": 1
+      "Line": 1,
+      "Column": 29
     }
   ],
   "Errors": null

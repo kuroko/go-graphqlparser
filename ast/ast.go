@@ -34,6 +34,7 @@ func (k DefinitionKind) String() string {
 }
 
 type Definition struct {
+	Location             graphql.Location
 	ExecutableDefinition *ExecutableDefinition
 	TypeSystemDefinition *TypeSystemDefinition
 	TypeSystemExtension  *TypeSystemExtension

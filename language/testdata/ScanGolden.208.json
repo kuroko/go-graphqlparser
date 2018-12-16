@@ -4,14 +4,14 @@
     {
       "Kind": 2,
       "Literal": "query",
-      "Position": 1,
-      "Line": 3
+      "Line": 3,
+      "Column": 1
     },
     {
       "Kind": 0,
       "Literal": "",
-      "Position": 6,
-      "Line": 3
+      "Line": 3,
+      "Column": 6
     }
   ],
   "Errors": null

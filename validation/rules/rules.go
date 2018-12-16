@@ -12,7 +12,7 @@ import (
 var Specified = []validation.RuleFunc{
 	executableDefinitions,
 	// uniqueOperationNames,
-	// loneAnonymousOperation,
+	loneAnonymousOperation,
 	// singleFieldSubscriptions,
 	// knownTypeNames,
 	// fragmentsOnCompositeTypes,
