@@ -218,10 +218,6 @@ type Value struct {
 	Kind         ValueKind
 }
 
-// @wg:ignore
-//type ListValue []Value
-
-// @wg:ignore
 type ObjectField struct {
 	Name  string
 	Value Value

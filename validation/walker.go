@@ -40,6 +40,7 @@ type Walker struct {
 	mutationOperationDefinitionEventHandlers     MutationOperationDefinitionEventHandlers
 	namedTypeEventHandlers                       NamedTypeEventHandlers
 	nullValueEventHandlers                       NullValueEventHandlers
+	objectFieldEventHandlers                     ObjectFieldEventHandlers
 	objectTypeDefinitionEventHandlers            ObjectTypeDefinitionEventHandlers
 	objectTypeExtensionEventHandlers             ObjectTypeExtensionEventHandlers
 	objectValueEventHandlers                     ObjectValueEventHandlers
@@ -1602,8 +1603,8 @@ func (w *Walker) OnListValueLeave(ctx *Context, v ast.Value) {
 func (w *Walker) walkListValue(ctx *Context, v ast.Value) {
 	w.OnListValueEnter(ctx, v)
 
-	for i := range v.ListValue {
-		w.walkValue(ctx, v.ListValue[i])
+	for i := range v.ObjectValue {
+		w.walkObjectField(ctx, v.ObjectValue[i])
 	}
 
 	w.OnListValueLeave(ctx, v)
@@ -1743,6 +1744,48 @@ func (w *Walker) walkNullValue(ctx *Context, v ast.Value) {
 	w.OnNullValueEnter(ctx, v)
 
 	w.OnNullValueLeave(ctx, v)
+}
+
+// ObjectFieldEventHandler function can handle enter/leave events for ObjectField.
+type ObjectFieldEventHandler func(*Context, ast.ObjectField)
+
+// ObjectFieldEventHandlers stores the enter and leave events handlers.
+type ObjectFieldEventHandlers struct {
+	enter []ObjectFieldEventHandler
+	leave []ObjectFieldEventHandler
+}
+
+// AddObjectFieldEnterEventHandler adds an event handler to be called when entering ObjectField nodes.
+func (w *Walker) AddObjectFieldEnterEventHandler(h ObjectFieldEventHandler) {
+	w.objectFieldEventHandlers.enter = append(w.objectFieldEventHandlers.enter, h)
+}
+
+// AddObjectFieldLeaveEventHandler adds an event handler to be called when leaving ObjectField nodes.
+func (w *Walker) AddObjectFieldLeaveEventHandler(h ObjectFieldEventHandler) {
+	w.objectFieldEventHandlers.leave = append(w.objectFieldEventHandlers.leave, h)
+}
+
+// OnObjectFieldEnter calls the enter event handlers registered for this node type.
+func (w *Walker) OnObjectFieldEnter(ctx *Context, of ast.ObjectField) {
+	for _, handler := range w.objectFieldEventHandlers.enter {
+		handler(ctx, of)
+	}
+}
+
+// OnObjectFieldLeave calls the leave event handlers registered for this node type.
+func (w *Walker) OnObjectFieldLeave(ctx *Context, of ast.ObjectField) {
+	for _, handler := range w.objectFieldEventHandlers.leave {
+		handler(ctx, of)
+	}
+}
+
+// walkObjectField is a function that walks ObjectField type's AST node.
+func (w *Walker) walkObjectField(ctx *Context, of ast.ObjectField) {
+	w.OnObjectFieldEnter(ctx, of)
+
+	w.walkValue(ctx, of.Value)
+
+	w.OnObjectFieldLeave(ctx, of)
 }
 
 // ObjectTypeDefinitionEventHandler function can handle enter/leave events for ObjectTypeDefinition.
@@ -1909,6 +1952,10 @@ func (w *Walker) OnObjectValueLeave(ctx *Context, v ast.Value) {
 // walkObjectValue is a function that walks ObjectValue type's AST node.
 func (w *Walker) walkObjectValue(ctx *Context, v ast.Value) {
 	w.OnObjectValueEnter(ctx, v)
+
+	for i := range v.ObjectValue {
+		w.walkObjectField(ctx, v.ObjectValue[i])
+	}
 
 	w.OnObjectValueLeave(ctx, v)
 }
