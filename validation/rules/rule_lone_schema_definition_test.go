@@ -56,6 +56,6 @@ func TestLoneSchemaDefinition(t *testing.T) {
 		}
 
 		errs := validation.Validate(doc, walker)
-		assert.Equal(t, tc.errs, errs)
+		assert.Equal(t, tc.errs, errs, tc.msg)
 	}
 }
