@@ -9,33 +9,35 @@ import (
 // Lone Schema definition
 //
 // A GraphQL document is only valid if it contains only one schema definition.
-func loneSchemaDefinition(walker *validation.Walker) {
+func loneSchemaDefinition(ctx *validation.Context) validation.VisitFunc {
 	var schemaDefinitions int
 
-	walker.AddSchemaDefinitionEnterEventHandler(func(context *validation.Context, _ *ast.SchemaDefinition) {
-		// TODO: implement logic once schema is implemented.
-		_ = context.Schema
-		if false {
-			context.Errors = context.Errors.Add(canNotDefineSchemaWithinExtensionMessage(0, 0))
-		}
+	return func(w *validation.Walker) {
+		w.AddSchemaDefinitionEnterEventHandler(func(_ *ast.SchemaDefinition) {
+			// TODO: implement logic once schema is implemented.
+			_ = ctx.Schema
+			if false {
+				ctx.Errors = ctx.Errors.Add(canNotDefineSchemaWithinExtensionError(0, 0))
+			}
 
-		if schemaDefinitions > 0 {
-			context.Errors = context.Errors.Add(schemaDefinitionNotAlone(0, 0))
-		}
-		schemaDefinitions++
-	})
+			if schemaDefinitions > 0 {
+				ctx.Errors = ctx.Errors.Add(schemaDefinitionNotAloneError(0, 0))
+			}
+			schemaDefinitions++
+		})
+	}
 }
 
-func schemaDefinitionNotAlone(line, col int) graphql.Error {
+func schemaDefinitionNotAloneError(line, col int) graphql.Error {
 	return graphql.NewError(
 		"Must provide only one schema definition.",
-		// TODO(seeruk): Location.
+		// TODO: Location.
 	)
 }
 
-func canNotDefineSchemaWithinExtensionMessage(line, col int) graphql.Error {
+func canNotDefineSchemaWithinExtensionError(line, col int) graphql.Error {
 	return graphql.NewError(
 		"Cannot define a new schema within a schema extension.",
-		// TODO(seeruk): Location.
+		// TODO: Location.
 	)
 }

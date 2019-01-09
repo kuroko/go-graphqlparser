@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: when schema is implemented add tests for canNotDefineSchemaWithinExtensionMessage.
+// TODO: when schema is implemented add tests for canNotDefineSchemaWithinExtensionError.
 func TestLoneSchemaDefinition(t *testing.T) {
 	tt := []struct {
 		msg   string
@@ -41,13 +41,12 @@ func TestLoneSchemaDefinition(t *testing.T) {
 			schema { subscription: Foo }
 			`,
 			errs: (*graphql.Errors).
-				Add(nil, schemaDefinitionNotAlone(0, 0)).
-				Add(schemaDefinitionNotAlone(0, 0)),
+				Add(nil, schemaDefinitionNotAloneError(0, 0)).
+				Add(schemaDefinitionNotAloneError(0, 0)),
 		},
 	}
 
 	for _, tc := range tt {
-		walker := validation.NewWalker([]validation.RuleFunc{loneSchemaDefinition})
 		parser := language.NewParser([]byte(tc.query))
 
 		doc, err := parser.Parse()
@@ -55,7 +54,7 @@ func TestLoneSchemaDefinition(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		errs := validation.Validate(doc, walker)
+		errs := validation.Validate(doc, []validation.RuleFunc{loneSchemaDefinition})
 		assert.Equal(t, tc.errs, errs, tc.msg)
 	}
 }

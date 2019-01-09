@@ -20,7 +20,6 @@ query Foo {
 `)
 
 func BenchmarkValidate(b *testing.B) {
-	walker := validation.NewWalker(rules.Specified)
 	parser := language.NewParser(query)
 
 	doc, err := parser.Parse()
@@ -31,14 +30,12 @@ func BenchmarkValidate(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		validation.Validate(doc, walker)
+		validation.Validate(doc, rules.Specified)
 	}
 }
 
 func TestValidate(t *testing.T) {
-	// TODO(seeruk): Move into golden test format.
-
-	walker := validation.NewWalker(rules.Specified)
+	// TODO: Move into golden test format.
 	parser := language.NewParser([]byte(`
 		query { hello }
 		query { goodbye }
@@ -49,7 +46,7 @@ func TestValidate(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	errs := validation.Validate(doc, walker)
+	errs := validation.Validate(doc, rules.Specified)
 
 	assert.Equal(t, 2, errs.Len())
 }

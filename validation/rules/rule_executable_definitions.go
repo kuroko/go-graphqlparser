@@ -9,24 +9,26 @@ import (
 )
 
 // executableDefinitions ...
-func executableDefinitions(walker *validation.Walker) {
-	walker.AddDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.Definition) {
-		if def.Kind != ast.DefinitionKindExecutable {
-			err := graphql.NewError(nonExecutableDefinitionMessage(def))
-			// TODO: Add locations to AST.
-			err.Locations = err.Locations.Add(graphql.Location{Line: 6, Column: 7})
-			// NOTE(elliot): err.Path is unused in validation.
+func executableDefinitions(ctx *validation.Context) validation.VisitFunc {
+	return func(w *validation.Walker) {
+		w.AddDefinitionEnterEventHandler(func(def ast.Definition) {
+			if def.Kind != ast.DefinitionKindExecutable {
+				err := graphql.NewError(nonExecutableDefinitionMessage(def))
+				// TODO: Add locations to AST.
+				err.Locations = err.Locations.Add(graphql.Location{Line: 6, Column: 7})
+				// NOTE(elliot): err.Path is unused in validation.
 
-			ctx.Errors = ctx.Errors.Add(err)
-		}
-	})
+				ctx.Errors = ctx.Errors.Add(err)
+			}
+		})
+	}
 }
 
 // nonExecutableDefinitionMessage ...
 func nonExecutableDefinitionMessage(def ast.Definition) string {
 	var name string
 
-	// TODO(elliot): We really need to move the name field to the top level of Definition...
+	// TODO: We really need to move the name field to the top level of Definition...
 	switch def.Kind {
 	case ast.DefinitionKindTypeSystem:
 		tsDef := def.TypeSystemDefinition

@@ -6,9 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bucketd/go-graphqlparser/graphql"
-
 	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/graphql"
 )
 
 // Parser is a parser for GraphQL documents.

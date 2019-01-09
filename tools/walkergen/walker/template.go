@@ -29,18 +29,18 @@ type Walker struct { {{- range .}}
 }
 
 // NewWalker returns a new Walker instance.
-func NewWalker(rules []RuleFunc) *Walker {
+func NewWalker(visitFns []VisitFunc) *Walker {
 	walker := &Walker{}
-	for _, rule := range rules {
-		rule(walker)
+	for _, visitFn := range visitFns {
+		visitFn(walker)
 	}
 
 	return walker
 }
 
 // Walk traverses an entire AST document for the purposes of validation.
-func (w *Walker) Walk(ctx *Context, doc ast.Document) {
-	w.walkDocument(ctx, doc)
+func (w *Walker) Walk(doc ast.Document) {
+	w.walkDocument(doc)
 }
 `))
 
@@ -48,7 +48,7 @@ func (w *Walker) Walk(ctx *Context, doc ast.Document) {
 // and the corresponding types that have the event handler functions attached.
 var eventHandlersTmpl = template.Must(template.New("eventHandlersTmpl").Funcs(sprig.TxtFuncMap()).Parse(`
 // {{.FuncName}}EventHandler function can handle enter/leave events for {{.FuncName}}.
-type {{.FuncName}}EventHandler func(*Context, {{if .IsAlwaysPointer}}*{{end}}ast.{{.TypeName}})
+type {{.FuncName}}EventHandler func({{if .IsAlwaysPointer}}*{{end}}ast.{{.TypeName}})
 
 // {{.FuncName}}EventHandlers stores the enter and leave events handlers.
 type {{.FuncName}}EventHandlers struct {
@@ -67,16 +67,16 @@ func (w *Walker) Add{{.FuncName}}LeaveEventHandler(h {{.FuncName}}EventHandler) 
 }
 
 // On{{.FuncName}}Enter calls the enter event handlers registered for this node type.
-func (w *Walker) On{{.FuncName}}Enter(ctx *Context, {{.ShortTypeName}} {{if .IsAlwaysPointer}}*{{end}}ast.{{.TypeName}}) {
+func (w *Walker) On{{.FuncName}}Enter({{.ShortTypeName}} {{if .IsAlwaysPointer}}*{{end}}ast.{{.TypeName}}) {
 	for _, handler := range w.{{untitle .FuncName}}EventHandlers.enter {
-		handler(ctx, {{.ShortTypeName}})
+		handler({{.ShortTypeName}})
 	}
 }
 
 // On{{.FuncName}}Leave calls the leave event handlers registered for this node type.
-func (w *Walker) On{{.FuncName}}Leave(ctx *Context, {{.ShortTypeName}} {{if .IsAlwaysPointer}}*{{end}}ast.{{.TypeName}}) {
+func (w *Walker) On{{.FuncName}}Leave({{.ShortTypeName}} {{if .IsAlwaysPointer}}*{{end}}ast.{{.TypeName}}) {
 	for _, handler := range w.{{untitle .FuncName}}EventHandlers.leave {
-		handler(ctx, {{.ShortTypeName}})
+		handler({{.ShortTypeName}})
 	}
 }
 `))
@@ -84,19 +84,19 @@ func (w *Walker) On{{.FuncName}}Leave(ctx *Context, {{.ShortTypeName}} {{if .IsA
 // walkFnHeadTmpl is the template for generating the head of a walker function.
 var walkFnHeadTmpl = template.Must(template.New("walkFnHeadTmpl").Funcs(sprig.TxtFuncMap()).Parse(`
 // walk{{.FuncName}} is a function that walks {{.FuncName}} type's AST node.
-func (w *Walker) walk{{.FuncName}}(ctx *Context, {{.ShortTypeName}} {{.FullTypeName}}) {
-	w.On{{.FuncName}}Enter(ctx, {{.ShortTypeName}})
+func (w *Walker) walk{{.FuncName}}({{.ShortTypeName}} {{.FullTypeName}}) {
+	w.On{{.FuncName}}Enter({{.ShortTypeName}})
 `))
 
 // walkFnFootTmpl is the template for generating the head of a walker function.
 var walkFnFootTmpl = template.Must(template.New("walkFnFootTmpl").Funcs(sprig.TxtFuncMap()).Parse(`
-	w.On{{.FuncName}}Leave(ctx, {{.ShortTypeName}})
+	w.On{{.FuncName}}Leave({{.ShortTypeName}})
 }
 `))
 
 var walkFnLinkedListTmpl = template.Must(template.New("walkFnLinkedListTmpl").Parse(`
 	{{.ShortTypeName}}.ForEach(func({{.LinkedListType.ShortTypeName}} {{.LinkedListType.FullTypeName}}, i int) {
-		w.walk{{.LinkedListType.FuncName}}(ctx, {{.LinkedListType.ShortTypeName}})
+		w.walk{{.LinkedListType.FuncName}}({{.LinkedListType.ShortTypeName}})
 	})
 `))
 
@@ -104,7 +104,7 @@ var walkFnKindsTmpl = template.Must(template.New("walkFnKindsTmpl").Parse(`
 	switch {{.ShortTypeName}}.Kind {
 	{{range .Kinds -}}
 	case ast.{{.ConstName}}:
-		w.walk{{.Type.FuncName}}(ctx, {{$.ShortTypeName}}
+		w.walk{{.Type.FuncName}}({{$.ShortTypeName}}
 			{{- if not .IsSelf -}}
 				.{{.Field.Name}}
 			{{- end -}}
@@ -154,7 +154,7 @@ func walkerFnTmpl(w io.Writer, wt walkerType) error {
 				fmt.Fprintf(w, "\tif %s.%s != nil {\n", wt.ShortTypeName, fld.Name)
 			}
 
-			fmt.Fprintf(w, "%sw.walk%s(ctx, %s%s.%s%s)\n", indent, fld.Type.FuncName, deref, wt.ShortTypeName, fld.Name, accessor)
+			fmt.Fprintf(w, "%sw.walk%s(%s%s.%s%s)\n", indent, fld.Type.FuncName, deref, wt.ShortTypeName, fld.Name, accessor)
 
 			if needsNilCheck {
 				fmt.Fprintf(w, "\t}\n")

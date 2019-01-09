@@ -15,9 +15,6 @@ query Foo {
 `)
 
 func main() {
-	// A walker with a given set of rules can be re-used as many times as is necessary.
-	walker := validation.NewWalker(rules.Specified)
-
 	// Later on, probably in a request, create a parser, and parse a query.
 	parser := language.NewParser(query)
 	doc, err := parser.Parse()
@@ -26,7 +23,7 @@ func main() {
 	}
 
 	// Validate the result, returning GraphQL errors.
-	errs := validation.Validate(doc, walker)
+	errs := validation.Validate(doc, rules.Specified)
 
 	spew.Dump(errs)
 }

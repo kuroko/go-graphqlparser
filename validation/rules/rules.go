@@ -26,7 +26,7 @@ var Specified = []validation.RuleFunc{
 	// noFragmentCycles,
 	// uniqueVariableNames,
 	// noUndefinedVariables,
-	// noUnusedVariables,
+	noUnusedVariables,
 	// knownDirectives,
 	// uniqueDirectivesPerLocation,
 	// knownArgumentNames,
@@ -52,11 +52,4 @@ var SpecifiedSDL = []validation.RuleFunc{
 	// uniqueArgumentNames,
 	// uniqueInputFieldNames,
 	// providedRequiredArgumentsOnDirectives,
-}
-
-// ApplyRules ...
-func ApplyRules(rules []validation.RuleFunc, walker *validation.Walker) {
-	for _, rule := range rules {
-		rule(walker)
-	}
 }

@@ -15,7 +15,7 @@ const (
 // Gender represents enum values for: enum Gender
 type Gender int
 
-// TODO(seeruk): Gender would also need some kind of Marshal method, to take an ast.Value or similar
+// TODO: Gender would also need some kind of Marshal method, to take an ast.Value or similar
 // and create a Gender out of it.
 
 // Union kinds for: union SearchResult

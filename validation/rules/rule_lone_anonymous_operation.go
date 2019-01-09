@@ -10,25 +10,31 @@ import (
 //
 // A GraphQL document is only valid if when it contains an anonymous operation
 // (the query short-hand) that it contains only that one operation definition.
-func loneAnonymousOperation(walker *validation.Walker) {
+func loneAnonymousOperation(ctx *validation.Context) validation.VisitFunc {
 	var operations int
 
-	walker.AddDocumentEnterEventHandler(func(context *validation.Context, document ast.Document) {
-		document.Definitions.ForEach(func(d ast.Definition, i int) {
-			if d.Kind == ast.DefinitionKindExecutable {
-				if d.ExecutableDefinition.Kind == ast.ExecutableDefinitionKindOperation {
-					operations++
+	return func(w *validation.Walker) {
+		w.AddDocumentEnterEventHandler(func(document ast.Document) {
+			document.Definitions.ForEach(func(d ast.Definition, i int) {
+				if d.Kind == ast.DefinitionKindExecutable {
+					if d.ExecutableDefinition.Kind == ast.ExecutableDefinitionKindOperation {
+						operations++
+					}
 				}
+			})
+		})
+
+		w.AddOperationDefinitionEnterEventHandler(func(definition *ast.OperationDefinition) {
+			if definition.Name == "" && operations > 1 {
+				ctx.Errors = ctx.Errors.Add(graphql.NewError(
+					"This anonymous operation must be the only defined operation.",
+					// TODO: Location.
+				))
 			}
 		})
-	})
 
-	walker.AddOperationDefinitionEnterEventHandler(func(context *validation.Context, definition *ast.OperationDefinition) {
-		if definition.Name == "" && operations > 1 {
-			context.Errors = context.Errors.Add(graphql.NewError(
-				"This anonymous operation must be the only defined operation.",
-				// TODO(seeruk): Location.
-			))
-		}
-	})
+		w.AddDocumentLeaveEventHandler(func(document ast.Document) {
+			operations = 0
+		})
+	}
 }

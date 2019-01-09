@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: when schema is implemented add tests for canNotDefineSchemaWithinExtensionMessage.
+// TODO: when schema is implemented add tests for canNotDefineSchemaWithinExtensionError.
 func TestNoUnusedVariables(t *testing.T) {
 	tt := []struct {
 		msg   string
@@ -118,7 +118,7 @@ func TestNoUnusedVariables(t *testing.T) {
 			}
 			`,
 			errs: (*graphql.Errors).
-				Add(nil, unusedVariableMessage("c", "", 0, 0)),
+				Add(nil, unusedVariableError("c", "", 0, 0)),
 		},
 		{
 			msg: "multiple variables not used",
@@ -128,8 +128,8 @@ func TestNoUnusedVariables(t *testing.T) {
 			}
 			`,
 			errs: (*graphql.Errors).
-				Add(nil, unusedVariableMessage("a", "Foo", 0, 0)).
-				Add(unusedVariableMessage("c", "Foo", 0, 0)),
+				Add(nil, unusedVariableError("a", "Foo", 0, 0)).
+				Add(unusedVariableError("c", "Foo", 0, 0)),
 		},
 		// {
 		// 	msg: "variable not used in fragments",
@@ -152,7 +152,7 @@ func TestNoUnusedVariables(t *testing.T) {
 		// 	}
 		// 	`,
 		// 	errs: (*graphql.Errors).
-		// 		Add(nil, unusedVariableMessage("c", "Foo", 0, 0)),
+		// 		Add(nil, unusedVariableError("c", "Foo", 0, 0)),
 		// },
 		// {
 		// 	msg: "multiple variables not used in fragments",
@@ -175,8 +175,8 @@ func TestNoUnusedVariables(t *testing.T) {
 		// 	}
 		// 	`,
 		// 	errs: (*graphql.Errors).
-		// 		Add(nil, unusedVariableMessage("a", "Foo", 0, 0)).
-		// 		Add(unusedVariableMessage("c", "Foo", 0, 0)),
+		// 		Add(nil, unusedVariableError("a", "Foo", 0, 0)).
+		// 		Add(unusedVariableError("c", "Foo", 0, 0)),
 		// },
 		{
 			msg: "variable not used by unreferenced fragment",
@@ -192,7 +192,7 @@ func TestNoUnusedVariables(t *testing.T) {
 			}
 			`,
 			errs: (*graphql.Errors).
-				Add(nil, unusedVariableMessage("b", "Foo", 0, 0)),
+				Add(nil, unusedVariableError("b", "Foo", 0, 0)),
 		},
 		{
 			msg: "variable not used by fragment used by other operation",
@@ -211,13 +211,12 @@ func TestNoUnusedVariables(t *testing.T) {
 			}
 			`,
 			errs: (*graphql.Errors).
-				Add(nil, unusedVariableMessage("b", "Foo", 0, 0)).
-				Add(unusedVariableMessage("a", "Bar", 0, 0)),
+				Add(nil, unusedVariableError("b", "Foo", 0, 0)).
+				Add(unusedVariableError("a", "Bar", 0, 0)),
 		},
 	}
 
 	for _, tc := range tt {
-		walker := validation.NewWalker([]validation.RuleFunc{noUnusedVariables})
 		parser := language.NewParser([]byte(tc.query))
 
 		doc, err := parser.Parse()
@@ -225,7 +224,7 @@ func TestNoUnusedVariables(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		errs := validation.Validate(doc, walker)
+		errs := validation.Validate(doc, []validation.RuleFunc{noUnusedVariables})
 		assert.Equal(t, tc.errs, errs, tc.msg)
 	}
 }

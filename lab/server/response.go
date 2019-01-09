@@ -69,7 +69,7 @@ func (v ResponseValue) MarshalGraphQL(buf *bytes.Buffer) error {
 				return err
 			}
 
-			// @TODO: Optimise.
+			// TODO: Optimise.
 			if i < len(v.ArrayValue)-1 {
 				buf.WriteString(",") // 44 = ,
 			}
@@ -106,20 +106,20 @@ func (v ResponseValue) MarshalGraphQL(buf *bytes.Buffer) error {
 // Response is a server response.
 type Response struct {
 	Data   ResponseValue
-	Errors []error // @TODO: This is not the right type.
+	Errors []error // TODO: This is not the right type.
 }
 
 // MarshalGraphQL marshals the server response.
 func (r Response) MarshalGraphQL() ([]byte, error) {
 	buf := &bytes.Buffer{}
 
-	// @TODO: Handle errors portion of response.
+	// TODO: Handle errors portion of response.
 
 	buf.WriteString("{")
 	buf.WriteString(`"data":`)
 
 	// Data must either be an object, or null.
-	// @TODO: Is null even valid? I guess you can't have an empty query?
+	// TODO: Is null even valid? I guess you can't have an empty query?
 	if r.Data.Kind != ResponseValueKindNull && r.Data.Kind != ResponseValueKindObject {
 		return nil, errors.New("TODO")
 	}

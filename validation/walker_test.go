@@ -40,15 +40,15 @@ func TestWalker_Walk(t *testing.T) {
 	var pt assert.TestingT
 
 	tt := []struct {
-		name  string
-		query []byte
-		rules RuleFunc
+		name     string
+		query    []byte
+		visitFns VisitFunc
 	}{
 		{
 			name:  "simple selection",
 			query: []byte(`{ hello }`),
-			rules: func(w *Walker) {
-				w.AddSelectionEnterEventHandler(func(context *Context, selection ast.Selection) {
+			visitFns: func(w *Walker) {
+				w.AddSelectionEnterEventHandler(func(selection ast.Selection) {
 					assert.Equal(pt, "hello", selection.Name)
 				})
 			},
@@ -64,13 +64,13 @@ func TestWalker_Walk(t *testing.T) {
 					weight: Int
 				}
 			`),
-			rules: func(w *Walker) {
+			visitFns: func(w *Walker) {
 				var count int
-				w.AddTypeEnterEventHandler(func(context *Context, gt ast.Type) {
+				w.AddTypeEnterEventHandler(func(gt ast.Type) {
 					count++
 				})
 
-				w.AddDocumentLeaveEventHandler(func(context *Context, document ast.Document) {
+				w.AddDocumentLeaveEventHandler(func(document ast.Document) {
 					assert.Equal(pt, 5, count)
 				})
 			},
@@ -80,8 +80,8 @@ func TestWalker_Walk(t *testing.T) {
 			query: []byte(`
 				{ foo { bar { baz { qux { quux { corge { uier { grault @garply } } } } } } } }
 			`),
-			rules: func(w *Walker) {
-				w.AddDirectiveEnterEventHandler(func(context *Context, directive ast.Directive) {
+			visitFns: func(w *Walker) {
+				w.AddDirectiveEnterEventHandler(func(directive ast.Directive) {
 					assert.Equal(pt, "garply", directive.Name)
 				})
 			},
@@ -93,8 +93,8 @@ func TestWalker_Walk(t *testing.T) {
 					foo(list: ["bar"])
 				}
 			`),
-			rules: func(w *Walker) {
-				w.AddStringValueEnterEventHandler(func(context *Context, value ast.Value) {
+			visitFns: func(w *Walker) {
+				w.AddStringValueEnterEventHandler(func(value ast.Value) {
 					assert.Equal(pt, "bar", value.StringValue)
 				})
 			},
@@ -113,15 +113,15 @@ func TestWalker_Walk(t *testing.T) {
 					}
 				}
 			`),
-			rules: func(w *Walker) {
+			visitFns: func(w *Walker) {
 				var authorName string
-				w.AddObjectFieldEnterEventHandler(func(context *Context, field ast.ObjectField) {
+				w.AddObjectFieldEnterEventHandler(func(field ast.ObjectField) {
 					if field.Name == "name" {
 						authorName = field.Value.StringValue
 					}
 				})
 
-				w.AddDocumentLeaveEventHandler(func(context *Context, document ast.Document) {
+				w.AddDocumentLeaveEventHandler(func(document ast.Document) {
 					assert.Equal(pt, "seer", authorName)
 				})
 			},
@@ -133,8 +133,8 @@ func TestWalker_Walk(t *testing.T) {
 					hello
 				}
 			`),
-			rules: func(w *Walker) {
-				w.AddDirectiveEnterEventHandler(func(context *Context, directive ast.Directive) {
+			visitFns: func(w *Walker) {
+				w.AddDirectiveEnterEventHandler(func(directive ast.Directive) {
 					assert.Fail(pt, "we shouldn't have walked directives, when none exist")
 				})
 			},
@@ -148,17 +148,17 @@ func TestWalker_Walk(t *testing.T) {
 					}
 				}
 			`),
-			rules: func(w *Walker) {
+			visitFns: func(w *Walker) {
 				var calls int
-				w.AddMutationOperationDefinitionEnterEventHandler(func(context *Context, handler *ast.OperationDefinition) {
+				w.AddMutationOperationDefinitionEnterEventHandler(func(handler *ast.OperationDefinition) {
 					calls++
 				})
 
-				w.AddQueryOperationDefinitionEnterEventHandler(func(context *Context, definition *ast.OperationDefinition) {
+				w.AddQueryOperationDefinitionEnterEventHandler(func(definition *ast.OperationDefinition) {
 					calls++
 				})
 
-				w.AddDocumentLeaveEventHandler(func(context *Context, document ast.Document) {
+				w.AddDocumentLeaveEventHandler(func(document ast.Document) {
 					assert.Equal(pt, 1, calls)
 				})
 			},
@@ -173,9 +173,7 @@ func TestWalker_Walk(t *testing.T) {
 		doc, err := parser.Parse()
 		require.NoError(t, err)
 
-		ctx := &Context{}
-
-		walker := NewWalker([]RuleFunc{tc.rules})
-		walker.Walk(ctx, doc)
+		walker := NewWalker([]VisitFunc{tc.visitFns})
+		walker.Walk(doc)
 	}
 }
