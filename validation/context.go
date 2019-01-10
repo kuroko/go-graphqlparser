@@ -11,16 +11,15 @@ import (
 func NewContext(doc ast.Document) *Context {
 	ctx := &Context{}
 
-	visitFns := []VisitFunc{
+	visitFns := []ast.VisitFunc{
 		setFragment(ctx),
-
 		setVariableUsages(ctx),
 		setRecursiveVariableUsages(ctx),
 		setRecursivelyReferencedFragments(ctx),
 		setFragmentSpreads(ctx),
 	}
 
-	walker := NewWalker(visitFns)
+	walker := ast.NewWalker(visitFns)
 	walker.Walk(doc)
 
 	return ctx
@@ -43,8 +42,8 @@ func (ctx *Context) Fragment(fragName string) *ast.FragmentDefinition {
 	return ctx.fragment[fragName]
 }
 
-func setFragment(ctx *Context) VisitFunc {
-	return func(w *Walker) {
+func setFragment(ctx *Context) ast.VisitFunc {
+	return func(w *ast.Walker) {
 		w.AddFragmentDefinitionEnterEventHandler(func(fragDef *ast.FragmentDefinition) {
 			ctx.fragment[fragDef.Name] = fragDef
 		})
@@ -56,8 +55,8 @@ func (ctx *Context) FragmentSpreads(selections *ast.Selections) map[string]bool 
 	return ctx.fragmentSpreads[selections]
 }
 
-func setFragmentSpreads(ctx *Context) VisitFunc {
-	return func(w *Walker) {}
+func setFragmentSpreads(ctx *Context) ast.VisitFunc {
+	return func(w *ast.Walker) {}
 }
 
 // RecursivelyReferencedFragments returns all the recursively referenced
@@ -66,8 +65,8 @@ func (ctx *Context) RecursivelyReferencedFragments(exDef *ast.ExecutableDefiniti
 	return ctx.recursivelyReferencedFragments[exDef]
 }
 
-func setRecursivelyReferencedFragments(ctx *Context) VisitFunc {
-	return func(w *Walker) {}
+func setRecursivelyReferencedFragments(ctx *Context) ast.VisitFunc {
+	return func(w *ast.Walker) {}
 }
 
 // VariableUsages returns the variable usages in an operation or fragment definition.
@@ -75,8 +74,8 @@ func (ctx *Context) VariableUsages(exDef *ast.ExecutableDefinition) map[string]b
 	return ctx.variableUsages[exDef]
 }
 
-func setVariableUsages(ctx *Context) VisitFunc {
-	return func(w *Walker) {}
+func setVariableUsages(ctx *Context) ast.VisitFunc {
+	return func(w *ast.Walker) {}
 }
 
 // RecursiveVariableUsages returns all recursively referenced variable usages for an operation.
@@ -84,6 +83,6 @@ func (ctx *Context) RecursiveVariableUsages(opName string) map[string]bool {
 	return ctx.recursiveVariableUsages[opName]
 }
 
-func setRecursiveVariableUsages(ctx *Context) VisitFunc {
-	return func(w *Walker) {}
+func setRecursiveVariableUsages(ctx *Context) ast.VisitFunc {
+	return func(w *ast.Walker) {}
 }
