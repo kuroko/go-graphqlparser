@@ -5,18 +5,12 @@ import (
 	"github.com/bucketd/go-graphqlparser/graphql"
 )
 
-// Context ...
-type Context struct {
-	Errors *graphql.Errors
-	Schema *graphql.Schema
-}
-
 // RuleFunc ...
 type RuleFunc func(ctx *Context) ast.VisitFunc
 
 // Validate ...
 func Validate(doc ast.Document, rules []RuleFunc) *graphql.Errors {
-	ctx := &Context{}
+	ctx := NewContext(doc)
 
 	visitFns := make([]ast.VisitFunc, 0, len(rules))
 	for _, rule := range rules {
