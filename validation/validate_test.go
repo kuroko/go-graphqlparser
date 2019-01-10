@@ -3,11 +3,10 @@ package validation_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 

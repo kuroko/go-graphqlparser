@@ -9,10 +9,10 @@ import (
 )
 
 // noUnusedVariables ...
-func noUnusedVariables(ctx *validation.Context) validation.VisitFunc {
+func noUnusedVariables(ctx *validation.Context) ast.VisitFunc {
 	var variableDefs *ast.VariableDefinitions
 
-	return func(w *validation.Walker) {
+	return func(w *ast.Walker) {
 		w.AddOperationDefinitionEnterEventHandler(func(definition *ast.OperationDefinition) {
 			variableDefs = &ast.VariableDefinitions{}
 		})

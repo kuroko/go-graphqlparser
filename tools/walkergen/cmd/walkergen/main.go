@@ -17,11 +17,9 @@ const (
 func main() {
 	var astPath string
 	var packageName string
-	var noImports bool
 
 	flag.StringVar(&astPath, "ast-path", "", "The path to the AST package on the filesystem.")
 	flag.StringVar(&packageName, "package", "", "The package name to use in the generated code.")
-	flag.BoolVar(&noImports, "no-imports", false, "Use this flag to exclude imports.")
 	flag.Parse()
 
 	if astPath == "" {
@@ -55,5 +53,5 @@ func main() {
 	}
 
 	// Output walker.
-	walker.Generate(os.Stdout, packageName, noImports, symbols)
+	walker.Generate(os.Stdout, packageName, symbols)
 }

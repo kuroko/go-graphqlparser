@@ -12,22 +12,18 @@ type Context struct {
 }
 
 // RuleFunc ...
-type RuleFunc func(ctx *Context) VisitFunc
-
-// VisitFunc ...
-// TODO: Move me to another package? AST Maybe?
-type VisitFunc func(w *Walker)
+type RuleFunc func(ctx *Context) ast.VisitFunc
 
 // Validate ...
 func Validate(doc ast.Document, rules []RuleFunc) *graphql.Errors {
 	ctx := &Context{}
 
-	visitFns := make([]VisitFunc, 0, len(rules))
+	visitFns := make([]ast.VisitFunc, 0, len(rules))
 	for _, rule := range rules {
 		visitFns = append(visitFns, rule(ctx))
 	}
 
-	walker := NewWalker(visitFns)
+	walker := ast.NewWalker(visitFns)
 	walker.Walk(doc)
 
 	return ctx.Errors

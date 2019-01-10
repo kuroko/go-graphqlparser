@@ -9,8 +9,8 @@ import (
 )
 
 // executableDefinitions ...
-func executableDefinitions(ctx *validation.Context) validation.VisitFunc {
-	return func(w *validation.Walker) {
+func executableDefinitions(ctx *validation.Context) ast.VisitFunc {
+	return func(w *ast.Walker) {
 		w.AddDefinitionEnterEventHandler(func(def ast.Definition) {
 			if def.Kind != ast.DefinitionKindExecutable {
 				err := graphql.NewError(nonExecutableDefinitionMessage(def))

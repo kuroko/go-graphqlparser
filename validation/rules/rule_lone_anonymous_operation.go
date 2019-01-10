@@ -10,10 +10,10 @@ import (
 //
 // A GraphQL document is only valid if when it contains an anonymous operation
 // (the query short-hand) that it contains only that one operation definition.
-func loneAnonymousOperation(ctx *validation.Context) validation.VisitFunc {
+func loneAnonymousOperation(ctx *validation.Context) ast.VisitFunc {
 	var operations int
 
-	return func(w *validation.Walker) {
+	return func(w *ast.Walker) {
 		w.AddDocumentEnterEventHandler(func(document ast.Document) {
 			document.Definitions.ForEach(func(d ast.Definition, i int) {
 				if d.Kind == ast.DefinitionKindExecutable {
