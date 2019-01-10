@@ -6,18 +6,21 @@ import (
 )
 
 // RuleFunc ...
-type RuleFunc func(ctx *Context) ast.VisitFunc
+type RuleFunc func(ctx *Context) VisitFunc
+
+// VisitFunc ...
+type VisitFunc func(w *Walker)
 
 // Validate ...
 func Validate(doc ast.Document, rules []RuleFunc) *graphql.Errors {
 	ctx := NewContext(doc)
 
-	visitFns := make([]ast.VisitFunc, 0, len(rules))
+	visitFns := make([]VisitFunc, 0, len(rules))
 	for _, rule := range rules {
 		visitFns = append(visitFns, rule(ctx))
 	}
 
-	walker := ast.NewWalker(visitFns)
+	walker := NewWalker(visitFns)
 	walker.Walk(doc)
 
 	return ctx.Errors

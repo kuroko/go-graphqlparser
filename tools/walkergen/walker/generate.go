@@ -13,7 +13,7 @@ import (
 )
 
 // Generate ...
-func Generate(w io.Writer, packageName string, st goast.SymbolTable) {
+func Generate(w io.Writer, packageName string, noImports bool, st goast.SymbolTable) {
 	// First pass, get walker types for types that are actually defined in the symbol table. The
 	// actual list of walker types will grow once we add the "kind" types later.
 	wts := buildBaseTypes(st)
@@ -42,6 +42,10 @@ func Generate(w io.Writer, packageName string, st goast.SymbolTable) {
 	// Header and package name
 	fmt.Fprintf(os.Stdout, strings.TrimSpace(header))
 	fmt.Fprintf(os.Stdout, "\npackage %s\n", packageName)
+
+	if !noImports {
+		fmt.Fprintf(os.Stdout, "%s", imports)
+	}
 
 	err := walkerTypeTmpl.Execute(w, wts)
 	if err != nil {
@@ -327,7 +331,7 @@ func buildTypeFullName(wt walkerType) string {
 		tn = "*"
 	}
 
-	return tn + wt.TypeName
+	return tn + "ast." + wt.TypeName
 }
 
 // buildTypeKindFuncName takes the name of a kind constant, and turns it into the expected format
