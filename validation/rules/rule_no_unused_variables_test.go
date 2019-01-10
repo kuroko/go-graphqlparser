@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: when schema is implemented add tests for canNotDefineSchemaWithinExtensionError.
 func TestNoUnusedVariables(t *testing.T) {
 	tt := []struct {
 		msg   string
@@ -78,38 +77,38 @@ func TestNoUnusedVariables(t *testing.T) {
 			`,
 			errs: nil,
 		},
-		// {
-		// 	msg: "variable used by fragment in multiple operations",
-		// 	query: `
-		// 	query Foo($a: String) {
-		// 	  ...FragA
-		// 	}
-		// 	query Bar($b: String) {
-		// 	  ...FragB
-		// 	}
-		// 	fragment FragA on Type {
-		// 	  field(a: $a)
-		// 	}
-		// 	fragment FragB on Type {
-		// 	  field(b: $b)
-		// 	}
-		// 	`,
-		// 	errs: nil,
-		// },
-		// {
-		// 	msg: "variable used by recursive fragment",
-		// 	query: `
-		// 	query Foo($a: String) {
-		// 	  ...FragA
-		// 	}
-		// 	fragment FragA on Type {
-		// 	  field(a: $a) {
-		// 		...FragA
-		// 	  }
-		// 	}
-		// 	`,
-		// 	errs: nil,
-		// },
+		{
+			msg: "variable used by fragment in multiple operations",
+			query: `
+			query Foo($a: String) {
+			  ...FragA
+			}
+			query Bar($b: String) {
+			  ...FragB
+			}
+			fragment FragA on Type {
+			  field(a: $a)
+			}
+			fragment FragB on Type {
+			  field(b: $b)
+			}
+			`,
+			errs: nil,
+		},
+		{
+			msg: "variable used by recursive fragment",
+			query: `
+			query Foo($a: String) {
+			  ...FragA
+			}
+			fragment FragA on Type {
+			  field(a: $a) {
+				...FragA
+			  }
+			}
+			`,
+			errs: nil,
+		},
 		{
 			msg: "variable not used",
 			query: `
@@ -131,53 +130,53 @@ func TestNoUnusedVariables(t *testing.T) {
 				Add(nil, unusedVariableError("a", "Foo", 0, 0)).
 				Add(unusedVariableError("c", "Foo", 0, 0)),
 		},
-		// {
-		// 	msg: "variable not used in fragments",
-		// 	query: `
-		// 	query Foo($a: String, $b: String, $c: String) {
-		// 	  ...FragA
-		// 	}
-		// 	fragment FragA on Type {
-		// 	  field(a: $a) {
-		// 		...FragB
-		// 	  }
-		// 	}
-		// 	fragment FragB on Type {
-		// 	  field(b: $b) {
-		// 		...FragC
-		// 	  }
-		// 	}
-		// 	fragment FragC on Type {
-		// 	  field
-		// 	}
-		// 	`,
-		// 	errs: (*graphql.Errors).
-		// 		Add(nil, unusedVariableError("c", "Foo", 0, 0)),
-		// },
-		// {
-		// 	msg: "multiple variables not used in fragments",
-		// 	query: `
-		// 	query Foo($a: String, $b: String, $c: String) {
-		// 	  ...FragA
-		// 	}
-		// 	fragment FragA on Type {
-		// 	  field {
-		// 		...FragB
-		// 	  }
-		// 	}
-		// 	fragment FragB on Type {
-		// 	  field(b: $b) {
-		// 		...FragC
-		// 	  }
-		// 	}
-		// 	fragment FragC on Type {
-		// 	  field
-		// 	}
-		// 	`,
-		// 	errs: (*graphql.Errors).
-		// 		Add(nil, unusedVariableError("a", "Foo", 0, 0)).
-		// 		Add(unusedVariableError("c", "Foo", 0, 0)),
-		// },
+		{
+			msg: "variable not used in fragments",
+			query: `
+			query Foo($a: String, $b: String, $c: String) {
+			  ...FragA
+			}
+			fragment FragA on Type {
+			  field(a: $a) {
+				...FragB
+			  }
+			}
+			fragment FragB on Type {
+			  field(b: $b) {
+				...FragC
+			  }
+			}
+			fragment FragC on Type {
+			  field
+			}
+			`,
+			errs: (*graphql.Errors).
+				Add(nil, unusedVariableError("c", "Foo", 0, 0)),
+		},
+		{
+			msg: "multiple variables not used in fragments",
+			query: `
+			query Foo($a: String, $b: String, $c: String) {
+			  ...FragA
+			}
+			fragment FragA on Type {
+			  field {
+				...FragB
+			  }
+			}
+			fragment FragB on Type {
+			  field(b: $b) {
+				...FragC
+			  }
+			}
+			fragment FragC on Type {
+			  field
+			}
+			`,
+			errs: (*graphql.Errors).
+				Add(nil, unusedVariableError("a", "Foo", 0, 0)).
+				Add(unusedVariableError("c", "Foo", 0, 0)),
+		},
 		{
 			msg: "variable not used by unreferenced fragment",
 			query: `

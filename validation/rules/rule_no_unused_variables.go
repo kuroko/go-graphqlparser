@@ -13,16 +13,22 @@ func noUnusedVariables(ctx *validation.Context) ast.VisitFunc {
 	var variableDefs *ast.VariableDefinitions
 
 	return func(w *ast.Walker) {
-		w.AddOperationDefinitionEnterEventHandler(func(definition *ast.OperationDefinition) {
+		w.AddOperationDefinitionEnterEventHandler(func(opDef *ast.OperationDefinition) {
 			variableDefs = &ast.VariableDefinitions{}
 		})
 
-		w.AddOperationDefinitionLeaveEventHandler(func(definition *ast.OperationDefinition) {
-			// TODO: Magic: https://github.com/graphql/graphql-js/blob/master/src/validation/rules/NoUnusedVariables.js#L37
+		w.AddVariableDefinitionEnterEventHandler(func(varDef ast.VariableDefinition) {
+			variableDefs.Add(varDef)
 		})
 
-		w.AddVariableDefinitionEnterEventHandler(func(def ast.VariableDefinition) {
-			variableDefs.Add(def)
+		w.AddOperationDefinitionLeaveEventHandler(func(opDef *ast.OperationDefinition) {
+			variableUses := ctx.RecursiveVariableUsages(opDef.Name)
+
+			variableDefs.ForEach(func(varDef ast.VariableDefinition, _ int) {
+				if !variableUses[varDef.Name] {
+					ctx.Errors = ctx.Errors.Add(unusedVariableError(varDef.Name, opDef.Name, 0, 0))
+				}
+			})
 		})
 	}
 }
