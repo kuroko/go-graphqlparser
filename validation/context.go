@@ -12,8 +12,8 @@ func NewContext(doc ast.Document) *Context {
 	ctx := &Context{
 		fragment:                       make(map[string]*ast.FragmentDefinition),
 		fragmentSpreads:                make(map[*ast.Selections]map[string]bool),
-		recursivelyReferencedFragments: make(map[*ast.ExecutableDefinition]map[string]bool),
-		variableUsages:                 make(map[*ast.ExecutableDefinition]map[string]bool),
+		recursivelyReferencedFragments: make(map[string]map[string]bool),
+		variableUsages:                 make(map[string]map[string]bool),
 		recursiveVariableUsages:        make(map[string]map[string]bool),
 	}
 
@@ -38,8 +38,8 @@ type Context struct {
 
 	fragment                       map[string]*ast.FragmentDefinition
 	fragmentSpreads                map[*ast.Selections]map[string]bool
-	recursivelyReferencedFragments map[*ast.ExecutableDefinition]map[string]bool
-	variableUsages                 map[*ast.ExecutableDefinition]map[string]bool
+	recursivelyReferencedFragments map[string]map[string]bool
+	variableUsages                 map[string]map[string]bool
 	recursiveVariableUsages        map[string]map[string]bool
 }
 
@@ -50,15 +50,15 @@ func (ctx *Context) Fragment(fragName string) *ast.FragmentDefinition {
 
 func setFragment(ctx *Context) VisitFunc {
 	return func(w *Walker) {
-		w.AddFragmentDefinitionEnterEventHandler(func(fragDef *ast.FragmentDefinition) {
-			ctx.fragment[fragDef.Name] = fragDef
+		w.AddFragmentDefinitionEnterEventHandler(func(fd *ast.FragmentDefinition) {
+			ctx.fragment[fd.Name] = fd
 		})
 	}
 }
 
 // FragmentSpreads returns all nested usages of fragment spreads in this Selections.
-func (ctx *Context) FragmentSpreads(selections *ast.Selections) map[string]bool {
-	return ctx.fragmentSpreads[selections]
+func (ctx *Context) FragmentSpreads(ss *ast.Selections) map[string]bool {
+	return ctx.fragmentSpreads[ss]
 }
 
 func setFragmentSpreads(ctx *Context) VisitFunc {
@@ -67,8 +67,8 @@ func setFragmentSpreads(ctx *Context) VisitFunc {
 
 // RecursivelyReferencedFragments returns all the recursively referenced
 // fragments used by an operation or fragment definition.
-func (ctx *Context) RecursivelyReferencedFragments(exDef *ast.ExecutableDefinition) map[string]bool {
-	return ctx.recursivelyReferencedFragments[exDef]
+func (ctx *Context) RecursivelyReferencedFragments(exDefName string) map[string]bool {
+	return ctx.recursivelyReferencedFragments[exDefName]
 }
 
 func setRecursivelyReferencedFragments(ctx *Context) VisitFunc {
@@ -76,8 +76,8 @@ func setRecursivelyReferencedFragments(ctx *Context) VisitFunc {
 }
 
 // VariableUsages returns the variable usages in an operation or fragment definition.
-func (ctx *Context) VariableUsages(exDef *ast.ExecutableDefinition) map[string]bool {
-	return ctx.variableUsages[exDef]
+func (ctx *Context) VariableUsages(exDefName string) map[string]bool {
+	return ctx.variableUsages[exDefName]
 }
 
 func setVariableUsages(ctx *Context) VisitFunc {
