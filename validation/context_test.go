@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
@@ -26,15 +27,17 @@ func TestSetFragment(t *testing.T) {
 
 	query := `
 	query Foo($a: String, $b: String) {
-	  ...FragA
+		...FragA
 	}
+	
 	fragment FragA on Type {
-	  field(a: $a) {
+		field(a: $a) {
 			...FragB
-	  }
+		}
 	}
+	
 	fragment FragB on Type {
-	  field(b: $b)
+		field(b: $b)
 	}
 	`
 	parser := language.NewParser([]byte(query))
@@ -51,10 +54,65 @@ func TestSetFragment(t *testing.T) {
 	assert.Equal(t, seeking, found.Name)
 }
 
+func TestSetFragmentSpreads(t *testing.T) {
+	ctx := newContext()
+	visitFns := []VisitFunc{setFragmentSpreads(ctx)}
+	walker := NewWalker(visitFns)
+
+	query := `
+	query Foo($a: String, $b: String) {
+		...Frag11
+		field1 {
+			...Frag21
+			field2 {
+				...Frag31
+			}
+		}
+		...Frag12
+	}
+	`
+	parser := language.NewParser([]byte(query))
+
+	doc, err := parser.Parse()
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	walker.Walk(doc)
+
+	var s1, s2, s3 *ast.Selections
+	for ss, v := range ctx.fragmentSpreads {
+		switch {
+		case len(v) == 4:
+			s1 = ss
+		case len(v) == 2:
+			s2 = ss
+		case len(v) == 1:
+			s3 = ss
+		default:
+			t.Fatal("Found unexpected selection")
+		}
+	}
+
+	frags1, seen1 := ctx.FragmentSpreads(s1), make([]string, 0)
+	for k := range frags1 {
+		seen1 = append(seen1, k)
+	}
+	sort.Strings(seen1)
+
+	assert.Equal(t, []string{
+		"Frag11",
+		"Frag12",
+		"Frag21",
+		"Frag31",
+	}, seen1)
+
+	assert.False(t, ctx.FragmentSpreads(s2)["Frag12"])
+	assert.False(t, ctx.FragmentSpreads(s3)["Frag12"])
+}
+
 func TestSetVariableUsages(t *testing.T) {}
 
 func TestSetRecursiveVariableUsages(t *testing.T) {}
 
 func TestSetRecursivelyReferencedFragments(t *testing.T) {}
-
-func TestSetFragmentSpreads(t *testing.T) {}

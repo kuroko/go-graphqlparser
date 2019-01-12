@@ -62,7 +62,24 @@ func (ctx *Context) FragmentSpreads(ss *ast.Selections) map[string]bool {
 }
 
 func setFragmentSpreads(ctx *Context) VisitFunc {
-	return func(w *Walker) {}
+	return func(w *Walker) {
+		var parents []*ast.Selections
+
+		w.AddSelectionsEnterEventHandler(func(ss *ast.Selections) {
+			ctx.fragmentSpreads[ss] = make(map[string]bool)
+			parents = append(parents, ss)
+		})
+
+		w.AddFragmentSpreadSelectionEnterEventHandler(func(s ast.Selection) {
+			for _, p := range parents {
+				ctx.fragmentSpreads[p][s.Name] = true
+			}
+		})
+
+		w.AddSelectionsLeaveEventHandler(func(ss *ast.Selections) {
+			parents = parents[:len(parents)-1]
+		})
+	}
 }
 
 // RecursivelyReferencedFragments returns all the recursively referenced
