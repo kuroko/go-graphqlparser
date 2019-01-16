@@ -54,7 +54,9 @@ func TestLoneSchemaDefinition(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		errs := validation.Validate(doc, []validation.RuleFunc{loneSchemaDefinition})
+		walker := validation.NewWalker([]validation.VisitFunc{loneSchemaDefinition})
+
+		errs := validation.Validate(doc, walker)
 		assert.Equal(t, tc.errs, errs, tc.msg)
 	}
 }

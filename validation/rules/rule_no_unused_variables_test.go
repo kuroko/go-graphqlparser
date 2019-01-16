@@ -223,7 +223,9 @@ func TestNoUnusedVariables(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		errs := validation.Validate(doc, []validation.RuleFunc{noUnusedVariables})
+		walker := validation.NewWalker([]validation.VisitFunc{noUnusedVariables})
+
+		errs := validation.Validate(doc, walker)
 		assert.Equal(t, tc.errs, errs, tc.msg)
 	}
 }

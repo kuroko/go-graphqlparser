@@ -26,7 +26,7 @@ func NewContext(doc ast.Document) *Context {
 	}
 
 	walker := NewWalker(visitFns)
-	walker.Walk(doc)
+	walker.Walk(ctx, doc)
 
 	return ctx
 }
@@ -50,7 +50,7 @@ func (ctx *Context) Fragment(fragName string) *ast.FragmentDefinition {
 
 func setFragment(ctx *Context) VisitFunc {
 	return func(w *Walker) {
-		w.AddFragmentDefinitionEnterEventHandler(func(fd *ast.FragmentDefinition) {
+		w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, fd *ast.FragmentDefinition) {
 			ctx.fragment[fd.Name] = fd
 		})
 	}
@@ -65,18 +65,18 @@ func setFragmentSpreads(ctx *Context) VisitFunc {
 	return func(w *Walker) {
 		var parents []*ast.Selections
 
-		w.AddSelectionsEnterEventHandler(func(ss *ast.Selections) {
+		w.AddSelectionsEnterEventHandler(func(ctx *Context, ss *ast.Selections) {
 			ctx.fragmentSpreads[ss] = make(map[string]bool)
 			parents = append(parents, ss)
 		})
 
-		w.AddFragmentSpreadSelectionEnterEventHandler(func(s ast.Selection) {
+		w.AddFragmentSpreadSelectionEnterEventHandler(func(ctx *Context, s ast.Selection) {
 			for _, p := range parents {
 				ctx.fragmentSpreads[p][s.Name] = true
 			}
 		})
 
-		w.AddSelectionsLeaveEventHandler(func(ss *ast.Selections) {
+		w.AddSelectionsLeaveEventHandler(func(ctx *Context, ss *ast.Selections) {
 			parents = parents[:len(parents)-1]
 		})
 	}

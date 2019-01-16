@@ -47,7 +47,7 @@ func TestSetFragment(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	walker.Walk(doc)
+	walker.Walk(ctx, doc)
 
 	seeking := "FragA"
 	found := ctx.Fragment(seeking)
@@ -78,7 +78,7 @@ func TestSetFragmentSpreads(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	walker.Walk(doc)
+	walker.Walk(ctx, doc)
 
 	var s1, s2, s3 *ast.Selections
 	for ss, v := range ctx.fragmentSpreads {

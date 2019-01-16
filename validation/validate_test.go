@@ -28,8 +28,10 @@ func BenchmarkValidate(b *testing.B) {
 
 	b.ResetTimer()
 
+	walker := validation.NewWalker(rules.Specified)
+
 	for i := 0; i < b.N; i++ {
-		validation.Validate(doc, rules.Specified)
+		validation.Validate(doc, walker)
 	}
 }
 
@@ -45,7 +47,8 @@ func TestValidate(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	errs := validation.Validate(doc, rules.Specified)
+	walker := validation.NewWalker(rules.Specified)
+	errs := validation.Validate(doc, walker)
 
-	assert.Equal(t, 2, errs.Len())
+	assert.Equal(t, 4, errs.Len())
 }

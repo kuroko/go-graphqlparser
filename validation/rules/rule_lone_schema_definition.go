@@ -9,23 +9,21 @@ import (
 // Lone Schema definition
 //
 // A GraphQL document is only valid if it contains only one schema definition.
-func loneSchemaDefinition(ctx *validation.Context) validation.VisitFunc {
+func loneSchemaDefinition(w *validation.Walker) {
 	var schemaDefinitions int
 
-	return func(w *validation.Walker) {
-		w.AddSchemaDefinitionEnterEventHandler(func(_ *ast.SchemaDefinition) {
-			// TODO: implement logic once schema is implemented.
-			_ = ctx.Schema
-			if false {
-				ctx.Errors = ctx.Errors.Add(canNotDefineSchemaWithinExtensionError(0, 0))
-			}
+	w.AddSchemaDefinitionEnterEventHandler(func(ctx *validation.Context, _ *ast.SchemaDefinition) {
+		// TODO: implement logic once schema is implemented.
+		_ = ctx.Schema
+		if false {
+			ctx.Errors = ctx.Errors.Add(canNotDefineSchemaWithinExtensionError(0, 0))
+		}
 
-			if schemaDefinitions > 0 {
-				ctx.Errors = ctx.Errors.Add(schemaDefinitionNotAloneError(0, 0))
-			}
-			schemaDefinitions++
-		})
-	}
+		if schemaDefinitions > 0 {
+			ctx.Errors = ctx.Errors.Add(schemaDefinitionNotAloneError(0, 0))
+		}
+		schemaDefinitions++
+	})
 }
 
 func schemaDefinitionNotAloneError(line, col int) graphql.Error {

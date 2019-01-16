@@ -22,8 +22,10 @@ func main() {
 		panic(err)
 	}
 
+	walker := validation.NewWalker(rules.Specified)
+
 	// Validate the result, returning GraphQL errors.
-	errs := validation.Validate(doc, rules.Specified)
+	errs := validation.Validate(doc, walker)
 
 	spew.Dump(errs)
 }

@@ -9,7 +9,7 @@ import (
 //
 // The order of this list is important, and is intended to produce the most clear output when
 // encountering multiple validation errors.
-var Specified = []validation.RuleFunc{
+var Specified = []validation.VisitFunc{
 	executableDefinitions,
 	// uniqueOperationNames,
 	loneAnonymousOperation,
@@ -44,7 +44,7 @@ var Specified = []validation.RuleFunc{
 //
 // The order of this list is important, and is intended to produce the most clear output when
 // encountering multiple validation errors.
-var SpecifiedSDL = []validation.RuleFunc{
+var SpecifiedSDL = []validation.VisitFunc{
 	// loneSchemaDefinition,
 	// knownDirectives,
 	// uniqueDirectivesPerLocation,

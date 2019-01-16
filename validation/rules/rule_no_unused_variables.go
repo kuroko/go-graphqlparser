@@ -9,28 +9,26 @@ import (
 )
 
 // noUnusedVariables ...
-func noUnusedVariables(ctx *validation.Context) validation.VisitFunc {
+func noUnusedVariables(w *validation.Walker) {
 	var variableDefs *ast.VariableDefinitions
 
-	return func(w *validation.Walker) {
-		w.AddOperationDefinitionEnterEventHandler(func(opDef *ast.OperationDefinition) {
-			variableDefs = &ast.VariableDefinitions{}
-		})
+	w.AddOperationDefinitionEnterEventHandler(func(ctx *validation.Context, opDef *ast.OperationDefinition) {
+		variableDefs = &ast.VariableDefinitions{}
+	})
 
-		w.AddVariableDefinitionEnterEventHandler(func(varDef ast.VariableDefinition) {
-			variableDefs.Add(varDef)
-		})
+	w.AddVariableDefinitionEnterEventHandler(func(ctx *validation.Context, varDef ast.VariableDefinition) {
+		variableDefs.Add(varDef)
+	})
 
-		w.AddOperationDefinitionLeaveEventHandler(func(opDef *ast.OperationDefinition) {
-			variableUses := ctx.RecursiveVariableUsages(opDef.Name)
+	w.AddOperationDefinitionLeaveEventHandler(func(ctx *validation.Context, opDef *ast.OperationDefinition) {
+		variableUses := ctx.RecursiveVariableUsages(opDef.Name)
 
-			variableDefs.ForEach(func(varDef ast.VariableDefinition, _ int) {
-				if !variableUses[varDef.Name] {
-					ctx.Errors = ctx.Errors.Add(unusedVariableError(varDef.Name, opDef.Name, 0, 0))
-				}
-			})
+		variableDefs.ForEach(func(varDef ast.VariableDefinition, _ int) {
+			if !variableUses[varDef.Name] {
+				ctx.Errors = ctx.Errors.Add(unusedVariableError(varDef.Name, opDef.Name, 0, 0))
+			}
 		})
-	}
+	})
 }
 
 // unusedVariableError ...
