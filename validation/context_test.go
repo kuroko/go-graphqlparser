@@ -12,7 +12,7 @@ import (
 
 func newContext() *Context {
 	return &Context{
-		fragment:                       make(map[string]*ast.FragmentDefinition),
+		fragments:                      make(map[string]*ast.FragmentDefinition),
 		fragmentSpreads:                make(map[*ast.Selections]map[string]bool),
 		recursivelyReferencedFragments: make(map[string]map[string]bool),
 		variableUsages:                 make(map[string]map[string]bool),
@@ -20,9 +20,48 @@ func newContext() *Context {
 	}
 }
 
+func BenchmarkNewContext(b *testing.B) {
+	parser := language.NewParser([]byte(`
+		query Foo($a: String, $b: String, $c: String) {
+		  ...FragA
+		}
+		fragment FragA on Type {
+		  field(a: $a) {
+			foo {
+				bar {
+					baz {
+						...FragB
+						...FragC
+					}
+				}
+			}
+		  }
+		}
+		fragment FragB on Type {
+		  field(b: $b) {
+				...FragC
+		  }
+		}
+		fragment FragC on Type {
+		  field(c: $c)
+		}
+	`))
+
+	doc, err := parser.Parse()
+	require.NoError(b, err)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		ctx := NewContext(doc)
+		_ = ctx
+	}
+}
+
 func TestSetFragment(t *testing.T) {
 	ctx := newContext()
-	visitFns := []VisitFunc{setFragment(ctx)}
+	visitFns := []VisitFunc{setFragment}
 	walker := NewWalker(visitFns)
 
 	query := `
@@ -56,7 +95,7 @@ func TestSetFragment(t *testing.T) {
 
 func TestSetFragmentSpreads(t *testing.T) {
 	ctx := newContext()
-	visitFns := []VisitFunc{setFragmentSpreads(ctx)}
+	visitFns := []VisitFunc{setFragmentSpreads}
 	walker := NewWalker(visitFns)
 
 	query := `
