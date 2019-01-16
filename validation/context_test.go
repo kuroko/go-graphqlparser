@@ -119,39 +119,65 @@ func TestSetFragmentSpreads(t *testing.T) {
 
 	walker.Walk(ctx, doc)
 
-	var s1, s2, s3 *ast.Selections
+	var s *ast.Selections
 	for ss, v := range ctx.fragmentSpreads {
-		switch {
-		case len(v) == 4:
-			s1 = ss
-		case len(v) == 2:
-			s2 = ss
-		case len(v) == 1:
-			s3 = ss
-		default:
+		if len(v) == 4 {
+			s = ss
+		} else {
 			t.Fatal("Found unexpected selection")
 		}
 	}
 
-	frags1, seen1 := ctx.FragmentSpreads(s1), make([]string, 0)
-	for k := range frags1 {
-		seen1 = append(seen1, k)
+	frags, seen := ctx.FragmentSpreads(s), make([]string, 0)
+	for k := range frags {
+		seen = append(seen, k)
 	}
-	sort.Strings(seen1)
+	sort.Strings(seen)
 
 	assert.Equal(t, []string{
 		"Frag11",
 		"Frag12",
 		"Frag21",
 		"Frag31",
-	}, seen1)
+	}, seen)
+}
 
-	assert.False(t, ctx.FragmentSpreads(s2)["Frag12"])
-	assert.False(t, ctx.FragmentSpreads(s3)["Frag12"])
+func TestSetRecursivelyReferencedFragments(t *testing.T) {
+	ctx := newContext()
+	visitFns := []VisitFunc{setFragment}
+	walker := NewWalker(visitFns)
+
+	query := `
+	fragment FragB on Type {
+	  field(b: $b) {
+	    ...FragC
+	  }
+	}
+	query Foo($a: String, $b: String, $c: String) {
+	  ...FragA
+	}
+	fragment FragC on Type {
+	  field(c: $c)
+	}
+	fragment FragA on Type {
+	  field(a: $a) {
+	    ...FragB
+	  }
+	}
+	`
+	parser := language.NewParser([]byte(query))
+
+	doc, err := parser.Parse()
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	walker.Walk(ctx, doc)
+
+	found := ctx.RecursivelyReferencedFragments("Foo")
+	assert.True(t, found["FragC"])
 }
 
 func TestSetVariableUsages(t *testing.T) {}
 
 func TestSetRecursiveVariableUsages(t *testing.T) {}
-
-func TestSetRecursivelyReferencedFragments(t *testing.T) {}
