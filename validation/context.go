@@ -40,6 +40,8 @@ type Context struct {
 	recursiveVariableUsages        map[string]map[string]bool
 
 	fragmentSpreadsSelectionSet *ast.Selections
+	name                        string
+	nameToSelections            map[string]*ast.Selections
 }
 
 // Fragment returns a FragmentDefinition by name.
@@ -63,12 +65,12 @@ func (ctx *Context) FragmentSpreads(ss *ast.Selections) map[string]bool {
 }
 
 func setFragmentSpreads(w *Walker) {
-	w.AddOperationDefinitionEnterEventHandler(func(ctx *Context, def *ast.OperationDefinition) {
-		ctx.fragmentSpreadsSelectionSet = def.SelectionSet
+	w.AddOperationDefinitionEnterEventHandler(func(ctx *Context, od *ast.OperationDefinition) {
+		ctx.fragmentSpreadsSelectionSet = od.SelectionSet
 	})
 
-	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, def *ast.FragmentDefinition) {
-		ctx.fragmentSpreadsSelectionSet = def.SelectionSet
+	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, fd *ast.FragmentDefinition) {
+		ctx.fragmentSpreadsSelectionSet = fd.SelectionSet
 	})
 
 	w.AddFragmentSpreadSelectionEnterEventHandler(func(ctx *Context, s ast.Selection) {
@@ -91,7 +93,89 @@ func (ctx *Context) RecursivelyReferencedFragments(exDefName string) map[string]
 }
 
 func setRecursivelyReferencedFragments(w *Walker) {
+	w.AddOperationDefinitionEnterEventHandler(func(ctx *Context, od *ast.OperationDefinition) {
+		ctx.name = od.Name
+	})
 
+	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, fd *ast.FragmentDefinition) {
+		ctx.name = fd.Name
+	})
+
+	w.AddFragmentSpreadSelectionEnterEventHandler(func(ctx *Context, s ast.Selection) {
+		if ctx.nameToSelections == nil {
+			ctx.nameToSelections = make(map[string]*ast.Selections)
+		}
+
+		ctx.nameToSelections[ctx.name] = ctx.fragmentSpreadsSelectionSet
+	})
+
+	w.AddDocumentLeaveEventHandler(func(ctx *Context, d ast.Document) {
+		for exDefName := range ctx.nameToSelections {
+
+			if _, ok := ctx.recursivelyReferencedFragments[exDefName]; ok {
+				continue
+			}
+
+			_ = set(ctx, exDefName, []string{exDefName})
+		}
+	})
+}
+
+func set(ctx *Context, name string, parents []string) []string {
+	var children []string
+	for frag := range ctx.FragmentSpreads(ctx.nameToSelections[name]) {
+		if in(frag, parents) {
+			continue
+		}
+		c := set(
+			ctx,
+			frag,
+			append(parents, name),
+		)
+		children = append(children, c...)
+	}
+
+	ctx.recursivelyReferencedFragments[name] = mappend(ctx.FragmentSpreads(ctx.nameToSelections[name]))
+
+	for _, child := range children {
+		quzz := mappend(
+			ctx.recursivelyReferencedFragments[name],
+			ctx.FragmentSpreads(ctx.nameToSelections[child]),
+		)
+		ctx.recursivelyReferencedFragments[name] = quzz
+	}
+
+	return append(children, name)
+}
+
+func in(item string, list []string) bool {
+	for _, str := range list {
+		if str == item {
+			return true
+		}
+	}
+	return false
+}
+
+func mappend(maps ...map[string]bool) map[string]bool {
+	if len(maps) < 1 {
+		return make(map[string]bool)
+	}
+
+	if maps[0] == nil {
+		maps[0] = make(map[string]bool)
+	}
+
+	if len(maps) < 2 {
+		return maps[0]
+	}
+
+	for _, m := range maps[1:] {
+		for k := range m {
+			maps[0][k] = true
+		}
+	}
+	return maps[0]
 }
 
 // VariableUsages returns the variable usages in an operation or fragment definition.

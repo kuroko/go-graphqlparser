@@ -144,7 +144,7 @@ func TestSetFragmentSpreads(t *testing.T) {
 
 func TestSetRecursivelyReferencedFragments(t *testing.T) {
 	ctx := newContext()
-	visitFns := []VisitFunc{setFragment}
+	visitFns := []VisitFunc{setFragmentSpreads, setRecursivelyReferencedFragments}
 	walker := NewWalker(visitFns)
 
 	query := `
