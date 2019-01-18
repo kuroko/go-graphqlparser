@@ -10,16 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newContext() *Context {
-	return &Context{
-		fragments:                      make(map[string]*ast.FragmentDefinition),
-		fragmentSpreads:                make(map[*ast.Selections]map[string]bool),
-		recursivelyReferencedFragments: make(map[string]map[string]bool),
-		variableUsages:                 make(map[string]map[string]bool),
-		recursiveVariableUsages:        make(map[string]map[string]bool),
-	}
-}
-
 func BenchmarkNewContext(b *testing.B) {
 	parser := language.NewParser([]byte(`
 		query Foo($a: String, $b: String, $c: String) {
@@ -60,7 +50,7 @@ func BenchmarkNewContext(b *testing.B) {
 }
 
 func TestSetFragment(t *testing.T) {
-	ctx := newContext()
+	ctx := &Context{}
 	visitFns := []VisitFunc{setFragment}
 	walker := NewWalker(visitFns)
 
@@ -94,7 +84,7 @@ func TestSetFragment(t *testing.T) {
 }
 
 func TestSetFragmentSpreads(t *testing.T) {
-	ctx := newContext()
+	ctx := &Context{}
 	visitFns := []VisitFunc{setFragmentSpreads}
 	walker := NewWalker(visitFns)
 
@@ -143,7 +133,7 @@ func TestSetFragmentSpreads(t *testing.T) {
 }
 
 func TestSetRecursivelyReferencedFragments(t *testing.T) {
-	ctx := newContext()
+	ctx := &Context{}
 	visitFns := []VisitFunc{setFragmentSpreads, setRecursivelyReferencedFragments}
 	walker := NewWalker(visitFns)
 

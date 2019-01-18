@@ -106,6 +106,10 @@ func setRecursivelyReferencedFragments(w *Walker) {
 			ctx.nameToSelections = make(map[string]*ast.Selections)
 		}
 
+		if ctx.recursivelyReferencedFragments == nil {
+			ctx.recursivelyReferencedFragments = make(map[string]map[string]bool)
+		}
+
 		ctx.nameToSelections[ctx.name] = ctx.fragmentSpreadsSelectionSet
 	})
 
@@ -116,18 +120,18 @@ func setRecursivelyReferencedFragments(w *Walker) {
 				continue
 			}
 
-			_ = set(ctx, exDefName, []string{exDefName})
+			_ = recurseFrags(ctx, exDefName, []string{exDefName})
 		}
 	})
 }
 
-func set(ctx *Context, name string, parents []string) []string {
+func recurseFrags(ctx *Context, name string, parents []string) []string {
 	var children []string
 	for frag := range ctx.FragmentSpreads(ctx.nameToSelections[name]) {
 		if in(frag, parents) {
 			continue
 		}
-		c := set(
+		c := recurseFrags(
 			ctx,
 			frag,
 			append(parents, name),
@@ -135,47 +139,24 @@ func set(ctx *Context, name string, parents []string) []string {
 		children = append(children, c...)
 	}
 
-	ctx.recursivelyReferencedFragments[name] = mappend(ctx.FragmentSpreads(ctx.nameToSelections[name]))
+	ctx.recursivelyReferencedFragments[name] = ctx.FragmentSpreads(ctx.nameToSelections[name])
 
 	for _, child := range children {
-		quzz := mappend(
-			ctx.recursivelyReferencedFragments[name],
-			ctx.FragmentSpreads(ctx.nameToSelections[child]),
-		)
-		ctx.recursivelyReferencedFragments[name] = quzz
+		for frag := range ctx.FragmentSpreads(ctx.nameToSelections[child]) {
+			ctx.recursivelyReferencedFragments[name][frag] = true
+		}
 	}
 
 	return append(children, name)
 }
 
-func in(item string, list []string) bool {
-	for _, str := range list {
-		if str == item {
+func in(target string, candidates []string) bool {
+	for _, c := range candidates {
+		if c == target {
 			return true
 		}
 	}
 	return false
-}
-
-func mappend(maps ...map[string]bool) map[string]bool {
-	if len(maps) < 1 {
-		return make(map[string]bool)
-	}
-
-	if maps[0] == nil {
-		maps[0] = make(map[string]bool)
-	}
-
-	if len(maps) < 2 {
-		return maps[0]
-	}
-
-	for _, m := range maps[1:] {
-		for k := range m {
-			maps[0][k] = true
-		}
-	}
-	return maps[0]
 }
 
 // VariableUsages returns the variable usages in an operation or fragment definition.
