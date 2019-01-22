@@ -168,6 +168,35 @@ func TestSetRecursivelyReferencedFragments(t *testing.T) {
 	assert.True(t, found["FragC"])
 }
 
-func TestSetVariableUsages(t *testing.T) {}
+func TestSetVariableUsages(t *testing.T) {
+	ctx := &Context{}
+	visitFns := []VisitFunc{setVariableUsages}
+	walker := NewWalker(visitFns)
+
+	query := `
+	query Foo($a: String, $b: String, $c: String) {
+		... on Type {
+			field(a: $a) {
+				field(b: $b) {
+					... on Type {
+						field(c: $c)
+  				}
+  			}
+  		}
+  	}
+  }
+	`
+	parser := language.NewParser([]byte(query))
+
+	doc, err := parser.Parse()
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	walker.Walk(ctx, doc)
+
+	found := ctx.VariableUsages("Foo")
+	assert.True(t, found["c"])
+}
 
 func TestSetRecursiveVariableUsages(t *testing.T) {}
