@@ -6,6 +6,7 @@ import (
 )
 
 var contextDecoratorWalker = NewWalker([]VisitFunc{
+	setDefinitionName,
 	setFragment,
 	setVariableUsages,
 	setRecursiveVariableUsages,
@@ -44,6 +45,16 @@ type Context struct {
 	nameToSelections            map[string]*ast.Selections
 }
 
+func setDefinitionName(w *Walker) {
+	w.AddOperationDefinitionEnterEventHandler(func(ctx *Context, od *ast.OperationDefinition) {
+		ctx.name = od.Name
+	})
+
+	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, fd *ast.FragmentDefinition) {
+		ctx.name = fd.Name
+	})
+}
+
 // Fragment returns a FragmentDefinition by name.
 func (ctx *Context) Fragment(fragName string) *ast.FragmentDefinition {
 	return ctx.fragments[fragName]
@@ -75,6 +86,9 @@ func setFragmentSpreads(w *Walker) {
 
 	w.AddFragmentSpreadSelectionEnterEventHandler(func(ctx *Context, s ast.Selection) {
 		if ctx.fragmentSpreads == nil {
+			// TODO: Could this be keyed to operation / fragment name instead. We can extract all
+			// fragments used within a definition, rather than being as granular as selections.
+			// TODO: Is this going to be used elsewhere? If so, we might need to keep it like this.
 			ctx.fragmentSpreads = make(map[*ast.Selections]map[string]bool)
 		}
 
@@ -93,29 +107,22 @@ func (ctx *Context) RecursivelyReferencedFragments(exDefName string) map[string]
 }
 
 func setRecursivelyReferencedFragments(w *Walker) {
-	w.AddOperationDefinitionEnterEventHandler(func(ctx *Context, od *ast.OperationDefinition) {
-		ctx.name = od.Name
-	})
-
-	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, fd *ast.FragmentDefinition) {
-		ctx.name = fd.Name
-	})
-
 	w.AddFragmentSpreadSelectionEnterEventHandler(func(ctx *Context, s ast.Selection) {
 		if ctx.nameToSelections == nil {
 			ctx.nameToSelections = make(map[string]*ast.Selections)
 		}
 
+		// TODO: maybe this should happen later?
 		if ctx.recursivelyReferencedFragments == nil {
 			ctx.recursivelyReferencedFragments = make(map[string]map[string]bool)
 		}
 
+		// TODO: ctx.name here can be overwritten by a query and a fragment called the same thing.
 		ctx.nameToSelections[ctx.name] = ctx.fragmentSpreadsSelectionSet
 	})
 
 	w.AddDocumentLeaveEventHandler(func(ctx *Context, d ast.Document) {
 		for exDefName := range ctx.nameToSelections {
-
 			if _, ok := ctx.recursivelyReferencedFragments[exDefName]; ok {
 				continue
 			}
@@ -136,6 +143,7 @@ func recurseFrags(ctx *Context, name string, parents []string) []string {
 			frag,
 			append(parents, name),
 		)
+
 		children = append(children, c...)
 	}
 
@@ -165,14 +173,6 @@ func (ctx *Context) VariableUsages(exDefName string) map[string]bool {
 }
 
 func setVariableUsages(w *Walker) {
-	w.AddOperationDefinitionEnterEventHandler(func(ctx *Context, od *ast.OperationDefinition) {
-		ctx.name = od.Name
-	})
-
-	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, fd *ast.FragmentDefinition) {
-		ctx.name = fd.Name
-	})
-
 	w.AddVariableValueEnterEventHandler(func(ctx *Context, v ast.Value) {
 		if ctx.variableUsages == nil {
 			ctx.variableUsages = make(map[string]map[string]bool)
