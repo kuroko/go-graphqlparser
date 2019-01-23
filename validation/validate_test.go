@@ -26,9 +26,10 @@ func BenchmarkValidate(b *testing.B) {
 		b.Error(err)
 	}
 
-	b.ResetTimer()
-
 	walker := validation.NewWalker(rules.Specified)
+
+	b.ReportAllocs()
+	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
 		validation.Validate(doc, walker)
