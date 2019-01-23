@@ -10,22 +10,14 @@ import (
 
 // noUnusedVariables ...
 func noUnusedVariables(w *validation.Walker) {
-	w.AddOperationDefinitionEnterEventHandler(func(ctx *validation.Context, opDef *ast.OperationDefinition) {
-		ctx.VariableDefs = &ast.VariableDefinitions{}
-	})
-
 	w.AddOperationDefinitionLeaveEventHandler(func(ctx *validation.Context, opDef *ast.OperationDefinition) {
 		variableUses := ctx.RecursiveVariableUsages(opDef.Name)
 
-		ctx.VariableDefs.ForEach(func(varDef ast.VariableDefinition, _ int) {
-			if !variableUses[varDef.Name] {
+		opDef.VariableDefinitions.ForEach(func(varDef ast.VariableDefinition, _ int) {
+			if _, ok := variableUses[varDef.Name]; !ok {
 				ctx.Errors = ctx.Errors.Add(unusedVariableError(varDef.Name, opDef.Name, 0, 0))
 			}
 		})
-	})
-
-	w.AddVariableDefinitionEnterEventHandler(func(ctx *validation.Context, varDef ast.VariableDefinition) {
-		ctx.VariableDefs.Add(varDef)
 	})
 }
 

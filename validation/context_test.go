@@ -195,8 +195,10 @@ func TestSetVariableUsages(t *testing.T) {
 
 	walker.Walk(ctx, doc)
 
-	found := ctx.VariableUsages("Foo")
-	assert.True(t, found["c"])
+	usages := ctx.VariableUsages("Foo")
+	_, found := usages["c"]
+
+	assert.True(t, found)
 }
 
 func TestSetRecursiveVariableUsages(t *testing.T) {}

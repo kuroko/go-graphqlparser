@@ -3,6 +3,8 @@ package validation_test
 import (
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
+
 	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
@@ -51,5 +53,7 @@ func TestValidate(t *testing.T) {
 	walker := validation.NewWalker(rules.Specified)
 	errs := validation.Validate(doc, walker)
 
-	assert.Equal(t, 4, errs.Len())
+	t.Log(spew.Sdump(errs))
+
+	assert.Equal(t, 2, errs.Len())
 }

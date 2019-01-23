@@ -42,10 +42,16 @@ func main() {
 			typeNameLCF = "err"
 		}
 
+		abridged := strings.Map(abridger, tn)
+		if abridged == "" {
+			r, _ := utf8.DecodeRuneInString(tn)
+			abridged = strings.ToLower(string(r))
+		}
+
 		linkedList.Execute(os.Stdout, map[string]string{
 			"TypeNameLCF": typeNameLCF,
 			"TypeName":    tn,
-			"AbridgedTN":  strings.Map(abridger, tn),
+			"AbridgedTN":  abridged,
 		})
 	}
 }

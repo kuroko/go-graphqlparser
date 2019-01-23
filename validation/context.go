@@ -42,7 +42,6 @@ type Context struct {
 	fragmentSpreadsSelectionSet *ast.Selections
 	name                        string
 	nameToSelections            map[string]*ast.Selections
-	variables                   map[string]bool
 }
 
 // Fragment returns a FragmentDefinition by name.
@@ -175,24 +174,22 @@ func setVariableUsages(w *Walker) {
 	})
 
 	w.AddVariableValueEnterEventHandler(func(ctx *Context, v ast.Value) {
-		if ctx.variables == nil {
-			ctx.variables = make(map[string]bool)
-		}
-
-		ctx.variables[v.StringValue] = true
-	})
-
-	w.AddExecutableDefinitionLeaveEventHandler(func(ctx *Context, ed *ast.ExecutableDefinition) {
 		if ctx.variableUsages == nil {
 			ctx.variableUsages = make(map[string]map[string]bool)
 		}
-		ctx.variableUsages[ctx.name] = ctx.variables
+
+		if ctx.variableUsages[ctx.name] == nil {
+			ctx.variableUsages[ctx.name] = make(map[string]bool)
+		}
+
+		ctx.variableUsages[ctx.name][v.StringValue] = true
 	})
 }
 
 // RecursiveVariableUsages returns all recursively referenced variable usages for an operation.
 func (ctx *Context) RecursiveVariableUsages(opName string) map[string]bool {
-	return ctx.recursiveVariableUsages[opName]
+	//return ctx.recursiveVariableUsages[opName]
+	return ctx.variableUsages[opName]
 }
 
 func setRecursiveVariableUsages(w *Walker) {
