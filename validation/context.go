@@ -30,47 +30,50 @@ type Context struct {
 	Schema   *graphql.Schema
 	document ast.Document
 
-	// Used by validation rules.
-	VariableDefs *ast.VariableDefinitions
-
 	// Internal pre-cached with methods to access.
-	variableUsages map[*ast.ExecutableDefinition]map[string]bool
+	variableUsages map[*ast.ExecutableDefinition][]string
 
 	// Maybe this is all we need here? This would store directly referenced fragments, as a list of
 	// definitions. By storing them as pointers, do we save memory by re-using the existing memory
 	// we've allocated during parsing?
-	referencedFragments map[*ast.ExecutableDefinition]*ast.Definitions
-
-	// Maybe this doesn't need to exist?
-	recursivelyReferencedFragments map[*ast.Definition]*ast.Definitions
+	referencedFragments map[*ast.ExecutableDefinition][]ast.Definition
 
 	executableDefinition *ast.ExecutableDefinition
 }
 
 // VariableUsages returns the variable usages in an operation or fragment definition.
-func (ctx *Context) VariableUsages(def *ast.ExecutableDefinition) map[string]bool {
+func (ctx *Context) VariableUsages(def *ast.ExecutableDefinition) []string {
 	return ctx.variableUsages[def]
 }
 
 // NOTE: In practice, def would likely be an operation definition, but this isn't a requirement.
-func (ctx *Context) RecursivelyReferencedFragments(def *ast.ExecutableDefinition) *ast.Definitions {
-	if ctx.referencedFragments[def] == nil || ctx.referencedFragments[def].Len() == 0 {
+func (ctx *Context) RecursivelyReferencedFragments(def *ast.ExecutableDefinition) map[ast.Definition]struct{} {
+	if ctx.referencedFragments[def] == nil || len(ctx.referencedFragments[def]) == 0 {
 		return nil
 	}
 
-	var result *ast.Definitions
+	// Maybe we could make this a slice too?
+	result := make(map[ast.Definition]struct{})
 
-	ctx.referencedFragments[def].ForEach(func(d ast.Definition, _ int) {
-		// TODO: Is this necessary? We should only put in valid data to the map.
-		if d.Kind != ast.DefinitionKindExecutable {
-			return
-		}
-
-		result = result.Add(d)
-		result.Join(ctx.RecursivelyReferencedFragments(d.ExecutableDefinition))
-	})
+	ctx.recursivelyReferencedFragmentsIter(def, result, make(map[*ast.ExecutableDefinition]struct{}))
 
 	return result
+}
+
+// recursivelyReferencedFragmentsIter is the inner iteration method for finding recursively
+// referenced fragments for a given executable definition. It modifies the given aggregate map of
+// results.
+func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefinition, agg map[ast.Definition]struct{}, seen map[*ast.ExecutableDefinition]struct{}) {
+	// For each referenced fragment in the current executable definition...
+	for _, rd := range ctx.referencedFragments[def] {
+		agg[rd] = struct{}{}
+
+		// We only want to recurse deeper if we've never seen the fragment before.
+		if _, ok := seen[rd.ExecutableDefinition]; !ok {
+			seen[rd.ExecutableDefinition] = struct{}{}
+			ctx.recursivelyReferencedFragmentsIter(rd.ExecutableDefinition, agg, seen)
+		}
+	}
 }
 
 func setExecutableDefinition(w *Walker) {
@@ -92,11 +95,17 @@ func setReferencedFragments(w *Walker) {
 
 			if d.ExecutableDefinition.FragmentDefinition.Name == s.Name {
 				if ctx.referencedFragments == nil {
-					ctx.referencedFragments = make(map[*ast.ExecutableDefinition]*ast.Definitions)
+					ctx.referencedFragments = make(map[*ast.ExecutableDefinition][]ast.Definition)
+				}
+
+				for _, v := range ctx.referencedFragments[ctx.executableDefinition] {
+					if v == d {
+						return
+					}
 				}
 
 				ctx.referencedFragments[ctx.executableDefinition] =
-					ctx.referencedFragments[ctx.executableDefinition].Add(d)
+					append(ctx.referencedFragments[ctx.executableDefinition], d)
 			}
 		})
 	})
@@ -109,13 +118,15 @@ func setReferencedFragments(w *Walker) {
 func setVariableUsages(w *Walker) {
 	w.AddVariableValueEnterEventHandler(func(ctx *Context, v ast.Value) {
 		if ctx.variableUsages == nil {
-			ctx.variableUsages = make(map[*ast.ExecutableDefinition]map[string]bool)
+			ctx.variableUsages = make(map[*ast.ExecutableDefinition][]string)
 		}
 
-		if ctx.variableUsages[ctx.executableDefinition] == nil {
-			ctx.variableUsages[ctx.executableDefinition] = make(map[string]bool)
+		for _, u := range ctx.variableUsages[ctx.executableDefinition] {
+			if u == v.StringValue {
+				return
+			}
 		}
 
-		ctx.variableUsages[ctx.executableDefinition][v.StringValue] = true
+		ctx.variableUsages[ctx.executableDefinition] = append(ctx.variableUsages[ctx.executableDefinition], v.StringValue)
 	})
 }

@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
@@ -11,7 +10,7 @@ import (
 )
 
 func BenchmarkNewContext(b *testing.B) {
-	parser := language.NewParser([]byte(`
+	query := []byte(`
 		query Foo($a: String, $b: String, $c: String) {
 		  ...FragA
 		}
@@ -29,21 +28,26 @@ func BenchmarkNewContext(b *testing.B) {
 		}
 		fragment FragB on Type {
 		  field(b: $b) {
+				...FragB
+				...FragC
+				...FragB
 				...FragC
 		  }
 		}
 		fragment FragC on Type {
 		  field(c: $c)
 		}
-	`))
-
-	doc, err := parser.Parse()
-	require.NoError(b, err)
+	`)
 
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
+		parser := language.NewParser(query)
+
+		doc, err := parser.Parse()
+		require.NoError(b, err)
+
 		ctx := NewContext(doc)
 		_ = ctx
 	}
@@ -91,12 +95,13 @@ func TestDump(t *testing.T) {
 		spew.Dump(ctx)
 
 		defs := ctx.RecursivelyReferencedFragments(d.ExecutableDefinition)
+		_ = defs
 
 		spew.Dump(d.ExecutableDefinition)
 
-		defs.ForEach(func(d ast.Definition, i int) {
-			fmt.Println(d.ExecutableDefinition.FragmentDefinition.Name)
-		})
+		//defs.ForEach(func(d ast.Definition, i int) {
+		//	fmt.Println(d.ExecutableDefinition.FragmentDefinition.Name)
+		//})
 	})
 
 	t.Fail()

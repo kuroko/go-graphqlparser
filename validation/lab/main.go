@@ -3,17 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/bucketd/go-graphqlparser/validation"
-
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/language"
+	"github.com/bucketd/go-graphqlparser/validation"
 )
 
 func main() {
 	parser := language.NewParser([]byte(`
-		query Foo($a: String, $b: String, $c: String) {
-		  ...FragA
-		}
 		fragment FragA on Type {
 		  field(a: $a) {
 			foo {
@@ -28,10 +24,26 @@ func main() {
 		}
 		fragment FragB on Type {
 		  field(b: $b) {
-				...FragC
+			...FragB
+			...FragC
+			...FragB
+			...FragC
+			...FragB
+			...FragC
+			...FragB
+			...FragC
+			...FragB
+			...FragC
+			...FragD
 		  }
 		}
+		query Foo($a: String, $b: String, $c: String) {
+		  ...FragA
+		}
 		fragment FragC on Type {
+		  field(c: $c)
+		}
+		fragment FragD on Type {
 		  field(c: $c)
 		}
 	`))
@@ -53,8 +65,12 @@ func main() {
 		defs := ctx.RecursivelyReferencedFragments(d.ExecutableDefinition)
 		_ = defs
 
-		defs.ForEach(func(d ast.Definition, i int) {
-			fmt.Println(d.ExecutableDefinition.FragmentDefinition.Name)
-		})
+		for k := range defs {
+			fmt.Println(k.ExecutableDefinition.FragmentDefinition.Name)
+		}
+
+		//defs.ForEach(func(d ast.Definition, i int) {
+		//	fmt.Println(d.ExecutableDefinition.FragmentDefinition.Name)
+		//})
 	})
 }

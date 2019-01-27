@@ -27,7 +27,14 @@ func noUnusedVariables(w *validation.Walker) {
 		variableUses := ctx.VariableUsages(def)
 
 		opDef.VariableDefinitions.ForEach(func(varDef ast.VariableDefinition, _ int) {
-			if _, ok := variableUses[varDef.Name]; !ok {
+			var used bool
+			for _, u := range variableUses {
+				if u == varDef.Name {
+					used = true
+				}
+			}
+
+			if !used {
 				ctx.Errors = ctx.Errors.Add(unusedVariableError(varDef.Name, opDef.Name, 0, 0))
 			}
 		})
