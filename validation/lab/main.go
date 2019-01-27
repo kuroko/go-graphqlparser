@@ -39,6 +39,9 @@ func main() {
 		}
 		query Foo($a: String, $b: String, $c: String) {
 		  ...FragA
+		  field(c: $c) {
+			name
+		  }
 		}
 		fragment FragC on Type {
 		  field(c: $c)

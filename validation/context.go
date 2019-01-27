@@ -109,10 +109,6 @@ func setReferencedFragments(w *Walker) {
 			}
 		})
 	})
-
-	//w.AddDocumentLeaveEventHandler(func(ctx *Context, doc ast.Document) {
-	//	spew.Dump(ctx.referencedFragments)
-	//})
 }
 
 func setVariableUsages(w *Walker) {

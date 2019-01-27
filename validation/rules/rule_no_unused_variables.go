@@ -23,7 +23,7 @@ func noUnusedVariables(w *validation.Walker) {
 
 		opDef := def.OperationDefinition
 
-		// TODO: Should use recursive variable usages.
+		// TODO: Should use recursive variable usages. Also, recursive method might return map.
 		variableUses := ctx.VariableUsages(def)
 
 		opDef.VariableDefinitions.ForEach(func(varDef ast.VariableDefinition, _ int) {

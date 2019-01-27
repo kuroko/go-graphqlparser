@@ -39,17 +39,140 @@ func BenchmarkNewContext(b *testing.B) {
 		}
 	`)
 
+	parser := language.NewParser(query)
+
+	doc, err := parser.Parse()
+	require.NoError(b, err)
+
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		parser := language.NewParser(query)
-
-		doc, err := parser.Parse()
-		require.NoError(b, err)
-
 		ctx := NewContext(doc)
 		_ = ctx
+	}
+}
+
+func BenchmarkContext_RecursivelyReferencedFragments(b *testing.B) {
+	query := []byte(`
+		query Foo($a: String, $b: String, $c: String) {
+		  ...FragA
+		  ...FragB
+		  ...FragC
+		  ...FragD
+		  ...FragE
+		  ...FragF
+		  ...FragG
+		  ...FragH
+		  ...FragI
+		  ...FragJ
+		}
+		fragment FragA on Type {
+		  field(a: $a) {
+			foo {
+				bar {
+					baz {
+						...FragB
+						...FragC
+						...FragD
+						...FragE
+						...FragF
+						...FragG
+						...FragH
+						...FragI
+						...FragJ
+					}
+				}
+			}
+		  }
+		}
+		fragment FragB on Type {
+		  field(b: $b) {
+				...FragC
+				...FragD
+				...FragE
+				...FragF
+				...FragG
+				...FragH
+				...FragI
+				...FragJ
+		  }
+		}
+		fragment FragC on Type {
+		  field(c: $c)
+		  ...FragD
+		  ...FragE
+		  ...FragF
+		  ...FragG
+		  ...FragH
+		  ...FragI
+		  ...FragJ
+		}
+		fragment FragD on Type {
+		  field(c: $c)
+		  ...FragE
+		  ...FragF
+		  ...FragG
+		  ...FragH
+		  ...FragI
+		  ...FragJ
+		}
+		fragment FragE on Type {
+		  field(c: $c)
+		  ...FragF
+		  ...FragG
+		  ...FragH
+		  ...FragI
+		  ...FragJ
+		}
+		fragment FragF on Type {
+		  field(c: $c)
+		  ...FragG
+		  ...FragH
+		  ...FragI
+		  ...FragJ
+		}
+		fragment FragG on Type {
+		  field(c: $c)
+		  ...FragH
+		  ...FragI
+		  ...FragJ
+		}
+		fragment FragH on Type {
+		  field(c: $c)
+		  ...FragI
+		  ...FragJ
+		}
+		fragment FragI on Type {
+		  field(c: $c)
+		  ...FragJ
+		}
+		fragment FragJ on Type {
+		  field(c: $c)
+		}
+	`)
+
+	parser := language.NewParser(query)
+
+	doc, err := parser.Parse()
+	require.NoError(b, err)
+
+	ctx := NewContext(doc)
+
+	// TODO: Make list function get item at index.
+	var def ast.Definition
+	doc.Definitions.ForEach(func(d ast.Definition, i int) {
+		if i == 0 {
+			def = d
+		}
+	})
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		frags := ctx.RecursivelyReferencedFragments(def.ExecutableDefinition)
+		_ = frags
 	}
 }
 
