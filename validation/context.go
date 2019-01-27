@@ -16,7 +16,7 @@ var contextDecoratorWalker = NewWalker([]VisitFunc{
 // more complicated validation walk to come.
 func NewContext(doc ast.Document) *Context {
 	ctx := &Context{
-		document: &doc,
+		document: doc,
 	}
 
 	contextDecoratorWalker.Walk(ctx, doc)
@@ -28,7 +28,7 @@ func NewContext(doc ast.Document) *Context {
 type Context struct {
 	Errors   *graphql.Errors
 	Schema   *graphql.Schema
-	document *ast.Document
+	document ast.Document
 
 	// Used by validation rules.
 	VariableDefs *ast.VariableDefinitions
