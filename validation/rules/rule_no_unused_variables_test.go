@@ -4,18 +4,10 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/language"
-	"github.com/bucketd/go-graphqlparser/validation"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestNoUnusedVariables(t *testing.T) {
-	tt := []struct {
-		msg   string
-		query string
-		errs  *graphql.Errors
-	}{
+	tt := []ruleTestCase{
 		{
 			msg: "uses all variables",
 			query: `
@@ -215,17 +207,5 @@ func TestNoUnusedVariables(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tt {
-		parser := language.NewParser([]byte(tc.query))
-
-		doc, err := parser.Parse()
-		if err != nil {
-			require.NoError(t, err)
-		}
-
-		walker := validation.NewWalker([]validation.VisitFunc{noUnusedVariables})
-
-		errs := validation.Validate(doc, walker)
-		assert.Equal(t, tc.errs, errs, tc.msg)
-	}
+	ruleTester(t, tt, noUnusedVariables)
 }
