@@ -6,19 +6,19 @@ import (
 )
 
 var contextDecoratorWalker = NewWalker([]VisitFunc{
-	setDefinitionName,
-	setFragment,
+	setExecutableDefinition,
+	setFragments,
+	setReferencedFragments,
 	setVariableUsages,
-	setRecursiveVariableUsages,
-	setRecursivelyReferencedFragments,
-	setFragmentSpreads,
 })
 
 // NewContext instantiates a validation context struct, this involves the walker
 // doing a preliminary pass of the document, gathering basic information for the
 // more complicated validation walk to come.
 func NewContext(doc ast.Document) *Context {
-	ctx := &Context{}
+	ctx := &Context{
+		Document: doc,
+	}
 
 	contextDecoratorWalker.Walk(ctx, doc)
 
@@ -27,171 +27,162 @@ func NewContext(doc ast.Document) *Context {
 
 // Context ...
 type Context struct {
-	Errors *graphql.Errors
-	Schema *graphql.Schema
+	Document ast.Document
+	Errors   *graphql.Errors
+	Schema   *graphql.Schema
 
-	// Used by validation rules.
-	VariableDefs *ast.VariableDefinitions
+	// fragments contains all fragment definitions found in the input query, accessible by name.
+	fragments map[string]*ast.FragmentDefinition
 
-	// Internal pre-cached with methods to access.
-	fragments                      map[string]*ast.FragmentDefinition
-	fragmentSpreads                map[*ast.Selections]map[string]bool
-	recursivelyReferencedFragments map[string]map[string]bool
-	variableUsages                 map[string]map[string]bool
-	recursiveVariableUsages        map[string]map[string]bool
+	// referencedFragments stores the fragment definitions referenced directly by an executable
+	// definition, i.e. this is not recursively referenced fragments.
+	referencedFragments map[*ast.ExecutableDefinition][]ast.Definition
 
-	fragmentSpreadsSelectionSet *ast.Selections
-	name                        string
-	nameToSelections            map[string]*ast.Selections
+	// variableUsages stores the variable usages referenced directly by an executable definition,
+	// i.e. this is not recursive variable usages.
+	variableUsages map[*ast.ExecutableDefinition][]string
+
+	// executableDefinition is the current executable definition being walked over.
+	executableDefinition *ast.ExecutableDefinition
 }
 
-func setDefinitionName(w *Walker) {
-	w.AddOperationDefinitionEnterEventHandler(func(ctx *Context, od *ast.OperationDefinition) {
-		ctx.name = od.Name
+// Fragment ...
+func (ctx *Context) Fragment(name string) *ast.FragmentDefinition {
+	return ctx.fragments[name]
+}
+
+// VariableUsages returns the variable usages in an operation or fragment definition.
+func (ctx *Context) VariableUsages(def *ast.ExecutableDefinition) []string {
+	return ctx.variableUsages[def]
+}
+
+// RecursiveVariableUsages ...
+func (ctx *Context) RecursiveVariableUsages(def *ast.ExecutableDefinition) map[string]struct{} {
+	if ctx.variableUsages[def] == nil || len(ctx.variableUsages[def]) == 0 {
+		return nil
+	}
+
+	// Maybe we could make this a slice too?
+	result := make(map[string]struct{})
+
+	ctx.recursiveVariableUsagesIter(def, result, make(map[*ast.ExecutableDefinition]struct{}))
+
+	return result
+}
+
+// recursiveVariableUsagesIter ...
+func (ctx *Context) recursiveVariableUsagesIter(def *ast.ExecutableDefinition, agg map[string]struct{}, seen map[*ast.ExecutableDefinition]struct{}) {
+	for _, vu := range ctx.variableUsages[def] {
+		agg[vu] = struct{}{}
+	}
+
+	// TODO: Can this be swapped to use a cached version of recursively referenced fragments.
+	for _, rd := range ctx.referencedFragments[def] {
+		// We only want to recurse deeper if we've never seen the fragment before.
+		if _, ok := seen[rd.ExecutableDefinition]; !ok {
+			seen[rd.ExecutableDefinition] = struct{}{}
+			ctx.recursiveVariableUsagesIter(rd.ExecutableDefinition, agg, seen)
+		}
+	}
+}
+
+// ReferencedFragments returns the fragments directly referenced by the given executable definition.
+func (ctx *Context) ReferencedFragments(def *ast.ExecutableDefinition) []ast.Definition {
+	return ctx.referencedFragments[def]
+}
+
+// RecursivelyReferencedFragments ...
+// NOTE: In practice, def would likely be an operation definition, but this isn't a requirement.
+func (ctx *Context) RecursivelyReferencedFragments(def *ast.ExecutableDefinition) map[ast.Definition]struct{} {
+	if ctx.referencedFragments[def] == nil || len(ctx.referencedFragments[def]) == 0 {
+		return nil
+	}
+
+	// Maybe we could make this a slice too?
+	result := make(map[ast.Definition]struct{})
+
+	ctx.recursivelyReferencedFragmentsIter(def, result, make(map[*ast.ExecutableDefinition]struct{}))
+
+	return result
+}
+
+// recursivelyReferencedFragmentsIter is the inner iteration method for finding recursively
+// referenced fragments for a given executable definition. It modifies the given aggregate map of
+// results.
+func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefinition, agg map[ast.Definition]struct{}, seen map[*ast.ExecutableDefinition]struct{}) {
+	// For each referenced fragment in the current executable definition...
+	for _, rd := range ctx.referencedFragments[def] {
+		agg[rd] = struct{}{}
+
+		// We only want to recurse deeper if we've never seen the fragment before.
+		if _, ok := seen[rd.ExecutableDefinition]; !ok {
+			seen[rd.ExecutableDefinition] = struct{}{}
+			ctx.recursivelyReferencedFragmentsIter(rd.ExecutableDefinition, agg, seen)
+		}
+	}
+}
+
+// setExecutableDefinition ...
+func setExecutableDefinition(w *Walker) {
+	w.AddExecutableDefinitionEnterEventHandler(func(ctx *Context, def *ast.ExecutableDefinition) {
+		ctx.executableDefinition = def
 	})
-
-	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, fd *ast.FragmentDefinition) {
-		ctx.name = fd.Name
-	})
 }
 
-// Fragment returns a FragmentDefinition by name.
-func (ctx *Context) Fragment(fragName string) *ast.FragmentDefinition {
-	return ctx.fragments[fragName]
-}
-
-func setFragment(w *Walker) {
-	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, fd *ast.FragmentDefinition) {
+// setFragments ...
+func setFragments(w *Walker) {
+	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, def *ast.FragmentDefinition) {
 		if ctx.fragments == nil {
 			ctx.fragments = make(map[string]*ast.FragmentDefinition)
 		}
 
-		ctx.fragments[fd.Name] = fd
+		ctx.fragments[def.Name] = def
 	})
 }
 
-// FragmentSpreads returns all nested usages of fragment spreads in this Selections.
-func (ctx *Context) FragmentSpreads(ss *ast.Selections) map[string]bool {
-	return ctx.fragmentSpreads[ss]
-}
-
-func setFragmentSpreads(w *Walker) {
-	w.AddOperationDefinitionEnterEventHandler(func(ctx *Context, od *ast.OperationDefinition) {
-		ctx.fragmentSpreadsSelectionSet = od.SelectionSet
-	})
-
-	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, fd *ast.FragmentDefinition) {
-		ctx.fragmentSpreadsSelectionSet = fd.SelectionSet
-	})
-
+// setReferencedFragments ...
+func setReferencedFragments(w *Walker) {
 	w.AddFragmentSpreadSelectionEnterEventHandler(func(ctx *Context, s ast.Selection) {
-		if ctx.fragmentSpreads == nil {
-			// TODO: Could this be keyed to operation / fragment name instead. We can extract all
-			// fragments used within a definition, rather than being as granular as selections.
-			// TODO: Is this going to be used elsewhere? If so, we might need to keep it like this.
-			ctx.fragmentSpreads = make(map[*ast.Selections]map[string]bool)
-		}
-
-		if ctx.fragmentSpreads[ctx.fragmentSpreadsSelectionSet] == nil {
-			ctx.fragmentSpreads[ctx.fragmentSpreadsSelectionSet] = make(map[string]bool)
-		}
-
-		ctx.fragmentSpreads[ctx.fragmentSpreadsSelectionSet][s.Name] = true
-	})
-}
-
-// RecursivelyReferencedFragments returns all the recursively referenced
-// fragments used by an operation or fragment definition.
-func (ctx *Context) RecursivelyReferencedFragments(exDefName string) map[string]bool {
-	return ctx.recursivelyReferencedFragments[exDefName]
-}
-
-func setRecursivelyReferencedFragments(w *Walker) {
-	w.AddFragmentSpreadSelectionEnterEventHandler(func(ctx *Context, s ast.Selection) {
-		if ctx.nameToSelections == nil {
-			ctx.nameToSelections = make(map[string]*ast.Selections)
-		}
-
-		// TODO: maybe this should happen later?
-		if ctx.recursivelyReferencedFragments == nil {
-			ctx.recursivelyReferencedFragments = make(map[string]map[string]bool)
-		}
-
-		// TODO: ctx.name here can be overwritten by a query and a fragment called the same thing.
-		ctx.nameToSelections[ctx.name] = ctx.fragmentSpreadsSelectionSet
-	})
-
-	w.AddDocumentLeaveEventHandler(func(ctx *Context, d ast.Document) {
-		for exDefName := range ctx.nameToSelections {
-			if _, ok := ctx.recursivelyReferencedFragments[exDefName]; ok {
-				continue
+		ctx.Document.Definitions.ForEach(func(d ast.Definition, i int) {
+			if d.Kind != ast.DefinitionKindExecutable {
+				return
 			}
 
-			_ = recurseFrags(ctx, exDefName, []string{exDefName})
-		}
+			if d.ExecutableDefinition.Kind != ast.ExecutableDefinitionKindFragment {
+				return
+			}
+
+			if d.ExecutableDefinition.FragmentDefinition.Name == s.Name {
+				if ctx.referencedFragments == nil {
+					ctx.referencedFragments = make(map[*ast.ExecutableDefinition][]ast.Definition)
+				}
+
+				for _, v := range ctx.referencedFragments[ctx.executableDefinition] {
+					if v == d {
+						return
+					}
+				}
+
+				ctx.referencedFragments[ctx.executableDefinition] =
+					append(ctx.referencedFragments[ctx.executableDefinition], d)
+			}
+		})
 	})
 }
 
-func recurseFrags(ctx *Context, name string, parents []string) []string {
-	var children []string
-	for frag := range ctx.FragmentSpreads(ctx.nameToSelections[name]) {
-		if in(frag, parents) {
-			continue
-		}
-		c := recurseFrags(
-			ctx,
-			frag,
-			append(parents, name),
-		)
-
-		children = append(children, c...)
-	}
-
-	ctx.recursivelyReferencedFragments[name] = ctx.FragmentSpreads(ctx.nameToSelections[name])
-
-	for _, child := range children {
-		for frag := range ctx.FragmentSpreads(ctx.nameToSelections[child]) {
-			ctx.recursivelyReferencedFragments[name][frag] = true
-		}
-	}
-
-	return append(children, name)
-}
-
-func in(target string, candidates []string) bool {
-	for _, c := range candidates {
-		if c == target {
-			return true
-		}
-	}
-	return false
-}
-
-// VariableUsages returns the variable usages in an operation or fragment definition.
-func (ctx *Context) VariableUsages(exDefName string) map[string]bool {
-	return ctx.variableUsages[exDefName]
-}
-
+// setVariableUsages ...
 func setVariableUsages(w *Walker) {
 	w.AddVariableValueEnterEventHandler(func(ctx *Context, v ast.Value) {
 		if ctx.variableUsages == nil {
-			ctx.variableUsages = make(map[string]map[string]bool)
+			ctx.variableUsages = make(map[*ast.ExecutableDefinition][]string)
 		}
 
-		if ctx.variableUsages[ctx.name] == nil {
-			ctx.variableUsages[ctx.name] = make(map[string]bool)
+		for _, u := range ctx.variableUsages[ctx.executableDefinition] {
+			if u == v.StringValue {
+				return
+			}
 		}
 
-		ctx.variableUsages[ctx.name][v.StringValue] = true
+		ctx.variableUsages[ctx.executableDefinition] = append(ctx.variableUsages[ctx.executableDefinition], v.StringValue)
 	})
-}
-
-// RecursiveVariableUsages returns all recursively referenced variable usages for an operation.
-func (ctx *Context) RecursiveVariableUsages(opName string) map[string]bool {
-	//return ctx.recursiveVariableUsages[opName]
-	return ctx.variableUsages[opName]
-}
-
-func setRecursiveVariableUsages(w *Walker) {
-
 }

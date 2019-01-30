@@ -53,6 +53,47 @@ type CharacterResolver interface {
 	BestFriend(gender Gender) CharacterResolver
 }
 
+type Character struct {
+	ID           string  `json:"id"`
+	Name         string  `json:"name"`
+	JobTitle     *string `json:"job_title"`
+	BestFriendID string  `json:"best_friend_id"`
+}
+
+type CharacterResolverImpl struct {
+	character Character
+}
+
+func (r *CharacterResolverImpl) ID() string {
+	return r.character.ID
+}
+
+func (r *CharacterResolverImpl) Name() string {
+	return r.character.Name
+}
+
+func (r *CharacterResolverImpl) JobTitle() NullString {
+	if r.character.JobTitle == nil {
+		return NullString{IsNull: true}
+	}
+
+	return NullString{
+		String: *r.character.JobTitle,
+	}
+}
+
+func (r *CharacterResolverImpl) BestFriend(gender Gender) CharacterResolver {
+	character := apiCall(r.character.BestFriendID)
+
+	return &CharacterResolverImpl{
+		character: character,
+	}
+}
+
+func apiCall(id string) Character {
+	return Character{}
+}
+
 // DroidInput represents: input DroidInput
 type DroidInput struct {
 	Name             string

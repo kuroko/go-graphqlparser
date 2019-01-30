@@ -72,6 +72,17 @@ type ExecutableDefinition struct {
 	Kind                ExecutableDefinitionKind
 }
 
+func (def ExecutableDefinition) String() string {
+	switch def.Kind {
+	case ExecutableDefinitionKindFragment:
+		return def.FragmentDefinition.Name
+	case ExecutableDefinitionKindOperation:
+		return def.OperationDefinition.Name
+	}
+
+	return "UnnamedExecutableDefinition"
+}
+
 type FragmentDefinition struct {
 	Name          string
 	TypeCondition *TypeCondition
