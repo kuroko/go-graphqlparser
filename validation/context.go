@@ -7,6 +7,7 @@ import (
 
 var contextDecoratorWalker = NewWalker([]VisitFunc{
 	setExecutableDefinition,
+	setFragments,
 	setReferencedFragments,
 	setVariableUsages,
 })
@@ -16,7 +17,7 @@ var contextDecoratorWalker = NewWalker([]VisitFunc{
 // more complicated validation walk to come.
 func NewContext(doc ast.Document) *Context {
 	ctx := &Context{
-		document: doc,
+		Document: doc,
 	}
 
 	contextDecoratorWalker.Walk(ctx, doc)
@@ -26,19 +27,28 @@ func NewContext(doc ast.Document) *Context {
 
 // Context ...
 type Context struct {
+	Document ast.Document
 	Errors   *graphql.Errors
 	Schema   *graphql.Schema
-	document ast.Document
 
-	// Internal pre-cached with methods to access.
-	variableUsages map[*ast.ExecutableDefinition][]string
+	// fragments contains all fragment definitions found in the input query, accessible by name.
+	fragments map[string]*ast.FragmentDefinition
 
-	// Maybe this is all we need here? This would store directly referenced fragments, as a list of
-	// definitions. By storing them as pointers, do we save memory by re-using the existing memory
-	// we've allocated during parsing?
+	// referencedFragments stores the fragment definitions referenced directly by an executable
+	// definition, i.e. this is not recursively referenced fragments.
 	referencedFragments map[*ast.ExecutableDefinition][]ast.Definition
 
+	// variableUsages stores the variable usages referenced directly by an executable definition,
+	// i.e. this is not recursive variable usages.
+	variableUsages map[*ast.ExecutableDefinition][]string
+
+	// executableDefinition is the current executable definition being walked over.
 	executableDefinition *ast.ExecutableDefinition
+}
+
+// Fragment ...
+func (ctx *Context) Fragment(name string) *ast.FragmentDefinition {
+	return ctx.fragments[name]
 }
 
 // VariableUsages returns the variable usages in an operation or fragment definition.
@@ -46,6 +56,42 @@ func (ctx *Context) VariableUsages(def *ast.ExecutableDefinition) []string {
 	return ctx.variableUsages[def]
 }
 
+// RecursiveVariableUsages ...
+func (ctx *Context) RecursiveVariableUsages(def *ast.ExecutableDefinition) map[string]struct{} {
+	if ctx.variableUsages[def] == nil || len(ctx.variableUsages[def]) == 0 {
+		return nil
+	}
+
+	// Maybe we could make this a slice too?
+	result := make(map[string]struct{})
+
+	ctx.recursiveVariableUsagesIter(def, result, make(map[*ast.ExecutableDefinition]struct{}))
+
+	return result
+}
+
+// recursiveVariableUsagesIter ...
+func (ctx *Context) recursiveVariableUsagesIter(def *ast.ExecutableDefinition, agg map[string]struct{}, seen map[*ast.ExecutableDefinition]struct{}) {
+	for _, vu := range ctx.variableUsages[def] {
+		agg[vu] = struct{}{}
+	}
+
+	// TODO: Can this be swapped to use a cached version of recursively referenced fragments.
+	for _, rd := range ctx.referencedFragments[def] {
+		// We only want to recurse deeper if we've never seen the fragment before.
+		if _, ok := seen[rd.ExecutableDefinition]; !ok {
+			seen[rd.ExecutableDefinition] = struct{}{}
+			ctx.recursiveVariableUsagesIter(rd.ExecutableDefinition, agg, seen)
+		}
+	}
+}
+
+// ReferencedFragments returns the fragments directly referenced by the given executable definition.
+func (ctx *Context) ReferencedFragments(def *ast.ExecutableDefinition) []ast.Definition {
+	return ctx.referencedFragments[def]
+}
+
+// RecursivelyReferencedFragments ...
 // NOTE: In practice, def would likely be an operation definition, but this isn't a requirement.
 func (ctx *Context) RecursivelyReferencedFragments(def *ast.ExecutableDefinition) map[ast.Definition]struct{} {
 	if ctx.referencedFragments[def] == nil || len(ctx.referencedFragments[def]) == 0 {
@@ -76,15 +122,28 @@ func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefini
 	}
 }
 
+// setExecutableDefinition ...
 func setExecutableDefinition(w *Walker) {
 	w.AddExecutableDefinitionEnterEventHandler(func(ctx *Context, def *ast.ExecutableDefinition) {
 		ctx.executableDefinition = def
 	})
 }
 
+// setFragments ...
+func setFragments(w *Walker) {
+	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, def *ast.FragmentDefinition) {
+		if ctx.fragments == nil {
+			ctx.fragments = make(map[string]*ast.FragmentDefinition)
+		}
+
+		ctx.fragments[def.Name] = def
+	})
+}
+
+// setReferencedFragments ...
 func setReferencedFragments(w *Walker) {
 	w.AddFragmentSpreadSelectionEnterEventHandler(func(ctx *Context, s ast.Selection) {
-		ctx.document.Definitions.ForEach(func(d ast.Definition, i int) {
+		ctx.Document.Definitions.ForEach(func(d ast.Definition, i int) {
 			if d.Kind != ast.DefinitionKindExecutable {
 				return
 			}
@@ -111,6 +170,7 @@ func setReferencedFragments(w *Walker) {
 	})
 }
 
+// setVariableUsages ...
 func setVariableUsages(w *Walker) {
 	w.AddVariableValueEnterEventHandler(func(ctx *Context, v ast.Value) {
 		if ctx.variableUsages == nil {

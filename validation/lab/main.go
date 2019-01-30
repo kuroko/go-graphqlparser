@@ -47,7 +47,7 @@ func main() {
 		  field(c: $c)
 		}
 		fragment FragD on Type {
-		  field(c: $c)
+		  field(c: $c, d: $d)
 		}
 	`))
 
@@ -70,6 +70,13 @@ func main() {
 
 		for k := range defs {
 			fmt.Println(k.ExecutableDefinition.FragmentDefinition.Name)
+		}
+
+		vars := ctx.RecursiveVariableUsages(d.ExecutableDefinition)
+		_ = vars
+
+		for v := range vars {
+			fmt.Println(v)
 		}
 
 		//defs.ForEach(func(d ast.Definition, i int) {

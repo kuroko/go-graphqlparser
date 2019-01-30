@@ -20,7 +20,7 @@ type Mutation {
 }
 
 interface Character {
-    id: ID!w
+    id: ID!
     name: String!
     jobTitle: String
     bestFriend(gender: Gender!): Character
@@ -49,4 +49,3 @@ type Human implements Character {
     bestFriend(gender: Gender!): Character
     credits: Int!
 }
-
