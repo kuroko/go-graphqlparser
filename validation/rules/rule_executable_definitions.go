@@ -12,14 +12,17 @@ import (
 func executableDefinitions(w *validation.Walker) {
 	w.AddDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.Definition) {
 		if def.Kind != ast.DefinitionKindExecutable {
-			err := graphql.NewError(nonExecutableDefinitionMessage(def))
-			// TODO: Add locations to AST.
-			err.Locations = err.Locations.Add(graphql.Location{Line: 6, Column: 7})
-			// NOTE(elliot): err.Path is unused in validation.
-
-			ctx.Errors = ctx.Errors.Add(err)
+			ctx.Errors = ctx.Errors.Add(nonExecutableDefinitionError(def, 0, 0))
 		}
 	})
+}
+
+// nonExecutableDefinitionError ...
+func nonExecutableDefinitionError(def ast.Definition, line, col int) graphql.Error {
+	return graphql.NewError(
+		nonExecutableDefinitionMessage(def),
+		// TODO: Location.
+	)
 }
 
 // nonExecutableDefinitionMessage ...
