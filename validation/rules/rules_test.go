@@ -25,7 +25,7 @@ func ruleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 			require.NoError(t, err)
 		}
 
-		walker := validation.NewWalker([]validation.VisitFunc{loneSchemaDefinition})
+		walker := validation.NewWalker([]validation.VisitFunc{fn})
 
 		errs := validation.Validate(doc, walker)
 		assert.Equal(t, tc.errs, errs, tc.msg)
