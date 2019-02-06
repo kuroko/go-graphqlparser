@@ -7,5 +7,5 @@ import (
 func TestUniqueFieldDefinitionNames(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, uniqueFieldDefinitionNames)
+	queryRuleTester(t, tt, uniqueFieldDefinitionNames)
 }

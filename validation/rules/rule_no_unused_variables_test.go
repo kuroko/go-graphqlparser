@@ -207,5 +207,5 @@ func TestNoUnusedVariables(t *testing.T) {
 		},
 	}
 
-	ruleTester(t, tt, noUnusedVariables)
+	queryRuleTester(t, tt, noUnusedVariables)
 }

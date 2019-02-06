@@ -7,5 +7,5 @@ import (
 func TestPossibleTypeExtensions(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, possibleTypeExtensions)
+	queryRuleTester(t, tt, possibleTypeExtensions)
 }

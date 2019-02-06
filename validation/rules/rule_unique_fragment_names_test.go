@@ -7,5 +7,5 @@ import (
 func TestUniqueFragmentNames(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, uniqueFragmentNames)
+	queryRuleTester(t, tt, uniqueFragmentNames)
 }

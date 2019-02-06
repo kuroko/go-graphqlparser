@@ -7,5 +7,5 @@ import (
 func TestUniqueDirectivesPerLocation(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, uniqueDirectivesPerLocation)
+	queryRuleTester(t, tt, uniqueDirectivesPerLocation)
 }

@@ -7,5 +7,5 @@ import (
 func TestProvidedRequiredArguments(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, providedRequiredArguments)
+	queryRuleTester(t, tt, providedRequiredArguments)
 }

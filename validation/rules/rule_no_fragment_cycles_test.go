@@ -7,5 +7,5 @@ import (
 func TestNoFragmentCycles(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, noFragmentCycles)
+	queryRuleTester(t, tt, noFragmentCycles)
 }

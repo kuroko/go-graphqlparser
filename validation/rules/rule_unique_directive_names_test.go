@@ -7,5 +7,5 @@ import (
 func TestUniqueDirectiveNames(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, uniqueDirectiveNames)
+	queryRuleTester(t, tt, uniqueDirectiveNames)
 }

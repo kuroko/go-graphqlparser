@@ -37,5 +37,5 @@ func TestLoneSchemaDefinition(t *testing.T) {
 		},
 	}
 
-	ruleTester(t, tt, loneSchemaDefinition)
+	queryRuleTester(t, tt, loneSchemaDefinition)
 }

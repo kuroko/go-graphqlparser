@@ -7,5 +7,5 @@ import (
 func TestValuesOfCorrectType(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, valuesOfCorrectType)
+	queryRuleTester(t, tt, valuesOfCorrectType)
 }

@@ -7,5 +7,5 @@ import (
 func TestSingleFieldSubscriptions(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, singleFieldSubscriptions)
+	queryRuleTester(t, tt, singleFieldSubscriptions)
 }

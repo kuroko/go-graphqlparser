@@ -48,7 +48,7 @@ func BenchmarkNewContext(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		ctx := NewContext(doc)
+		ctx := NewQueryContext(doc)
 		_ = ctx
 	}
 }
@@ -157,7 +157,7 @@ func BenchmarkContext_RecursivelyReferencedFragments(b *testing.B) {
 	doc, err := parser.Parse()
 	require.NoError(b, err)
 
-	ctx := NewContext(doc)
+	ctx := NewQueryContext(doc)
 
 	// TODO: Make list function get item at index.
 	var def ast.Definition
@@ -206,7 +206,7 @@ func TestDump(t *testing.T) {
 	doc, err := parser.Parse()
 	require.NoError(t, err)
 
-	ctx := NewContext(doc)
+	ctx := NewQueryContext(doc)
 	_ = ctx
 
 	doc.Definitions.ForEach(func(d ast.Definition, i int) {

@@ -4,6 +4,8 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
+// TODO: Add reference to GraphQL JS for rule names / base logic.
+
 // Specified is a slice of ValidationRuleFunc that contains all validation rules defined by the
 // GraphQL specification.
 //
@@ -46,8 +48,15 @@ var Specified = []validation.VisitFunc{
 // encountering multiple validation errors.
 var SpecifiedSDL = []validation.VisitFunc{
 	// loneSchemaDefinition,
+	// uniqueOperationTypes,
+	// uniqueTypeNames,
+	// uniqueEnumValueNames,
+	// uniqueFieldDefinitionNames,
+	// uniqueDirectiveNames,
+	// knownTypeNames,
 	// knownDirectives,
 	// uniqueDirectivesPerLocation,
+	// possibleTypeExtensions,
 	// knownArgumentNamesOnDirectives,
 	// uniqueArgumentNames,
 	// uniqueInputFieldNames,

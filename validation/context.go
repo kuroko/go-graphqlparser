@@ -5,22 +5,47 @@ import (
 	"github.com/bucketd/go-graphqlparser/graphql"
 )
 
-var contextDecoratorWalker = NewWalker([]VisitFunc{
-	setExecutableDefinition,
-	setFragments,
-	setReferencedFragments,
-	setVariableUsages,
-})
+var (
+	// queryContextDecoratorWalker ...
+	queryContextDecoratorWalker = NewWalker([]VisitFunc{
+		setExecutableDefinition,
+		setFragments,
+		setReferencedFragments,
+		setVariableUsages,
+	})
+	// sdlContextDecoratorWalker ...
+	sdlContextDecoratorWalker = NewWalker([]VisitFunc{
+		setExecutableDefinition,
+		setFragments,
+		setReferencedFragments,
+		setVariableUsages,
+	})
+)
 
-// NewContext instantiates a validation context struct, this involves the walker
-// doing a preliminary pass of the document, gathering basic information for the
-// more complicated validation walk to come.
-func NewContext(doc ast.Document) *Context {
-	ctx := &Context{
-		Document: doc,
+// NewQueryContext instantiates a validation context struct, this involves the walker doing a
+// preliminary pass of a query document, gathering basic information for the more complicated
+// validation walk to come.
+func NewQueryContext(doc ast.Document, schema *graphql.Schema) *Context {
+	return newContext(doc, schema, queryContextDecoratorWalker)
+}
+
+// NewSDLContext ...
+func NewSDLContext(doc ast.Document, schema *graphql.Schema) *Context {
+	return newContext(doc, schema, sdlContextDecoratorWalker)
+}
+
+// newContext ...
+func newContext(doc ast.Document, schema *graphql.Schema, walker *Walker) *Context {
+	if schema == nil {
+		schema = &graphql.Schema{}
 	}
 
-	contextDecoratorWalker.Walk(ctx, doc)
+	ctx := &Context{
+		Document: doc,
+		Schema:   schema,
+	}
+
+	walker.Walk(ctx, doc)
 
 	return ctx
 }

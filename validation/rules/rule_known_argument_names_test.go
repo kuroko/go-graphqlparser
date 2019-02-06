@@ -7,5 +7,5 @@ import (
 func TestKnownArgumentNames(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, knownArgumentNames)
+	queryRuleTester(t, tt, knownArgumentNames)
 }

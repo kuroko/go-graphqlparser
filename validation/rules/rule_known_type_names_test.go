@@ -5,7 +5,16 @@ import (
 )
 
 func TestKnownTypeNames(t *testing.T) {
-	tt := []ruleTestCase{}
+	t.Run("schema definition language", func(t *testing.T) {
+		// TODO
+		//tt := []ruleTestCase{}
+		//
+		//sdlRuleTester(t, tt, knownTypeNames)
+	})
 
-	ruleTester(t, tt, knownTypeNames)
+	t.Run("query language", func(t *testing.T) {
+		var tt []ruleTestCase
+
+		queryRuleTester(t, tt, knownTypeNames)
+	})
 }

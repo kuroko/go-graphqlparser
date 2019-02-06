@@ -83,5 +83,5 @@ func TestExecutableDefinitions(t *testing.T) {
 		},
 	}
 
-	ruleTester(t, tt, executableDefinitions)
+	queryRuleTester(t, tt, executableDefinitions)
 }

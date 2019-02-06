@@ -7,5 +7,5 @@ import (
 func TestOverlappingFieldsCanBeMerged(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, overlappingFieldsCanBeMerged)
+	queryRuleTester(t, tt, overlappingFieldsCanBeMerged)
 }

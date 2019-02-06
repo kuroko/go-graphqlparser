@@ -7,5 +7,5 @@ import (
 func TestLoneAnonymousOperation(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, loneAnonymousOperation)
+	queryRuleTester(t, tt, loneAnonymousOperation)
 }

@@ -7,5 +7,5 @@ import (
 func TestPossibleFragmentSpreads(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, possibleFragmentSpreads)
+	queryRuleTester(t, tt, possibleFragmentSpreads)
 }

@@ -7,5 +7,5 @@ import (
 func TestNoUndefinedVariables(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, noUndefinedVariables)
+	queryRuleTester(t, tt, noUndefinedVariables)
 }

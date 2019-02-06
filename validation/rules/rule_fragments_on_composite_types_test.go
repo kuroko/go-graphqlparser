@@ -7,5 +7,5 @@ import (
 func TestFragmentsOnCompositeTypes(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, fragmentsOnCompositeTypes)
+	queryRuleTester(t, tt, fragmentsOnCompositeTypes)
 }

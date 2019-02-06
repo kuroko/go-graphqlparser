@@ -7,5 +7,5 @@ import (
 func TestUniqueArgumentNames(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, uniqueArgumentNames)
+	queryRuleTester(t, tt, uniqueArgumentNames)
 }

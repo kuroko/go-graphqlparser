@@ -7,5 +7,5 @@ import (
 func TestVariablesInAllowedPosition(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, variablesInAllowedPosition)
+	queryRuleTester(t, tt, variablesInAllowedPosition)
 }

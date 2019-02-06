@@ -7,5 +7,5 @@ import (
 func TestKnownDirectives(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, knownDirectives)
+	queryRuleTester(t, tt, knownDirectives)
 }

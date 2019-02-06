@@ -7,5 +7,5 @@ import (
 func TestVariablesAreInputTypes(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	ruleTester(t, tt, variablesAreInputTypes)
+	queryRuleTester(t, tt, variablesAreInputTypes)
 }
