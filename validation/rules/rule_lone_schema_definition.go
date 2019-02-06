@@ -10,19 +10,15 @@ import (
 //
 // A GraphQL document is only valid if it contains only one schema definition.
 func loneSchemaDefinition(w *validation.Walker) {
-	var schemaDefinitions int
+	w.AddSchemaDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.SchemaDefinition) {
+		hasQryType := ctx.Schema.QueryType != nil
+		hasMutType := ctx.Schema.MutationType != nil
+		hasSubType := ctx.Schema.SubscriptionType != nil
 
-	w.AddSchemaDefinitionEnterEventHandler(func(ctx *validation.Context, _ *ast.SchemaDefinition) {
-		// TODO: implement logic once schema is implemented.
-		_ = ctx.Schema
-		if false {
-			ctx.Errors = ctx.Errors.Add(canNotDefineSchemaWithinExtensionError(0, 0))
+		if hasQryType || hasMutType || hasSubType {
+			// TODO: Can we think of a way to replicate the way the JS version has two errors?
+			ctx.AddError(schemaDefinitionNotAloneError(0, 0))
 		}
-
-		if schemaDefinitions > 0 {
-			ctx.Errors = ctx.Errors.Add(schemaDefinitionNotAloneError(0, 0))
-		}
-		schemaDefinitions++
 	})
 }
 
@@ -33,9 +29,9 @@ func schemaDefinitionNotAloneError(line, col int) graphql.Error {
 	)
 }
 
-func canNotDefineSchemaWithinExtensionError(line, col int) graphql.Error {
-	return graphql.NewError(
-		"Cannot define a new schema within a schema extension.",
-		// TODO: Location.
-	)
-}
+//func canNotDefineSchemaWithinExtensionError(line, col int) graphql.Error {
+//	return graphql.NewError(
+//		"Cannot define a new schema within a schema extension.",
+//		// TODO: Location.
+//	)
+//}

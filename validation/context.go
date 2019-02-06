@@ -71,6 +71,11 @@ type Context struct {
 	executableDefinition *ast.ExecutableDefinition
 }
 
+// AddError adds an error to the linked list of errors on this Context.
+func (ctx *Context) AddError(err graphql.Error) {
+	ctx.Errors = ctx.Errors.Add(err)
+}
+
 // Fragment ...
 func (ctx *Context) Fragment(name string) *ast.FragmentDefinition {
 	return ctx.fragments[name]
