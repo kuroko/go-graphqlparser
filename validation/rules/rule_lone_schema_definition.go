@@ -16,8 +16,11 @@ func loneSchemaDefinition(w *validation.Walker) {
 		hasSubType := ctx.Schema.SubscriptionType != nil
 
 		if hasQryType || hasMutType || hasSubType {
-			// TODO: Can we think of a way to replicate the way the JS version has two errors?
-			ctx.AddError(schemaDefinitionNotAloneError(0, 0))
+			if ctx.IsExtending {
+				ctx.AddError(canNotDefineSchemaWithinExtensionError(0, 0))
+			} else {
+				ctx.AddError(schemaDefinitionNotAloneError(0, 0))
+			}
 		}
 	})
 }
@@ -29,9 +32,9 @@ func schemaDefinitionNotAloneError(line, col int) graphql.Error {
 	)
 }
 
-//func canNotDefineSchemaWithinExtensionError(line, col int) graphql.Error {
-//	return graphql.NewError(
-//		"Cannot define a new schema within a schema extension.",
-//		// TODO: Location.
-//	)
-//}
+func canNotDefineSchemaWithinExtensionError(line, col int) graphql.Error {
+	return graphql.NewError(
+		"Cannot define a new schema within a schema extension.",
+		// TODO: Location.
+	)
+}

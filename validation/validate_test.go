@@ -3,11 +3,10 @@ package validation_test
 import (
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
-
 	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,7 +33,7 @@ func BenchmarkValidate(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		validation.Validate(doc, walker)
+		validation.ValidateWithWalker(doc, &validation.Schema{}, walker)
 	}
 }
 
@@ -51,7 +50,7 @@ func TestValidate(t *testing.T) {
 	}
 
 	walker := validation.NewWalker(rules.Specified)
-	errs := validation.Validate(doc, walker)
+	errs := validation.ValidateWithWalker(doc, &validation.Schema{}, walker)
 
 	t.Log(spew.Sdump(errs))
 

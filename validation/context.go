@@ -25,24 +25,26 @@ var (
 // NewQueryContext instantiates a validation context struct, this involves the walker doing a
 // preliminary pass of a query document, gathering basic information for the more complicated
 // validation walk to come.
-func NewQueryContext(doc ast.Document, schema *graphql.Schema) *Context {
+func NewQueryContext(doc ast.Document, schema *Schema) *Context {
 	return newContext(doc, schema, queryContextDecoratorWalker)
 }
 
 // NewSDLContext ...
-func NewSDLContext(doc ast.Document, schema *graphql.Schema) *Context {
+func NewSDLContext(doc ast.Document, schema *Schema) *Context {
 	return newContext(doc, schema, sdlContextDecoratorWalker)
 }
 
 // newContext ...
-func newContext(doc ast.Document, schema *graphql.Schema, walker *Walker) *Context {
-	if schema == nil {
-		schema = &graphql.Schema{}
+func newContext(doc ast.Document, schema *Schema, walker *Walker) *Context {
+	isExtending := schema != nil
+	if !isExtending {
+		schema = &Schema{}
 	}
 
 	ctx := &Context{
-		Document: doc,
-		Schema:   schema,
+		Document:    doc,
+		Schema:      schema,
+		IsExtending: isExtending,
 	}
 
 	walker.Walk(ctx, doc)
@@ -54,7 +56,7 @@ func newContext(doc ast.Document, schema *graphql.Schema, walker *Walker) *Conte
 type Context struct {
 	Document ast.Document
 	Errors   *graphql.Errors
-	Schema   *graphql.Schema
+	Schema   *Schema
 
 	// fragments contains all fragment definitions found in the input query, accessible by name.
 	fragments map[string]*ast.FragmentDefinition
@@ -69,6 +71,10 @@ type Context struct {
 
 	// executableDefinition is the current executable definition being walked over.
 	executableDefinition *ast.ExecutableDefinition
+
+	// IsExtending is true if this context was created with an existing Schema, and it's being
+	// extended by another SDL file.
+	IsExtending bool
 }
 
 // AddError adds an error to the linked list of errors on this Context.
