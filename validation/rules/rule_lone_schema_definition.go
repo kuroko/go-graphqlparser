@@ -15,13 +15,19 @@ func loneSchemaDefinition(w *validation.Walker) {
 		hasMutType := ctx.Schema.MutationType != nil
 		hasSubType := ctx.Schema.SubscriptionType != nil
 
-		if hasQryType || hasMutType || hasSubType {
-			if ctx.IsExtending {
-				ctx.AddError(canNotDefineSchemaWithinExtensionError(0, 0))
-			} else {
-				ctx.AddError(schemaDefinitionNotAloneError(0, 0))
-			}
+		alreadyDefined := ctx.IsExtending && (hasQryType || hasMutType || hasSubType)
+
+		if alreadyDefined {
+			ctx.AddError(canNotDefineSchemaWithinExtensionError(0, 0))
+			return
 		}
+
+		if ctx.HasSeenSchemaDefinition {
+			ctx.AddError(schemaDefinitionNotAloneError(0, 0))
+			return
+		}
+
+		ctx.HasSeenSchemaDefinition = true
 	})
 }
 

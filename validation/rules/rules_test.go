@@ -25,14 +25,15 @@ var (
 
 // ruleTestCase ...
 type ruleTestCase struct {
-	msg   string
-	query string
-	errs  *graphql.Errors
+	msg    string
+	query  string
+	schema *validation.Schema
+	errs   *graphql.Errors
 }
 
 // queryRuleTester ...
 func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
-	var schema graphql.Schema
+	var schema validation.Schema
 
 	schemaParser := language.NewParser([]byte(schemaDocument))
 
@@ -53,6 +54,23 @@ func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 		walker := validation.NewWalker([]validation.VisitFunc{fn})
 
 		errs := validation.ValidateWithWalker(doc, &schema, walker)
+		assert.Equal(t, tc.errs, errs, tc.msg)
+	}
+}
+
+// sdlRuleTester ...
+func sdlRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
+	for _, tc := range tt {
+		schemaParser := language.NewParser([]byte(tc.query))
+
+		schemaDoc, err := schemaParser.Parse()
+		require.NoError(t, err, "failed to parse schema document")
+
+		walker := validation.NewWalker([]validation.VisitFunc{fn})
+
+		//spew.Dump(tc.schema)
+
+		errs := validation.ValidateSDLWithWalker(schemaDoc, tc.schema, walker)
 		assert.Equal(t, tc.errs, errs, tc.msg)
 	}
 }

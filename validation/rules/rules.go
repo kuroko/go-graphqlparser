@@ -53,7 +53,7 @@ var Specified = []validation.VisitFunc{
 // The order of this list is important, and is intended to produce the most clear output when
 // encountering multiple validation errors.
 var SpecifiedSDL = []validation.VisitFunc{
-	// loneSchemaDefinition,
+	loneSchemaDefinition,
 	// uniqueOperationTypes,
 	// uniqueTypeNames,
 	// uniqueEnumValueNames,

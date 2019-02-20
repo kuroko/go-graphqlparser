@@ -11,6 +11,7 @@ import (
 // A GraphQL document is only valid if when it contains an anonymous operation
 // (the query short-hand) it contains only that one operation definition.
 func loneAnonymousOperation(w *validation.Walker) {
+	// TODO: Move this to context (!!)
 	var operations int
 
 	w.AddDocumentEnterEventHandler(func(ctx *validation.Context, document ast.Document) {

@@ -15,10 +15,7 @@ var (
 	})
 	// sdlContextDecoratorWalker ...
 	sdlContextDecoratorWalker = NewWalker([]VisitFunc{
-		setExecutableDefinition,
-		setFragments,
-		setReferencedFragments,
-		setVariableUsages,
+		setSchemaDefinitionTypes,
 	})
 )
 
@@ -75,6 +72,9 @@ type Context struct {
 	// IsExtending is true if this context was created with an existing Schema, and it's being
 	// extended by another SDL file.
 	IsExtending bool
+
+	// HasSeenSchemaDefinition ...
+	HasSeenSchemaDefinition bool
 }
 
 // AddError adds an error to the linked list of errors on this Context.
@@ -201,6 +201,22 @@ func setReferencedFragments(w *Walker) {
 
 				ctx.referencedFragments[ctx.executableDefinition] =
 					append(ctx.referencedFragments[ctx.executableDefinition], d)
+			}
+		})
+	})
+}
+
+// setSchemaDefinitionTypes ...
+func setSchemaDefinitionTypes(w *Walker) {
+	w.AddSchemaDefinitionEnterEventHandler(func(ctx *Context, def *ast.SchemaDefinition) {
+		def.RootOperationTypeDefinitions.ForEach(func(otd ast.RootOperationTypeDefinition, i int) {
+			switch otd.OperationType {
+			case ast.OperationDefinitionKindQuery:
+				ctx.Schema.QueryType = &otd.NamedType
+			case ast.OperationDefinitionKindMutation:
+				ctx.Schema.MutationType = &otd.NamedType
+			case ast.OperationDefinitionKindSubscription:
+				ctx.Schema.SubscriptionType = &otd.NamedType
 			}
 		})
 	})

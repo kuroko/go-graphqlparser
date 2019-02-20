@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/validation"
 )
 
 func TestLoneSchemaDefinition(t *testing.T) {
@@ -35,7 +36,16 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				Add(nil, schemaDefinitionNotAloneError(0, 0)).
 				Add(schemaDefinitionNotAloneError(0, 0)),
 		},
+		{
+			msg: "schema definition in extending schema document",
+			query: `
+			schema { query: Foo }
+			`,
+			schema: &validation.Schema{},
+			errs: (*graphql.Errors).
+				Add(nil, canNotDefineSchemaWithinExtensionError(0, 0)),
+		},
 	}
 
-	queryRuleTester(t, tt, loneSchemaDefinition)
+	sdlRuleTester(t, tt, loneSchemaDefinition)
 }
