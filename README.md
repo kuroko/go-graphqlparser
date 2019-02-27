@@ -22,30 +22,30 @@ Benchmarks:
 
 ```
 $ go test -bench=. -benchmem
-goos: darwin
+goos: linux
 goarch: amd64
 pkg: github.com/bucketd/go-graphqlparser/language
-BenchmarkLexer/bucketd-8                      200000   7588 ns/op    960 B/op    5 allocs/op
-BenchmarkLexer/graphql-go-8                   100000  21537 ns/op   2176 B/op   32 allocs/op
-BenchmarkLexer/vektah-8                       200000   6301 ns/op   2000 B/op    9 allocs/op
-BenchmarkTypeSystemParser/tsQuery/bucketd-8  1000000   2158 ns/op    624 B/op   16 allocs/op
-BenchmarkTypeSystemParser/tsQuery/vektah-8    500000   3356 ns/op   1392 B/op   24 allocs/op
-BenchmarkParser/normalQuery/bucketd-8         100000  22362 ns/op   6768 B/op   81 allocs/op
-BenchmarkParser/normalQuery/graphql-go-8       20000  60579 ns/op  21504 B/op  565 allocs/op
-BenchmarkParser/normalQuery/vektah-8           50000  36795 ns/op  15936 B/op  244 allocs/op
-BenchmarkParser/tinyQuery/bucketd-8          2000000    807 ns/op    400 B/op    6 allocs/op
-BenchmarkParser/tinyQuery/graphql-go-8       1000000   2276 ns/op   1064 B/op   27 allocs/op
-BenchmarkParser/tinyQuery/vektah-8           1000000   1377 ns/op    968 B/op   13 allocs/op
+BenchmarkLexer/bucketd-8                    	  300000	      4378 ns/op	     656 B/op	       3 allocs/op
+BenchmarkLexer/graphql-go-8                 	  200000	     12037 ns/op	    1844 B/op	      30 allocs/op
+BenchmarkLexer/vektah-8                     	  500000	      3435 ns/op	    1760 B/op	       8 allocs/op
+BenchmarkTypeSystemParser/tsQuery/bucketd-8 	 1000000	      1225 ns/op	     688 B/op	      14 allocs/op
+BenchmarkTypeSystemParser/tsQuery/vektah-8  	 1000000	      1784 ns/op	    1392 B/op	      24 allocs/op
+BenchmarkParser/normalQuery/bucketd-8       	  100000	     13601 ns/op	    7648 B/op	      83 allocs/op
+BenchmarkParser/normalQuery/graphql-go-8    	   30000	     40802 ns/op	   26975 B/op	     736 allocs/op
+BenchmarkParser/normalQuery/vektah-8        	  100000	     20363 ns/op	   15776 B/op	     243 allocs/op
+BenchmarkParser/tinyQuery/bucketd-8         	 3000000	       533 ns/op	     464 B/op	       7 allocs/op
+BenchmarkParser/tinyQuery/graphql-go-8      	 1000000	      1558 ns/op	    1320 B/op	      35 allocs/op
+BenchmarkParser/tinyQuery/vektah-8          	 2000000	       795 ns/op	     968 B/op	      13 allocs/op
 PASS
-ok  	github.com/bucketd/go-graphqlparser/language	21.860s
+ok  	github.com/bucketd/go-graphqlparser/language	20.184s
 ```
 
 Test machine info:
 
-* CPU: Intel Core i7-4770HQ @ 8x 2.2GHz (boost to 3.4GHz)
-* RAM: 16GiB 1600MHz DDR3
-* OS: macOS Mojave (Version 10.14)
-* Go: version go1.11.1 darwin/amd64
+* CPU: Intel Core i7-7700K @ 8x 5.0GHz
+* RAM: 16GiB 3200MHz DDR4
+* OS: Arch Linux 4.20.10-arch1-1-ARCH
+* Go: version go1.12 linux/amd64
 
 The benchmark code is included in this repository, please feel free to take a look at it yourself,
 if you spot a mistake in our benchmark code that would give us an unfair advantage (or 
