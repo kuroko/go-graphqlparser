@@ -49,7 +49,7 @@ func TestNoUnusedVariables(t *testing.T) {
 		},
 		{
 			msg: "uses all variables in fragments",
-			query: ` 
+			query: `
 			query Foo($a: String, $b: String, $c: String) {
 			  ...FragA
 			}

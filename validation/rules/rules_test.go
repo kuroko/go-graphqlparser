@@ -33,15 +33,15 @@ type ruleTestCase struct {
 
 // queryRuleTester ...
 func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
-	var schema validation.Schema
+	var schema *validation.Schema
 
 	schemaParser := language.NewParser([]byte(schemaDocument))
 
 	schemaDoc, err := schemaParser.Parse()
 	require.NoError(t, err, "failed to parse schema document")
 
-	errs := validation.ValidateSDL(schemaDoc, &schema)
-	require.True(t, errs.Len() == 0, "found errors validation schema")
+	errs := validation.ValidateSDL(schemaDoc, schema, validation.NewWalker(SpecifiedSDL))
+	require.True(t, errs.Len() == 0, "found errors validating schema")
 
 	for _, tc := range tt {
 		parser := language.NewParser([]byte(tc.query))
@@ -53,7 +53,7 @@ func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 
 		walker := validation.NewWalker([]validation.VisitFunc{fn})
 
-		errs := validation.ValidateWithWalker(doc, &schema, walker)
+		errs := validation.Validate(doc, schema, walker)
 		assert.Equal(t, tc.errs, errs, tc.msg)
 	}
 }
@@ -70,7 +70,7 @@ func sdlRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 
 		//spew.Dump(tc.schema)
 
-		errs := validation.ValidateSDLWithWalker(schemaDoc, tc.schema, walker)
+		errs := validation.ValidateSDL(schemaDoc, tc.schema, walker)
 		assert.Equal(t, tc.errs, errs, tc.msg)
 	}
 }

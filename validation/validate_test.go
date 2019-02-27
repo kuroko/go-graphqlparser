@@ -33,7 +33,7 @@ func BenchmarkValidate(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		validation.ValidateWithWalker(doc, &validation.Schema{}, walker)
+		validation.Validate(doc, &validation.Schema{}, walker)
 	}
 }
 
@@ -50,7 +50,7 @@ func TestValidate(t *testing.T) {
 	}
 
 	walker := validation.NewWalker(rules.Specified)
-	errs := validation.ValidateWithWalker(doc, &validation.Schema{}, walker)
+	errs := validation.Validate(doc, &validation.Schema{}, walker)
 
 	t.Log(spew.Sdump(errs))
 

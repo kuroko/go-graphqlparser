@@ -94,10 +94,6 @@ func (ctx *Context) VariableUsages(def *ast.ExecutableDefinition) []string {
 
 // RecursiveVariableUsages ...
 func (ctx *Context) RecursiveVariableUsages(def *ast.ExecutableDefinition) map[string]struct{} {
-	if ctx.variableUsages[def] == nil || len(ctx.variableUsages[def]) == 0 {
-		return nil
-	}
-
 	// Maybe we could make this a slice too?
 	result := make(map[string]struct{})
 

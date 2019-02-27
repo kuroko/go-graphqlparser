@@ -5,7 +5,6 @@ import (
 
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/language"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
@@ -48,7 +47,7 @@ func BenchmarkNewContext(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		ctx := NewQueryContext(doc)
+		ctx := NewQueryContext(doc, nil)
 		_ = ctx
 	}
 }
@@ -157,7 +156,7 @@ func BenchmarkContext_RecursivelyReferencedFragments(b *testing.B) {
 	doc, err := parser.Parse()
 	require.NoError(b, err)
 
-	ctx := NewQueryContext(doc)
+	ctx := NewQueryContext(doc, nil)
 
 	// TODO: Make list function get item at index.
 	var def ast.Definition
@@ -176,59 +175,59 @@ func BenchmarkContext_RecursivelyReferencedFragments(b *testing.B) {
 	}
 }
 
-func TestDump(t *testing.T) {
-	parser := language.NewParser([]byte(`
-		query Foo($a: String, $b: String, $c: String) {
-		  ...FragA
-		}
-		fragment FragA on Type {
-		  field(a: $a) {
-			foo {
-				bar {
-					baz {
-						...FragB
-						...FragC
-					}
-				}
-			}
-		  }
-		}
-		fragment FragB on Type {
-		  field(b: $b) {
-				...FragC
-		  }
-		}
-		fragment FragC on Type {
-		  field(c: $c)
-		}
-	`))
-
-	doc, err := parser.Parse()
-	require.NoError(t, err)
-
-	ctx := NewQueryContext(doc)
-	_ = ctx
-
-	doc.Definitions.ForEach(func(d ast.Definition, i int) {
-		// We want to see the fragments referenced on the query...
-		if d.Kind != ast.DefinitionKindExecutable || d.ExecutableDefinition.Kind != ast.ExecutableDefinitionKindOperation {
-			return
-		}
-
-		spew.Dump(ctx)
-
-		defs := ctx.RecursivelyReferencedFragments(d.ExecutableDefinition)
-		_ = defs
-
-		spew.Dump(d.ExecutableDefinition)
-
-		//defs.ForEach(func(d ast.Definition, i int) {
-		//	fmt.Println(d.ExecutableDefinition.FragmentDefinition.Name)
-		//})
-	})
-
-	t.Fail()
-}
+//func TestDump(t *testing.T) {
+//	parser := language.NewParser([]byte(`
+//		query Foo($a: String, $b: String, $c: String) {
+//		  ...FragA
+//		}
+//		fragment FragA on Type {
+//		  field(a: $a) {
+//			foo {
+//				bar {
+//					baz {
+//						...FragB
+//						...FragC
+//					}
+//				}
+//			}
+//		  }
+//		}
+//		fragment FragB on Type {
+//		  field(b: $b) {
+//				...FragC
+//		  }
+//		}
+//		fragment FragC on Type {
+//		  field(c: $c)
+//		}
+//	`))
+//
+//	doc, err := parser.Parse()
+//	require.NoError(t, err)
+//
+//	ctx := NewQueryContext(doc, nil)
+//	_ = ctx
+//
+//	doc.Definitions.ForEach(func(d ast.Definition, i int) {
+//		// We want to see the fragments referenced on the query...
+//		if d.Kind != ast.DefinitionKindExecutable || d.ExecutableDefinition.Kind != ast.ExecutableDefinitionKindOperation {
+//			return
+//		}
+//
+//		spew.Dump(ctx)
+//
+//		defs := ctx.RecursivelyReferencedFragments(d.ExecutableDefinition)
+//		_ = defs
+//
+//		spew.Dump(d.ExecutableDefinition)
+//
+//		//defs.ForEach(func(d ast.Definition, i int) {
+//		//	fmt.Println(d.ExecutableDefinition.FragmentDefinition.Name)
+//		//})
+//	})
+//
+//	t.Fail()
+//}
 
 //func TestSetFragment(t *testing.T) {
 //	ctx := &Context{}
