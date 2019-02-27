@@ -3,9 +3,8 @@ package main
 import (
 	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/bucketd/go-graphqlparser/validation"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 	"github.com/davecgh/go-spew/spew"
-
-	_ "github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 var query = []byte(`
@@ -27,8 +26,12 @@ func main() {
 	// TODO: Parse schema first.
 	schema := &validation.Schema{}
 
+	// This walker instance should be shared for the lifetime of a whole application, not just a
+	// single request. It is stateless, but not cheap to create.
+	walker := validation.NewWalker(rules.Specified)
+
 	// Validate the result, returning GraphQL errors.
-	errs := validation.ValidateWithWalker(doc, schema, validation.DefaultQueryWalker)
+	errs := validation.Validate(doc, schema, walker)
 
 	spew.Dump(errs)
 }

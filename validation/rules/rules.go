@@ -4,12 +4,6 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-func init() {
-	// Initialise the default walker with the rules for queries and the SDL respectively.
-	validation.DefaultQueryWalker = validation.NewWalker(Specified)
-	validation.DefaultSDLWalker = validation.NewWalker(SpecifiedSDL)
-}
-
 // TODO: Add reference to GraphQL JS for rule names / base logic.
 
 // Specified is a slice of ValidationRuleFunc that contains all validation rules defined by the
