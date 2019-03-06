@@ -4,9 +4,8 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/validation"
-
 	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/validation"
 )
 
 func TestLoneSchemaDefinition(t *testing.T) {
