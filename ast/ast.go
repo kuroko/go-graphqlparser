@@ -342,7 +342,7 @@ type SchemaDefinition struct {
 
 // TODO: Should NamedType be a string?
 type RootOperationTypeDefinition struct {
-	NamedType     Type // Only allow "TypeKindNamed" kind NamedType.
+	NamedType     Type
 	OperationType OperationDefinitionKind
 }
 

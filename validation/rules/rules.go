@@ -48,7 +48,7 @@ var Specified = []validation.VisitFunc{
 // encountering multiple validation errors.
 var SpecifiedSDL = []validation.VisitFunc{
 	loneSchemaDefinition,
-	// uniqueOperationTypes,
+	uniqueOperationTypes,
 	// uniqueTypeNames,
 	// uniqueEnumValueNames,
 	// uniqueFieldDefinitionNames,

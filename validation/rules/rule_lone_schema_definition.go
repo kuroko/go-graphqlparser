@@ -11,13 +11,7 @@ import (
 // A GraphQL document is only valid if it contains only one schema definition.
 func loneSchemaDefinition(w *validation.Walker) {
 	w.AddSchemaDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.SchemaDefinition) {
-		hasQryType := ctx.Schema.QueryType != nil
-		hasMutType := ctx.Schema.MutationType != nil
-		hasSubType := ctx.Schema.SubscriptionType != nil
-
-		alreadyDefined := ctx.IsExtending && (hasQryType || hasMutType || hasSubType)
-
-		if alreadyDefined {
+		if ctx.Schema.IsExtending {
 			ctx.AddError(canNotDefineSchemaWithinExtensionError(0, 0))
 			return
 		}

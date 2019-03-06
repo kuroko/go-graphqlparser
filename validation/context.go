@@ -15,7 +15,7 @@ var (
 	})
 	// sdlContextDecoratorWalker ...
 	sdlContextDecoratorWalker = NewWalker([]VisitFunc{
-		setSchemaDefinitionTypes,
+		//setSchemaDefinitionTypes,
 	})
 )
 
@@ -36,12 +36,13 @@ func newContext(doc ast.Document, schema *Schema, walker *Walker) *Context {
 	isExtending := schema != nil
 	if !isExtending {
 		schema = &Schema{}
+	} else {
+		schema.IsExtending = true
 	}
 
 	ctx := &Context{
-		Document:    doc,
-		Schema:      schema,
-		IsExtending: isExtending,
+		Document: doc,
+		Schema:   schema,
 	}
 
 	walker.Walk(ctx, doc)
@@ -69,9 +70,11 @@ type Context struct {
 	// executableDefinition is the current executable definition being walked over.
 	executableDefinition *ast.ExecutableDefinition
 
-	// IsExtending is true if this context was created with an existing Schema, and it's being
-	// extended by another SDL file.
-	IsExtending bool
+	// TODO: Should schema related context fields go on the Schema type? Might save memory.
+
+	QueryType        *ast.Type
+	MutationType     *ast.Type
+	SubscriptionType *ast.Type
 
 	// HasSeenSchemaDefinition ...
 	HasSeenSchemaDefinition bool
@@ -206,6 +209,19 @@ func setReferencedFragments(w *Walker) {
 func setSchemaDefinitionTypes(w *Walker) {
 	w.AddSchemaDefinitionEnterEventHandler(func(ctx *Context, def *ast.SchemaDefinition) {
 		def.RootOperationTypeDefinitions.ForEach(func(otd ast.RootOperationTypeDefinition, i int) {
+			switch otd.OperationType {
+			case ast.OperationDefinitionKindQuery:
+				ctx.Schema.QueryType = &otd.NamedType
+			case ast.OperationDefinitionKindMutation:
+				ctx.Schema.MutationType = &otd.NamedType
+			case ast.OperationDefinitionKindSubscription:
+				ctx.Schema.SubscriptionType = &otd.NamedType
+			}
+		})
+	})
+
+	w.AddSchemaExtensionEnterEventHandler(func(ctx *Context, ext *ast.SchemaExtension) {
+		ext.OperationTypeDefinitions.ForEach(func(otd ast.OperationTypeDefinition, i int) {
 			switch otd.OperationType {
 			case ast.OperationDefinitionKindQuery:
 				ctx.Schema.QueryType = &otd.NamedType

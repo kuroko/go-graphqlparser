@@ -15,4 +15,12 @@ type Schema struct {
 	QueryType        *ast.Type
 	MutationType     *ast.Type
 	SubscriptionType *ast.Type
+
+	QueryTypeDefined        bool
+	MutationTypeDefined     bool
+	SubscriptionTypeDefined bool
+
+	// IsExtending is true if this context was created with an existing Schema, and it's being
+	// extended by another SDL file.
+	IsExtending bool
 }
