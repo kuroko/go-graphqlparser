@@ -14,19 +14,19 @@ func uniqueOperationTypes(w *validation.Walker) {
 			switch rotd.OperationType {
 			case ast.OperationDefinitionKindQuery:
 				if ctx.Schema.QueryTypeDefined {
-					ctx.AddError(duplicateOperationTypeMessage("query", 0, 0))
+					ctx.AddError(duplicateOperationTypeMessage(rotd.OperationType.String(), 0, 0))
 				}
 
 				ctx.Schema.QueryTypeDefined = true
 			case ast.OperationDefinitionKindMutation:
 				if ctx.Schema.MutationTypeDefined {
-					ctx.AddError(duplicateOperationTypeMessage("mutation", 0, 0))
+					ctx.AddError(duplicateOperationTypeMessage(rotd.OperationType.String(), 0, 0))
 				}
 
 				ctx.Schema.MutationTypeDefined = true
 			case ast.OperationDefinitionKindSubscription:
 				if ctx.Schema.SubscriptionTypeDefined {
-					ctx.AddError(duplicateOperationTypeMessage("subscription", 0, 0))
+					ctx.AddError(duplicateOperationTypeMessage(rotd.OperationType.String(), 0, 0))
 				}
 
 				ctx.Schema.SubscriptionTypeDefined = true
@@ -39,25 +39,25 @@ func uniqueOperationTypes(w *validation.Walker) {
 			switch otd.OperationType {
 			case ast.OperationDefinitionKindQuery:
 				if ctx.Schema.QueryType != nil {
-					ctx.AddError(existedOperationTypeMessage("query", 0, 0))
+					ctx.AddError(existedOperationTypeMessage(otd.OperationType.String(), 0, 0))
 				} else if ctx.Schema.QueryTypeDefined {
-					ctx.AddError(duplicateOperationTypeMessage("query", 0, 0))
+					ctx.AddError(duplicateOperationTypeMessage(otd.OperationType.String(), 0, 0))
 				}
 
 				ctx.Schema.QueryTypeDefined = true
 			case ast.OperationDefinitionKindMutation:
 				if ctx.Schema.MutationType != nil {
-					ctx.AddError(existedOperationTypeMessage("mutation", 0, 0))
+					ctx.AddError(existedOperationTypeMessage(otd.OperationType.String(), 0, 0))
 				} else if ctx.Schema.MutationTypeDefined {
-					ctx.AddError(duplicateOperationTypeMessage("mutation", 0, 0))
+					ctx.AddError(duplicateOperationTypeMessage(otd.OperationType.String(), 0, 0))
 				}
 
 				ctx.Schema.MutationTypeDefined = true
 			case ast.OperationDefinitionKindSubscription:
 				if ctx.Schema.SubscriptionType != nil {
-					ctx.AddError(existedOperationTypeMessage("subscription", 0, 0))
+					ctx.AddError(existedOperationTypeMessage(otd.OperationType.String(), 0, 0))
 				} else if ctx.Schema.SubscriptionTypeDefined {
-					ctx.AddError(duplicateOperationTypeMessage("subscription", 0, 0))
+					ctx.AddError(duplicateOperationTypeMessage(otd.OperationType.String(), 0, 0))
 				}
 
 				ctx.Schema.SubscriptionTypeDefined = true
