@@ -49,7 +49,7 @@ var Specified = []validation.VisitFunc{
 var SpecifiedSDL = []validation.VisitFunc{
 	loneSchemaDefinition,
 	uniqueOperationTypes,
-	// uniqueTypeNames,
+	uniqueTypeNames,
 	// uniqueEnumValueNames,
 	// uniqueFieldDefinitionNames,
 	// uniqueDirectiveNames,

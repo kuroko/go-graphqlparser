@@ -27,7 +27,7 @@ const (
 // SearchResultKind represents union kinds for: union SearchResult
 type SearchResultKind int
 
-// SearchResult represents: union Searchresult
+// SearchResult represents: union SearchResult
 type SearchResult struct {
 	Kind  SearchResultKind
 	Droid DroidResolver
@@ -49,7 +49,7 @@ type MutationResolver interface {
 type CharacterResolver interface {
 	ID() string
 	Name() string
-	JobTitle() NullString
+	JobTitle() *string
 	BestFriend(gender Gender) CharacterResolver
 }
 
@@ -72,14 +72,8 @@ func (r *CharacterResolverImpl) Name() string {
 	return r.character.Name
 }
 
-func (r *CharacterResolverImpl) JobTitle() NullString {
-	if r.character.JobTitle == nil {
-		return NullString{IsNull: true}
-	}
-
-	return NullString{
-		String: *r.character.JobTitle,
-	}
+func (r *CharacterResolverImpl) JobTitle() *string {
+	return r.character.JobTitle
 }
 
 func (r *CharacterResolverImpl) BestFriend(gender Gender) CharacterResolver {
@@ -97,9 +91,9 @@ func apiCall(id string) Character {
 // DroidInput represents: input DroidInput
 type DroidInput struct {
 	Name             string
-	JobTitle         NullString
-	MaleBestFriend   NullString
-	FemaleBestFriend NullString
+	JobTitle         *string
+	MaleBestFriend   *string
+	FemaleBestFriend *string
 	PrimaryFunction  string
 }
 
@@ -134,12 +128,6 @@ type HumanResolver interface {
 // Somewhere else we define a NullXyz type for every type that can be returned from a resolver. With
 // the exception of other resolvers, and slices:
 
-// NullString ...
-type NullString struct {
-	String string
-	IsNull bool
-}
-
 // NOTE(seeruk): Nullability:
 // * For resolvers, the generated server will know which resolvers are allowed to be nullable. If a
 //   resolver is marked as non-nullable, and nil is returned, then we know we can error.
@@ -150,7 +138,8 @@ type NullString struct {
 // Generated code should only be able to return values that we can return as JSON. We control what
 // gets generated in the end anyway.
 
-// NOTE(seeruk): You cannot pass a GraphQL `type` as an argument, it must be an `input` type, and // those have restrictions on what fields can be defined as.
+// NOTE(seeruk): You cannot pass a GraphQL `type` as an argument, it must be an `input` type, and
+// those have restrictions on what fields can be defined as.
 
 // NOTE(seeruk): Extending code generation.
 // * Uses directives.

@@ -66,6 +66,7 @@ func uniqueOperationTypes(w *validation.Walker) {
 	})
 }
 
+// duplicateOperationTypeMessage ...
 func duplicateOperationTypeMessage(operation string, line, col int) graphql.Error {
 	return graphql.NewError(
 		"There can be only one " + operation + " type in schema.",
@@ -73,6 +74,7 @@ func duplicateOperationTypeMessage(operation string, line, col int) graphql.Erro
 	)
 }
 
+// existedOperationTypeMessage ...
 func existedOperationTypeMessage(operation string, line, col int) graphql.Error {
 	return graphql.NewError(
 		"Type for " + operation + " already defined in the schema. It cannot be redefined.",
