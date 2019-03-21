@@ -11,17 +11,19 @@ import (
 // A GraphQL document is only valid if it contains only one schema definition.
 func loneSchemaDefinition(w *validation.Walker) {
 	w.AddSchemaDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.SchemaDefinition) {
-		if ctx.Schema.IsExtending {
+		// NOTE: If ctx.SDLContext is nil here, we should panic, this is an SDL only rule.
+
+		if ctx.SDLContext.IsExtending {
 			ctx.AddError(canNotDefineSchemaWithinExtensionError(0, 0))
 			return
 		}
 
-		if ctx.HasSeenSchemaDefinition {
+		if ctx.SDLContext.HasSeenSchemaDefinition {
 			ctx.AddError(schemaDefinitionNotAloneError(0, 0))
 			return
 		}
 
-		ctx.HasSeenSchemaDefinition = true
+		ctx.SDLContext.HasSeenSchemaDefinition = true
 	})
 }
 

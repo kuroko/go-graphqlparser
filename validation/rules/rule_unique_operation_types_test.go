@@ -234,17 +234,14 @@ func TestUniqueOperationTypes(t *testing.T) {
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Query",
 				},
-				QueryTypeDefined: true,
 				MutationType: &ast.Type{
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Mutation",
 				},
-				MutationTypeDefined: true,
 				SubscriptionType: &ast.Type{
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Subscription",
 				},
-				SubscriptionTypeDefined: true,
 			},
 			query: `
 			extend schema {
@@ -266,17 +263,14 @@ func TestUniqueOperationTypes(t *testing.T) {
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Query",
 				},
-				QueryTypeDefined: true,
 				MutationType: &ast.Type{
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Mutation",
 				},
-				MutationTypeDefined: true,
 				SubscriptionType: &ast.Type{
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Subscription",
 				},
-				SubscriptionTypeDefined: true,
 			},
 			query: `
 			extend schema {

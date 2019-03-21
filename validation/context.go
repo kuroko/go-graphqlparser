@@ -28,16 +28,20 @@ func NewQueryContext(doc ast.Document, schema *Schema) *Context {
 
 // NewSDLContext ...
 func NewSDLContext(doc ast.Document, schema *Schema) *Context {
-	return newContext(doc, schema, sdlContextDecoratorWalker)
+	ctx := newContext(doc, schema, sdlContextDecoratorWalker)
+
+	// Construct SDL specific structures.
+	ctx.SDLContext = &SDLContext{
+		IsExtending: schema != nil,
+	}
+
+	return ctx
 }
 
 // newContext ...
 func newContext(doc ast.Document, schema *Schema, walker *Walker) *Context {
-	isExtending := schema != nil
-	if !isExtending {
+	if schema == nil {
 		schema = &Schema{}
-	} else {
-		schema.IsExtending = true
 	}
 
 	ctx := &Context{
@@ -50,11 +54,28 @@ func newContext(doc ast.Document, schema *Schema, walker *Walker) *Context {
 	return ctx
 }
 
+// SDLContext ...
+type SDLContext struct {
+	QueryTypeDefined        bool
+	MutationTypeDefined     bool
+	SubscriptionTypeDefined bool
+
+	// HasSeenSchemaDefinition ...
+	HasSeenSchemaDefinition bool
+
+	// IsExtending is true if this context was created with an existing Schema, and it's being
+	// extended by another SDL file.
+	IsExtending bool
+}
+
 // Context ...
 type Context struct {
 	Document ast.Document
 	Errors   *graphql.Errors
 	Schema   *Schema
+
+	// Used if we're validating an SDL file.
+	SDLContext *SDLContext
 
 	// fragments contains all fragment definitions found in the input query, accessible by name.
 	fragments map[string]*ast.FragmentDefinition
@@ -69,15 +90,6 @@ type Context struct {
 
 	// executableDefinition is the current executable definition being walked over.
 	executableDefinition *ast.ExecutableDefinition
-
-	// TODO: Should schema related context fields go on the Schema type? Might save memory.
-
-	QueryType        *ast.Type
-	MutationType     *ast.Type
-	SubscriptionType *ast.Type
-
-	// HasSeenSchemaDefinition ...
-	HasSeenSchemaDefinition bool
 }
 
 // AddError adds an error to the linked list of errors on this Context.

@@ -56,7 +56,6 @@ func TestLoneSchemaDefinition(t *testing.T) {
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Foo",
 				},
-				QueryTypeDefined: true,
 			},
 			query: `
 			schema {
@@ -75,7 +74,6 @@ func TestLoneSchemaDefinition(t *testing.T) {
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Foo",
 				},
-				QueryTypeDefined: true,
 			},
 			query: `
 			schema {
@@ -92,7 +90,6 @@ func TestLoneSchemaDefinition(t *testing.T) {
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Foo",
 				},
-				QueryTypeDefined: true,
 			},
 			query: `
 			extend schema {

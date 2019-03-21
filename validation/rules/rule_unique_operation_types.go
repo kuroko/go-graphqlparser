@@ -13,23 +13,23 @@ func uniqueOperationTypes(w *validation.Walker) {
 			// NOTE: Can't be extending here.
 			switch rotd.OperationType {
 			case ast.OperationDefinitionKindQuery:
-				if ctx.Schema.QueryTypeDefined {
+				if ctx.SDLContext.QueryTypeDefined {
 					ctx.AddError(duplicateOperationTypeMessage(rotd.OperationType.String(), 0, 0))
 				}
 
-				ctx.Schema.QueryTypeDefined = true
+				ctx.SDLContext.QueryTypeDefined = true
 			case ast.OperationDefinitionKindMutation:
-				if ctx.Schema.MutationTypeDefined {
+				if ctx.SDLContext.MutationTypeDefined {
 					ctx.AddError(duplicateOperationTypeMessage(rotd.OperationType.String(), 0, 0))
 				}
 
-				ctx.Schema.MutationTypeDefined = true
+				ctx.SDLContext.MutationTypeDefined = true
 			case ast.OperationDefinitionKindSubscription:
-				if ctx.Schema.SubscriptionTypeDefined {
+				if ctx.SDLContext.SubscriptionTypeDefined {
 					ctx.AddError(duplicateOperationTypeMessage(rotd.OperationType.String(), 0, 0))
 				}
 
-				ctx.Schema.SubscriptionTypeDefined = true
+				ctx.SDLContext.SubscriptionTypeDefined = true
 			}
 		})
 	})
@@ -40,27 +40,27 @@ func uniqueOperationTypes(w *validation.Walker) {
 			case ast.OperationDefinitionKindQuery:
 				if ctx.Schema.QueryType != nil {
 					ctx.AddError(existedOperationTypeMessage(otd.OperationType.String(), 0, 0))
-				} else if ctx.Schema.QueryTypeDefined {
+				} else if ctx.SDLContext.QueryTypeDefined {
 					ctx.AddError(duplicateOperationTypeMessage(otd.OperationType.String(), 0, 0))
 				}
 
-				ctx.Schema.QueryTypeDefined = true
+				ctx.SDLContext.QueryTypeDefined = true
 			case ast.OperationDefinitionKindMutation:
 				if ctx.Schema.MutationType != nil {
 					ctx.AddError(existedOperationTypeMessage(otd.OperationType.String(), 0, 0))
-				} else if ctx.Schema.MutationTypeDefined {
+				} else if ctx.SDLContext.MutationTypeDefined {
 					ctx.AddError(duplicateOperationTypeMessage(otd.OperationType.String(), 0, 0))
 				}
 
-				ctx.Schema.MutationTypeDefined = true
+				ctx.SDLContext.MutationTypeDefined = true
 			case ast.OperationDefinitionKindSubscription:
 				if ctx.Schema.SubscriptionType != nil {
 					ctx.AddError(existedOperationTypeMessage(otd.OperationType.String(), 0, 0))
-				} else if ctx.Schema.SubscriptionTypeDefined {
+				} else if ctx.SDLContext.SubscriptionTypeDefined {
 					ctx.AddError(duplicateOperationTypeMessage(otd.OperationType.String(), 0, 0))
 				}
 
-				ctx.Schema.SubscriptionTypeDefined = true
+				ctx.SDLContext.SubscriptionTypeDefined = true
 			}
 		})
 	})
