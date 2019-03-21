@@ -16,7 +16,6 @@ type Schema struct {
 	MutationType     *ast.Type
 	SubscriptionType *ast.Type
 
-	// TODO: Probably not final type.
 	// TODO: Not actually populated yet.
-	Types map[string]struct{}
+	Types map[string]*ast.TypeDefinition
 }

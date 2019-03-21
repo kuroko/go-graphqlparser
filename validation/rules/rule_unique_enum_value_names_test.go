@@ -2,10 +2,175 @@ package rules
 
 import (
 	"testing"
+
+	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/validation"
 )
 
 func TestUniqueEnumValueNames(t *testing.T) {
-	tt := []ruleTestCase{}
+	tt := []ruleTestCase{
+		{
+			msg: "no values",
+			query: `
+				enum SomeEnum
+			`,
+		},
+		{
+			msg: "one value",
+			query: `
+				enum SomeEnum {
+					FOO
+				}
+			`,
+		},
+		{
+			msg: "multiple values",
+			query: `
+				enum SomeEnum {
+					FOO
+					BAR
+				}
+			`,
+		},
+		{
+			msg: "duplicate values inside the same enum definition",
+			query: `
+				enum SomeEnum {
+					FOO
+					BAR
+					FOO
+				}
+			`,
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+		},
+		{
+			msg: "extend enum with new value",
+			query: `
+				enum SomeEnum {
+					FOO
+				}
 
-	queryRuleTester(t, tt, uniqueEnumValueNames)
+				extend enum SomeEnum {
+					BAR
+				}
+
+				extend enum SomeEnum {
+					BAZ
+				}
+			`,
+		},
+		{
+			msg: "extend enum with duplicate value",
+			query: `
+				enum SomeEnum {
+					FOO
+				}
+
+				extend enum SomeEnum {
+					FOO
+				}
+			`,
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+		},
+		{
+			msg: "duplicate value inside extension",
+			query: `
+				enum SomeEnum
+
+				extend enum SomeEnum {
+					FOO
+					BAR
+					FOO
+				}
+			`,
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+		},
+		{
+			msg: "duplicate value inside different extensions",
+			query: `
+				enum SomeEnum
+
+				extend enum SomeEnum {
+					FOO
+				}
+
+				extend enum SomeEnum {
+					FOO
+				}
+			`,
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+		},
+		{
+			msg: "adding new value to the type inside existing schema",
+			schema: &validation.Schema{
+				Types: map[string]*ast.TypeDefinition{
+					"SomeEnum": {
+						Name: "SomeEnum",
+						Kind: ast.TypeDefinitionKindEnum,
+					},
+				},
+			},
+			query: `
+				extend enum SomeEnum {
+					FOO
+				}
+			`,
+		},
+		{
+			msg: "adding conflicting value to existing schema twice",
+			schema: &validation.Schema{
+				Types: map[string]*ast.TypeDefinition{
+					"SomeEnum": {
+						Name: "SomeEnum",
+						Kind: ast.TypeDefinitionKindEnum,
+						EnumValuesDefinition: (*ast.EnumValueDefinitions)(nil).
+							Add(ast.EnumValueDefinition{
+								EnumValue: "FOO",
+							}),
+					},
+				},
+			},
+			query: `
+				extend enum SomeEnum {
+					FOO
+				}
+
+				extend enum SomeEnum {
+					FOO
+				}
+			`,
+			errs: (*graphql.Errors)(nil).
+				Add(existedEnumValueNameMessage("SomeEnum", "FOO")).
+				Add(existedEnumValueNameMessage("SomeEnum", "FOO")),
+		},
+		{
+			msg: "adding conflicting value to existing schema twice",
+			schema: &validation.Schema{
+				Types: map[string]*ast.TypeDefinition{
+					"SomeEnum": {
+						Name: "SomeEnum",
+						Kind: ast.TypeDefinitionKindEnum,
+					},
+				},
+			},
+			query: `
+				extend enum SomeEnum {
+					FOO
+				}
+
+				extend enum SomeEnum {
+					FOO
+				}
+			`,
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+		},
+	}
+
+	sdlRuleTester(t, tt, uniqueEnumValueNames)
 }

@@ -32,8 +32,7 @@ func NewSDLContext(doc ast.Document, schema *Schema) *Context {
 
 	// Construct SDL specific structures.
 	ctx.SDLContext = &SDLContext{
-		KnownTypeNames: make(map[string]struct{}),
-		IsExtending:    schema != nil,
+		IsExtending: schema != nil,
 	}
 
 	return ctx
@@ -158,7 +157,8 @@ func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefini
 
 // SDLContext ...
 type SDLContext struct {
-	KnownTypeNames map[string]struct{}
+	KnownTypeNames      map[string]struct{}
+	KnownEnumValueNames map[string]map[string]struct{}
 
 	QueryTypeDefined        bool
 	MutationTypeDefined     bool

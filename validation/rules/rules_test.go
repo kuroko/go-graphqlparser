@@ -18,7 +18,7 @@ var (
 		}
 
 		type Query {
-			foo: String!
+			checkEnumValueUniqueness: String!
 		}
 	`
 )

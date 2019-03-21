@@ -385,6 +385,53 @@ type TypeDefinition struct {
 	Kind                  TypeDefinitionKind
 }
 
+// GetEnumValueDefinition ...
+func (d TypeDefinition) GetEnumValueDefinition(valueName string) (EnumValueDefinition, bool) {
+	var evd EnumValueDefinition
+	var found bool
+
+	if IsEnumTypeDefinition(&d) {
+		d.EnumValuesDefinition.ForEach(func(ievd EnumValueDefinition, i int) {
+			if ievd.EnumValue == valueName {
+				evd = ievd
+				found = true
+			}
+		})
+	}
+
+	return evd, found
+}
+
+// IsScalarTypeDefinition ...
+func IsScalarTypeDefinition(def *TypeDefinition) bool {
+	return def.Kind == TypeDefinitionKindScalar
+}
+
+// IsObjectTypeDefinition ...
+func IsObjectTypeDefinition(def *TypeDefinition) bool {
+	return def.Kind == TypeDefinitionKindObject
+}
+
+// IsInterfaceTypeDefinition ...
+func IsInterfaceTypeDefinition(def *TypeDefinition) bool {
+	return def.Kind == TypeDefinitionKindInterface
+}
+
+// IsUnionTypeDefinition ...
+func IsUnionTypeDefinition(def *TypeDefinition) bool {
+	return def.Kind == TypeDefinitionKindUnion
+}
+
+// IsEnumTypeDefinition ...
+func IsEnumTypeDefinition(def *TypeDefinition) bool {
+	return def.Kind == TypeDefinitionKindEnum
+}
+
+// IsInputObjectTypeDefinition ...
+func IsInputObjectTypeDefinition(def *TypeDefinition) bool {
+	return def.Kind == TypeDefinitionKindInputObject
+}
+
 type FieldDefinition struct {
 	Description         string
 	Name                string

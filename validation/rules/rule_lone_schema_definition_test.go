@@ -13,7 +13,7 @@ func TestLoneSchemaDefinition(t *testing.T) {
 		{
 			msg: "no schema",
 			query: `
-			type Foo { foo: String }
+			type Foo { checkEnumValueUniqueness: String }
 			`,
 			errs: nil,
 		},
@@ -21,7 +21,7 @@ func TestLoneSchemaDefinition(t *testing.T) {
 			msg: "one schema definition",
 			query: `
 			schema { query: Foo }
-			type Foo { foo: String }
+			type Foo { checkEnumValueUniqueness: String }
 			`,
 			errs: nil,
 		},
@@ -29,12 +29,12 @@ func TestLoneSchemaDefinition(t *testing.T) {
 			msg: "multiple schema definitions",
 			query: `
 			schema { query: Foo }
-			type Foo { foo: String }
+			type Foo { checkEnumValueUniqueness: String }
 			schema { mutation: Foo }
 			schema { subscription: Foo }
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, schemaDefinitionNotAloneError(0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(schemaDefinitionNotAloneError(0, 0)).
 				Add(schemaDefinitionNotAloneError(0, 0)),
 		},
 		{
@@ -45,8 +45,8 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				query: Foo
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, canNotDefineSchemaWithinExtensionError(0, 0)),
+			errs: (*graphql.Errors)(nil).
+				Add(canNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "redefine schema in schema extension",
@@ -62,8 +62,8 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				mutation: Foo
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, canNotDefineSchemaWithinExtensionError(0, 0)),
+			errs: (*graphql.Errors)(nil).
+				Add(canNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "redefine implicit schema in schema extension",
@@ -80,8 +80,8 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				mutation: Foo
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, canNotDefineSchemaWithinExtensionError(0, 0)),
+			errs: (*graphql.Errors)(nil).
+				Add(canNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "extend schema in schema extension",

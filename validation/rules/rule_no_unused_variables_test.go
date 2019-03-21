@@ -108,8 +108,8 @@ func TestNoUnusedVariables(t *testing.T) {
 			  field(a: $a, b: $b)
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, unusedVariableError("c", "", 0, 0)),
+			errs: (*graphql.Errors)(nil).
+				Add(unusedVariableError("c", "", 0, 0)),
 		},
 		{
 			msg: "multiple variables not used",
@@ -118,8 +118,8 @@ func TestNoUnusedVariables(t *testing.T) {
 			  field(b: $b)
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, unusedVariableError("a", "Foo", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(unusedVariableError("a", "Foo", 0, 0)).
 				Add(unusedVariableError("c", "Foo", 0, 0)),
 		},
 		{
@@ -142,8 +142,8 @@ func TestNoUnusedVariables(t *testing.T) {
 			  field
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, unusedVariableError("c", "Foo", 0, 0)),
+			errs: (*graphql.Errors)(nil).
+				Add(unusedVariableError("c", "Foo", 0, 0)),
 		},
 		{
 			msg: "multiple variables not used in fragments",
@@ -165,8 +165,8 @@ func TestNoUnusedVariables(t *testing.T) {
 			  field
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, unusedVariableError("a", "Foo", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(unusedVariableError("a", "Foo", 0, 0)).
 				Add(unusedVariableError("c", "Foo", 0, 0)),
 		},
 		{
@@ -182,8 +182,8 @@ func TestNoUnusedVariables(t *testing.T) {
 			  field(b: $b)
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, unusedVariableError("b", "Foo", 0, 0)),
+			errs: (*graphql.Errors)(nil).
+				Add(unusedVariableError("b", "Foo", 0, 0)),
 		},
 		{
 			msg: "variable not used by fragment used by other operation",
@@ -201,8 +201,8 @@ func TestNoUnusedVariables(t *testing.T) {
 			  field(b: $b)
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, unusedVariableError("b", "Foo", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(unusedVariableError("b", "Foo", 0, 0)).
 				Add(unusedVariableError("a", "Bar", 0, 0)),
 		},
 	}

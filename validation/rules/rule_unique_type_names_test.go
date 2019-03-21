@@ -3,6 +3,7 @@ package rules
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
@@ -51,8 +52,8 @@ func TestUniqueTypeNames(t *testing.T) {
 				enum Foo
 				input Foo
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, duplicateTypeNameMessage("Foo", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateTypeNameMessage("Foo", 0, 0)).
 				Add(duplicateTypeNameMessage("Foo", 0, 0)).
 				Add(duplicateTypeNameMessage("Foo", 0, 0)).
 				Add(duplicateTypeNameMessage("Foo", 0, 0)).
@@ -62,7 +63,7 @@ func TestUniqueTypeNames(t *testing.T) {
 		{
 			msg: "adding new types to existing schema",
 			schema: &validation.Schema{
-				Types: map[string]struct{}{
+				Types: map[string]*ast.TypeDefinition{
 					"Foo": {},
 				},
 			},
@@ -82,7 +83,7 @@ func TestUniqueTypeNames(t *testing.T) {
 		{
 			msg: "adding conflicting types to existing schema",
 			schema: &validation.Schema{
-				Types: map[string]struct{}{
+				Types: map[string]*ast.TypeDefinition{
 					"Foo": {},
 				},
 			},
@@ -94,8 +95,8 @@ func TestUniqueTypeNames(t *testing.T) {
 				enum Foo
 				input Foo
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, existedTypeNameMessage("Foo", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(existedTypeNameMessage("Foo", 0, 0)).
 				Add(existedTypeNameMessage("Foo", 0, 0)).
 				Add(existedTypeNameMessage("Foo", 0, 0)).
 				Add(existedTypeNameMessage("Foo", 0, 0)).

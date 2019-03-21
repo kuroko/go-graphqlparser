@@ -9,6 +9,10 @@ import (
 // uniqueTypeNames ...
 func uniqueTypeNames(w *validation.Walker) {
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.TypeDefinition) {
+		if ctx.SDLContext.KnownTypeNames == nil {
+			ctx.SDLContext.KnownTypeNames = make(map[string]struct{})
+		}
+
 		// TODO: Can this ever be nil?
 		if _, ok := ctx.Schema.Types[def.Name]; ok {
 			ctx.AddError(existedTypeNameMessage(def.Name, 0, 0))

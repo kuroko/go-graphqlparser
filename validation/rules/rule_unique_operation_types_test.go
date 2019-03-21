@@ -94,8 +94,8 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, duplicateOperationTypeMessage("query", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateOperationTypeMessage("query", 0, 0)).
 				Add(duplicateOperationTypeMessage("mutation", 0, 0)).
 				Add(duplicateOperationTypeMessage("subscription", 0, 0)),
 		},
@@ -116,8 +116,8 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, duplicateOperationTypeMessage("query", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateOperationTypeMessage("query", 0, 0)).
 				Add(duplicateOperationTypeMessage("mutation", 0, 0)).
 				Add(duplicateOperationTypeMessage("subscription", 0, 0)),
 		},
@@ -144,8 +144,8 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, duplicateOperationTypeMessage("query", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateOperationTypeMessage("query", 0, 0)).
 				Add(duplicateOperationTypeMessage("mutation", 0, 0)).
 				Add(duplicateOperationTypeMessage("subscription", 0, 0)).
 				Add(duplicateOperationTypeMessage("query", 0, 0)).
@@ -172,8 +172,8 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, duplicateOperationTypeMessage("query", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(duplicateOperationTypeMessage("query", 0, 0)).
 				Add(duplicateOperationTypeMessage("mutation", 0, 0)).
 				Add(duplicateOperationTypeMessage("subscription", 0, 0)),
 		},
@@ -242,8 +242,8 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Foo
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, existedOperationTypeMessage("query", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(existedOperationTypeMessage("query", 0, 0)).
 				Add(existedOperationTypeMessage("mutation", 0, 0)).
 				Add(existedOperationTypeMessage("subscription", 0, 0)),
 		},
@@ -277,8 +277,8 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Foo
 			}
 			`,
-			errs: (*graphql.Errors).
-				Add(nil, existedOperationTypeMessage("query", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(existedOperationTypeMessage("query", 0, 0)).
 				Add(existedOperationTypeMessage("mutation", 0, 0)).
 				Add(existedOperationTypeMessage("subscription", 0, 0)).
 				Add(existedOperationTypeMessage("query", 0, 0)).

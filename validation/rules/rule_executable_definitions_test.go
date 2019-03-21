@@ -61,8 +61,8 @@ func TestExecutableDefinitions(t *testing.T) {
 			  color: String
 			}
 		    `,
-			errs: (*graphql.Errors).
-				Add(nil, mockNonExecutableDefinitionError("Cow", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(mockNonExecutableDefinitionError("Cow", 0, 0)).
 				Add(mockNonExecutableDefinitionError("Dog", 0, 0)),
 		},
 		{
@@ -76,8 +76,8 @@ func TestExecutableDefinitions(t *testing.T) {
 			}
 			extend schema @directive
 		    `,
-			errs: (*graphql.Errors).
-				Add(nil, mockNonExecutableDefinitionError("schema", 0, 0)).
+			errs: (*graphql.Errors)(nil).
+				Add(mockNonExecutableDefinitionError("schema", 0, 0)).
 				Add(mockNonExecutableDefinitionError("Query", 0, 0)).
 				Add(mockNonExecutableDefinitionError("schema", 0, 0)),
 		},
