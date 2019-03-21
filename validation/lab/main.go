@@ -58,7 +58,7 @@ func main() {
 
 	schema := &validation.Schema{}
 
-	ctx := validation.NewQueryContext(doc, schema)
+	ctx := validation.NewContext(doc, schema)
 	_ = ctx
 
 	doc.Definitions.ForEach(func(d ast.Definition, i int) {

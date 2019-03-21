@@ -10,7 +10,7 @@ type VisitFunc func(w *Walker)
 
 // Validate ...
 func Validate(doc ast.Document, schema *Schema, walker *Walker) *graphql.Errors {
-	ctx := NewQueryContext(doc, schema)
+	ctx := NewContext(doc, schema)
 
 	walker.Walk(ctx, doc)
 

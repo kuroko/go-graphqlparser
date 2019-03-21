@@ -19,10 +19,10 @@ var (
 	})
 )
 
-// NewQueryContext instantiates a validation context struct, this involves the walker doing a
+// NewContext instantiates a validation context struct, this involves the walker doing a
 // preliminary pass of a query document, gathering basic information for the more complicated
 // validation walk to come.
-func NewQueryContext(doc ast.Document, schema *Schema) *Context {
+func NewContext(doc ast.Document, schema *Schema) *Context {
 	return newContext(doc, schema, queryContextDecoratorWalker)
 }
 
@@ -32,7 +32,8 @@ func NewSDLContext(doc ast.Document, schema *Schema) *Context {
 
 	// Construct SDL specific structures.
 	ctx.SDLContext = &SDLContext{
-		IsExtending: schema != nil,
+		KnownTypeNames: make(map[string]struct{}),
+		IsExtending:    schema != nil,
 	}
 
 	return ctx
@@ -52,20 +53,6 @@ func newContext(doc ast.Document, schema *Schema, walker *Walker) *Context {
 	walker.Walk(ctx, doc)
 
 	return ctx
-}
-
-// SDLContext ...
-type SDLContext struct {
-	QueryTypeDefined        bool
-	MutationTypeDefined     bool
-	SubscriptionTypeDefined bool
-
-	// HasSeenSchemaDefinition ...
-	HasSeenSchemaDefinition bool
-
-	// IsExtending is true if this context was created with an existing Schema, and it's being
-	// extended by another SDL file.
-	IsExtending bool
 }
 
 // Context ...
@@ -167,6 +154,22 @@ func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefini
 			ctx.recursivelyReferencedFragmentsIter(rd.ExecutableDefinition, agg, seen)
 		}
 	}
+}
+
+// SDLContext ...
+type SDLContext struct {
+	KnownTypeNames map[string]struct{}
+
+	QueryTypeDefined        bool
+	MutationTypeDefined     bool
+	SubscriptionTypeDefined bool
+
+	// HasSeenSchemaDefinition ...
+	HasSeenSchemaDefinition bool
+
+	// IsExtending is true if this context was created with an existing Schema, and it's being
+	// extended by another SDL file.
+	IsExtending bool
 }
 
 // setExecutableDefinition ...

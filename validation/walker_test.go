@@ -174,7 +174,7 @@ func TestWalker_Walk(t *testing.T) {
 		doc, err := parser.Parse()
 		require.NoError(t, err)
 
-		ctx := validation.NewQueryContext(doc, nil)
+		ctx := validation.NewContext(doc, nil)
 
 		walker := validation.NewWalker([]validation.VisitFunc{tc.visitFns})
 		walker.Walk(ctx, doc)

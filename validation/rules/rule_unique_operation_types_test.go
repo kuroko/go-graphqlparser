@@ -15,7 +15,6 @@ func TestUniqueOperationTypes(t *testing.T) {
 			query: `
 			type Foo
 			`,
-			errs: nil,
 		},
 		{
 			msg: "schema definition with all types",
@@ -28,7 +27,6 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: nil,
 		},
 		{
 			msg: "schema definition with single extension",
@@ -44,7 +42,6 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: nil,
 		},
 		{
 			msg: "schema definition with separate extensions",
@@ -63,7 +60,6 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: nil,
 		},
 		{
 			msg: "extend schema before definition",
@@ -82,7 +78,6 @@ func TestUniqueOperationTypes(t *testing.T) {
 				query: Query
 			}
 			`,
-			errs: nil,
 		},
 		{
 			msg: "duplicate operation types inside single schema definition",
@@ -192,7 +187,6 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: nil,
 		},
 		{
 			msg:    "define and extend schema inside extension SDL",
@@ -210,7 +204,6 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: nil,
 		},
 		{
 			msg:    "adding new operation types to existing schema",
@@ -224,7 +217,6 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: nil,
 		},
 		{
 			msg: "adding conflicting operation types to existing schema",
