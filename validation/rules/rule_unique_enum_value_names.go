@@ -43,9 +43,9 @@ func checkEnumValueUniqueness(ctx *validation.Context, typeName string, evds *as
 			}
 
 			if isExistingEnumValue {
-				ctx.AddError(existedEnumValueNameMessage(typeName, valueName))
+				ctx.AddError(existedEnumValueNameMessage(typeName, valueName, 0, 0))
 			} else if _, ok := valueNames[valueName]; ok {
-				ctx.AddError(duplicateEnumValueNameMessage(typeName, valueName))
+				ctx.AddError(duplicateEnumValueNameMessage(typeName, valueName, 0, 0))
 			} else {
 				valueNames[valueName] = struct{}{}
 			}
@@ -54,7 +54,7 @@ func checkEnumValueUniqueness(ctx *validation.Context, typeName string, evds *as
 }
 
 // duplicateEnumValueNameMessage ...
-func duplicateEnumValueNameMessage(typeName string, valueName string) graphql.Error {
+func duplicateEnumValueNameMessage(typeName, valueName string, line, col int) graphql.Error {
 	return graphql.NewError(
 		"Enum value \"" + typeName + "." + valueName + "\" can only be defined once.",
 		// TODO: Location.
@@ -62,7 +62,7 @@ func duplicateEnumValueNameMessage(typeName string, valueName string) graphql.Er
 }
 
 // existedEnumValueNameMessage ...
-func existedEnumValueNameMessage(typeName string, valueName string) graphql.Error {
+func existedEnumValueNameMessage(typeName, valueName string, line, col int) graphql.Error {
 	return graphql.NewError(
 		"Enum value \"" + typeName + "." + valueName + "\" already exists in the schema. It cannot also be defined in this type extension.",
 		// TODO: Location.

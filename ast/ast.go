@@ -470,6 +470,36 @@ type TypeExtension struct {
 	Kind                  TypeExtensionKind
 }
 
+// IsScalarTypeExtension ...
+func IsScalarTypeExtension(def *TypeExtension) bool {
+	return def.Kind == TypeExtensionKindScalar
+}
+
+// IsObjectTypeExtension ...
+func IsObjectTypeExtension(def *TypeExtension) bool {
+	return def.Kind == TypeExtensionKindObject
+}
+
+// IsInterfaceTypeExtension ...
+func IsInterfaceTypeExtension(def *TypeExtension) bool {
+	return def.Kind == TypeExtensionKindInterface
+}
+
+// IsUnionTypeExtension ...
+func IsUnionTypeExtension(def *TypeExtension) bool {
+	return def.Kind == TypeExtensionKindUnion
+}
+
+// IsEnumTypeExtension ...
+func IsEnumTypeExtension(def *TypeExtension) bool {
+	return def.Kind == TypeExtensionKindEnum
+}
+
+// IsInputObjectTypeExtension ...
+func IsInputObjectTypeExtension(def *TypeExtension) bool {
+	return def.Kind == TypeExtensionKindInputObject
+}
+
 // 3.6 Objects
 // http://facebook.github.io/graphql/June2018/#sec-Objects
 

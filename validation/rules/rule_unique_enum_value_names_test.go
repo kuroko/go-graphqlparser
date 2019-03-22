@@ -43,7 +43,7 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				}
 			`,
 			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "extend enum with new value",
@@ -73,7 +73,7 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				}
 			`,
 			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "duplicate value inside extension",
@@ -87,7 +87,7 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				}
 			`,
 			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "duplicate value inside different extensions",
@@ -103,7 +103,7 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				}
 			`,
 			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "adding new value to the type inside existing schema",
@@ -145,8 +145,8 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				}
 			`,
 			errs: (*graphql.Errors)(nil).
-				Add(existedEnumValueNameMessage("SomeEnum", "FOO")).
-				Add(existedEnumValueNameMessage("SomeEnum", "FOO")),
+				Add(existedEnumValueNameMessage("SomeEnum", "FOO", 0, 0)).
+				Add(existedEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "adding conflicting value to existing schema twice",
@@ -168,7 +168,7 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				}
 			`,
 			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO")),
+				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
 		},
 	}
 

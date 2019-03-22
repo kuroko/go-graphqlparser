@@ -159,6 +159,7 @@ func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefini
 type SDLContext struct {
 	KnownTypeNames      map[string]struct{}
 	KnownEnumValueNames map[string]map[string]struct{}
+	KnownFieldNames     map[string]map[string]struct{}
 
 	QueryTypeDefined        bool
 	MutationTypeDefined     bool
