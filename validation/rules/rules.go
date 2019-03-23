@@ -53,7 +53,7 @@ var SpecifiedSDL = []validation.VisitFunc{
 	uniqueEnumValueNames,
 	uniqueFieldDefinitionNames,
 	uniqueDirectiveNames,
-	// knownTypeNames,
+	knownTypeNames,
 	// knownDirectives,
 	uniqueDirectivesPerLocation,
 	// possibleTypeExtensions,

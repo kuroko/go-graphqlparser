@@ -12,9 +12,11 @@ var (
 		setFragments,
 		setReferencedFragments,
 		setVariableUsages,
+		setTypeDefinitions,
 	})
 	// sdlContextDecoratorWalker ...
 	sdlContextDecoratorWalker = NewWalker([]VisitFunc{
+		setTypeDefinitions,
 		//setSchemaDefinitionTypes,
 	})
 )
@@ -84,6 +86,9 @@ type Context struct {
 
 	// executableDefinition is the current executable definition being walked over.
 	executableDefinition *ast.ExecutableDefinition
+
+	// typeDefinitions is a map of all TypeDefinition nodes in the current document.
+	typeDefinitions map[string]*ast.TypeDefinition
 }
 
 // AddError adds an error to the linked list of errors on this Context.
@@ -101,9 +106,16 @@ func (ctx *Context) VariableUsages(def *ast.ExecutableDefinition) []string {
 	return ctx.variableUsages[def]
 }
 
+// TypeDefinitions returns all TypeDefinition nodes in the current document, in a map where the key
+// is the name of the type.
+func (ctx *Context) TypeDefinitions() map[string]*ast.TypeDefinition {
+	return ctx.typeDefinitions
+}
+
 // RecursiveVariableUsages ...
 func (ctx *Context) RecursiveVariableUsages(def *ast.ExecutableDefinition) map[string]struct{} {
-	// Maybe we could make this a slice too?
+	// TODO: Maybe we could make this a slice too?.. and maybe we should, given VariableUsages
+	// returns a string slice too, this is pretty inconsistent.
 	result := make(map[string]struct{})
 
 	ctx.recursiveVariableUsagesIter(def, result, make(map[*ast.ExecutableDefinition]struct{}))
@@ -273,5 +285,17 @@ func setVariableUsages(w *Walker) {
 		}
 
 		ctx.variableUsages[ctx.executableDefinition] = append(ctx.variableUsages[ctx.executableDefinition], v.StringValue)
+	})
+}
+
+// setTypeDefinitions ...
+func setTypeDefinitions(w *Walker) {
+	w.AddTypeDefinitionEnterEventHandler(func(ctx *Context, def *ast.TypeDefinition) {
+		if ctx.typeDefinitions == nil {
+			ctx.typeDefinitions = make(map[string]*ast.TypeDefinition)
+		}
+
+		// TODO: Do type definitions always have a name?..
+		ctx.typeDefinitions[def.Name] = def
 	})
 }

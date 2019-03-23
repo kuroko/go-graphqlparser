@@ -17,6 +17,34 @@ var (
 			query: Query
 		}
 
+		interface Being {
+			name(surname: Boolean): String
+		}
+
+		interface Pet {
+			name(surname: Boolean): String
+		}
+
+		interface Canine {
+			name(surname: Boolean): String
+		}
+
+		enum DogCommand {
+			SIT
+			HEEL
+			DOWN
+		}
+
+		type Dog implements Being & Pet & Canine {
+			name(surname: Boolean): String
+			nickname: String
+			barkVolume: Int
+			barks: Boolean
+			doesKnownCommand(dogCommand: DogCommand): Boolean
+			isHousetrained(atOtherHomes: Boolean = true): Boolean
+			isAtLocation(x: Int, y: Int): Boolean
+		}
+
 		type Query {
 			checkEnumValueUniqueness: String!
 		}
@@ -33,15 +61,8 @@ type ruleTestCase struct {
 
 // queryRuleTester ...
 func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
-	var schema *validation.Schema
-
-	schemaParser := language.NewParser([]byte(schemaDocument))
-
-	schemaDoc, err := schemaParser.Parse()
-	require.NoError(t, err, "failed to parse schema document")
-
-	errs := validation.ValidateSDL(schemaDoc, schema, validation.NewWalker(SpecifiedSDL))
-	require.True(t, errs.Len() == 0, "found errors validating schema")
+	schema, err := validation.BuildSchema(schemaDocument, validation.NewWalker(SpecifiedSDL))
+	require.NoError(t, err, "failed to build schema")
 
 	for _, tc := range tt {
 		parser := language.NewParser([]byte(tc.query))
@@ -67,8 +88,6 @@ func sdlRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 		require.NoError(t, err, "failed to parse schema document")
 
 		walker := validation.NewWalker([]validation.VisitFunc{fn})
-
-		//spew.Dump(tc.schema)
 
 		errs := validation.ValidateSDL(schemaDoc, tc.schema, walker)
 		assert.Equal(t, tc.errs, errs, tc.msg)
