@@ -10,6 +10,8 @@ const rootSchema = `
         bar: String
         baz: String
     }
+    
+    directive @foo on OBJECT
 
     type Query {
         post(id: Int, code: String, foo: Foo): Post
@@ -17,20 +19,24 @@ const rootSchema = `
     
     type Mutation {
         _empty: String
-    }   
+    }
     
-    extend type Post {
+    interface SomeInterface {
+        fieldOnInterface: String
+    }
+
+    type Post implements SomeInterface {
+        title: String!
+    }
+    
+    extend type Post @foo {
         author: String!
     }
 `;
 
-const postSchema = `    
+const postSchema = `
     type Mutation2 {
         doSomething: String!
-    }
-
-    type Post {
-        title: String!
     }
 `;
 

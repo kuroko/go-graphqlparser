@@ -30,14 +30,14 @@ var Specified = []validation.VisitFunc{
 	// noUndefinedVariables,
 	noUnusedVariables,
 	// knownDirectives,
-	// uniqueDirectivesPerLocation,
+	uniqueDirectivesPerLocation,
 	// knownArgumentNames,
-	// uniqueArgumentNames,
+	uniqueArgumentNames,
 	// valuesOfCorrectType,
 	// providedRequiredArguments,
 	// variablesInAllowedPosition,
 	// overlappingFieldsCanBeMerged,
-	// uniqueInputFieldNames,
+	uniqueInputFieldNames,
 }
 
 // SpecifiedSDL is a slice of ValidationRuleFunc that contains validation rules defined by the
@@ -61,4 +61,8 @@ var SpecifiedSDL = []validation.VisitFunc{
 	uniqueArgumentNames,
 	uniqueInputFieldNames,
 	// providedRequiredArgumentsOnDirectives,
+
+	// TODO: You shouldn't be able to apply the same directive to a type and any type extensions for
+	// that type, they should be unique across the whole type. Again, this is not tested in the
+	// reference implementation.
 }
