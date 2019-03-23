@@ -66,6 +66,11 @@ type Context struct {
 	// KnownArgNames ...
 	KnownArgNames map[string]struct{}
 
+	// KnownInputFieldNamesStack ...
+	KnownInputFieldNamesStack []map[string]struct{}
+	// KnownInputFieldNames ...
+	KnownInputFieldNames map[string]struct{}
+
 	// fragments contains all fragment definitions found in the input query, accessible by name.
 	fragments map[string]*ast.FragmentDefinition
 
