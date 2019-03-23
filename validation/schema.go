@@ -17,5 +17,6 @@ type Schema struct {
 	SubscriptionType *ast.Type
 
 	// TODO: Not actually populated yet.
-	Types map[string]*ast.TypeDefinition
+	Directives map[string]*ast.DirectiveDefinition
+	Types      map[string]*ast.TypeDefinition
 }

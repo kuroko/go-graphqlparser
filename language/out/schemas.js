@@ -5,9 +5,14 @@ const rootSchema = `
         query: Query
         mutation: Mutation
     }
+    
+    input Foo {
+        bar: String
+        baz: String
+    }
 
     type Query {
-        post(id: Int, code: String): Post
+        post(id: Int, code: String, foo: Foo): Post
     }
     
     type Mutation {
@@ -15,7 +20,6 @@ const rootSchema = `
     }   
     
     extend type Post {
-        title: Int!
         author: String!
     }
 `;

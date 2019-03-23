@@ -63,6 +63,9 @@ type Context struct {
 	// Used if we're validating an SDL file.
 	SDLContext *SDLContext
 
+	// KnownArgNames ...
+	KnownArgNames map[string]struct{}
+
 	// fragments contains all fragment definitions found in the input query, accessible by name.
 	fragments map[string]*ast.FragmentDefinition
 
@@ -158,6 +161,7 @@ func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefini
 // SDLContext ...
 type SDLContext struct {
 	KnownTypeNames      map[string]struct{}
+	KnownDirectiveNames map[string]struct{}
 	KnownEnumValueNames map[string]map[string]struct{}
 	KnownFieldNames     map[string]map[string]struct{}
 
