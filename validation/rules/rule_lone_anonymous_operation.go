@@ -23,13 +23,13 @@ func LoneAnonymousOperation(w *validation.Walker) {
 
 	w.AddOperationDefinitionEnterEventHandler(func(ctx *validation.Context, definition *ast.OperationDefinition) {
 		if definition.Name == "" && ctx.OperationsCount > 1 {
-			ctx.AddError(AnonOperationNotAloneError())
+			ctx.AddError(AnonOperationNotAloneError(0, 0))
 		}
 	})
 }
 
 // AnonOperationNotAloneError ...
-func AnonOperationNotAloneError() types.Error {
+func AnonOperationNotAloneError(line, col int) types.Error {
 	return types.NewError(
 		anonOperationNotAloneMessage(),
 		// TODO: Location.

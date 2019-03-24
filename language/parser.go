@@ -13,9 +13,6 @@ import (
 type Parser struct {
 	lexer *Lexer
 	token Token
-
-	// Stateful checks.
-	hasShorthandQuery bool
 }
 
 // NewParser returns a new Parser instance.
@@ -35,11 +32,6 @@ func (p *Parser) Parse() (ast.Document, error) {
 	var definitions *ast.Definitions
 
 	for {
-		// This should be set during the first iteration.
-		if p.hasShorthandQuery {
-			return ast.Document{}, p.unexpected(p.token, p.expected(TokenKindEOF))
-		}
-
 		definition, err := p.parseDefinition(document)
 		if err != nil {
 			return ast.Document{}, err
@@ -66,7 +58,7 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 	var err error
 
 	// We can only allow a shorthand query if it's the only definition.
-	p.hasShorthandQuery = document.Definitions.Len() == 0 && p.token.Literal == "{"
+	isShorthandQuery := p.token.Literal == "{"
 
 	location := ast.Location{
 		Line:   p.token.Line,
@@ -77,7 +69,7 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 	if p.peekn(TokenKindName, "query", "mutation", "subscription") || p.peek1(TokenKindPunctuator, "{") {
 		definition := ast.Definition{}
 		definition.Kind = ast.DefinitionKindExecutable
-		definition.ExecutableDefinition, err = p.parseOperationDefinition(p.hasShorthandQuery)
+		definition.ExecutableDefinition, err = p.parseOperationDefinition(isShorthandQuery)
 		definition.Location = location
 
 		return definition, err
