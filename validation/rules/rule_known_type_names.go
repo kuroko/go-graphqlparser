@@ -2,12 +2,12 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// knownTypeNames ...
-func knownTypeNames(w *validation.Walker) {
+// KnownTypeNames ...
+func KnownTypeNames(w *validation.Walker) {
 	w.AddNamedTypeEnterEventHandler(func(ctx *validation.Context, t ast.Type) {
 		typeName := t.NamedType
 
@@ -15,19 +15,19 @@ func knownTypeNames(w *validation.Walker) {
 		_, existsInDocument := ctx.TypeDefinitions()[typeName]
 
 		if !existsInSchema && !existsInDocument && !isSpecifiedScalarName(typeName) {
-			ctx.AddError(unknownTypeMessage(typeName, []string{}, 0, 0))
+			ctx.AddError(UnknownTypeError(typeName, []string{}, 0, 0))
 		}
 	})
 }
 
-// unknownTypeMessage ...
-func unknownTypeMessage(typeName string, suggestedTypes []string, line, col int) graphql.Error {
+// UnknownTypeMessage ...
+func UnknownTypeError(typeName string, suggestedTypes []string, line, col int) types.Error {
 	// TODO: Implement this kind of logic, ish.
 	//if len(suggestedTypes) > 0 {
 	//	message += ` Did you mean ${quotedOrList(suggestedTypes)}?`;
 	//}
 
-	return graphql.NewError(
+	return types.NewError(
 		"Unknown type \"" + typeName + "\".",
 		// TODO: Location.
 	)

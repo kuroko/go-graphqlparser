@@ -1,6 +1,42 @@
 package ast
 
-import "github.com/bucketd/go-graphqlparser/graphql"
+// Location contains location information about where an AST type is in a document.
+type Location struct {
+	Line   int
+	Column int
+}
+
+// PathNodeKind values.
+const (
+	PathNodeKindString PathNodeKind = iota
+	PathNodeKindInt
+)
+
+// PathNodeKind an enum type that defines the type of data stored in a PathNode.
+type PathNodeKind uint8
+
+// PathNode is an individual part of the path.
+type PathNode struct {
+	Kind   PathNodeKind
+	String string
+	Int    int
+}
+
+// NewStringPathNode returns a new PathNode with the given string as it's value.
+func NewStringPathNode(s string) PathNode {
+	return PathNode{
+		Kind:   PathNodeKindString,
+		String: s,
+	}
+}
+
+// NewIntPathNode returns a new Pathnode with the given int as it's value.
+func NewIntPathNode(i int) PathNode {
+	return PathNode{
+		Kind: PathNodeKindInt,
+		Int:  i,
+	}
+}
 
 // 2.2 Document
 // http://facebook.github.io/graphql/June2018/#sec-Language.Document
@@ -34,7 +70,7 @@ func (k DefinitionKind) String() string {
 }
 
 type Definition struct {
-	Location             graphql.Location
+	Location             Location
 	ExecutableDefinition *ExecutableDefinition
 	TypeSystemDefinition *TypeSystemDefinition
 	TypeSystemExtension  *TypeSystemExtension
@@ -153,7 +189,7 @@ type Selection struct {
 	Arguments     *Arguments
 	Directives    *Directives
 	SelectionSet  *Selections
-	Path          *graphql.PathNodes
+	Path          *PathNodes
 	Kind          SelectionKind
 }
 

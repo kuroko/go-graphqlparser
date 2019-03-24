@@ -1,11 +1,13 @@
-package rules
+package rules_test
 
 import (
 	"testing"
+
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestKnownArgumentNames(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	queryRuleTester(t, tt, knownArgumentNames)
+	queryRuleTester(t, tt, rules.KnownArgumentNames)
 }

@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// possibleFragmentSpreads ...
-func possibleFragmentSpreads(w *validation.Walker) {}
+// PossibleFragmentSpreads ...
+func PossibleFragmentSpreads(w *validation.Walker) {}

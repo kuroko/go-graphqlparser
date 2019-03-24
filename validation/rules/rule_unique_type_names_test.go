@@ -1,11 +1,11 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/validation"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestUniqueTypeNames(t *testing.T) {
@@ -52,17 +52,17 @@ func TestUniqueTypeNames(t *testing.T) {
 				enum Foo
 				input Foo
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateTypeNameMessage("Foo", 0, 0)).
-				Add(duplicateTypeNameMessage("Foo", 0, 0)).
-				Add(duplicateTypeNameMessage("Foo", 0, 0)).
-				Add(duplicateTypeNameMessage("Foo", 0, 0)).
-				Add(duplicateTypeNameMessage("Foo", 0, 0)).
-				Add(duplicateTypeNameMessage("Foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(rules.DuplicateTypeNameError("Foo", 0, 0)),
 		},
 		{
 			msg: "adding new types to existing schema",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Types: map[string]*ast.TypeDefinition{
 					"Foo": {},
 				},
@@ -75,14 +75,14 @@ func TestUniqueTypeNames(t *testing.T) {
 		// could also do with something like `buildSchema`?
 		//{
 		//	msg:    "adding new type to existing schema with same-named directive",
-		//	schema: &validation.Schema{},
+		//	schema: &types.Schema{},
 		//	query: `
 		//		type Foo
 		//	`,
 		//},
 		{
 			msg: "adding conflicting types to existing schema",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Types: map[string]*ast.TypeDefinition{
 					"Foo": {},
 				},
@@ -95,15 +95,15 @@ func TestUniqueTypeNames(t *testing.T) {
 				enum Foo
 				input Foo
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(existedTypeNameMessage("Foo", 0, 0)).
-				Add(existedTypeNameMessage("Foo", 0, 0)).
-				Add(existedTypeNameMessage("Foo", 0, 0)).
-				Add(existedTypeNameMessage("Foo", 0, 0)).
-				Add(existedTypeNameMessage("Foo", 0, 0)).
-				Add(existedTypeNameMessage("Foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
+				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
+				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
+				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
+				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
+				Add(rules.ExistedTypeNameError("Foo", 0, 0)),
 		},
 	}
 
-	sdlRuleTester(t, tt, uniqueTypeNames)
+	sdlRuleTester(t, tt, rules.UniqueTypeNames)
 }

@@ -1,11 +1,11 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/validation"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestUniqueDirectiveNames(t *testing.T) {
@@ -46,12 +46,12 @@ func TestUniqueDirectiveNames(t *testing.T) {
 				directive @foo on SCHEMA
 				directive @foo on SCHEMA
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateDirectiveNameMessage("foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateDirectiveNameError("foo", 0, 0)),
 		},
 		{
 			msg: "adding new directive to existing schema",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Directives: map[string]*ast.DirectiveDefinition{
 					"foo": {
 						Name:               "foo",
@@ -67,7 +67,7 @@ func TestUniqueDirectiveNames(t *testing.T) {
 			msg: "adding new directive with standard name to existing schema",
 			// TODO: If we implement `buildSchema`, we should be adding `skip`, `include`, and
 			// `deprecated` to the directives map.
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Directives: map[string]*ast.DirectiveDefinition{
 					"skip": {
 						Name: "skip",
@@ -80,14 +80,14 @@ func TestUniqueDirectiveNames(t *testing.T) {
 			query: `
 				directive @skip on SCHEMA
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(existedDirectiveNameMessage("skip", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.ExistedDirectiveNameError("skip", 0, 0)),
 		},
 		{
 			msg: "adding new directive to existing schema with same-named type",
 			// TODO: If we implement `buildSchema`, we should be adding `skip`, `include`, and
 			// `deprecated` to the directives map.
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Types: map[string]*ast.TypeDefinition{
 					"foo": {
 						Name: "foo",
@@ -102,7 +102,7 @@ func TestUniqueDirectiveNames(t *testing.T) {
 			msg: "adding conflicting directives to existing schema",
 			// TODO: If we implement `buildSchema`, we should be adding `skip`, `include`, and
 			// `deprecated` to the directives map.
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Directives: map[string]*ast.DirectiveDefinition{
 					"foo": {
 						Name:               "foo",
@@ -113,10 +113,10 @@ func TestUniqueDirectiveNames(t *testing.T) {
 			query: `
 				directive @foo on SCHEMA
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(existedDirectiveNameMessage("foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.ExistedDirectiveNameError("foo", 0, 0)),
 		},
 	}
 
-	sdlRuleTester(t, tt, uniqueDirectiveNames)
+	sdlRuleTester(t, tt, rules.UniqueDirectiveNames)
 }

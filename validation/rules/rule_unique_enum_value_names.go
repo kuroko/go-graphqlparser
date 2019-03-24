@@ -2,12 +2,12 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// uniqueEnumValueNames ...
-func uniqueEnumValueNames(w *validation.Walker) {
+// UniqueEnumValueNames ...
+func UniqueEnumValueNames(w *validation.Walker) {
 	w.AddEnumTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.TypeDefinition) {
 		checkEnumValueUniqueness(ctx, def.Name, def.EnumValuesDefinition)
 	})
@@ -15,6 +15,22 @@ func uniqueEnumValueNames(w *validation.Walker) {
 	w.AddEnumTypeExtensionEnterEventHandler(func(ctx *validation.Context, ext *ast.TypeExtension) {
 		checkEnumValueUniqueness(ctx, ext.Name, ext.EnumValuesDefinition)
 	})
+}
+
+// DuplicateEnumValueNameError ...
+func DuplicateEnumValueNameError(typeName, valueName string, line, col int) types.Error {
+	return types.NewError(
+		"Enum value \"" + typeName + "." + valueName + "\" can only be defined once.",
+		// TODO: Location.
+	)
+}
+
+// ExistedEnumValueNameError ...
+func ExistedEnumValueNameError(typeName, valueName string, line, col int) types.Error {
+	return types.NewError(
+		"Enum value \"" + typeName + "." + valueName + "\" already exists in the schema. It cannot also be defined in this type extension.",
+		// TODO: Location.
+	)
 }
 
 // checkEnumValueUniqueness ...
@@ -43,28 +59,12 @@ func checkEnumValueUniqueness(ctx *validation.Context, typeName string, evds *as
 			}
 
 			if isExistingEnumValue {
-				ctx.AddError(existedEnumValueNameMessage(typeName, valueName, 0, 0))
+				ctx.AddError(ExistedEnumValueNameError(typeName, valueName, 0, 0))
 			} else if _, ok := valueNames[valueName]; ok {
-				ctx.AddError(duplicateEnumValueNameMessage(typeName, valueName, 0, 0))
+				ctx.AddError(DuplicateEnumValueNameError(typeName, valueName, 0, 0))
 			} else {
 				valueNames[valueName] = struct{}{}
 			}
 		})
 	}
-}
-
-// duplicateEnumValueNameMessage ...
-func duplicateEnumValueNameMessage(typeName, valueName string, line, col int) graphql.Error {
-	return graphql.NewError(
-		"Enum value \"" + typeName + "." + valueName + "\" can only be defined once.",
-		// TODO: Location.
-	)
-}
-
-// existedEnumValueNameMessage ...
-func existedEnumValueNameMessage(typeName, valueName string, line, col int) graphql.Error {
-	return graphql.NewError(
-		"Enum value \"" + typeName + "." + valueName + "\" already exists in the schema. It cannot also be defined in this type extension.",
-		// TODO: Location.
-	)
 }

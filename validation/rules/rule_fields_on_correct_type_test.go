@@ -1,11 +1,13 @@
-package rules
+package rules_test
 
 import (
 	"testing"
+
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestFieldsOnCorrectType(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	queryRuleTester(t, tt, fieldsOnCorrectType)
+	queryRuleTester(t, tt, rules.FieldsOnCorrectType)
 }

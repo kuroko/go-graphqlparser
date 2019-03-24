@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// noFragmentCycles ...
-func noFragmentCycles(w *validation.Walker) {}
+// NoFragmentCycles ...
+func NoFragmentCycles(w *validation.Walker) {}

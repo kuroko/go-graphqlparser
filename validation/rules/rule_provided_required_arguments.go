@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// providedRequiredArguments ...
-func providedRequiredArguments(w *validation.Walker) {}
+// ProvidedRequiredArguments ...
+func ProvidedRequiredArguments(w *validation.Walker) {}

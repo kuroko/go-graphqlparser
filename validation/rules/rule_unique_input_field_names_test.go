@@ -1,9 +1,10 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestUniqueInputFieldNames(t *testing.T) {
@@ -69,9 +70,9 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field2 @foo(arg: { f1: "value", f1: "value" })
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateInputFieldMessage("f1", 0, 0)).
-					Add(duplicateInputFieldMessage("f1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
+					Add(rules.DuplicateInputFieldError("f1", 0, 0)),
 			},
 			{
 				msg: "many duplicate input object fields",
@@ -81,11 +82,11 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field2 @foo(arg: { f1: "value", f1: "value", f1: "value" })
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateInputFieldMessage("f1", 0, 0)).
-					Add(duplicateInputFieldMessage("f1", 0, 0)).
-					Add(duplicateInputFieldMessage("f1", 0, 0)).
-					Add(duplicateInputFieldMessage("f1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
+					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
+					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
+					Add(rules.DuplicateInputFieldError("f1", 0, 0)),
 			},
 			{
 				msg: "nested duplicate input object fields",
@@ -95,13 +96,13 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field2 @foo(arg: { f1: { f2: "value", f2: "value" } })
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateInputFieldMessage("f2", 0, 0)).
-					Add(duplicateInputFieldMessage("f2", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateInputFieldError("f2", 0, 0)).
+					Add(rules.DuplicateInputFieldError("f2", 0, 0)),
 			},
 		}
 
-		queryRuleTester(t, tt, uniqueInputFieldNames)
+		queryRuleTester(t, tt, rules.UniqueInputFieldNames)
 	})
 
 	t.Run("sdl documents", func(t *testing.T) {
@@ -153,8 +154,8 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field: String @foo(arg: { f1: "value", f1: "value" })
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateInputFieldMessage("f1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateInputFieldError("f1", 0, 0)),
 			},
 			{
 				msg: "many duplicate input object fields",
@@ -163,9 +164,9 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field: String @foo(arg: { f1: "value", f1: "value", f1: "value" })
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateInputFieldMessage("f1", 0, 0)).
-					Add(duplicateInputFieldMessage("f1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
+					Add(rules.DuplicateInputFieldError("f1", 0, 0)),
 			},
 			{
 				msg: "nested duplicate input object fields",
@@ -174,11 +175,11 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field: String @foo(arg: { f1: { f2: "value", f2: "value" } })
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateInputFieldMessage("f2", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateInputFieldError("f2", 0, 0)),
 			},
 		}
 
-		sdlRuleTester(t, tt, uniqueInputFieldNames)
+		sdlRuleTester(t, tt, rules.UniqueInputFieldNames)
 	})
 }

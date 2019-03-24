@@ -1,29 +1,30 @@
-package graphql
+package types
 
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestError_MarshalJSON(t *testing.T) {
 	t.Run("should return valid JSON", func(t *testing.T) {
-		locations := []Location{
+		locations := []ast.Location{
 			{Line: 6, Column: 7},
 		}
 
-		nodes := []PathNode{
-			{Kind: PathNodeKindString, String: "hero"},
-			{Kind: PathNodeKindString, String: "heroFriends"},
-			{Kind: PathNodeKindInt, Int: 1},
-			{Kind: PathNodeKindString, String: "name"},
+		nodes := []ast.PathNode{
+			{Kind: ast.PathNodeKindString, String: "hero"},
+			{Kind: ast.PathNodeKindString, String: "heroFriends"},
+			{Kind: ast.PathNodeKindInt, Int: 1},
+			{Kind: ast.PathNodeKindString, String: "name"},
 		}
 
 		gqlErr := Error{
 			Message:   "Name for character with ID 1002 could not be fetched.",
-			Locations: LocationsFromSlice(locations),
-			Path:      PathNodesFromSlice(nodes),
+			Locations: ast.LocationsFromSlice(locations),
+			Path:      ast.PathNodesFromSlice(nodes),
 		}
 
 		actual, err := gqlErr.MarshalJSON()

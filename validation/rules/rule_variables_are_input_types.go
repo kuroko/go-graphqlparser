@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// variablesAreInputTypes ...
-func variablesAreInputTypes(w *validation.Walker) {}
+// VariablesAreInputTypes ...
+func VariablesAreInputTypes(w *validation.Walker) {}

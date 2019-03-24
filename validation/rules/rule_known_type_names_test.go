@@ -1,7 +1,9 @@
-package rules
+package rules_test
 
 import (
 	"testing"
+
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestKnownTypeNames(t *testing.T) {
@@ -23,12 +25,12 @@ func TestKnownTypeNames(t *testing.T) {
 			},
 		}
 
-		queryRuleTester(t, tt, knownTypeNames)
+		queryRuleTester(t, tt, rules.KnownTypeNames)
 	})
 
 	t.Run("sdl document", func(t *testing.T) {
 		tt := []ruleTestCase{}
 
-		sdlRuleTester(t, tt, knownTypeNames)
+		sdlRuleTester(t, tt, rules.KnownTypeNames)
 	})
 }

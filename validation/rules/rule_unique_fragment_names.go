@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// uniqueFragmentNames ...
-func uniqueFragmentNames(w *validation.Walker) {}
+// UniqueFragmentNames ...
+func UniqueFragmentNames(w *validation.Walker) {}

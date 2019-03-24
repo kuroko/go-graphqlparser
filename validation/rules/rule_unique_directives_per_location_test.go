@@ -1,9 +1,10 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestUniqueDirectivesPerLocation(t *testing.T) {
@@ -57,8 +58,8 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 						field @directive @directive
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateDirectiveMessage("directive", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)),
 			},
 			{
 				msg: "many duplicate directives in one location",
@@ -67,9 +68,9 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 						field @directive @directive @directive
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)),
 			},
 			{
 				msg: "different duplicate directives in one location",
@@ -78,9 +79,9 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 						field @directiveA @directiveB @directiveA @directiveB
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateDirectiveMessage("directiveA", 0, 0)).
-					Add(duplicateDirectiveMessage("directiveB", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateDirectiveError("directiveA", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directiveB", 0, 0)),
 			},
 			{
 				msg: "duplicate directives in many locations",
@@ -89,13 +90,13 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 						field @directive @directive
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)),
 			},
 		}
 
-		queryRuleTester(t, tt, uniqueDirectivesPerLocation)
+		queryRuleTester(t, tt, rules.UniqueDirectivesPerLocation)
 	})
 
 	t.Run("sdl document", func(t *testing.T) {
@@ -121,22 +122,22 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 					input TestInput @directive @directive
 					extend input TestInput @directive @directive
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)).
-					Add(duplicateDirectiveMessage("directive", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
+					Add(rules.DuplicateDirectiveError("directive", 0, 0)),
 			},
 		}
 
-		sdlRuleTester(t, tt, uniqueDirectivesPerLocation)
+		sdlRuleTester(t, tt, rules.UniqueDirectivesPerLocation)
 	})
 }

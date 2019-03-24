@@ -1,11 +1,11 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/validation"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestUniqueOperationTypes(t *testing.T) {
@@ -94,10 +94,10 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateOperationTypeMessage("query", 0, 0)).
-				Add(duplicateOperationTypeMessage("mutation", 0, 0)).
-				Add(duplicateOperationTypeMessage("subscription", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg: "duplicate operation types inside schema extension",
@@ -116,10 +116,10 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateOperationTypeMessage("query", 0, 0)).
-				Add(duplicateOperationTypeMessage("mutation", 0, 0)).
-				Add(duplicateOperationTypeMessage("subscription", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg: "duplicate operation types inside schema extension twice",
@@ -144,13 +144,13 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateOperationTypeMessage("query", 0, 0)).
-				Add(duplicateOperationTypeMessage("mutation", 0, 0)).
-				Add(duplicateOperationTypeMessage("subscription", 0, 0)).
-				Add(duplicateOperationTypeMessage("query", 0, 0)).
-				Add(duplicateOperationTypeMessage("mutation", 0, 0)).
-				Add(duplicateOperationTypeMessage("subscription", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg: "duplicate operation types inside second schema extension",
@@ -172,14 +172,14 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Subscription
 			}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateOperationTypeMessage("query", 0, 0)).
-				Add(duplicateOperationTypeMessage("mutation", 0, 0)).
-				Add(duplicateOperationTypeMessage("subscription", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg:    "define schema inside extension SDL",
-			schema: &validation.Schema{},
+			schema: &types.Schema{},
 			query: `
 			schema {
 				query: Query
@@ -190,7 +190,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 		},
 		{
 			msg:    "define and extend schema inside extension SDL",
-			schema: &validation.Schema{},
+			schema: &types.Schema{},
 			query: `
 			schema {
 				query: Query
@@ -207,7 +207,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 		},
 		{
 			msg:    "adding new operation types to existing schema",
-			schema: &validation.Schema{},
+			schema: &types.Schema{},
 			query: `
 			extend schema {
 				mutation: Mutation
@@ -221,7 +221,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 		{
 			msg: "adding conflicting operation types to existing schema",
 			// TODO: Maybe replace with something that builds this from a schema string?
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				QueryType: &ast.Type{
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Query",
@@ -242,15 +242,15 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Foo
 			}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(existedOperationTypeMessage("query", 0, 0)).
-				Add(existedOperationTypeMessage("mutation", 0, 0)).
-				Add(existedOperationTypeMessage("subscription", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.ExistedOperationTypeError("query", 0, 0)).
+				Add(rules.ExistedOperationTypeError("mutation", 0, 0)).
+				Add(rules.ExistedOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg: "adding conflicting operation types to existing schema twice",
 			// TODO: Maybe replace with something that builds this from a schema string?
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				QueryType: &ast.Type{
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Query",
@@ -277,15 +277,15 @@ func TestUniqueOperationTypes(t *testing.T) {
 				subscription: Foo
 			}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(existedOperationTypeMessage("query", 0, 0)).
-				Add(existedOperationTypeMessage("mutation", 0, 0)).
-				Add(existedOperationTypeMessage("subscription", 0, 0)).
-				Add(existedOperationTypeMessage("query", 0, 0)).
-				Add(existedOperationTypeMessage("mutation", 0, 0)).
-				Add(existedOperationTypeMessage("subscription", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.ExistedOperationTypeError("query", 0, 0)).
+				Add(rules.ExistedOperationTypeError("mutation", 0, 0)).
+				Add(rules.ExistedOperationTypeError("subscription", 0, 0)).
+				Add(rules.ExistedOperationTypeError("query", 0, 0)).
+				Add(rules.ExistedOperationTypeError("mutation", 0, 0)).
+				Add(rules.ExistedOperationTypeError("subscription", 0, 0)),
 		},
 	}
 
-	sdlRuleTester(t, tt, uniqueOperationTypes)
+	sdlRuleTester(t, tt, rules.UniqueOperationTypes)
 }

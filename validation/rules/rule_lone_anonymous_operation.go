@@ -2,38 +2,41 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// loneAnonymousOperation: Lone anonymous operation
+// LoneAnonymousOperation: Lone anonymous operation
 //
 // A GraphQL document is only valid if when it contains an anonymous operation
 // (the query short-hand) it contains only that one operation definition.
-func loneAnonymousOperation(w *validation.Walker) {
-	// TODO: Move this to context (!!)
-	var operations int
-
+func LoneAnonymousOperation(w *validation.Walker) {
 	w.AddDocumentEnterEventHandler(func(ctx *validation.Context, document ast.Document) {
 		document.Definitions.ForEach(func(d ast.Definition, i int) {
 			if d.Kind == ast.DefinitionKindExecutable {
 				if d.ExecutableDefinition.Kind == ast.ExecutableDefinitionKindOperation {
-					operations++
+					ctx.OperationsCount++
 				}
 			}
 		})
 	})
 
 	w.AddOperationDefinitionEnterEventHandler(func(ctx *validation.Context, definition *ast.OperationDefinition) {
-		if definition.Name == "" && operations > 1 {
-			ctx.Errors = ctx.Errors.Add(graphql.NewError(
-				"This anonymous operation must be the only defined operation.",
-				// TODO: Location.
-			))
+		if definition.Name == "" && ctx.OperationsCount > 1 {
+			ctx.AddError(AnonOperationNotAloneError())
 		}
 	})
+}
 
-	w.AddDocumentLeaveEventHandler(func(ctx *validation.Context, document ast.Document) {
-		operations = 0
-	})
+// AnonOperationNotAloneError ...
+func AnonOperationNotAloneError() types.Error {
+	return types.NewError(
+		anonOperationNotAloneMessage(),
+		// TODO: Location.
+	)
+}
+
+// anonOperationNotAloneMessage ...
+func anonOperationNotAloneMessage() string {
+	return "This anonymous operation must be the only defined operation."
 }

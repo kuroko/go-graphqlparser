@@ -2,7 +2,7 @@ package validation
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 )
 
 var (
@@ -24,12 +24,12 @@ var (
 // NewContext instantiates a validation context struct, this involves the walker doing a
 // preliminary pass of a query document, gathering basic information for the more complicated
 // validation walk to come.
-func NewContext(doc ast.Document, schema *Schema) *Context {
+func NewContext(doc ast.Document, schema *types.Schema) *Context {
 	return newContext(doc, schema, queryContextDecoratorWalker)
 }
 
 // NewSDLContext ...
-func NewSDLContext(doc ast.Document, schema *Schema) *Context {
+func NewSDLContext(doc ast.Document, schema *types.Schema) *Context {
 	ctx := newContext(doc, schema, sdlContextDecoratorWalker)
 
 	// Construct SDL specific structures.
@@ -41,9 +41,9 @@ func NewSDLContext(doc ast.Document, schema *Schema) *Context {
 }
 
 // newContext ...
-func newContext(doc ast.Document, schema *Schema, walker *Walker) *Context {
+func newContext(doc ast.Document, schema *types.Schema, walker *Walker) *Context {
 	if schema == nil {
-		schema = &Schema{}
+		schema = &types.Schema{}
 	}
 
 	ctx := &Context{
@@ -59,8 +59,8 @@ func newContext(doc ast.Document, schema *Schema, walker *Walker) *Context {
 // Context ...
 type Context struct {
 	Document ast.Document
-	Errors   *graphql.Errors
-	Schema   *Schema
+	Errors   *types.Errors
+	Schema   *types.Schema
 
 	// Used if we're validating an SDL file.
 	SDLContext *SDLContext
@@ -72,6 +72,9 @@ type Context struct {
 	KnownInputFieldNamesStack []map[string]struct{}
 	// KnownInputFieldNames ...
 	KnownInputFieldNames map[string]struct{}
+
+	// OperationsCount ...
+	OperationsCount int
 
 	// fragments contains all fragment definitions found in the input query, accessible by name.
 	fragments map[string]*ast.FragmentDefinition
@@ -92,7 +95,7 @@ type Context struct {
 }
 
 // AddError adds an error to the linked list of errors on this Context.
-func (ctx *Context) AddError(err graphql.Error) {
+func (ctx *Context) AddError(err types.Error) {
 	ctx.Errors = ctx.Errors.Add(err)
 }
 

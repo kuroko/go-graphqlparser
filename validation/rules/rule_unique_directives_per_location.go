@@ -2,12 +2,12 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// uniqueDirectivesPerLocation ...
-func uniqueDirectivesPerLocation(w *validation.Walker) {
+// UniqueDirectivesPerLocation ...
+func UniqueDirectivesPerLocation(w *validation.Walker) {
 	w.AddDirectivesEnterEventHandler(func(ctx *validation.Context, directives *ast.Directives) {
 		if directives.Len() == 0 {
 			return
@@ -19,7 +19,7 @@ func uniqueDirectivesPerLocation(w *validation.Walker) {
 			directiveName := directive.Name
 
 			if _, ok := knownDirectives[directiveName]; ok {
-				ctx.AddError(duplicateDirectiveMessage(directiveName, 0, 0))
+				ctx.AddError(DuplicateDirectiveError(directiveName, 0, 0))
 			} else {
 				knownDirectives[directiveName] = struct{}{}
 			}
@@ -27,9 +27,9 @@ func uniqueDirectivesPerLocation(w *validation.Walker) {
 	})
 }
 
-// duplicateDirectiveMessage ...
-func duplicateDirectiveMessage(directiveName string, line, col int) graphql.Error {
-	return graphql.NewError(
+// DuplicateDirectiveError ...
+func DuplicateDirectiveError(directiveName string, line, col int) types.Error {
+	return types.NewError(
 		"The directive \"" + directiveName + "\" can only be used once at this location.",
 		// TODO: Location.
 	)

@@ -2,24 +2,24 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
 // Lone Schema definition
 //
 // A GraphQL document is only valid if it contains only one schema definition.
-func loneSchemaDefinition(w *validation.Walker) {
+func LoneSchemaDefinition(w *validation.Walker) {
 	w.AddSchemaDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.SchemaDefinition) {
 		// NOTE: If ctx.SDLContext is nil here, we should panic, this is an SDL only rule.
 
 		if ctx.SDLContext.IsExtending {
-			ctx.AddError(canNotDefineSchemaWithinExtensionError(0, 0))
+			ctx.AddError(CanNotDefineSchemaWithinExtensionError(0, 0))
 			return
 		}
 
 		if ctx.SDLContext.HasSeenSchemaDefinition {
-			ctx.AddError(schemaDefinitionNotAloneError(0, 0))
+			ctx.AddError(SchemaDefinitionNotAloneError(0, 0))
 			return
 		}
 
@@ -27,15 +27,15 @@ func loneSchemaDefinition(w *validation.Walker) {
 	})
 }
 
-func schemaDefinitionNotAloneError(line, col int) graphql.Error {
-	return graphql.NewError(
+func SchemaDefinitionNotAloneError(line, col int) types.Error {
+	return types.NewError(
 		"Must provide only one schema definition.",
 		// TODO: Location.
 	)
 }
 
-func canNotDefineSchemaWithinExtensionError(line, col int) graphql.Error {
-	return graphql.NewError(
+func CanNotDefineSchemaWithinExtensionError(line, col int) types.Error {
+	return types.NewError(
 		"Cannot define a new schema within a schema extension.",
 		// TODO: Location.
 	)

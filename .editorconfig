@@ -14,3 +14,6 @@ indent_style = tab
 
 [*.go]
 indent_style = tab
+
+[*.sh]
+indent_size = 2

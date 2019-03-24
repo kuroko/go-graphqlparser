@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// possibleTypeExtensions ...
-func possibleTypeExtensions(w *validation.Walker) {}
+// PossibleTypeExtensions ...
+func PossibleTypeExtensions(w *validation.Walker) {}

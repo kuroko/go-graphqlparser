@@ -1,11 +1,11 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/validation"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestUniqueEnumValueNames(t *testing.T) {
@@ -42,8 +42,8 @@ func TestUniqueEnumValueNames(t *testing.T) {
 					FOO
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "extend enum with new value",
@@ -72,8 +72,8 @@ func TestUniqueEnumValueNames(t *testing.T) {
 					FOO
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "duplicate value inside extension",
@@ -86,8 +86,8 @@ func TestUniqueEnumValueNames(t *testing.T) {
 					FOO
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "duplicate value inside different extensions",
@@ -102,12 +102,12 @@ func TestUniqueEnumValueNames(t *testing.T) {
 					FOO
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "adding new value to the type inside existing schema",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Types: map[string]*ast.TypeDefinition{
 					"SomeEnum": {
 						Name: "SomeEnum",
@@ -123,7 +123,7 @@ func TestUniqueEnumValueNames(t *testing.T) {
 		},
 		{
 			msg: "adding conflicting value to existing schema twice",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Types: map[string]*ast.TypeDefinition{
 					"SomeEnum": {
 						Name: "SomeEnum",
@@ -144,13 +144,13 @@ func TestUniqueEnumValueNames(t *testing.T) {
 					FOO
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(existedEnumValueNameMessage("SomeEnum", "FOO", 0, 0)).
-				Add(existedEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.ExistedEnumValueNameError("SomeEnum", "FOO", 0, 0)).
+				Add(rules.ExistedEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "adding conflicting value to existing schema twice",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Types: map[string]*ast.TypeDefinition{
 					"SomeEnum": {
 						Name: "SomeEnum",
@@ -167,10 +167,10 @@ func TestUniqueEnumValueNames(t *testing.T) {
 					FOO
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateEnumValueNameMessage("SomeEnum", "FOO", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 	}
 
-	sdlRuleTester(t, tt, uniqueEnumValueNames)
+	sdlRuleTester(t, tt, rules.UniqueEnumValueNames)
 }

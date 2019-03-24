@@ -2,8 +2,6 @@
 
 typeNames=(
   Error
-  Location
-  PathNode
 )
 
 types=
@@ -15,5 +13,5 @@ for i in ${!typeNames[@]}; do
   fi
 done
 
-go run lab/generics/main.go -package graphql -types ${types} > graphql/lists.go
-go fmt graphql/lists.go
+go run tools/listgen/main.go -package types -types ${types} > graphql/types/lists.go
+go fmt graphql/types/lists.go

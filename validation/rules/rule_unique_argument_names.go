@@ -2,12 +2,12 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// uniqueArgumentNames ...
-func uniqueArgumentNames(w *validation.Walker) {
+// UniqueArgumentNames ...
+func UniqueArgumentNames(w *validation.Walker) {
 	w.AddFieldSelectionEnterEventHandler(func(ctx *validation.Context, sel ast.Selection) {
 		ctx.KnownArgNames = make(map[string]struct{})
 	})
@@ -30,7 +30,7 @@ func uniqueArgumentNames(w *validation.Walker) {
 		argName := arg.Name
 
 		if _, ok := ctx.KnownArgNames[argName]; ok {
-			ctx.AddError(duplicateArgMessage(argName, 0, 0))
+			ctx.AddError(DuplicateArgError(argName, 0, 0))
 		} else {
 			ctx.KnownArgNames[argName] = struct{}{}
 		}
@@ -40,14 +40,14 @@ func uniqueArgumentNames(w *validation.Walker) {
 		argName := def.Name
 
 		if _, ok := ctx.KnownArgNames[argName]; ok {
-			ctx.AddError(duplicateArgMessage(argName, 0, 0))
+			ctx.AddError(DuplicateArgError(argName, 0, 0))
 		} else {
 			ctx.KnownArgNames[argName] = struct{}{}
 		}
 	})
 }
 
-// duplicateArgMessage ...
-func duplicateArgMessage(argName string, line, col int) graphql.Error {
-	return graphql.NewError("There can be only one argument named \"" + argName + "\".")
+// DuplicateArgError ...
+func DuplicateArgError(argName string, line, col int) types.Error {
+	return types.NewError("There can be only one argument named \"" + argName + "\".")
 }

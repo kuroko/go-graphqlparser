@@ -1,9 +1,10 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestUniqueArgumentNames(t *testing.T) {
@@ -89,8 +90,8 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field(arg1: "value", arg1: "value")
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateArgMessage("arg1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "many duplicate field arguments",
@@ -99,9 +100,9 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field(arg1: "value", arg1: "value", arg1: "value")
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateArgMessage("arg1", 0, 0)).
-					Add(duplicateArgMessage("arg1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateArgError("arg1", 0, 0)).
+					Add(rules.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "duplicate directive arguments",
@@ -110,8 +111,8 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field @directive(arg1: "value", arg1: "value")
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateArgMessage("arg1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "many duplicate directive arguments",
@@ -120,13 +121,13 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field @directive(arg1: "value", arg1: "value", arg1: "value")
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateArgMessage("arg1", 0, 0)).
-					Add(duplicateArgMessage("arg1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateArgError("arg1", 0, 0)).
+					Add(rules.DuplicateArgError("arg1", 0, 0)),
 			},
 		}
 
-		queryRuleTester(t, tt, uniqueArgumentNames)
+		queryRuleTester(t, tt, rules.UniqueArgumentNames)
 	})
 
 	t.Run("sdl documents", func(t *testing.T) {
@@ -217,17 +218,17 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field(arg1: String, arg1: String): String
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateArgMessage("arg1", 0, 0)).
-					Add(duplicateArgMessage("arg1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateArgError("arg1", 0, 0)).
+					Add(rules.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "duplicate directive arguments",
 				query: `
 					directive @foo(arg1: String, arg1: String) on SCHEMA
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateArgMessage("arg1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "many duplicate field arguments",
@@ -240,23 +241,23 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field(arg1: String, arg1: String, arg1: String): String
 					}
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateArgMessage("arg1", 0, 0)).
-					Add(duplicateArgMessage("arg1", 0, 0)).
-					Add(duplicateArgMessage("arg1", 0, 0)).
-					Add(duplicateArgMessage("arg1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateArgError("arg1", 0, 0)).
+					Add(rules.DuplicateArgError("arg1", 0, 0)).
+					Add(rules.DuplicateArgError("arg1", 0, 0)).
+					Add(rules.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "many duplicate directive arguments",
 				query: `
 					directive @foo(arg1: String, arg1: String, arg1: String) on SCHEMA
 				`,
-				errs: (*graphql.Errors)(nil).
-					Add(duplicateArgMessage("arg1", 0, 0)).
-					Add(duplicateArgMessage("arg1", 0, 0)),
+				errs: (*types.Errors)(nil).
+					Add(rules.DuplicateArgError("arg1", 0, 0)).
+					Add(rules.DuplicateArgError("arg1", 0, 0)),
 			},
 		}
 
-		sdlRuleTester(t, tt, uniqueArgumentNames)
+		sdlRuleTester(t, tt, rules.UniqueArgumentNames)
 	})
 }

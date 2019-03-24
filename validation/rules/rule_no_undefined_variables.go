@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// noUndefinedVariables ...
-func noUndefinedVariables(w *validation.Walker) {}
+// NoUndefinedVariables ...
+func NoUndefinedVariables(w *validation.Walker) {}

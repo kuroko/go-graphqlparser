@@ -1,11 +1,11 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/validation"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestLoneSchemaDefinition(t *testing.T) {
@@ -33,25 +33,25 @@ func TestLoneSchemaDefinition(t *testing.T) {
 			schema { mutation: Foo }
 			schema { subscription: Foo }
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(schemaDefinitionNotAloneError(0, 0)).
-				Add(schemaDefinitionNotAloneError(0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.SchemaDefinitionNotAloneError(0, 0)).
+				Add(rules.SchemaDefinitionNotAloneError(0, 0)),
 		},
 		{
 			msg:    "define schema in schema extension",
-			schema: &validation.Schema{},
+			schema: &types.Schema{},
 			query: `
 			schema {
 				query: Foo
 			}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(canNotDefineSchemaWithinExtensionError(0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.CanNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "redefine schema in schema extension",
 			// TODO: Maybe replace with something that builds this from a schema string?
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				QueryType: &ast.Type{
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Foo",
@@ -62,14 +62,14 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				mutation: Foo
 			}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(canNotDefineSchemaWithinExtensionError(0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.CanNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "redefine implicit schema in schema extension",
 			// TODO: Maybe replace with something that builds this from a schema string?
 			// TODO: This isn't "valid" really, we're not testing the implicit schema definition.
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				QueryType: &ast.Type{
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Foo",
@@ -80,12 +80,12 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				mutation: Foo
 			}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(canNotDefineSchemaWithinExtensionError(0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.CanNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "extend schema in schema extension",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				QueryType: &ast.Type{
 					Kind:      ast.TypeKindNamed,
 					NamedType: "Foo",
@@ -100,5 +100,5 @@ func TestLoneSchemaDefinition(t *testing.T) {
 		},
 	}
 
-	sdlRuleTester(t, tt, loneSchemaDefinition)
+	sdlRuleTester(t, tt, rules.LoneSchemaDefinition)
 }

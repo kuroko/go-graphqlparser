@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// valuesOfCorrectType ...
-func valuesOfCorrectType(w *validation.Walker) {}
+// ValuesOfCorrectType ...
+func ValuesOfCorrectType(w *validation.Walker) {}

@@ -1,9 +1,10 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/stretchr/testify/assert"
@@ -12,7 +13,7 @@ import (
 
 var (
 	// schemaDocument ...
-	schemaDocument = `
+	schemaDocument = []byte(`
 		schema {
 			query: Query
 		}
@@ -48,21 +49,22 @@ var (
 		type Query {
 			checkEnumValueUniqueness: String!
 		}
-	`
+	`)
 )
 
 // ruleTestCase ...
 type ruleTestCase struct {
 	msg    string
 	query  string
-	schema *validation.Schema
-	errs   *graphql.Errors
+	schema *types.Schema
+	errs   *types.Errors
 }
 
 // queryRuleTester ...
 func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
-	schema, err := validation.BuildSchema(schemaDocument, validation.NewWalker(SpecifiedSDL))
+	schema, errs, err := graphql.BuildSchema(nil, schemaDocument)
 	require.NoError(t, err, "failed to build schema")
+	require.Equal(t, (*types.Errors)(nil), errs, "failed to validate schema")
 
 	for _, tc := range tt {
 		parser := language.NewParser([]byte(tc.query))

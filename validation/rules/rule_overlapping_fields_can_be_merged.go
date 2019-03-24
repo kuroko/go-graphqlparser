@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// overlappingFieldsCanBeMerged ...
-func overlappingFieldsCanBeMerged(w *validation.Walker) {}
+// OverlappingFieldsCanBeMerged ...
+func OverlappingFieldsCanBeMerged(w *validation.Walker) {}

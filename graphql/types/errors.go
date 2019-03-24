@@ -1,15 +1,17 @@
-package graphql
+package types
 
 import (
 	"bytes"
 	"strconv"
+
+	"github.com/bucketd/go-graphqlparser/ast"
 )
 
 // Error fulfils the requirements of a GraphQL error type.
 type Error struct {
 	Message   string
-	Locations *Locations
-	Path      *PathNodes
+	Locations *ast.Locations
+	Path      *ast.PathNodes
 }
 
 // NewError returns a new Error with the given message.
@@ -30,7 +32,7 @@ func (e *Error) MarshalJSON() ([]byte, error) {
 
 	if e.Locations.Len() > 0 {
 		buf.WriteString(`,"locations":[`)
-		e.Locations.ForEach(func(location Location, i int) {
+		e.Locations.ForEach(func(location ast.Location, i int) {
 			if i > 0 {
 				buf.WriteString(",")
 			}
@@ -47,17 +49,17 @@ func (e *Error) MarshalJSON() ([]byte, error) {
 
 	if e.Path.Len() > 0 {
 		buf.WriteString(`,"path":[`)
-		e.Path.ForEach(func(pathNode PathNode, i int) {
+		e.Path.ForEach(func(pathNode ast.PathNode, i int) {
 			if i > 0 {
 				buf.WriteString(",")
 			}
 
 			switch pathNode.Kind {
-			case PathNodeKindString:
+			case ast.PathNodeKindString:
 				buf.WriteString(`"`)
 				buf.WriteString(pathNode.String)
 				buf.WriteString(`"`)
-			case PathNodeKindInt:
+			case ast.PathNodeKindInt:
 				buf.WriteString(strconv.Itoa(pathNode.Int))
 			}
 		})
@@ -67,42 +69,4 @@ func (e *Error) MarshalJSON() ([]byte, error) {
 	buf.WriteString(`}`)
 
 	return buf.Bytes(), nil
-}
-
-// Location provides information about an error as the position in a potentially multi-line string.
-type Location struct {
-	Line   int
-	Column int
-}
-
-// PathNodeKind values.
-const (
-	PathNodeKindString PathNodeKind = iota
-	PathNodeKindInt
-)
-
-// PathNodeKind an enum type that defines the type of data stored in a PathNode.
-type PathNodeKind uint8
-
-// PathNode is an individual part of the path.
-type PathNode struct {
-	Kind   PathNodeKind
-	String string
-	Int    int
-}
-
-// NewStringPathNode returns a new PathNode with the given string as it's value.
-func NewStringPathNode(s string) PathNode {
-	return PathNode{
-		Kind:   PathNodeKindString,
-		String: s,
-	}
-}
-
-// NewIntPathNode returns a new Pathnode with the given int as it's value.
-func NewIntPathNode(i int) PathNode {
-	return PathNode{
-		Kind: PathNodeKindInt,
-		Int:  i,
-	}
 }

@@ -1,6 +1,8 @@
-package validation
+package types
 
-import "github.com/bucketd/go-graphqlparser/ast"
+import (
+	"github.com/bucketd/go-graphqlparser/ast"
+)
 
 // Schema ...
 type Schema struct {

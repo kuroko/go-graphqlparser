@@ -1,21 +1,22 @@
-package rules
+package rules_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
-func mockNonExecutableDefinitionError(name string, line, col int) graphql.Error {
-	return graphql.NewError(
+func mockNonExecutableDefinitionError(name string, line, col int) types.Error {
+	return types.NewError(
 		mockNonExecutableDefinitionMessage(name),
 		// TODO: Location.
 	)
 }
 
 func mockNonExecutableDefinitionMessage(name string) string {
-	return fmt.Sprintf("The %s definition is not executable.", name)
+	return fmt.Sprintf("The \"%s\" definition is not executable.", name)
 }
 
 func TestExecutableDefinitions(t *testing.T) {
@@ -61,7 +62,7 @@ func TestExecutableDefinitions(t *testing.T) {
 			  color: String
 			}
 		    `,
-			errs: (*graphql.Errors)(nil).
+			errs: (*types.Errors)(nil).
 				Add(mockNonExecutableDefinitionError("Cow", 0, 0)).
 				Add(mockNonExecutableDefinitionError("Dog", 0, 0)),
 		},
@@ -76,12 +77,12 @@ func TestExecutableDefinitions(t *testing.T) {
 			}
 			extend schema @directive
 		    `,
-			errs: (*graphql.Errors)(nil).
+			errs: (*types.Errors)(nil).
 				Add(mockNonExecutableDefinitionError("schema", 0, 0)).
 				Add(mockNonExecutableDefinitionError("Query", 0, 0)).
 				Add(mockNonExecutableDefinitionError("schema", 0, 0)),
 		},
 	}
 
-	queryRuleTester(t, tt, executableDefinitions)
+	queryRuleTester(t, tt, rules.ExecutableDefinitions)
 }

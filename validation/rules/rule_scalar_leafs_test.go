@@ -1,11 +1,13 @@
-package rules
+package rules_test
 
 import (
 	"testing"
+
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestScalarLeafs(t *testing.T) {
 	tt := []ruleTestCase{}
 
-	queryRuleTester(t, tt, scalarLeafs)
+	queryRuleTester(t, tt, rules.ScalarLeafs)
 }

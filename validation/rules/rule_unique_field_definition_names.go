@@ -2,12 +2,12 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// uniqueFieldDefinitionNames ...
-func uniqueFieldDefinitionNames(w *validation.Walker) {
+// UniqueFieldDefinitionNames ...
+func UniqueFieldDefinitionNames(w *validation.Walker) {
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.TypeDefinition) {
 		typeName := def.Name
 
@@ -49,6 +49,22 @@ func uniqueFieldDefinitionNames(w *validation.Walker) {
 	})
 }
 
+// DuplicateFieldDefinitionNameMessage ...
+func DuplicateFieldDefinitionNameError(typeName, fieldName string, line, col int) types.Error {
+	return types.NewError(
+		"Field \"" + typeName + "." + fieldName + "\" can only be defined once.",
+		// TODO: Location.
+	)
+}
+
+// ExistedFieldDefinitionNameMessage ...
+func ExistedFieldDefinitionNameError(typeName, fieldName string, line, col int) types.Error {
+	return types.NewError(
+		"Field \"" + typeName + "." + fieldName + "\" already exists in the schema. It cannot also be defined in this type extension.",
+		// TODO: Location.
+	)
+}
+
 // prepareFieldDefinitionSymbolTables ...
 func prepareFieldDefinitionSymbolTables(ctx *validation.Context, typeName string) {
 	if ctx.SDLContext.KnownFieldNames == nil {
@@ -63,28 +79,12 @@ func prepareFieldDefinitionSymbolTables(ctx *validation.Context, typeName string
 // checkFieldDefinitionNameUniqueness ...
 func checkFieldDefinitionNameUniqueness(ctx *validation.Context, typeName, fieldName string) {
 	if hasField(ctx.Schema.Types[typeName], fieldName) {
-		ctx.AddError(existedFieldDefinitionNameMessage(typeName, fieldName, 0, 0))
+		ctx.AddError(ExistedFieldDefinitionNameError(typeName, fieldName, 0, 0))
 	} else if _, ok := ctx.SDLContext.KnownFieldNames[typeName][fieldName]; ok {
-		ctx.AddError(duplicateFieldDefinitionNameMessage(typeName, fieldName, 0, 0))
+		ctx.AddError(DuplicateFieldDefinitionNameError(typeName, fieldName, 0, 0))
 	} else {
 		ctx.SDLContext.KnownFieldNames[typeName][fieldName] = struct{}{}
 	}
-}
-
-// duplicateFieldDefinitionNameMessage ...
-func duplicateFieldDefinitionNameMessage(typeName, fieldName string, line, col int) graphql.Error {
-	return graphql.NewError(
-		"Field \"" + typeName + "." + fieldName + "\" can only be defined once.",
-		// TODO: Location.
-	)
-}
-
-// existedFieldDefinitionNameMessage ...
-func existedFieldDefinitionNameMessage(typeName, fieldName string, line, col int) graphql.Error {
-	return graphql.NewError(
-		"Field \"" + typeName + "." + fieldName + "\" already exists in the schema. It cannot also be defined in this type extension.",
-		// TODO: Location.
-	)
 }
 
 // hasField ...

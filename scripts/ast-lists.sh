@@ -7,7 +7,9 @@ typeNames=(
   EnumValueDefinition
   FieldDefinition
   InputValueDefinition
+  Location
   OperationTypeDefinition
+  PathNode
   RootOperationTypeDefinition
   Selection
   Type
@@ -23,5 +25,5 @@ for i in ${!typeNames[@]}; do
   fi
 done
 
-go run lab/generics/main.go -package ast -types ${types} > ast/lists.go
+go run tools/listgen/main.go -package ast -types ${types} > ast/lists.go
 go fmt ast/lists.go

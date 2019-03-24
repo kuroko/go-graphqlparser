@@ -2,12 +2,12 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// uniqueInputFieldNames ...
-func uniqueInputFieldNames(w *validation.Walker) {
+// UniqueInputFieldNames ...
+func UniqueInputFieldNames(w *validation.Walker) {
 	w.AddObjectValueEnterEventHandler(func(ctx *validation.Context, val ast.Value) {
 		// TODO: Maybe a better type for this, slice?
 		knownNames := make(map[string]struct{}, len(val.ObjectValue))
@@ -16,7 +16,7 @@ func uniqueInputFieldNames(w *validation.Walker) {
 			fieldName := field.Name
 
 			if _, ok := knownNames[fieldName]; ok {
-				ctx.AddError(duplicateInputFieldMessage(fieldName, 0, 0))
+				ctx.AddError(DuplicateInputFieldError(fieldName, 0, 0))
 			} else {
 				knownNames[fieldName] = struct{}{}
 			}
@@ -24,9 +24,9 @@ func uniqueInputFieldNames(w *validation.Walker) {
 	})
 }
 
-// duplicateInputFieldMessage ...
-func duplicateInputFieldMessage(fieldName string, line, col int) graphql.Error {
-	return graphql.NewError(
+// DuplicateInputFieldError ...
+func DuplicateInputFieldError(fieldName string, line, col int) types.Error {
+	return types.NewError(
 		"There can be only one input field named \"" + fieldName + "\".",
 		// TODO: Location.
 	)

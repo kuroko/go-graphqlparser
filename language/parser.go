@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
 )
 
 // Parser is a parser for GraphQL documents.
@@ -69,7 +68,7 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 	// We can only allow a shorthand query if it's the only definition.
 	p.hasShorthandQuery = document.Definitions.Len() == 0 && p.token.Literal == "{"
 
-	location := graphql.Location{
+	location := ast.Location{
 		Line:   p.token.Line,
 		Column: p.token.Column,
 	}

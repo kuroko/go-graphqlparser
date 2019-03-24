@@ -4,5 +4,5 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// knownArgumentNames ...
-func knownArgumentNames(w *validation.Walker) {}
+// KnownArgumentNames ...
+func KnownArgumentNames(w *validation.Walker) {}

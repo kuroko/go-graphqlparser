@@ -1,11 +1,11 @@
-package rules
+package rules_test
 
 import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/validation"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestUniqueFieldDefinitionNames(t *testing.T) {
@@ -74,10 +74,10 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 					foo: String
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateFieldDefinitionNameMessage("SomeObject", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInterface", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInputObject", "foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeObject", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInterface", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInputObject", "foo", 0, 0)),
 		},
 		{
 			msg: "extend type with new field",
@@ -137,10 +137,10 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 					foo: String
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateFieldDefinitionNameMessage("SomeObject", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInterface", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInputObject", "foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeObject", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInterface", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInputObject", "foo", 0, 0)),
 		},
 		{
 			msg: "duplicate field inside extension",
@@ -166,10 +166,10 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 					foo: String
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateFieldDefinitionNameMessage("SomeObject", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInterface", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInputObject", "foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeObject", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInterface", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInputObject", "foo", 0, 0)),
 		},
 		{
 			msg: "duplicate field inside different extensions",
@@ -198,14 +198,14 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 					foo: String
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateFieldDefinitionNameMessage("SomeObject", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInterface", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInputObject", "foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeObject", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInterface", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInputObject", "foo", 0, 0)),
 		},
 		{
 			msg: "adding new field to the type inside existing schema",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Types: map[string]*ast.TypeDefinition{
 					"SomeObject": {
 						Name: "SomeObject",
@@ -237,7 +237,7 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 		},
 		{
 			msg: "adding conflicting fields to existing schema twice",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Types: map[string]*ast.TypeDefinition{
 					"SomeObject": {
 						Name: "SomeObject",
@@ -298,17 +298,17 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 					foo: String
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(existedFieldDefinitionNameMessage("SomeObject", "foo", 0, 0)).
-				Add(existedFieldDefinitionNameMessage("SomeInterface", "foo", 0, 0)).
-				Add(existedFieldDefinitionNameMessage("SomeInputObject", "foo", 0, 0)).
-				Add(existedFieldDefinitionNameMessage("SomeObject", "foo", 0, 0)).
-				Add(existedFieldDefinitionNameMessage("SomeInterface", "foo", 0, 0)).
-				Add(existedFieldDefinitionNameMessage("SomeInputObject", "foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.ExistedFieldDefinitionNameError("SomeObject", "foo", 0, 0)).
+				Add(rules.ExistedFieldDefinitionNameError("SomeInterface", "foo", 0, 0)).
+				Add(rules.ExistedFieldDefinitionNameError("SomeInputObject", "foo", 0, 0)).
+				Add(rules.ExistedFieldDefinitionNameError("SomeObject", "foo", 0, 0)).
+				Add(rules.ExistedFieldDefinitionNameError("SomeInterface", "foo", 0, 0)).
+				Add(rules.ExistedFieldDefinitionNameError("SomeInputObject", "foo", 0, 0)),
 		},
 		{
 			msg: "adding fields to existing schema twice",
-			schema: &validation.Schema{
+			schema: &types.Schema{
 				Types: map[string]*ast.TypeDefinition{
 					"SomeObject": {
 						Name: "SomeObject",
@@ -346,12 +346,12 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 					foo: String
 				}
 			`,
-			errs: (*graphql.Errors)(nil).
-				Add(duplicateFieldDefinitionNameMessage("SomeObject", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInterface", "foo", 0, 0)).
-				Add(duplicateFieldDefinitionNameMessage("SomeInputObject", "foo", 0, 0)),
+			errs: (*types.Errors)(nil).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeObject", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInterface", "foo", 0, 0)).
+				Add(rules.DuplicateFieldDefinitionNameError("SomeInputObject", "foo", 0, 0)),
 		},
 	}
 
-	sdlRuleTester(t, tt, uniqueFieldDefinitionNames)
+	sdlRuleTester(t, tt, rules.UniqueFieldDefinitionNames)
 }

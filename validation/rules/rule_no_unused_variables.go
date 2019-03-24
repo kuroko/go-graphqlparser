@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
-// noUnusedVariables ...
-func noUnusedVariables(w *validation.Walker) {
+// NoUnusedVariables ...
+func NoUnusedVariables(w *validation.Walker) {
 	w.AddExecutableDefinitionLeaveEventHandler(func(ctx *validation.Context, def *ast.ExecutableDefinition) {
 		// TODO: Should we evaluate adding parent/child relationships between AST nodes to avoid
 		// this kind of thing? The reason I've switched this to use ExecutableDefinition is because
@@ -33,15 +33,15 @@ func noUnusedVariables(w *validation.Walker) {
 			}
 
 			if !used {
-				ctx.Errors = ctx.Errors.Add(unusedVariableError(varDef.Name, opDef.Name, 0, 0))
+				ctx.Errors = ctx.Errors.Add(UnusedVariableError(varDef.Name, opDef.Name, 0, 0))
 			}
 		})
 	})
 }
 
-// unusedVariableError ...
-func unusedVariableError(varName, opName string, line, col int) graphql.Error {
-	return graphql.NewError(
+// UnusedVariableError ...
+func UnusedVariableError(varName, opName string, line, col int) types.Error {
+	return types.NewError(
 		unusedVariableMessage(varName, opName),
 		// TODO: Location.
 	)

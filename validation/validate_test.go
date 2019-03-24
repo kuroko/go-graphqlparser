@@ -3,6 +3,7 @@ package validation_test
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
@@ -33,7 +34,7 @@ func BenchmarkValidate(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		validation.Validate(doc, &validation.Schema{}, walker)
+		validation.Validate(doc, &types.Schema{}, walker)
 	}
 }
 
@@ -50,7 +51,7 @@ func TestValidate(t *testing.T) {
 	}
 
 	walker := validation.NewWalker(rules.Specified)
-	errs := validation.Validate(doc, &validation.Schema{}, walker)
+	errs := validation.Validate(doc, &types.Schema{}, walker)
 
 	t.Log(spew.Sdump(errs))
 
