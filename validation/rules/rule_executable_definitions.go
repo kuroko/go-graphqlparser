@@ -10,21 +10,21 @@ import (
 func ExecutableDefinitions(w *validation.Walker) {
 	w.AddDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.Definition) {
 		if def.Kind != ast.DefinitionKindExecutable {
-			ctx.Errors = ctx.Errors.Add(NonExecutableDefinitionError(def, 0, 0))
+			ctx.AddError(NonExecutableDefinitionError(getDefinitionName(def), 0, 0))
 		}
 	})
 }
 
 // NonExecutableDefinitionError ...
-func NonExecutableDefinitionError(def ast.Definition, line, col int) types.Error {
+func NonExecutableDefinitionError(name string, line, col int) types.Error {
 	return types.NewError(
-		nonExecutableDefinitionMessage(def),
+		"The \"" + name + "\" definition is not executable.",
 		// TODO: Location.
 	)
 }
 
-// nonExecutableDefinitionMessage ...
-func nonExecutableDefinitionMessage(def ast.Definition) string {
+// getDefinitionName ...
+func getDefinitionName(def ast.Definition) string {
 	var name string
 
 	// TODO: We really need to move the name field to the top level of Definition...
@@ -51,5 +51,5 @@ func nonExecutableDefinitionMessage(def ast.Definition) string {
 		}
 	}
 
-	return "The \"" + name + "\" definition is not executable."
+	return name
 }

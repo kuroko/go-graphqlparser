@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql/types"
-
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 

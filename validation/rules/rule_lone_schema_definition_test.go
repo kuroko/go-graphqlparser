@@ -13,25 +13,25 @@ func TestLoneSchemaDefinition(t *testing.T) {
 		{
 			msg: "no schema",
 			query: `
-			type Foo { checkEnumValueUniqueness: String }
+				type Foo { checkEnumValueUniqueness: String }
 			`,
 			errs: nil,
 		},
 		{
 			msg: "one schema definition",
 			query: `
-			schema { query: Foo }
-			type Foo { checkEnumValueUniqueness: String }
+				schema { query: Foo }
+				type Foo { checkEnumValueUniqueness: String }
 			`,
 			errs: nil,
 		},
 		{
 			msg: "multiple schema definitions",
 			query: `
-			schema { query: Foo }
-			type Foo { checkEnumValueUniqueness: String }
-			schema { mutation: Foo }
-			schema { subscription: Foo }
+				schema { query: Foo }
+				type Foo { checkEnumValueUniqueness: String }
+				schema { mutation: Foo }
+				schema { subscription: Foo }
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.SchemaDefinitionNotAloneError(0, 0)).
@@ -41,9 +41,9 @@ func TestLoneSchemaDefinition(t *testing.T) {
 			msg:    "define schema in schema extension",
 			schema: &types.Schema{},
 			query: `
-			schema {
-				query: Foo
-			}
+				schema {
+					query: Foo
+				}
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.CanNotDefineSchemaWithinExtensionError(0, 0)),
@@ -58,9 +58,9 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				},
 			},
 			query: `
-			schema {
-				mutation: Foo
-			}
+				schema {
+					mutation: Foo
+				}
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.CanNotDefineSchemaWithinExtensionError(0, 0)),
@@ -76,9 +76,9 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				},
 			},
 			query: `
-			schema {
-				mutation: Foo
-			}
+				schema {
+					mutation: Foo
+				}
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.CanNotDefineSchemaWithinExtensionError(0, 0)),
@@ -92,9 +92,9 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				},
 			},
 			query: `
-			extend schema {
-				mutation: Foo
-			}
+				extend schema {
+					mutation: Foo
+				}
 			`,
 			errs: nil,
 		},

@@ -13,86 +13,86 @@ func TestUniqueOperationTypes(t *testing.T) {
 		{
 			msg: "no schema definition",
 			query: `
-			type Foo
+				type Foo
 			`,
 		},
 		{
 			msg: "schema definition with all types",
 			query: `
-			type Foo
+				type Foo
 
-			schema {
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
-			}
+				schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
 			`,
 		},
 		{
 			msg: "schema definition with single extension",
 			query: `
-			type Foo
+				type Foo
 
-			schema {
-				query: Query
-			}
+				schema {
+					query: Query
+				}
 
-			extend schema {
-				mutation: Mutation
-				subscription: Subscription
-			}
+				extend schema {
+					mutation: Mutation
+					subscription: Subscription
+				}
 			`,
 		},
 		{
 			msg: "schema definition with separate extensions",
 			query: `
-			type Foo
+				type Foo
 
-			schema {
-				query: Query
-			}
+				schema {
+					query: Query
+				}
 
-			extend schema {
-				mutation: Mutation
-			}
+				extend schema {
+					mutation: Mutation
+				}
 
-			extend schema {
-				subscription: Subscription
-			}
+				extend schema {
+					subscription: Subscription
+				}
 			`,
 		},
 		{
 			msg: "extend schema before definition",
 			query: `
-			type Foo
+				type Foo
 
-			extend schema {
-				mutation: Mutation
-			}
+				extend schema {
+					mutation: Mutation
+				}
 
-			extend schema {
-				subscription: Subscription
-			}
+				extend schema {
+					subscription: Subscription
+				}
 
-			schema {
-				query: Query
-			}
+				schema {
+					query: Query
+				}
 			`,
 		},
 		{
 			msg: "duplicate operation types inside single schema definition",
 			query: `
-			type Foo
+				type Foo
 
-			schema {
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
+				schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
 
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
-			}
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
@@ -102,19 +102,19 @@ func TestUniqueOperationTypes(t *testing.T) {
 		{
 			msg: "duplicate operation types inside schema extension",
 			query: `
-			type Foo
+				type Foo
 
-			schema {
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
-			}
+				schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
 
-			extend schema {
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
-			}
+				extend schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
@@ -124,25 +124,25 @@ func TestUniqueOperationTypes(t *testing.T) {
 		{
 			msg: "duplicate operation types inside schema extension twice",
 			query: `
-			type Foo
+				type Foo
 
-			schema {
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
-			}
+				schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
 
-			extend schema {
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
-			}
+				extend schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
 
-			extend schema {
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
-			}
+				extend schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
@@ -155,22 +155,22 @@ func TestUniqueOperationTypes(t *testing.T) {
 		{
 			msg: "duplicate operation types inside second schema extension",
 			query: `
-			type Foo
+				type Foo
 
-			schema {
-				query: Query
-			}
+				schema {
+					query: Query
+				}
 
-			extend schema {
-				mutation: Mutation
-				subscription: Subscription
-			}
+				extend schema {
+					mutation: Mutation
+					subscription: Subscription
+				}
 
-			extend schema {
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
-			}
+				extend schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
@@ -181,41 +181,41 @@ func TestUniqueOperationTypes(t *testing.T) {
 			msg:    "define schema inside extension SDL",
 			schema: &types.Schema{},
 			query: `
-			schema {
-				query: Query
-				mutation: Mutation
-				subscription: Subscription
-			}
+				schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
 			`,
 		},
 		{
 			msg:    "define and extend schema inside extension SDL",
 			schema: &types.Schema{},
 			query: `
-			schema {
-				query: Query
-			}
+				schema {
+					query: Query
+				}
 
-			extend schema {
-				mutation: Mutation
-			}
+				extend schema {
+					mutation: Mutation
+				}
 
-			extend schema {
-				subscription: Subscription
-			}
+				extend schema {
+					subscription: Subscription
+				}
 			`,
 		},
 		{
 			msg:    "adding new operation types to existing schema",
 			schema: &types.Schema{},
 			query: `
-			extend schema {
-				mutation: Mutation
-			}
+				extend schema {
+					mutation: Mutation
+				}
 
-			extend schema {
-				subscription: Subscription
-			}
+				extend schema {
+					subscription: Subscription
+				}
 			`,
 		},
 		{
@@ -236,11 +236,11 @@ func TestUniqueOperationTypes(t *testing.T) {
 				},
 			},
 			query: `
-			extend schema {
-				query: Foo
-				mutation: Foo
-				subscription: Foo
-			}
+				extend schema {
+					query: Foo
+					mutation: Foo
+					subscription: Foo
+				}
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.ExistedOperationTypeError("query", 0, 0)).
@@ -265,17 +265,17 @@ func TestUniqueOperationTypes(t *testing.T) {
 				},
 			},
 			query: `
-			extend schema {
-				query: Foo
-				mutation: Foo
-				subscription: Foo
-			}
+				extend schema {
+					query: Foo
+					mutation: Foo
+					subscription: Foo
+				}
 
-			extend schema {
-				query: Foo
-				mutation: Foo
-				subscription: Foo
-			}
+				extend schema {
+					query: Foo
+					mutation: Foo
+					subscription: Foo
+				}
 			`,
 			errs: (*types.Errors)(nil).
 				Add(rules.ExistedOperationTypeError("query", 0, 0)).
