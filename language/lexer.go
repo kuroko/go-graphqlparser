@@ -233,6 +233,9 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	var bc int
 	var w int
 
+	var hasEscape bool
+	var hasCR bool
+
 	// This loop counts up the number of bytes we should need to store the block string, meaning we
 	// avoid many unnecessary allocations. It does slow us down overall, but cuts down memory usage
 	// quite a lot.
@@ -247,32 +250,38 @@ func (l *Lexer) scanBlockString(r rune) Token {
 
 			if r == '"' && isTripQuotes(l) {
 				bc += 2
+				hasEscape = true
 			}
-		}
-
-		// Check for invalid characters in the block string, bail early.
-		if r < ws && r != tab && r != lf && r != cr {
-			return Token{
-				Kind:    TokenKindIllegal,
-				Literal: fmt.Sprintf("invalid character within block string: %q", r),
-				Column:  startLPos - 2,
-				Line:    startLine,
-			}
-		}
-
-		// Escape from the loop as early as possible, if we've hit the end of the block string.
-		if r == '"' && isTripQuotes(l) {
-			break
-		}
-
-		// Check for end of input.
-		if r == eof {
+		} else if r == cr {
+			hasCR = true
+		} else if r == eof {
+			// Check for end of input.
 			return Token{
 				Kind:    TokenKindIllegal,
 				Literal: "unexpected eof, probably unclosed block string",
 				Column:  startLPos - 2,
 				Line:    startLine,
 			}
+		} else if r < ws && r != tab && r != lf && r != cr {
+			// Check for invalid characters in the block string, bail early.
+			return Token{
+				Kind:    TokenKindIllegal,
+				Literal: fmt.Sprintf("invalid character within block string: %q", r),
+				Column:  startLPos - 2,
+				Line:    startLine,
+			}
+		} else if r == '"' && isTripQuotes(l) {
+			// Escape from the loop as early as possible, if we've hit the end of the block string.
+			break
+		}
+	}
+
+	if !hasCR && !hasEscape {
+		return Token{
+			Kind:    TokenKindStringValue,
+			Literal: l.blockStringLiteral(btos(l.input[startPos : l.pos-3])),
+			Column:  startLPos - 2,
+			Line:    startLine,
 		}
 	}
 
