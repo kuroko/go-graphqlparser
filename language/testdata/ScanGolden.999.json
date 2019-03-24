@@ -1,5 +1,5 @@
 {
-  "Input": "\n        # Mutation for testing different token types.\n        mutation {\n            createPost(\n                id: 1024\n                title: \"String Value\"\n                content: \"\"\"\n                    Hello,\n\n                        Welcome to GraphQL.\n                        Let's make this string a little bigger then. Because the larger this string\n                        becomes, the more efficient our lexer should look...\n\n                    From, Bucketd\n                \"\"\"\n                readTime: 2.742\n            ) @async(bar: $baz)\n        }\n    ",
+  "Input": "\n        # Mutation for testing different token types.\n        mutation {\n            createPost(\n                id: 1024\n                title: \"String Value\"\n                content: \"\"\"\n                    Hello,\n\n                        Welcome to GraphQL.\n                        Let's make this string a little bigger then. Because the larger this string\n                        becomes, the more we can test our lexer.\n\n                    From, Bucketd\n                \"\"\"\n                readTime: 2.742\n            ) @async(bar: $baz)\n        }\n    ",
   "Tokens": [
     {
       "Kind": 2,
@@ -75,7 +75,7 @@
     },
     {
       "Kind": 5,
-      "Literal": "Hello,\n\n    Welcome to GraphQL.\n    Let's make this string a little bigger then. Because the larger this string\n    becomes, the more efficient our lexer should look...\n\nFrom, Bucketd",
+      "Literal": "Hello,\n\n    Welcome to GraphQL.\n    Let's make this string a little bigger then. Because the larger this string\n    becomes, the more we can test our lexer.\n\nFrom, Bucketd",
       "Line": 7,
       "Column": 26
     },
