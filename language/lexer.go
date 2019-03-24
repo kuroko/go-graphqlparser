@@ -128,14 +128,14 @@ func (l *Lexer) scanString(r rune) Token {
 	var bc int
 	var hasEscape bool
 
-	var done bool
-	for !done {
+Loop:
+	for {
 		r, w = l.read()
 		bc += w
 
 		switch {
 		case r == '"':
-			done = true
+			break Loop
 
 		case r < ws && r != tab:
 			return Token{
@@ -503,7 +503,7 @@ func hexRuneToInt(r rune) int {
 
 // scanComment scans valid GraphQL comments.
 func (l *Lexer) scanComment(r rune) Token {
-	var was000D bool
+	var wasCR bool
 	var w int
 
 	for {
@@ -515,7 +515,7 @@ func (l *Lexer) scanComment(r rune) Token {
 		// If on the last iteration we saw a CR, then we should check if we just read an LF on this
 		// iteration. If we did, reset line position as the next character is still the start of the
 		// next line, then scan.
-		if was000D && r == lf {
+		if wasCR && r == lf {
 			l.lpos = 0
 
 			return l.Scan()
@@ -523,18 +523,18 @@ func (l *Lexer) scanComment(r rune) Token {
 
 		// Otherwise, if we saw a CR, and this rune isn't an LF, then we have started reading the
 		// next line's runes, so unread the rune we read, and scan the next token.
-		if was000D && r != lf {
+		if wasCR && r != lf {
 			l.unread(w)
 
 			return l.Scan()
 		}
 
 		// If we encounter a CR at any point, this will be true.
-		was000D = r == cr
-		if was000D {
+		if r == cr {
 			// Carriage return, i.e. '\r'.
 			l.line++
 			l.lpos = 0
+			wasCR = true
 			continue
 		}
 
@@ -722,8 +722,8 @@ func (l *Lexer) readDigits(r rune) (rune, int, error) {
 
 	var w int
 
-	var done bool
-	for !done {
+Loop:
+	for {
 		r, w = l.read()
 
 		switch {
@@ -731,7 +731,7 @@ func (l *Lexer) readDigits(r rune) (rune, int, error) {
 			continue
 		default:
 			// No need to unread here. We actually want to read the character after the numbers.
-			done = true
+			break Loop
 		}
 	}
 
@@ -743,25 +743,24 @@ func (l *Lexer) readDigits(r rune) (rune, int, error) {
 // characters, etc.). It also does part of the work for identifying when new lines are encountered
 // to increment the line counter.
 func (l *Lexer) readNextSignificant() (rune, int) {
-	var done bool
-	var was000D bool
+	var wasCR bool
 
 	r := er
 	w := 0
 
-	for !done && r != eof {
+Loop:
+	for r != eof {
 		r, w = l.read()
 
-		was000D = r == cr
-
 		switch {
-		case was000D:
+		case r == cr:
 			// Carriage return, i.e. '\r'.
 			l.line++
 			l.lpos = 0
+			wasCR = true
 		case r == lf:
 			// Line feed, i.e. '\n'.
-			if !was000D {
+			if !wasCR {
 				// \r\n is not 2 newlines, so we must check what the last rune was.
 				l.line++
 				l.lpos = 0
@@ -770,7 +769,7 @@ func (l *Lexer) readNextSignificant() (rune, int) {
 			// Skip!
 		default:
 			// Done, this run was significant.
-			done = true
+			break Loop
 		}
 	}
 
