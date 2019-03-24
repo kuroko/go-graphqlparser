@@ -57,7 +57,7 @@ func (p *Parser) Parse() (ast.Document, error) {
 func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) {
 	var err error
 
-	// We can only allow a shorthand query if it's the only definition.
+	// We can only allow a shorthand query if it's the only executable definition.
 	isShorthandQuery := p.token.Literal == "{"
 
 	location := ast.Location{
