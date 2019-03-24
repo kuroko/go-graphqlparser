@@ -287,9 +287,12 @@ func (l *Lexer) scanBlockString(r rune) Token {
 
 		if r == lf {
 			buf.WriteRune(r)
-		} else if r == cr && l.input[l.pos+1] != byte(lf) {
-			// Replaces all CR characters with LF characters.
-			buf.WriteRune(lf)
+		} else if r == cr {
+			if l.input[l.pos+1] != byte(lf) {
+				// Replaces all CR characters with LF characters, only if they're not followed by a
+				// LF that we'll write next loop anyway (we don't want a double newline).
+				buf.WriteRune(lf)
+			}
 		} else if r == bsl {
 			// Handle escaped sequences appropriately.
 			r, _ = l.read()
