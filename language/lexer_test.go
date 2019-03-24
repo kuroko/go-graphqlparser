@@ -31,7 +31,7 @@ const (
 
                         Welcome to GraphQL.
                         Let's make this string a little bigger then. Because the larger this string
-                        becomes, the more efficient our lexer should look...
+                        becomes, the more we can test our lexer.
 
                     From, Bucketd
                 """
