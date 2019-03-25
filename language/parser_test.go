@@ -4,15 +4,14 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/parser"
 
 	goparser "github.com/graphql-go/graphql/language/parser"
 	gosource "github.com/graphql-go/graphql/language/source"
-	ast2 "github.com/vektah/gqlparser/ast"
-	"github.com/vektah/gqlparser/parser"
+	vast "github.com/vektah/gqlparser/ast"
 )
 
 var tsQuery = []byte(`
@@ -22,6 +21,31 @@ schema @foo @bar {
 
 directive @foo on SCHEMA
 directive @bar on SCHEMA
+
+"UUID is a scalar that represents the string form (36 characters) of a UUID"
+scalar UUID
+
+"""
+Field4Input's description, using a block string.
+This one spans multiple lines.
+"""
+input Field4Input {
+	input1: ID!
+}
+
+"Field4Payload's description, using a single-line string"
+type Field4Payload {
+	field1: UUID!
+	field2: String!
+}
+
+type Query {
+	"Fields may also have comments"
+	field1: String
+	field2(arg1: Int): String
+	field3: [String!]
+	field4(in: Field4Input!): Field4Payload
+}
 `)
 
 func BenchmarkTypeSystemParser(b *testing.B) {
@@ -147,7 +171,7 @@ func runVektahGQLParser(b *testing.B, query []byte) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		source := ast2.Source{
+		source := vast.Source{
 			Name:  "bench",
 			Input: qry,
 		}
@@ -167,7 +191,7 @@ func runVektahGQLSchemaParser(b *testing.B, query []byte) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		source := ast2.Source{
+		source := vast.Source{
 			Name:  "bench",
 			Input: qry,
 		}
