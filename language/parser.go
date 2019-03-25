@@ -870,7 +870,7 @@ func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 		return nil, p.unexpected(p.token, p.expected(TokenKindPunctuator, "{"))
 	}
 
-	var rootOperationTypeDefinitions *ast.RootOperationTypeDefinitions
+	var operationTypeDefinitions *ast.OperationTypeDefinitions
 
 	for {
 		opType, err := p.parseOperationType()
@@ -891,7 +891,7 @@ func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 			return nil, p.unexpected(p.token, "NamedType")
 		}
 
-		rootOperationTypeDefinitions = rootOperationTypeDefinitions.Add(ast.RootOperationTypeDefinition{
+		operationTypeDefinitions = operationTypeDefinitions.Add(ast.OperationTypeDefinition{
 			OperationType: opType,
 			NamedType:     namedType,
 		})
@@ -907,8 +907,8 @@ func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 	}
 
 	return &ast.SchemaDefinition{
-		Directives:                   directives,
-		RootOperationTypeDefinitions: rootOperationTypeDefinitions.Reverse(),
+		Directives:               directives,
+		OperationTypeDefinitions: operationTypeDefinitions.Reverse(),
 	}, nil
 }
 

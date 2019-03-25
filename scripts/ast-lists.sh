@@ -10,7 +10,6 @@ typeNames=(
   Location
   OperationTypeDefinition
   PathNode
-  RootOperationTypeDefinition
   Selection
   Type
   VariableDefinition

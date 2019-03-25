@@ -29,10 +29,10 @@ type Walker struct { {{- range .}}
 }
 
 // NewWalker returns a new Walker instance.
-func NewWalker(rules []RuleFunc) *Walker {
+func NewWalker(visitFns []VisitFunc) *Walker {
 	walker := &Walker{}
-	for _, rule := range rules {
-		rule(walker)
+	for _, visitFn := range visitFns {
+		visitFn(walker)
 	}
 
 	return walker

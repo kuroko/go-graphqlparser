@@ -436,8 +436,8 @@ func (d *dumper) dumpSchemaDefinition(def *SchemaDefinition) {
 	io.WriteString(d.w, " {\n")
 	d.depth++
 
-	def.RootOperationTypeDefinitions.ForEach(func(opTypeDef RootOperationTypeDefinition, _ int) {
-		d.dumpRootOperationTypeDefinition(opTypeDef)
+	def.OperationTypeDefinitions.ForEach(func(opTypeDef OperationTypeDefinition, _ int) {
+		d.dumpOperationTypeDefinition(opTypeDef)
 		io.WriteString(d.w, "\n")
 	})
 
@@ -446,7 +446,7 @@ func (d *dumper) dumpSchemaDefinition(def *SchemaDefinition) {
 }
 
 // 3.2.1 Root Operation Types
-func (d *dumper) dumpRootOperationTypeDefinition(opTypeDef RootOperationTypeDefinition) {
+func (d *dumper) dumpOperationTypeDefinition(opTypeDef OperationTypeDefinition) {
 	indent := strings.Repeat(indentation, d.depth)
 
 	io.WriteString(d.w, indent)
@@ -477,16 +477,6 @@ func (d *dumper) dumpSchemaExtension(sext *SchemaExtension) {
 		d.depth--
 		io.WriteString(d.w, "}")
 	}
-}
-
-func (d *dumper) dumpOperationTypeDefinition(otd OperationTypeDefinition) {
-	indent := strings.Repeat(indentation, d.depth)
-
-	io.WriteString(d.w, indent)
-	io.WriteString(d.w, otd.OperationType.String())
-	io.WriteString(d.w, ": ")
-
-	d.dumpType(otd.NamedType)
 }
 
 // 3.3 Descriptions

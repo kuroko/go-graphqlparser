@@ -245,35 +245,6 @@ func setReferencedFragments(w *Walker) {
 	})
 }
 
-// setSchemaDefinitionTypes ...
-func setSchemaDefinitionTypes(w *Walker) {
-	w.AddSchemaDefinitionEnterEventHandler(func(ctx *Context, def *ast.SchemaDefinition) {
-		def.RootOperationTypeDefinitions.ForEach(func(otd ast.RootOperationTypeDefinition, i int) {
-			switch otd.OperationType {
-			case ast.OperationDefinitionKindQuery:
-				ctx.Schema.QueryType = &otd.NamedType
-			case ast.OperationDefinitionKindMutation:
-				ctx.Schema.MutationType = &otd.NamedType
-			case ast.OperationDefinitionKindSubscription:
-				ctx.Schema.SubscriptionType = &otd.NamedType
-			}
-		})
-	})
-
-	w.AddSchemaExtensionEnterEventHandler(func(ctx *Context, ext *ast.SchemaExtension) {
-		ext.OperationTypeDefinitions.ForEach(func(otd ast.OperationTypeDefinition, i int) {
-			switch otd.OperationType {
-			case ast.OperationDefinitionKindQuery:
-				ctx.Schema.QueryType = &otd.NamedType
-			case ast.OperationDefinitionKindMutation:
-				ctx.Schema.MutationType = &otd.NamedType
-			case ast.OperationDefinitionKindSubscription:
-				ctx.Schema.SubscriptionType = &otd.NamedType
-			}
-		})
-	})
-}
-
 // setVariableUsages ...
 func setVariableUsages(w *Walker) {
 	w.AddVariableValueEnterEventHandler(func(ctx *Context, v ast.Value) {

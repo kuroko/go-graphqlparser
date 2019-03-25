@@ -18,6 +18,8 @@ func BuildASTSchema(schema *types.Schema, doc ast.Document) (*types.Schema, *typ
 	}
 
 	schemaVisitFns := []validation.VisitFunc{
+		setSchemaOperationTypes,
+		setSchemaDirectiveDefinitions,
 		setSchemaTypeDefinitions,
 	}
 
@@ -38,6 +40,32 @@ func BuildSchema(schema *types.Schema, doc []byte) (*types.Schema, *types.Errors
 	schema, errs := BuildASTSchema(schema, schemaDoc)
 
 	return schema, errs, nil
+}
+
+// setSchemaOperationTypes ...
+func setSchemaOperationTypes(w *validation.Walker) {
+	// NOTE: This handles both schema definitions and extensions.
+	w.AddOperationTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.OperationTypeDefinition) {
+		switch def.OperationType {
+		case ast.OperationDefinitionKindQuery:
+			ctx.Schema.QueryType = &def.NamedType
+		case ast.OperationDefinitionKindMutation:
+			ctx.Schema.MutationType = &def.NamedType
+		case ast.OperationDefinitionKindSubscription:
+			ctx.Schema.SubscriptionType = &def.NamedType
+		}
+	})
+}
+
+// setSchemaDirectiveDefinitions ...
+func setSchemaDirectiveDefinitions(w *validation.Walker) {
+	w.AddDirectiveDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.DirectiveDefinition) {
+		if ctx.Schema.Directives == nil {
+			ctx.Schema.Directives = make(map[string]*ast.DirectiveDefinition)
+		}
+
+		ctx.Schema.Directives[def.Name] = def
+	})
 }
 
 // setSchemaTypeDefinitions ...

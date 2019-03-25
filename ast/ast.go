@@ -6,7 +6,7 @@ type Location struct {
 	Column int
 }
 
-// PathNodeKind values.
+// @wg:field self
 const (
 	PathNodeKindString PathNodeKind = iota
 	PathNodeKindInt
@@ -30,7 +30,7 @@ func NewStringPathNode(s string) PathNode {
 	}
 }
 
-// NewIntPathNode returns a new Pathnode with the given int as it's value.
+// NewIntPathNode returns a new PathNode with the given int as it's value.
 func NewIntPathNode(i int) PathNode {
 	return PathNode{
 		Kind: PathNodeKindInt,
@@ -372,14 +372,8 @@ type TypeSystemExtension struct {
 // http://facebook.github.io/graphql/June2018/#sec-Schema
 
 type SchemaDefinition struct {
-	Directives                   *Directives
-	RootOperationTypeDefinitions *RootOperationTypeDefinitions
-}
-
-// TODO: Should NamedType be a string?
-type RootOperationTypeDefinition struct {
-	NamedType     Type
-	OperationType OperationDefinitionKind
+	Directives               *Directives
+	OperationTypeDefinitions *OperationTypeDefinitions
 }
 
 // 3.2.2 Schema Extension
@@ -388,7 +382,6 @@ type SchemaExtension struct {
 	OperationTypeDefinitions *OperationTypeDefinitions
 }
 
-// TODO: Should NamedType be a string?
 type OperationTypeDefinition struct {
 	NamedType     Type
 	OperationType OperationDefinitionKind

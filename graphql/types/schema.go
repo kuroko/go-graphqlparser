@@ -13,12 +13,11 @@ type Schema struct {
 	// ast.Document for the schema.
 	//Document ast.Document
 
-	// NOTE: The following should all be ast.Type instances with the kind ast.TypeKindNamed.
+	// NOTE: The following should all have the "kind" ast.TypeKindNamed.
 	QueryType        *ast.Type
 	MutationType     *ast.Type
 	SubscriptionType *ast.Type
 
-	// TODO: Not actually populated yet.
 	Directives map[string]*ast.DirectiveDefinition
 	Types      map[string]*ast.TypeDefinition
 }

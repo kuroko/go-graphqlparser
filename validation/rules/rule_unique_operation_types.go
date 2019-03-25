@@ -9,7 +9,7 @@ import (
 // UniqueOperationTypes ...
 func UniqueOperationTypes(w *validation.Walker) {
 	w.AddSchemaDefinitionLeaveEventHandler(func(ctx *validation.Context, def *ast.SchemaDefinition) {
-		def.RootOperationTypeDefinitions.ForEach(func(rotd ast.RootOperationTypeDefinition, i int) {
+		def.OperationTypeDefinitions.ForEach(func(rotd ast.OperationTypeDefinition, i int) {
 			// NOTE: Can't be extending here.
 			switch rotd.OperationType {
 			case ast.OperationDefinitionKindQuery:
