@@ -551,6 +551,7 @@ var DirectiveLocationsByName = map[string]DirectiveLocations{
 	"FRAGMENT_DEFINITION":    DirectiveLocationKindFragmentDefinition,
 	"FRAGMENT_SPREAD":        DirectiveLocationKindFragmentSpread,
 	"INLINE_FRAGMENT":        DirectiveLocationKindInlineFragment,
+	"VARIABLE_DEFINITION":    DirectiveLocationVariableDefinition,
 	"SCHEMA":                 DirectiveLocationKindSchema,
 	"SCALAR":                 DirectiveLocationKindScalar,
 	"OBJECT":                 DirectiveLocationKindObject,
@@ -572,6 +573,7 @@ var NamesByDirectiveLocations = map[DirectiveLocations]string{
 	DirectiveLocationKindFragmentDefinition:   "FRAGMENT_DEFINITION",
 	DirectiveLocationKindFragmentSpread:       "FRAGMENT_SPREAD",
 	DirectiveLocationKindInlineFragment:       "INLINE_FRAGMENT",
+	DirectiveLocationVariableDefinition:       "VARIABLE_DEFINITION",
 	DirectiveLocationKindSchema:               "SCHEMA",
 	DirectiveLocationKindScalar:               "SCALAR",
 	DirectiveLocationKindObject:               "OBJECT",
@@ -593,6 +595,7 @@ const (
 	DirectiveLocationKindFragmentDefinition
 	DirectiveLocationKindFragmentSpread
 	DirectiveLocationKindInlineFragment
+	DirectiveLocationVariableDefinition
 	DirectiveLocationKindSchema
 	DirectiveLocationKindScalar
 	DirectiveLocationKindObject
