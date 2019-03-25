@@ -3,9 +3,8 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/graphql"
-
 	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
