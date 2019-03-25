@@ -3,7 +3,6 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
@@ -51,7 +50,6 @@ func TestLoneSchemaDefinition(t *testing.T) {
 		},
 		{
 			msg: "redefine schema in schema extension",
-			// TODO: Maybe replace with something that builds this from a schema string?
 			schema: graphql.MustBuildSchema(nil, []byte(`
 				schema {
 					query: Foo
@@ -69,14 +67,15 @@ func TestLoneSchemaDefinition(t *testing.T) {
 		},
 		{
 			msg: "redefine implicit schema in schema extension",
-			// TODO: Maybe replace with something that builds this from a schema string?
-			// TODO: This isn't "valid" really, we're not testing the implicit schema definition.
-			schema: &types.Schema{
-				QueryType: &ast.Type{
-					Kind:      ast.TypeKindNamed,
-					NamedType: "Foo",
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				type Query {
+					fooField: Foo
+				}
+
+				type Foo {
+					foo: String
+				}
+			`)),
 			query: `
 				schema {
 					mutation: Foo
@@ -87,12 +86,13 @@ func TestLoneSchemaDefinition(t *testing.T) {
 		},
 		{
 			msg: "extend schema in schema extension",
-			schema: &types.Schema{
-				QueryType: &ast.Type{
-					Kind:      ast.TypeKindNamed,
-					NamedType: "Foo",
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				schema {
+					query: Foo
+				}
+
+				type Foo
+			`)),
 			query: `
 				extend schema {
 					mutation: Foo

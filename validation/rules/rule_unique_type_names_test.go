@@ -3,7 +3,7 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -62,31 +62,27 @@ func TestUniqueTypeNames(t *testing.T) {
 		},
 		{
 			msg: "adding new types to existing schema",
-			schema: &types.Schema{
-				Types: map[string]*ast.TypeDefinition{
-					"Foo": {},
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				type Foo
+			`)),
 			query: `
 				type Bar
 			`,
 		},
-		// TODO: We currently don't have directives stored on this type, revisit this test. Maybe we
-		// could also do with something like `buildSchema`?
-		//{
-		//	msg:    "adding new type to existing schema with same-named directive",
-		//	schema: &types.Schema{},
-		//	query: `
-		//		type Foo
-		//	`,
-		//},
+		{
+			msg: "adding new type to existing schema with same-named directive",
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				directive @Foo on SCHEMA
+			`)),
+			query: `
+				type Foo
+			`,
+		},
 		{
 			msg: "adding conflicting types to existing schema",
-			schema: &types.Schema{
-				Types: map[string]*ast.TypeDefinition{
-					"Foo": {},
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				type Foo
+			`)),
 			query: `
 				scalar Foo
 				type Foo

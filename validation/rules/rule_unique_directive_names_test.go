@@ -3,7 +3,7 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -51,32 +51,18 @@ func TestUniqueDirectiveNames(t *testing.T) {
 		},
 		{
 			msg: "adding new directive to existing schema",
-			schema: &types.Schema{
-				Directives: map[string]*ast.DirectiveDefinition{
-					"foo": {
-						Name:               "foo",
-						DirectiveLocations: ast.DirectiveLocationKindSchema,
-					},
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				directive @foo on SCHEMA
+			`)),
 			query: `
 				directive @bar on SCHEMA
 			`,
 		},
 		{
 			msg: "adding new directive with standard name to existing schema",
-			// TODO: If we implement `buildSchema`, we should be adding `skip`, `include`, and
-			// `deprecated` to the directives map.
-			schema: &types.Schema{
-				Directives: map[string]*ast.DirectiveDefinition{
-					"skip": {
-						Name: "skip",
-						DirectiveLocations: ast.DirectiveLocationKindField |
-							ast.DirectiveLocationKindFragmentSpread |
-							ast.DirectiveLocationKindInlineFragment,
-					},
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				type foo
+			`)),
 			query: `
 				directive @skip on SCHEMA
 			`,
@@ -85,31 +71,18 @@ func TestUniqueDirectiveNames(t *testing.T) {
 		},
 		{
 			msg: "adding new directive to existing schema with same-named type",
-			// TODO: If we implement `buildSchema`, we should be adding `skip`, `include`, and
-			// `deprecated` to the directives map.
-			schema: &types.Schema{
-				Types: map[string]*ast.TypeDefinition{
-					"foo": {
-						Name: "foo",
-					},
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				type foo
+			`)),
 			query: `
 				directive @foo on SCHEMA
 			`,
 		},
 		{
 			msg: "adding conflicting directives to existing schema",
-			// TODO: If we implement `buildSchema`, we should be adding `skip`, `include`, and
-			// `deprecated` to the directives map.
-			schema: &types.Schema{
-				Directives: map[string]*ast.DirectiveDefinition{
-					"foo": {
-						Name:               "foo",
-						DirectiveLocations: ast.DirectiveLocationKindSchema,
-					},
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				directive @foo on SCHEMA
+			`)),
 			query: `
 				directive @foo on SCHEMA
 			`,

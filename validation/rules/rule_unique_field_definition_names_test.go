@@ -3,7 +3,7 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -205,22 +205,11 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 		},
 		{
 			msg: "adding new field to the type inside existing schema",
-			schema: &types.Schema{
-				Types: map[string]*ast.TypeDefinition{
-					"SomeObject": {
-						Name: "SomeObject",
-						Kind: ast.TypeDefinitionKindObject,
-					},
-					"SomeInterface": {
-						Name: "SomeInterface",
-						Kind: ast.TypeDefinitionKindInterface,
-					},
-					"SomeInputObject": {
-						Name: "SomeInputObject",
-						Kind: ast.TypeDefinitionKindInputObject,
-					},
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				type SomeObject
+				interface SomeInterface
+				input SomeInputObject
+			`)),
 			query: `
 				extend type SomeObject {
 					foo: String
@@ -237,46 +226,19 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 		},
 		{
 			msg: "adding conflicting fields to existing schema twice",
-			schema: &types.Schema{
-				Types: map[string]*ast.TypeDefinition{
-					"SomeObject": {
-						Name: "SomeObject",
-						Kind: ast.TypeDefinitionKindObject,
-						FieldsDefinition: (*ast.FieldDefinitions)(nil).
-							Add(ast.FieldDefinition{
-								Name: "foo",
-								Type: ast.Type{
-									NamedType: "String",
-									Kind:      ast.TypeKindNamed,
-								},
-							}),
-					},
-					"SomeInterface": {
-						Name: "SomeInterface",
-						Kind: ast.TypeDefinitionKindInterface,
-						FieldsDefinition: (*ast.FieldDefinitions)(nil).
-							Add(ast.FieldDefinition{
-								Name: "foo",
-								Type: ast.Type{
-									NamedType: "String",
-									Kind:      ast.TypeKindNamed,
-								},
-							}),
-					},
-					"SomeInputObject": {
-						Name: "SomeInputObject",
-						Kind: ast.TypeDefinitionKindInputObject,
-						InputFieldsDefinition: (*ast.InputValueDefinitions)(nil).
-							Add(ast.InputValueDefinition{
-								Name: "foo",
-								Type: ast.Type{
-									NamedType: "String",
-									Kind:      ast.TypeKindNamed,
-								},
-							}),
-					},
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				type SomeObject {
+					foo: String
+				}
+
+				interface SomeInterface {
+					foo: String
+				}
+
+				input SomeInputObject {
+					foo: String
+				}
+			`)),
 			query: `
 				extend type SomeObject {
 					foo: String
@@ -308,22 +270,11 @@ func TestUniqueFieldDefinitionNames(t *testing.T) {
 		},
 		{
 			msg: "adding fields to existing schema twice",
-			schema: &types.Schema{
-				Types: map[string]*ast.TypeDefinition{
-					"SomeObject": {
-						Name: "SomeObject",
-						Kind: ast.TypeDefinitionKindObject,
-					},
-					"SomeInterface": {
-						Name: "SomeInterface",
-						Kind: ast.TypeDefinitionKindInterface,
-					},
-					"SomeInputObject": {
-						Name: "SomeInputObject",
-						Kind: ast.TypeDefinitionKindInputObject,
-					},
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				type SomeObject
+				interface SomeInterface
+				input SomeInputObject
+			`)),
 			query: `
 				extend type SomeObject {
 					foo: String

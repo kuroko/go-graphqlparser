@@ -19,6 +19,15 @@ func BuildASTSchema(schema *types.Schema, doc ast.Document) (*types.Schema, *typ
 		schema = &types.Schema{}
 	}
 
+	schema.Directives = make(map[string]*ast.DirectiveDefinition)
+	schema.Types = make(map[string]*ast.TypeDefinition)
+
+	// Add built-in directives, required by spec.
+	schema.Directives["skip"] = buildGraphQLSkipDirective()
+	schema.Directives["include"] = buildGraphQLIncludeDirective()
+	schema.Directives["deprecated"] = buildGraphQLDeprecatedDirective()
+
+	// Build symbol table entries from the schema document.
 	schemaVisitFns := []validation.VisitFunc{
 		setSchemaOperationTypes,
 		setSchemaDirectiveDefinitions,
@@ -76,10 +85,6 @@ func setSchemaOperationTypes(w *validation.Walker) {
 // setSchemaDirectiveDefinitions ...
 func setSchemaDirectiveDefinitions(w *validation.Walker) {
 	w.AddDirectiveDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.DirectiveDefinition) {
-		if ctx.Schema.Directives == nil {
-			ctx.Schema.Directives = make(map[string]*ast.DirectiveDefinition)
-		}
-
 		ctx.Schema.Directives[def.Name] = def
 	})
 }
@@ -87,10 +92,73 @@ func setSchemaDirectiveDefinitions(w *validation.Walker) {
 // setSchemaTypeDefinitions ...
 func setSchemaTypeDefinitions(w *validation.Walker) {
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.TypeDefinition) {
-		if ctx.Schema.Types == nil {
-			ctx.Schema.Types = make(map[string]*ast.TypeDefinition)
-		}
-
 		ctx.Schema.Types[def.Name] = def
 	})
+}
+
+// buildGraphQLSkipDirective ...
+func buildGraphQLSkipDirective() *ast.DirectiveDefinition {
+	return &ast.DirectiveDefinition{
+		Name:        "skip",
+		Description: "Directs the executor to skip this field or fragment when the `if` argument is true.",
+		DirectiveLocations: ast.DirectiveLocationKindField |
+			ast.DirectiveLocationKindFragmentSpread |
+			ast.DirectiveLocationKindInlineFragment,
+		ArgumentsDefinition: (*ast.InputValueDefinitions)(nil).
+			Add(ast.InputValueDefinition{
+				Name:        "if",
+				Description: "Skipped when true.",
+				Type: ast.Type{
+					NamedType:   "Boolean",
+					Kind:        ast.TypeKindNamed,
+					NonNullable: true,
+				},
+			}),
+	}
+}
+
+// buildGraphQLIncludeDirective ...
+func buildGraphQLIncludeDirective() *ast.DirectiveDefinition {
+	return &ast.DirectiveDefinition{
+		Name:        "include",
+		Description: "Directs the executor to include this field or fragment only when the `if` argument is true.",
+		DirectiveLocations: ast.DirectiveLocationKindField |
+			ast.DirectiveLocationKindFragmentSpread |
+			ast.DirectiveLocationKindInlineFragment,
+		ArgumentsDefinition: (*ast.InputValueDefinitions)(nil).
+			Add(ast.InputValueDefinition{
+				Name:        "if",
+				Description: "Included when true.",
+				Type: ast.Type{
+					NamedType:   "Boolean",
+					Kind:        ast.TypeKindNamed,
+					NonNullable: true,
+				},
+			}),
+	}
+}
+
+// buildGraphQLDeprecatedDirective ...
+func buildGraphQLDeprecatedDirective() *ast.DirectiveDefinition {
+	return &ast.DirectiveDefinition{
+		Name:        "deprecated",
+		Description: "Marks an element of a GraphQL schema as no longer supported.",
+		DirectiveLocations: ast.DirectiveLocationKindFieldDefinition |
+			ast.DirectiveLocationKindEnumValue,
+		ArgumentsDefinition: (*ast.InputValueDefinitions)(nil).
+			Add(ast.InputValueDefinition{
+				Name: "reason",
+				Description: "Explains why this element was deprecated, usually also including a " +
+					"suggestion for how to access supported similar data. Formatted using " +
+					"the Markdown syntax (as specified by [CommonMark](https://commonmark.org/).",
+				Type: ast.Type{
+					NamedType: "String",
+					Kind:      ast.TypeKindNamed,
+				},
+				DefaultValue: &ast.Value{
+					StringValue: "No longer supported",
+					Kind:        ast.ValueKindString,
+				},
+			}),
+	}
 }

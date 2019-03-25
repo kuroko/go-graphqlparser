@@ -3,7 +3,7 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -220,21 +220,17 @@ func TestUniqueOperationTypes(t *testing.T) {
 		},
 		{
 			msg: "adding conflicting operation types to existing schema",
-			// TODO: Maybe replace with something that builds this from a schema string?
-			schema: &types.Schema{
-				QueryType: &ast.Type{
-					Kind:      ast.TypeKindNamed,
-					NamedType: "Query",
-				},
-				MutationType: &ast.Type{
-					Kind:      ast.TypeKindNamed,
-					NamedType: "Mutation",
-				},
-				SubscriptionType: &ast.Type{
-					Kind:      ast.TypeKindNamed,
-					NamedType: "Subscription",
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
+
+				type Query
+				type Mutation
+				type Subscription
+			`)),
 			query: `
 				extend schema {
 					query: Foo
@@ -249,21 +245,17 @@ func TestUniqueOperationTypes(t *testing.T) {
 		},
 		{
 			msg: "adding conflicting operation types to existing schema twice",
-			// TODO: Maybe replace with something that builds this from a schema string?
-			schema: &types.Schema{
-				QueryType: &ast.Type{
-					Kind:      ast.TypeKindNamed,
-					NamedType: "Query",
-				},
-				MutationType: &ast.Type{
-					Kind:      ast.TypeKindNamed,
-					NamedType: "Mutation",
-				},
-				SubscriptionType: &ast.Type{
-					Kind:      ast.TypeKindNamed,
-					NamedType: "Subscription",
-				},
-			},
+			schema: graphql.MustBuildSchema(nil, []byte(`
+				schema {
+					query: Query
+					mutation: Mutation
+					subscription: Subscription
+				}
+
+				type Query
+				type Mutation
+				type Subscription
+			`)),
 			query: `
 				extend schema {
 					query: Foo
