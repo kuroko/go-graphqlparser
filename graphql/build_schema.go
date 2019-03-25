@@ -1,6 +1,8 @@
 package graphql
 
 import (
+	"fmt"
+
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
@@ -40,6 +42,20 @@ func BuildSchema(schema *types.Schema, doc []byte) (*types.Schema, *types.Errors
 	schema, errs := BuildASTSchema(schema, schemaDoc)
 
 	return schema, errs, nil
+}
+
+// MustBuildSchema ...
+func MustBuildSchema(schema *types.Schema, doc []byte) *types.Schema {
+	schema, errs, err := BuildSchema(schema, doc)
+	if err != nil {
+		panic(fmt.Sprintf("graphql: error building schema: %v", err))
+	}
+
+	if errs.Len() > 0 {
+		panic(fmt.Sprintf("graphql: validation failed whilst building schema: %v", errs))
+	}
+
+	return schema
 }
 
 // setSchemaOperationTypes ...
