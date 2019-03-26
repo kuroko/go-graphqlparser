@@ -91,10 +91,19 @@ func (l *Lexer) Scan() Token {
 
 	case r == '"':
 		r1, w1 := l.read()
+		if r1 >= utf8.RuneSelf {
+			r1, w1 = l.readUnicode()
+		}
+
 		r2, w2 := l.read()
+		if r2 >= utf8.RuneSelf {
+			r2, w2 = l.readUnicode()
+		}
+
 		if r1 == '"' && r2 == '"' {
 			return l.scanBlockString(r)
 		}
+
 		l.unread(w2)
 		l.unread(w1)
 
@@ -131,6 +140,10 @@ func (l *Lexer) scanString(r rune) Token {
 Loop:
 	for {
 		r, w = l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
+
 		bc += w
 
 		switch {
@@ -149,6 +162,9 @@ Loop:
 			hasEscape = true
 
 			r, w = l.read()
+			if r >= utf8.RuneSelf {
+				r, w = l.readUnicode()
+			}
 
 			// No need to increment bc here, if we hit backslash, we should already have incremented
 			// the counter by 1. That one byte increment should satisfy the width of any escape
@@ -157,10 +173,25 @@ Loop:
 			//bc += w
 
 			if r == 'u' {
-				_, _ = l.read()
-				_, _ = l.read()
-				_, _ = l.read()
-				_, _ = l.read()
+				r, _ = l.read()
+				if r >= utf8.RuneSelf {
+					r, _ = l.readUnicode()
+				}
+
+				r, _ = l.read()
+				if r >= utf8.RuneSelf {
+					r, _ = l.readUnicode()
+				}
+
+				r, _ = l.read()
+				if r >= utf8.RuneSelf {
+					r, _ = l.readUnicode()
+				}
+
+				r, _ = l.read()
+				if r >= utf8.RuneSelf {
+					r, _ = l.readUnicode()
+				}
 
 				// Increment bc by 3, because we've already incremented by 1 above at the start of
 				// this loop iteration. We increment by 3 here because we want to have incremented
@@ -191,6 +222,9 @@ Loop:
 	bs := make([]byte, 0, bc)
 	for {
 		r, _ = l.read()
+		if r >= utf8.RuneSelf {
+			r, _ = l.readUnicode()
+		}
 
 		switch {
 		case r == '"' || r == eof:
@@ -241,11 +275,19 @@ func (l *Lexer) scanBlockString(r rune) Token {
 	// quite a lot.
 	for {
 		r, w = l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
+
 		bc += w
 
 		// Check that escape sequences in this block string are valid.
 		if r == bsl {
 			r, w = l.read()
+			if r >= utf8.RuneSelf {
+				r, w = l.readUnicode()
+			}
+
 			bc += w
 
 			if r == '"' && isTripQuotes(l) {
@@ -293,6 +335,9 @@ func (l *Lexer) scanBlockString(r rune) Token {
 
 	for {
 		r, _ = l.read()
+		if r >= utf8.RuneSelf {
+			r, _ = l.readUnicode()
+		}
 
 		if r == lf {
 			buf.WriteRune(r)
@@ -305,6 +350,9 @@ func (l *Lexer) scanBlockString(r rune) Token {
 		} else if r == bsl {
 			// Handle escaped sequences appropriately.
 			r, _ = l.read()
+			if r >= utf8.RuneSelf {
+				r, _ = l.readUnicode()
+			}
 
 			if r == '"' && isTripQuotes(l) {
 				buf.WriteString(`"""`)
@@ -407,7 +455,15 @@ func leadingWhitespace(str string) int {
 // a row, or false otherwise.
 func isTripQuotes(l *Lexer) bool {
 	r1, w1 := l.read()
+	if r1 >= utf8.RuneSelf {
+		r1, w1 = l.readUnicode()
+	}
+
 	r2, w2 := l.read()
+	if r2 >= utf8.RuneSelf {
+		r2, w2 = l.readUnicode()
+	}
+
 	if r1 == '"' && r2 == '"' {
 		return true
 	}
@@ -424,6 +480,10 @@ func isTripQuotes(l *Lexer) bool {
 // escapedChar returns the rune that corresponds to an escape sequence that is scanned.
 func escapedChar(l *Lexer) (rune, error) {
 	r, _ := l.read()
+	if r >= utf8.RuneSelf {
+		r, _ = l.readUnicode()
+	}
+
 	switch r {
 	case '"':
 		return dq, nil
@@ -444,9 +504,24 @@ func escapedChar(l *Lexer) (rune, error) {
 
 	case 'u':
 		r1, _ := l.read()
+		if r1 >= utf8.RuneSelf {
+			r1, _ = l.readUnicode()
+		}
+
 		r2, _ := l.read()
+		if r2 >= utf8.RuneSelf {
+			r2, _ = l.readUnicode()
+		}
+
 		r3, _ := l.read()
+		if r3 >= utf8.RuneSelf {
+			r3, _ = l.readUnicode()
+		}
+
 		r4, _ := l.read()
+		if r4 >= utf8.RuneSelf {
+			r4, _ = l.readUnicode()
+		}
 
 		r := unicodeCodePointToRune(r1, r2, r3, r4)
 		if r < 0 {
@@ -520,6 +595,10 @@ func (l *Lexer) scanComment(r rune) Token {
 
 	for {
 		r, w = l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
+
 		if r == eof {
 			return l.Scan()
 		}
@@ -569,6 +648,9 @@ func (l *Lexer) scanName(r rune) Token {
 Loop:
 	for {
 		r, w := l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
 
 		switch {
 		case (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_':
@@ -596,7 +678,14 @@ func (l *Lexer) scanPunctuator(r rune, w int) Token {
 
 	if r == '.' {
 		r2, _ := l.read()
+		if r2 >= utf8.RuneSelf {
+			r2, _ = l.readUnicode()
+		}
+
 		r3, _ := l.read()
+		if r3 >= utf8.RuneSelf {
+			r3, _ = l.readUnicode()
+		}
 
 		rs := []rune{r, r2, r3}
 		if rs[1] != '.' || rs[2] != '.' {
@@ -637,11 +726,17 @@ func (l *Lexer) scanNumber(r rune) Token {
 	// Check for preceding minus sign
 	if r == '-' {
 		r, w = l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
 	}
 
 	// Check if digits begins with zero
 	if r == '0' {
 		r, w = l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
 
 		// If there is another digit after zero, error.
 		if r >= '0' && r <= '9' {
@@ -672,6 +767,9 @@ func (l *Lexer) scanNumber(r rune) Token {
 		float = true
 
 		r, w = l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
 
 		// Read the digits after the decimal place if the first character is not a digit, error.
 		r, w, err = l.readDigits(r)
@@ -690,10 +788,16 @@ func (l *Lexer) scanNumber(r rune) Token {
 		float = true
 
 		r, w = l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
 
 		// Check for positive or negative symbol in front of the value.
 		if r == '+' || r == '-' {
 			r, w = l.read()
+			if r >= utf8.RuneSelf {
+				r, w = l.readUnicode()
+			}
 		}
 
 		// Read the exponent digits, if the first character is not a digit, error.
@@ -737,6 +841,9 @@ func (l *Lexer) readDigits(r rune) (rune, int, error) {
 Loop:
 	for {
 		r, w = l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
 
 		switch {
 		case r >= '0' && r <= '9':
@@ -763,6 +870,9 @@ func (l *Lexer) readNextSignificant() (rune, int) {
 Loop:
 	for r != eof {
 		r, w = l.read()
+		if r >= utf8.RuneSelf {
+			r, w = l.readUnicode()
+		}
 
 		switch {
 		case r == cr:
@@ -796,13 +906,25 @@ func (l *Lexer) read() (rune, int) {
 		return eof, 0
 	}
 
-	r, w := rune(l.input[l.pos]), 1
-	if r >= utf8.RuneSelf {
-		r, w = utf8.DecodeRune(l.input[l.pos:])
+	r := rune(l.input[l.pos])
+	l.pos += 1
+	l.lpos++
+
+	return r, 1
+}
+
+// readUnicode attempts to read the next unicode (i.e. multi-byte) rune in the input bytes.
+// readUnicode should ALWAYS be called after read. If it isn't, it will break positioning
+// information in the document. Also, it should always be wrapped in an if statement, inline, to
+// check if the rune returned by read is a multi-byte character. The if statement is not part of
+// this method because we don't want to actually make the call to this function if we don't need to.
+func (l *Lexer) readUnicode() (rune, int) {
+	if l.pos >= l.inputLen {
+		return eof, 0
 	}
 
-	l.pos += w
-	l.lpos++
+	r, w := utf8.DecodeRune(l.input[l.pos-1:])
+	l.pos += w - 1
 
 	return r, w
 }

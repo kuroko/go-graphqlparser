@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"reflect"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/graphql-go/graphql/language/lexer"
 	"github.com/graphql-go/graphql/language/source"
@@ -266,18 +267,36 @@ func TestLexerReadUnread(t *testing.T) {
 	l := NewLexer(bs)
 
 	r, w1 := l.read()
+	if r >= utf8.RuneSelf {
+		r, w1 = l.readUnicode()
+	}
+
 	assert.Equal(t, fmt.Sprintf("%q", '世'), fmt.Sprintf("%q", r))
 
 	r, w2 := l.read()
+	if r >= utf8.RuneSelf {
+		r, w2 = l.readUnicode()
+	}
+
 	assert.Equal(t, fmt.Sprintf("%q", 'h'), fmt.Sprintf("%q", r))
 
 	l.unread(w2)
+
 	r, w2 = l.read()
+	if r >= utf8.RuneSelf {
+		r, w2 = l.readUnicode()
+	}
+
 	assert.Equal(t, fmt.Sprintf("%q", 'h'), fmt.Sprintf("%q", r))
 
 	l.unread(w2)
 	l.unread(w1)
+
 	r, _ = l.read()
+	if r >= utf8.RuneSelf {
+		r, _ = l.readUnicode()
+	}
+
 	assert.Equal(t, fmt.Sprintf("%q", '世'), fmt.Sprintf("%q", r))
 }
 
