@@ -1,8 +1,9 @@
-package language
+package language_test
 
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -10,20 +11,20 @@ func TestToken_String(t *testing.T) {
 	t.Run("should return an appropriate string", func(t *testing.T) {
 		tests := []struct {
 			expected string
-			token    TokenKind
+			token    language.TokenKind
 		}{
-			{"Illegal", TokenKindIllegal},
-			{"EOF", TokenKindEOF},
-			{"Punctuator", TokenKindPunctuator},
-			{"Name", TokenKindName},
-			{"IntValue", TokenKindIntValue},
-			{"FloatValue", TokenKindFloatValue},
-			{"StringValue", TokenKindStringValue},
-			{"UnicodeBOM", TokenKindUnicodeBOM},
-			{"WhiteSpace", TokenKindWhiteSpace},
-			{"LineTerminator", TokenKindLineTerminator},
-			{"Comment", TokenKindComment},
-			{"Comma", TokenKindComma},
+			{"Illegal", language.TokenKindIllegal},
+			{"EOF", language.TokenKindEOF},
+			{"Punctuator", language.TokenKindPunctuator},
+			{"Name", language.TokenKindName},
+			{"IntValue", language.TokenKindIntValue},
+			{"FloatValue", language.TokenKindFloatValue},
+			{"StringValue", language.TokenKindStringValue},
+			{"UnicodeBOM", language.TokenKindUnicodeBOM},
+			{"WhiteSpace", language.TokenKindWhiteSpace},
+			{"LineTerminator", language.TokenKindLineTerminator},
+			{"Comment", language.TokenKindComment},
+			{"Comma", language.TokenKindComma},
 		}
 
 		for _, test := range tests {

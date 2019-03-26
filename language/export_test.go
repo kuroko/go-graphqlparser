@@ -1,4 +1,4 @@
-package language
+package language_test
 
 var (
 	bigQuery = []byte(`

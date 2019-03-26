@@ -1,10 +1,11 @@
-package language
+package language_test
 
 import (
 	"bytes"
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/parser"
@@ -113,7 +114,7 @@ func TestParser_Parse(t *testing.T) {
 			{ hello }
 		`)
 
-		psr := NewParser(query)
+		psr := language.NewParser(query)
 
 		doc, err := psr.Parse()
 		require.NoError(t, err)
@@ -135,7 +136,7 @@ func runBucketdParser(b *testing.B, query []byte) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		psr := NewParser(query)
+		psr := language.NewParser(query)
 
 		doc, err := psr.Parse()
 		if err != nil {

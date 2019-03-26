@@ -1,19 +1,19 @@
-package language
+package language_test
 
 import (
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"reflect"
 	"testing"
-	"unicode/utf8"
 
-	"github.com/graphql-go/graphql/language/lexer"
-	"github.com/graphql-go/graphql/language/source"
+	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/stretchr/testify/assert"
-	"github.com/vektah/gqlparser/ast"
-	lexer2 "github.com/vektah/gqlparser/lexer"
+
+	glexer "github.com/graphql-go/graphql/language/lexer"
+	gsource "github.com/graphql-go/graphql/language/source"
+	vast "github.com/vektah/gqlparser/ast"
+	vlexer "github.com/vektah/gqlparser/lexer"
 )
 
 var update = flag.Bool("update", false, "update golden record files?")
@@ -41,6 +41,8 @@ const (
         }
     `
 
+	lf  = rune(0x000A)
+	cr  = rune(0x000D)
 	scr = string(cr)
 	slf = string(lf)
 )
@@ -50,15 +52,15 @@ func BenchmarkLexer(b *testing.B) {
 
 	b.Run("bucketd", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			lxr := NewLexer(qry)
+			lxr := language.NewLexer(qry)
 
 			for {
 				tok := lxr.Scan()
-				if tok.Kind == TokenKindIllegal {
+				if tok.Kind == language.TokenKindIllegal {
 					b.Fatal(tok.Literal)
 				}
 
-				if tok.Kind == TokenKindEOF {
+				if tok.Kind == language.TokenKindEOF {
 					break
 				}
 
@@ -69,7 +71,7 @@ func BenchmarkLexer(b *testing.B) {
 
 	b.Run("graphql-go", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			lxr := lexer.Lex(source.NewSource(&source.Source{
+			lxr := glexer.Lex(gsource.NewSource(&gsource.Source{
 				Body: qry,
 			}))
 
@@ -79,7 +81,7 @@ func BenchmarkLexer(b *testing.B) {
 					b.Fatal(err)
 				}
 
-				if tok.Kind == lexer.EOF {
+				if tok.Kind == glexer.EOF {
 					break
 				}
 
@@ -94,7 +96,7 @@ func BenchmarkLexer(b *testing.B) {
 		b.ResetTimer()
 
 		for i := 0; i < b.N; i++ {
-			lxr := lexer2.New(&ast.Source{
+			lxr := vlexer.New(&vast.Source{
 				Name:  "bench",
 				Input: input,
 			})
@@ -105,7 +107,7 @@ func BenchmarkLexer(b *testing.B) {
 					b.Fatal(err)
 				}
 
-				if tok.Kind == lexer2.EOF {
+				if tok.Kind == vlexer.EOF {
 					break
 				}
 
@@ -203,13 +205,13 @@ func TestLexer_ScanGolden(t *testing.T) {
 
 	type record struct {
 		Input  string
-		Tokens []Token
+		Tokens []language.Token
 		Errors []string
 	}
 
 	for _, test := range tests {
 		t.Run(fmt.Sprintf("%s", test.index), func(t *testing.T) {
-			lxr := NewLexer([]byte(test.input))
+			lxr := language.NewLexer([]byte(test.input))
 			actual := record{
 				Input: test.input,
 			}
@@ -218,11 +220,12 @@ func TestLexer_ScanGolden(t *testing.T) {
 				tok := lxr.Scan()
 
 				actual.Tokens = append(actual.Tokens, tok)
-				if tok.Kind == TokenKindIllegal {
+				if tok.Kind == language.TokenKindIllegal {
 					actual.Errors = append(actual.Errors, tok.Literal)
+					break
 				}
 
-				if tok.Kind == TokenKindEOF || tok.Kind == TokenKindIllegal {
+				if tok.Kind == language.TokenKindEOF {
 					break
 				}
 			}
@@ -257,69 +260,5 @@ func TestLexer_ScanGolden(t *testing.T) {
 
 			assert.Equal(t, expected, actual)
 		})
-	}
-}
-
-func TestLexerReadUnread(t *testing.T) {
-	// We need to test what happens when we have bytes containing runes of different lengths when we
-	// do reads and unreads, so we know we go backwards and forwards the right number of bytes.
-	bs := []byte("世h界e界l界l界o")
-	l := NewLexer(bs)
-
-	r, w1 := l.read()
-	if r >= utf8.RuneSelf {
-		r, w1 = l.readUnicode()
-	}
-
-	assert.Equal(t, fmt.Sprintf("%q", '世'), fmt.Sprintf("%q", r))
-
-	r, w2 := l.read()
-	if r >= utf8.RuneSelf {
-		r, w2 = l.readUnicode()
-	}
-
-	assert.Equal(t, fmt.Sprintf("%q", 'h'), fmt.Sprintf("%q", r))
-
-	l.unread(w2)
-
-	r, w2 = l.read()
-	if r >= utf8.RuneSelf {
-		r, w2 = l.readUnicode()
-	}
-
-	assert.Equal(t, fmt.Sprintf("%q", 'h'), fmt.Sprintf("%q", r))
-
-	l.unread(w2)
-	l.unread(w1)
-
-	r, _ = l.read()
-	if r >= utf8.RuneSelf {
-		r, _ = l.readUnicode()
-	}
-
-	assert.Equal(t, fmt.Sprintf("%q", '世'), fmt.Sprintf("%q", r))
-}
-
-func TestEncodeRune(t *testing.T) {
-	thing := '😀'
-
-	var counter int
-	var bs []byte
-
-	encodeRune(thing, func(b byte) {
-		counter++
-		bs = append(bs, b)
-	})
-	if counter != 4 {
-		t.Errorf("expected emoji triggers default case, counter should be 4, actual: %d\n", counter)
-	}
-
-	tbs := []byte(string(thing))
-	if !reflect.DeepEqual(bs, tbs) {
-		t.Errorf(
-			"\nexpected: %x %x %x %x\ngot: %x %x %x %x\n",
-			tbs[0], tbs[1], tbs[2], tbs[3],
-			bs[0], bs[1], bs[2], bs[3],
-		)
 	}
 }
