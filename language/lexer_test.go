@@ -58,7 +58,7 @@ func BenchmarkLexer(b *testing.B) {
 					b.Fatal(tok.Literal)
 				}
 
-				if tok.Kind == TokenKindEOF || tok.Kind == TokenKindIllegal {
+				if tok.Kind == TokenKindEOF {
 					break
 				}
 
