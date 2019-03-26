@@ -48,7 +48,8 @@ func (c Const) SelfName() string {
 
 // Struct represents the information we need from the Go AST for structs.
 type Struct struct {
-	Fields map[string]Type
+	FieldNames []string
+	Fields     map[string]Type
 }
 
 // NewStruct returns a new Struct value with the map on it initialised.
@@ -260,7 +261,12 @@ func processStructType(symbols *SymbolTable, name string, st *ast.StructType) er
 		for _, fieldIdent := range field.Names {
 			if t, ok := processExpr(field.Type); ok {
 				t.OnKinds = annotations.OnKinds
-				symbols.Structs[name].Fields[fieldIdent.Name] = t
+
+				str := symbols.Structs[name]
+				str.FieldNames = append(str.FieldNames, fieldIdent.Name)
+				str.Fields[fieldIdent.Name] = t
+
+				symbols.Structs[name] = str
 			}
 		}
 	}

@@ -36,9 +36,6 @@ func Generate(w io.Writer, packageName string, noImports bool, st goast.SymbolTa
 		return wts[i].FuncName < wts[j].FuncName
 	})
 
-	// Avoid printing this into generated file.
-	//spew.Fdump(os.Stderr, wts)
-
 	// Header and package name
 	fmt.Fprintf(os.Stdout, strings.TrimSpace(header))
 	fmt.Fprintf(os.Stdout, "\npackage %s\n", packageName)
@@ -80,7 +77,7 @@ func buildBaseTypes(st goast.SymbolTable) []walkerType {
 		wt := walkerType{}
 		wt.TypeName = tn
 		wt.FuncName = tn
-		wt.Fields = buildBaseTypeFields(st.Structs[tn].Fields)
+		wt.Fields = buildBaseTypeFields(st.Structs[tn].FieldNames, st.Structs[tn].Fields)
 		wt.Kinds = buildBaseTypeKinds(st.Consts[fmt.Sprintf("%sKind", tn)])
 		wt.IsAlwaysPointer = isTypeAlwaysPointer(st, tn)
 		wt.IsLinkedList = isTypeLinkedList(tn, st.Structs[tn])
@@ -114,17 +111,10 @@ func hydrateAllTypes(wts []walkerType) []walkerType {
 }
 
 // buildBaseTypeFields ...
-func buildBaseTypeFields(fields map[string]goast.Type) []walkerTypeField {
+func buildBaseTypeFields(fieldNames []string, fields map[string]goast.Type) []walkerTypeField {
 	var wtfs []walkerTypeField
 
-	var fns []string
-	for fn := range fields {
-		fns = append(fns, fn)
-	}
-
-	sort.Strings(fns)
-
-	for _, fn := range fns {
+	for _, fn := range fieldNames {
 		wtf := walkerTypeField{}
 		wtf.Name = fn
 		wtf.OnKinds = fields[fn].OnKinds
@@ -280,8 +270,9 @@ func injectSelfKindTypes(wts []walkerType) []walkerType {
 // removeUnusableFields ...
 func removeUnusableFields(wts []walkerType) []walkerType {
 	for i, wt := range wts {
-		for i := len(wt.Fields) - 1; i >= 0; i-- {
-			fld := wt.Fields[i]
+		var fields []walkerTypeField
+
+		for _, fld := range wt.Fields {
 			if len(fld.OnKinds) > 0 {
 				var allowed bool
 				for _, kind := range fld.OnKinds {
@@ -290,11 +281,15 @@ func removeUnusableFields(wts []walkerType) []walkerType {
 					}
 				}
 
-				if !allowed {
-					wt.Fields = append(wt.Fields[:i], wt.Fields[i+1:]...)
+				if allowed {
+					fields = append(fields, fld)
 				}
+			} else {
+				fields = append(fields, fld)
 			}
 		}
+
+		wt.Fields = fields
 
 		wts[i] = wt
 	}

@@ -184,7 +184,7 @@ func (k SelectionKind) String() string {
 type Selection struct {
 	Name  string // but not "on"
 	Alias string
-	// @wg:on_kinds FragmentSpreadSelection
+	// @wg:on_kinds InlineFragmentSelection
 	TypeCondition *TypeCondition
 	Arguments     *Arguments
 	Directives    *Directives
@@ -404,13 +404,13 @@ type TypeDefinitionKind int8
 
 type TypeDefinition struct {
 	Description           string
-	Directives            *Directives
+	Name                  string
 	ImplementsInterface   *Types // Only allow "TypeKindNamed" kind NamedType.
+	Directives            *Directives
 	FieldsDefinition      *FieldDefinitions
 	UnionMemberTypes      *Types // Only allow "TypeKindNamed" kind NamedType.
 	EnumValuesDefinition  *EnumValueDefinitions
 	InputFieldsDefinition *InputValueDefinitions
-	Name                  string
 	Kind                  TypeDefinitionKind
 }
 
@@ -464,9 +464,9 @@ func IsInputObjectTypeDefinition(def *TypeDefinition) bool {
 type FieldDefinition struct {
 	Description         string
 	Name                string
-	Directives          *Directives
-	Type                Type
 	ArgumentsDefinition *InputValueDefinitions
+	Type                Type
+	Directives          *Directives
 }
 
 type EnumValueDefinition struct {
@@ -551,7 +551,7 @@ var DirectiveLocationsByName = map[string]DirectiveLocations{
 	"FRAGMENT_DEFINITION":    DirectiveLocationKindFragmentDefinition,
 	"FRAGMENT_SPREAD":        DirectiveLocationKindFragmentSpread,
 	"INLINE_FRAGMENT":        DirectiveLocationKindInlineFragment,
-	"VARIABLE_DEFINITION":    DirectiveLocationVariableDefinition,
+	"VARIABLE_DEFINITION":    DirectiveLocationKindVariableDefinition,
 	"SCHEMA":                 DirectiveLocationKindSchema,
 	"SCALAR":                 DirectiveLocationKindScalar,
 	"OBJECT":                 DirectiveLocationKindObject,
@@ -573,7 +573,7 @@ var NamesByDirectiveLocations = map[DirectiveLocations]string{
 	DirectiveLocationKindFragmentDefinition:   "FRAGMENT_DEFINITION",
 	DirectiveLocationKindFragmentSpread:       "FRAGMENT_SPREAD",
 	DirectiveLocationKindInlineFragment:       "INLINE_FRAGMENT",
-	DirectiveLocationVariableDefinition:       "VARIABLE_DEFINITION",
+	DirectiveLocationKindVariableDefinition:   "VARIABLE_DEFINITION",
 	DirectiveLocationKindSchema:               "SCHEMA",
 	DirectiveLocationKindScalar:               "SCALAR",
 	DirectiveLocationKindObject:               "OBJECT",
@@ -595,7 +595,7 @@ const (
 	DirectiveLocationKindFragmentDefinition
 	DirectiveLocationKindFragmentSpread
 	DirectiveLocationKindInlineFragment
-	DirectiveLocationVariableDefinition
+	DirectiveLocationKindVariableDefinition
 	DirectiveLocationKindSchema
 	DirectiveLocationKindScalar
 	DirectiveLocationKindObject
