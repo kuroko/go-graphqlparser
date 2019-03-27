@@ -16,6 +16,7 @@ var (
 	})
 	// sdlContextDecoratorWalker ...
 	sdlContextDecoratorWalker = NewWalker([]VisitFunc{
+		setDirectiveDefinitions,
 		setTypeDefinitions,
 		//setSchemaDefinitionTypes,
 	})
@@ -25,23 +26,6 @@ var (
 // preliminary pass of a query document, gathering basic information for the more complicated
 // validation walk to come.
 func NewContext(doc ast.Document, schema *types.Schema) *Context {
-	return newContext(doc, schema, queryContextDecoratorWalker)
-}
-
-// NewSDLContext ...
-func NewSDLContext(doc ast.Document, schema *types.Schema) *Context {
-	ctx := newContext(doc, schema, sdlContextDecoratorWalker)
-
-	// Construct SDL specific structures.
-	ctx.SDLContext = &SDLContext{
-		IsExtending: schema != nil,
-	}
-
-	return ctx
-}
-
-// newContext ...
-func newContext(doc ast.Document, schema *types.Schema, walker *Walker) *Context {
 	if schema == nil {
 		schema = &types.Schema{}
 	}
@@ -51,7 +35,29 @@ func newContext(doc ast.Document, schema *types.Schema, walker *Walker) *Context
 		Schema:   schema,
 	}
 
-	walker.Walk(ctx, doc)
+	queryContextDecoratorWalker.Walk(ctx, doc)
+
+	return ctx
+}
+
+// NewSDLContext ...
+func NewSDLContext(doc ast.Document, schema *types.Schema) *Context {
+	isExtending := schema != nil
+	if !isExtending {
+		schema = &types.Schema{}
+	}
+
+	ctx := &Context{
+		Document: doc,
+		Schema:   schema,
+	}
+
+	// Construct SDL specific structures.
+	ctx.SDLContext = &SDLContext{
+		IsExtending: isExtending,
+	}
+
+	sdlContextDecoratorWalker.Walk(ctx, doc)
 
 	return ctx
 }
@@ -67,11 +73,13 @@ type Context struct {
 
 	// KnownArgNames ...
 	KnownArgNames map[string]struct{}
-
 	// KnownInputFieldNamesStack ...
 	KnownInputFieldNamesStack []map[string]struct{}
 	// KnownInputFieldNames ...
 	KnownInputFieldNames map[string]struct{}
+
+	// TypeDefinitions is a map of all TypeDefinition nodes in the current document.
+	TypeDefinitions map[string]*ast.TypeDefinition
 
 	// OperationsCount ...
 	OperationsCount int
@@ -89,9 +97,6 @@ type Context struct {
 
 	// executableDefinition is the current executable definition being walked over.
 	executableDefinition *ast.ExecutableDefinition
-
-	// typeDefinitions is a map of all TypeDefinition nodes in the current document.
-	typeDefinitions map[string]*ast.TypeDefinition
 }
 
 // AddError adds an error to the linked list of errors on this Context.
@@ -107,12 +112,6 @@ func (ctx *Context) Fragment(name string) *ast.FragmentDefinition {
 // VariableUsages returns the variable usages in an operation or fragment definition.
 func (ctx *Context) VariableUsages(def *ast.ExecutableDefinition) []string {
 	return ctx.variableUsages[def]
-}
-
-// TypeDefinitions returns all TypeDefinition nodes in the current document, in a map where the key
-// is the name of the type.
-func (ctx *Context) TypeDefinitions() map[string]*ast.TypeDefinition {
-	return ctx.typeDefinitions
 }
 
 // RecursiveVariableUsages ...
@@ -180,10 +179,11 @@ func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefini
 
 // SDLContext ...
 type SDLContext struct {
-	KnownTypeNames      map[string]struct{}
-	KnownDirectiveNames map[string]struct{}
-	KnownEnumValueNames map[string]map[string]struct{}
-	KnownFieldNames     map[string]map[string]struct{}
+	DirectiveDefinitions map[string]*ast.DirectiveDefinition
+	KnownTypeNames       map[string]struct{}
+	KnownDirectiveNames  map[string]struct{}
+	KnownEnumValueNames  map[string]map[string]struct{}
+	KnownFieldNames      map[string]map[string]struct{}
 
 	QueryTypeDefined        bool
 	MutationTypeDefined     bool
@@ -262,14 +262,25 @@ func setVariableUsages(w *Walker) {
 	})
 }
 
+// setDirectiveDefinitions ...
+func setDirectiveDefinitions(w *Walker) {
+	w.AddDirectiveDefinitionEnterEventHandler(func(ctx *Context, def *ast.DirectiveDefinition) {
+		if ctx.SDLContext.DirectiveDefinitions == nil {
+			ctx.SDLContext.DirectiveDefinitions = make(map[string]*ast.DirectiveDefinition)
+		}
+
+		ctx.SDLContext.DirectiveDefinitions[def.Name] = def
+	})
+}
+
 // setTypeDefinitions ...
 func setTypeDefinitions(w *Walker) {
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *Context, def *ast.TypeDefinition) {
-		if ctx.typeDefinitions == nil {
-			ctx.typeDefinitions = make(map[string]*ast.TypeDefinition)
+		if ctx.TypeDefinitions == nil {
+			ctx.TypeDefinitions = make(map[string]*ast.TypeDefinition)
 		}
 
 		// TODO: Do type definitions always have a name?..
-		ctx.typeDefinitions[def.Name] = def
+		ctx.TypeDefinitions[def.Name] = def
 	})
 }

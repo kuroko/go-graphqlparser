@@ -316,6 +316,7 @@ type Type struct {
 type Directive struct {
 	Name      string
 	Arguments *Arguments
+	Location  DirectiveLocation
 }
 
 // 3.0 NamedType System
@@ -543,7 +544,7 @@ type InputValueDefinition struct {
 // 3.13 Directives
 // http://facebook.github.io/graphql/June2018/#sec-Type-System.Directives
 
-var DirectiveLocationsByName = map[string]DirectiveLocations{
+var DirectiveLocationsByName = map[string]DirectiveLocation{
 	"QUERY":                  DirectiveLocationKindQuery,
 	"MUTATION":               DirectiveLocationKindMutation,
 	"SUBSCRIPTION":           DirectiveLocationKindSubscription,
@@ -565,7 +566,7 @@ var DirectiveLocationsByName = map[string]DirectiveLocations{
 	"INPUT_FIELD_DEFINITION": DirectiveLocationKindInputFieldDefinition,
 }
 
-var NamesByDirectiveLocations = map[DirectiveLocations]string{
+var NamesByDirectiveLocations = map[DirectiveLocation]string{
 	DirectiveLocationKindQuery:                "QUERY",
 	DirectiveLocationKindMutation:             "MUTATION",
 	DirectiveLocationKindSubscription:         "SUBSCRIPTION",
@@ -588,7 +589,7 @@ var NamesByDirectiveLocations = map[DirectiveLocations]string{
 }
 
 const (
-	DirectiveLocationKindQuery DirectiveLocations = 1 << iota
+	DirectiveLocationKindQuery DirectiveLocation = 1 << iota
 	DirectiveLocationKindMutation
 	DirectiveLocationKindSubscription
 	DirectiveLocationKindField
@@ -609,9 +610,9 @@ const (
 	DirectiveLocationKindInputFieldDefinition
 )
 
-type DirectiveLocations int32
+type DirectiveLocation int32
 
-func (l DirectiveLocations) String() string {
+func (l DirectiveLocation) String() string {
 	return NamesByDirectiveLocations[l]
 }
 
@@ -619,5 +620,5 @@ type DirectiveDefinition struct {
 	Description         string
 	Name                string
 	ArgumentsDefinition *InputValueDefinitions
-	DirectiveLocations  DirectiveLocations
+	DirectiveLocations  DirectiveLocation
 }

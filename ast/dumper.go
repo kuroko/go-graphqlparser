@@ -914,8 +914,8 @@ func (d *dumper) dumpDirectiveDefinition(def *DirectiveDefinition) {
 	d.dumpDirectiveLocations(def.DirectiveLocations)
 }
 
-// dumpDirectiveLocations dumps the DirectiveLocations. The formatting of
-// DirectiveLocations is flexible, so the dumper uses a sensible pattern
+// dumpDirectiveLocations dumps the DirectiveLocation. The formatting of
+// DirectiveLocation is flexible, so the dumper uses a sensible pattern
 // which you can see an example of below.
 //
 // directive @example on FIELD
@@ -924,7 +924,7 @@ func (d *dumper) dumpDirectiveDefinition(def *DirectiveDefinition) {
 //   | FIELD
 //   | FRAGMENT_SPREAD
 //   | INLINE_FRAGMENT
-func (d *dumper) dumpDirectiveLocations(dls DirectiveLocations) {
+func (d *dumper) dumpDirectiveLocations(dls DirectiveLocation) {
 	dll := len(NamesByDirectiveLocations)
 
 	var locs []string

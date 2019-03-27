@@ -127,7 +127,7 @@ func (p *Parser) parseDefinition(document ast.Document) (ast.Definition, error) 
 }
 
 // parseOperationDefinition ...
-func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefinition, error) {
+func (p *Parser) parseOperationDefinition(isShorthandQuery bool) (*ast.ExecutableDefinition, error) {
 	var variableDefinitions *ast.VariableDefinitions
 	var directives *ast.Directives
 
@@ -136,7 +136,7 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefiniti
 
 	opType := ast.OperationDefinitionKindQuery
 
-	if !isQuery {
+	if !isShorthandQuery {
 		opType, err = p.parseOperationType()
 		if err != nil {
 			return nil, err
@@ -151,7 +151,18 @@ func (p *Parser) parseOperationDefinition(isQuery bool) (*ast.ExecutableDefiniti
 			return nil, err
 		}
 
-		directives, err = p.parseDirectives()
+		var location ast.DirectiveLocation
+
+		switch opType {
+		case ast.OperationDefinitionKindQuery:
+			location = ast.DirectiveLocationKindQuery
+		case ast.OperationDefinitionKindMutation:
+			location = ast.DirectiveLocationKindMutation
+		case ast.OperationDefinitionKindSubscription:
+			location = ast.DirectiveLocationKindSubscription
+		}
+
+		directives, err = p.parseDirectives(location)
 		if err != nil {
 			return nil, err
 		}
@@ -211,7 +222,7 @@ func (p *Parser) parseFragmentDefinition() (*ast.ExecutableDefinition, error) {
 		return nil, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindFragmentDefinition)
 	if err != nil {
 		return nil, err
 	}
@@ -304,7 +315,7 @@ func (p *Parser) parseVariableDefinitions() (*ast.VariableDefinitions, error) {
 }
 
 // parseDirectives ...
-func (p *Parser) parseDirectives() (*ast.Directives, error) {
+func (p *Parser) parseDirectives(location ast.DirectiveLocation) (*ast.Directives, error) {
 	var directives *ast.Directives
 
 	for p.peek1(TokenKindPunctuator, "@") {
@@ -326,6 +337,7 @@ func (p *Parser) parseDirectives() (*ast.Directives, error) {
 		directive := ast.Directive{}
 		directive.Name = name.Literal
 		directive.Arguments = args
+		directive.Location = location
 
 		directives = directives.Add(directive)
 	}
@@ -396,7 +408,7 @@ func (p *Parser) parseFragmentSpread() (ast.Selection, error) {
 		return selection, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindFragmentSpread)
 	if err != nil {
 		return selection, err
 	}
@@ -421,7 +433,7 @@ func (p *Parser) parseInlineFragment() (ast.Selection, error) {
 		}
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindInlineFragment)
 	if err != nil {
 		return selection, err
 	}
@@ -468,7 +480,7 @@ func (p *Parser) parseField() (ast.Selection, error) {
 		return selection, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindField)
 	if err != nil {
 		return selection, err
 	}
@@ -709,7 +721,24 @@ func (p *Parser) parseTypeExtension() (*ast.TypeExtension, error) {
 		te.ImplementsInterface = ii
 	}
 
-	directives, err := p.parseDirectives()
+	var location ast.DirectiveLocation
+
+	switch kind.Literal {
+	case "scalar":
+		location = ast.DirectiveLocationKindScalar
+	case "type":
+		location = ast.DirectiveLocationKindObject
+	case "interface":
+		location = ast.DirectiveLocationKindInterface
+	case "union":
+		location = ast.DirectiveLocationKindUnion
+	case "enum":
+		location = ast.DirectiveLocationKindEnum
+	case "input":
+		location = ast.DirectiveLocationKindInputObject
+	}
+
+	directives, err := p.parseDirectives(location)
 	if err != nil {
 		return nil, err
 	}
@@ -861,7 +890,7 @@ func (p *Parser) parseSchemaDefinition() (*ast.SchemaDefinition, error) {
 		return nil, p.unexpected(p.token, p.expected(TokenKindName, "schema"))
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindSchema)
 	if err != nil {
 		return nil, err
 	}
@@ -919,7 +948,7 @@ func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
 		return nil, p.unexpected(p.token, p.expected(TokenKindName, "schema"))
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindSchema)
 	if err != nil {
 		return nil, err
 	}
@@ -992,7 +1021,7 @@ func (p *Parser) parseArgumentsDefinition() (*ast.InputValueDefinitions, error) 
 	}
 
 	for {
-		def, err := p.parseInputValueDefinition()
+		def, err := p.parseInputValueDefinition(ast.DirectiveLocationKindArgumentDefinition)
 		if err != nil {
 			return nil, err
 		}
@@ -1013,7 +1042,7 @@ func (p *Parser) parseArgumentsDefinition() (*ast.InputValueDefinitions, error) 
 }
 
 // parseInputValueDefinition ...
-func (p *Parser) parseInputValueDefinition() (ast.InputValueDefinition, error) {
+func (p *Parser) parseInputValueDefinition(directiveLocation ast.DirectiveLocation) (ast.InputValueDefinition, error) {
 	var description string
 
 	descriptionTok, ok := p.consume0(TokenKindStringValue)
@@ -1040,7 +1069,7 @@ func (p *Parser) parseInputValueDefinition() (ast.InputValueDefinition, error) {
 		return ast.InputValueDefinition{}, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(directiveLocation)
 	if err != nil {
 		return ast.InputValueDefinition{}, err
 	}
@@ -1125,7 +1154,7 @@ func (p *Parser) parseScalarTypeDefinition() (*ast.TypeDefinition, error) {
 		return nil, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindScalar)
 	if err != nil {
 		return nil, err
 	}
@@ -1149,7 +1178,7 @@ func (p *Parser) parseObjectDefinition() (*ast.TypeDefinition, error) {
 		return nil, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindObject)
 	if err != nil {
 		return nil, err
 	}
@@ -1175,7 +1204,7 @@ func (p *Parser) parseInterfaceDefinition() (*ast.TypeDefinition, error) {
 		return nil, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindInterface)
 	if err != nil {
 		return nil, err
 	}
@@ -1200,7 +1229,7 @@ func (p *Parser) parseUnionDefinition() (*ast.TypeDefinition, error) {
 		return nil, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindUnion)
 	if err != nil {
 		return nil, err
 	}
@@ -1225,7 +1254,7 @@ func (p *Parser) parseEnumDefinition() (*ast.TypeDefinition, error) {
 		return nil, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindEnum)
 	if err != nil {
 		return nil, err
 	}
@@ -1250,7 +1279,7 @@ func (p *Parser) parseInputObjectDefinition() (*ast.TypeDefinition, error) {
 		return nil, err
 	}
 
-	directives, err := p.parseDirectives()
+	directives, err := p.parseDirectives(ast.DirectiveLocationKindInputObject)
 	if err != nil {
 		return nil, err
 	}
@@ -1327,7 +1356,7 @@ func (p *Parser) parseFieldsDefinition() (*ast.FieldDefinitions, error) {
 			return nil, err
 		}
 
-		directives, err := p.parseDirectives()
+		directives, err := p.parseDirectives(ast.DirectiveLocationKindFieldDefinition)
 		if err != nil {
 			return nil, err
 		}
@@ -1399,7 +1428,7 @@ func (p *Parser) parseEnumValuesDefinition() (*ast.EnumValueDefinitions, error) 
 			return nil, err
 		}
 
-		directives, err := p.parseDirectives()
+		directives, err := p.parseDirectives(ast.DirectiveLocationKindEnumValue)
 		if err != nil {
 			return nil, err
 		}
@@ -1429,7 +1458,7 @@ func (p *Parser) parseInputFieldsDefinition() (*ast.InputValueDefinitions, error
 	var valDefs *ast.InputValueDefinitions
 
 	for {
-		valDef, err := p.parseInputValueDefinition()
+		valDef, err := p.parseInputValueDefinition(ast.DirectiveLocationKindInputFieldDefinition)
 		if err != nil {
 			return nil, err
 		}
@@ -1467,10 +1496,10 @@ var directiveLocations = []string{
 }
 
 // parseDirectiveLocations ...
-func (p *Parser) parseDirectiveLocations() (ast.DirectiveLocations, error) {
+func (p *Parser) parseDirectiveLocations() (ast.DirectiveLocation, error) {
 	p.skip1(TokenKindPunctuator, "|") // this one is optional
 
-	var locs ast.DirectiveLocations
+	var locs ast.DirectiveLocation
 
 	for {
 		tok, err := p.mustConsumen(TokenKindName, directiveLocations...)

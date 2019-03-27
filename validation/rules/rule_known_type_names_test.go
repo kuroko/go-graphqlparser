@@ -8,6 +8,36 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
+func BenchmarkKnownTypeNames(b *testing.B) {
+	query := `
+		type B
+
+		type SomeObject implements C {
+			e(d: D): E
+		}
+
+		union SomeUnion = F | G
+
+		interface SomeInterface {
+			i(h: H): I
+		}
+
+		input SomeInput {
+			j: J
+		}
+
+		directive @SomeDirective(k: K) on QUERY
+
+		schema {
+			query: L
+			mutation: M
+			subscription: N
+		}
+	`
+
+	queryRuleBencher(b, ruleTestCase{query: query}, rules.KnownTypeNames)
+}
+
 func TestKnownTypeNames(t *testing.T) {
 	t.Run("query document", func(t *testing.T) {
 		tt := []ruleTestCase{
@@ -40,9 +70,9 @@ func TestKnownTypeNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownTypeError("JumbledUpLetters", []string{}, 0, 0)).
-					Add(rules.UnknownTypeError("Badger", []string{}, 0, 0)).
-					Add(rules.UnknownTypeError("Peettt", []string{"Pet"}, 0, 0)),
+					Add(rules.UnknownTypeError("JumbledUpLetters", 0, 0)).
+					Add(rules.UnknownTypeError("Badger", 0, 0)).
+					Add(rules.UnknownTypeError("Peettt", 0, 0)),
 			},
 			// TODO: It's not possible to use our parser and have a schema without the built-in
 			// scalar types included. It's part of the spec, and a server would be pretty useless
@@ -134,18 +164,18 @@ func TestKnownTypeNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownTypeError("C", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("D", []string{"ID", "A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("E", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("F", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("G", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("H", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("I", []string{"ID", "A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("J", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("K", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("L", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("M", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("N", []string{"A", "B"}, 0, 0)),
+					Add(rules.UnknownTypeError("C", 0, 0)).
+					Add(rules.UnknownTypeError("D", 0, 0)).
+					Add(rules.UnknownTypeError("E", 0, 0)).
+					Add(rules.UnknownTypeError("F", 0, 0)).
+					Add(rules.UnknownTypeError("G", 0, 0)).
+					Add(rules.UnknownTypeError("H", 0, 0)).
+					Add(rules.UnknownTypeError("I", 0, 0)).
+					Add(rules.UnknownTypeError("J", 0, 0)).
+					Add(rules.UnknownTypeError("K", 0, 0)).
+					Add(rules.UnknownTypeError("L", 0, 0)).
+					Add(rules.UnknownTypeError("M", 0, 0)).
+					Add(rules.UnknownTypeError("N", 0, 0)),
 			},
 			{
 				msg: "doesn't consider non-type definitions",
@@ -159,7 +189,7 @@ func TestKnownTypeNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownTypeError("Foo", []string{}, 0, 0)),
+					Add(rules.UnknownTypeError("Foo", 0, 0)),
 			},
 			{
 				msg:    "reference standard scalars inside extension document",
@@ -219,18 +249,18 @@ func TestKnownTypeNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownTypeError("C", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("D", []string{"ID", "A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("E", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("F", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("G", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("H", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("I", []string{"ID", "A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("J", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("K", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("L", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("M", []string{"A", "B"}, 0, 0)).
-					Add(rules.UnknownTypeError("N", []string{"A", "B"}, 0, 0)),
+					Add(rules.UnknownTypeError("C", 0, 0)).
+					Add(rules.UnknownTypeError("D", 0, 0)).
+					Add(rules.UnknownTypeError("E", 0, 0)).
+					Add(rules.UnknownTypeError("F", 0, 0)).
+					Add(rules.UnknownTypeError("G", 0, 0)).
+					Add(rules.UnknownTypeError("H", 0, 0)).
+					Add(rules.UnknownTypeError("I", 0, 0)).
+					Add(rules.UnknownTypeError("J", 0, 0)).
+					Add(rules.UnknownTypeError("K", 0, 0)).
+					Add(rules.UnknownTypeError("L", 0, 0)).
+					Add(rules.UnknownTypeError("M", 0, 0)).
+					Add(rules.UnknownTypeError("N", 0, 0)),
 			},
 		}
 

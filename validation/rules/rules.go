@@ -54,7 +54,7 @@ var SpecifiedSDL = []validation.VisitFunc{
 	UniqueFieldDefinitionNames,
 	UniqueDirectiveNames,
 	KnownTypeNames,
-	// KnownDirectives,
+	KnownDirectives,
 	UniqueDirectivesPerLocation,
 	// PossibleTypeExtensions,
 	// KnownArgumentNamesOnDirectives,
@@ -64,5 +64,6 @@ var SpecifiedSDL = []validation.VisitFunc{
 
 	// TODO: You shouldn't be able to apply the same directive to a type and any type extensions for
 	// that type, they should be unique across the whole type. Again, this is not tested in the
-	// reference implementation.
+	// reference implementation. Update the 'UniqueDirectivesPerLocation' rule to support this.
+
 }

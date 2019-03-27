@@ -13,7 +13,6 @@ func UniqueTypeNames(w *validation.Walker) {
 			ctx.SDLContext.KnownTypeNames = make(map[string]struct{})
 		}
 
-		// TODO: Can this ever be nil?
 		if _, ok := ctx.Schema.Types[def.Name]; ok {
 			ctx.AddError(ExistedTypeNameError(def.Name, 0, 0))
 			return

@@ -148,6 +148,24 @@ type ruleTestCase struct {
 	errs   *types.Errors
 }
 
+// queryRuleBencher ...
+func queryRuleBencher(b *testing.B, t ruleTestCase, fn validation.VisitFunc) {
+	schema, errs, err := graphql.BuildSchema(nil, schemaDocument)
+	require.NoError(b, err, "failed to build schema")
+	require.Equal(b, (*types.Errors)(nil), errs, "failed to validate schema")
+
+	doc, err := graphql.Parse([]byte(t.query))
+	require.NoError(b, err)
+
+	walker := validation.NewWalker([]validation.VisitFunc{fn})
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		walker.Walk(validation.NewContext(doc, schema), doc)
+	}
+}
+
 // queryRuleTester ...
 func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 	schema, errs, err := graphql.BuildSchema(nil, schemaDocument)
