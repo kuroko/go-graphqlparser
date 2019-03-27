@@ -27,6 +27,12 @@ func BuildASTSchema(schema *types.Schema, doc ast.Document) (*types.Schema, *typ
 	schema.Directives["include"] = buildGraphQLIncludeDirective()
 	schema.Directives["deprecated"] = buildGraphQLDeprecatedDirective()
 
+	// TODO: Implement the other built-in scalars, and move into funcs.
+	schema.Types["ID"] = &ast.TypeDefinition{
+		Name: "ID",
+		Kind: ast.TypeDefinitionKindScalar,
+	}
+
 	// Build symbol table entries from the schema document.
 	schemaVisitFns := []validation.VisitFunc{
 		setSchemaOperationTypes,

@@ -4,6 +4,7 @@ require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.4.2 // indirect
 	github.com/Masterminds/sprig v2.18.0+incompatible
+	github.com/agnivade/levenshtein v1.0.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/graphql-go/graphql v0.7.7

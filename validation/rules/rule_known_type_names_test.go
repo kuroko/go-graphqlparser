@@ -3,6 +3,7 @@ package rules_test
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -108,6 +109,91 @@ func TestKnownTypeNames(t *testing.T) {
 				msg: "unknown type references",
 				query: `
 					type A
+					type B
+
+					type SomeObject implements C {
+						e(d: D): E
+					}
+
+					union SomeUnion = F | G
+
+					interface SomeInterface {
+						i(h: H): I
+					}
+
+					input SomeInput {
+						j: J
+					}
+
+					directive @SomeDirective(k: K) on QUERY
+
+					schema {
+						query: L
+						mutation: M
+						subscription: N
+					}
+				`,
+				errs: (*types.Errors)(nil).
+					Add(rules.UnknownTypeError("C", []string{"A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("D", []string{"ID", "A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("E", []string{"A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("F", []string{"A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("G", []string{"A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("H", []string{"A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("I", []string{"ID", "A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("J", []string{"A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("K", []string{"A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("L", []string{"A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("M", []string{"A", "B"}, 0, 0)).
+					Add(rules.UnknownTypeError("N", []string{"A", "B"}, 0, 0)),
+			},
+			{
+				msg: "doesn't consider non-type definitions",
+				query: `
+					query Foo { __typename }
+					fragment Foo on Query { __typename }
+					directive @Foo on QUERY
+
+					type Query {
+						foo: Foo
+					}
+				`,
+				errs: (*types.Errors)(nil).
+					Add(rules.UnknownTypeError("Foo", []string{}, 0, 0)),
+			},
+			{
+				msg:    "reference standard scalars inside extension document",
+				schema: graphql.MustBuildSchema(nil, []byte(`type Foo`)),
+				query: `
+					type SomeType {
+						string: String
+						int: Int
+						float: Float
+						boolean: Boolean
+						id: ID
+					}
+				`,
+			},
+			{
+				msg:    "reference types inside extension document",
+				schema: graphql.MustBuildSchema(nil, []byte(`type Foo`)),
+				query: `
+					type QueryRoot {
+						foo: Foo
+						bar: Bar
+					}
+
+					scalar Bar
+
+					schema {
+						query: QueryRoot
+					}
+				`,
+			},
+			{
+				msg:    "unknown type references inside extension document",
+				schema: graphql.MustBuildSchema(nil, []byte(`type A`)),
+				query: `
 					type B
 
 					type SomeObject implements C {
