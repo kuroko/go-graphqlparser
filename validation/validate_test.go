@@ -3,10 +3,6 @@ package validation_test
 import (
 	"testing"
 
-	"github.com/vektah/gqlparser/validator"
-
-	"github.com/vektah/gqlparser/parser"
-
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/language"
@@ -17,6 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/parser"
+	"github.com/vektah/gqlparser/validator"
 	_ "github.com/vektah/gqlparser/validator/rules"
 )
 
