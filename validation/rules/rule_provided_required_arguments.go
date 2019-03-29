@@ -8,6 +8,9 @@ import (
 // ProvidedRequiredArguments ...
 func ProvidedRequiredArguments(w *validation.Walker) {}
 
+// ProvidedRequiredArgumentsOnDirectives ...
+func ProvidedRequiredArgumentsOnDirectives(w *validation.Walker) {}
+
 // MissingFieldArgMessage ...
 func MissingFieldArgMessage(fieldName, argName, t string, line, col int) types.Error {
 	return types.NewError(

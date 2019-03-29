@@ -215,6 +215,11 @@ func TestProvidedRequiredArguments(t *testing.T) {
 				Add(rules.MissingDirectiveArgMessage("include", "if", "Boolean!", 0, 0)).
 				Add(rules.MissingDirectiveArgMessage("skip", "if", "Boolean!", 0, 0)),
 		},
+	}
+
+	queryRuleTester(t, tt, rules.ProvidedRequiredArguments)
+
+	sdlTT := []ruleTestCase{
 		{
 			msg: "missing optional args on directive defined inside SDL",
 			query: `
@@ -287,5 +292,5 @@ func TestProvidedRequiredArguments(t *testing.T) {
 		},
 	}
 
-	queryRuleTester(t, tt, rules.ProvidedRequiredArguments)
+	queryRuleTester(t, sdlTT, rules.ProvidedRequiredArgumentsOnDirectives)
 }
