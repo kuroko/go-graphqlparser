@@ -131,10 +131,12 @@ var (
 
 	// queryDoc ...
 	queryDoc = []byte(`
-		query Foo($var: JumbledUpLetters) {
-			user(id: 4) {
-				name
-				pets { ... on Badger { name }, ...PetFields }
+		query Foo($humanId: ID) {
+			human(id: $humanId) {
+				name(surname: false)
+				pets {
+					...PetFields
+				}
 			}
 		}
 
