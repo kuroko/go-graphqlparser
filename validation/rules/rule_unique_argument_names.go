@@ -9,40 +9,50 @@ import (
 // UniqueArgumentNames ...
 func UniqueArgumentNames(w *validation.Walker) {
 	w.AddFieldSelectionEnterEventHandler(func(ctx *validation.Context, sel ast.Selection) {
-		ctx.KnownArgNames = make(map[string]struct{})
+		validateArguments(ctx, sel.Arguments)
 	})
 
 	w.AddDirectiveEnterEventHandler(func(ctx *validation.Context, dir ast.Directive) {
-		ctx.KnownArgNames = make(map[string]struct{})
+		validateArguments(ctx, dir.Arguments)
 	})
 
 	// NOTE: This is not validated in graphql-js, but will silently cause issues.
 	w.AddFieldDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.FieldDefinition) {
-		ctx.KnownArgNames = make(map[string]struct{})
+		validateInputValueDefinitions(ctx, def.ArgumentsDefinition)
 	})
 
 	// NOTE: This is not validated in graphql-js, but will silently cause issues.
 	w.AddDirectiveDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.DirectiveDefinition) {
-		ctx.KnownArgNames = make(map[string]struct{})
+		validateInputValueDefinitions(ctx, def.ArgumentsDefinition)
 	})
+}
 
-	w.AddArgumentEnterEventHandler(func(ctx *validation.Context, arg ast.Argument) {
-		argName := arg.Name
+// validateArguments ...
+func validateArguments(ctx *validation.Context, arguments *ast.Arguments) {
+	knownArgNames := make(map[string]struct{})
 
-		if _, ok := ctx.KnownArgNames[argName]; ok {
+	arguments.ForEach(func(a ast.Argument, i int) {
+		argName := a.Name
+
+		if _, ok := knownArgNames[argName]; ok {
 			ctx.AddError(DuplicateArgError(argName, 0, 0))
 		} else {
-			ctx.KnownArgNames[argName] = struct{}{}
+			knownArgNames[argName] = struct{}{}
 		}
 	})
+}
 
-	w.AddInputValueDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.InputValueDefinition) {
-		argName := def.Name
+// validateInputValueDefinitions ...
+func validateInputValueDefinitions(ctx *validation.Context, ivds *ast.InputValueDefinitions) {
+	knownArgNames := make(map[string]struct{})
 
-		if _, ok := ctx.KnownArgNames[argName]; ok {
+	ivds.ForEach(func(ivd ast.InputValueDefinition, i int) {
+		argName := ivd.Name
+
+		if _, ok := knownArgNames[argName]; ok {
 			ctx.AddError(DuplicateArgError(argName, 0, 0))
 		} else {
-			ctx.KnownArgNames[argName] = struct{}{}
+			knownArgNames[argName] = struct{}{}
 		}
 	})
 }
