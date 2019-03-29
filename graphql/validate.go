@@ -9,6 +9,13 @@ import (
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
+var (
+	// DefaultValidationWalker ...
+	DefaultValidationWalker = validation.NewWalker(rules.Specified)
+	// DefaultValidationWalkerSDL ...
+	DefaultValidationWalkerSDL = validation.NewWalker(rules.SpecifiedSDL)
+)
+
 // Validate ...
 func Validate(schema *types.Schema, doc []byte) (*types.Errors, error) {
 	parsed, err := Parse(doc)
@@ -32,11 +39,11 @@ func ValidateSDL(schema *types.Schema, doc []byte) (*types.Errors, error) {
 // ValidateAST ...
 func ValidateAST(schema *types.Schema, doc ast.Document) *types.Errors {
 	// TODO: Re-use existing walker, stored in global.
-	return validation.Validate(doc, schema, validation.NewWalker(rules.Specified))
+	return validation.Validate(doc, schema, DefaultValidationWalker)
 }
 
 // ValidateSDLAST ...
 func ValidateSDLAST(schema *types.Schema, doc ast.Document) *types.Errors {
 	// TODO: Re-use existing walker, stored in global.
-	return validation.ValidateSDL(doc, schema, validation.NewWalker(rules.SpecifiedSDL))
+	return validation.ValidateSDL(doc, schema, DefaultValidationWalkerSDL)
 }
