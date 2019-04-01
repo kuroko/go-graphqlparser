@@ -71,6 +71,16 @@ type Context struct {
 	// Used if we're validating an SDL file.
 	SDLContext *SDLContext
 
+	// KnownArgNames ...
+	KnownArgNames map[string]struct{}
+	// KnownInputFieldNamesStack ...
+	KnownInputFieldNamesStack []map[string]struct{}
+	// KnownInputFieldNames ...
+	KnownInputFieldNames map[string]struct{}
+
+	// DirectiveArguments ...
+	DirectiveArguments map[string]struct{}
+
 	// TypeDefinitions is a map of all TypeDefinition nodes in the current document.
 	TypeDefinitions map[string]*ast.TypeDefinition
 
