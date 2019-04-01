@@ -15,7 +15,7 @@ var (
 				Name:        "if",
 				Description: "Skipped when true.",
 				Type: ast.Type{
-					NamedType:   "Boolean",
+					NamedType:   "Boolean!",
 					Kind:        ast.TypeKindNamed,
 					NonNullable: true,
 				},
@@ -33,7 +33,7 @@ var (
 				Name:        "if",
 				Description: "Included when true.",
 				Type: ast.Type{
-					NamedType:   "Boolean",
+					NamedType:   "Boolean!",
 					Kind:        ast.TypeKindNamed,
 					NonNullable: true,
 				},
