@@ -7,6 +7,9 @@ import (
 )
 
 // UniqueFieldDefinitionNames ...
+//
+// TODO: Maybe we can run this rule when we begin merging types with their extensions. We'll be
+// going over this same data, stored in a similar format again, but maybe using less memory in fact.
 func UniqueFieldDefinitionNames(w *validation.Walker) {
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.TypeDefinition) {
 		typeName := def.Name
@@ -68,11 +71,20 @@ func ExistedFieldDefinitionNameError(typeName, fieldName string, line, col int) 
 // prepareFieldDefinitionSymbolTables ...
 func prepareFieldDefinitionSymbolTables(ctx *validation.Context, typeName string) {
 	if ctx.SDLContext.KnownFieldNames == nil {
-		ctx.SDLContext.KnownFieldNames = make(map[string]map[string]struct{})
+		ctx.SDLContext.KnownFieldNames = make(map[string]map[string]struct{}, len(ctx.TypeDefinitions))
 	}
 
 	if _, ok := ctx.SDLContext.KnownFieldNames[typeName]; !ok {
-		ctx.SDLContext.KnownFieldNames[typeName] = make(map[string]struct{})
+		typeDef := ctx.TypeDefinitions[typeName]
+
+		var fieldCount int
+		if typeDef.Kind == ast.TypeDefinitionKindInterface || typeDef.Kind == ast.TypeDefinitionKindObject {
+			fieldCount = typeDef.FieldsDefinition.Len()
+		} else if typeDef.Kind == ast.TypeDefinitionKindInputObject {
+			fieldCount = typeDef.InputFieldsDefinition.Len()
+		}
+
+		ctx.SDLContext.KnownFieldNames[typeName] = make(map[string]struct{}, fieldCount)
 	}
 }
 

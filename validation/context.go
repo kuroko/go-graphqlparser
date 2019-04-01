@@ -71,13 +71,6 @@ type Context struct {
 	// Used if we're validating an SDL file.
 	SDLContext *SDLContext
 
-	// KnownArgNames ...
-	KnownArgNames map[string]struct{}
-	// KnownInputFieldNamesStack ...
-	KnownInputFieldNamesStack []map[string]struct{}
-	// KnownInputFieldNames ...
-	KnownInputFieldNames map[string]struct{}
-
 	// TypeDefinitions is a map of all TypeDefinition nodes in the current document.
 	TypeDefinitions map[string]*ast.TypeDefinition
 
@@ -275,6 +268,31 @@ func setDirectiveDefinitions(w *Walker) {
 
 // setTypeDefinitions ...
 func setTypeDefinitions(w *Walker) {
+	w.AddDocumentEnterEventHandler(func(ctx *Context, doc ast.Document) {
+		if ctx.TypeDefinitions == nil {
+			var count int
+
+			doc.Definitions.ForEach(func(def ast.Definition, i int) {
+				switch def.Kind {
+				case ast.DefinitionKindTypeSystem:
+					if def.TypeSystemDefinition.Kind != ast.TypeSystemDefinitionKindType {
+						return
+					}
+
+					count++
+				case ast.DefinitionKindTypeSystemExtension:
+					if def.TypeSystemExtension.Kind != ast.TypeSystemExtensionKindType {
+						return
+					}
+
+					count++
+				}
+			})
+
+			ctx.TypeDefinitions = make(map[string]*ast.TypeDefinition, count)
+		}
+	})
+
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *Context, def *ast.TypeDefinition) {
 		if ctx.TypeDefinitions == nil {
 			ctx.TypeDefinitions = make(map[string]*ast.TypeDefinition)
