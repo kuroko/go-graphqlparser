@@ -75,13 +75,22 @@ func prepareFieldDefinitionSymbolTables(ctx *validation.Context, typeName string
 	}
 
 	if _, ok := ctx.SDLContext.KnownFieldNames[typeName]; !ok {
-		typeDef := ctx.TypeDefinitions[typeName]
-
 		var fieldCount int
-		if typeDef.Kind == ast.TypeDefinitionKindInterface || typeDef.Kind == ast.TypeDefinitionKindObject {
-			fieldCount = typeDef.FieldsDefinition.Len()
-		} else if typeDef.Kind == ast.TypeDefinitionKindInputObject {
-			fieldCount = typeDef.InputFieldsDefinition.Len()
+
+		if typeDef, ok := ctx.TypeDefinitions[typeName]; ok {
+			if typeDef.Kind == ast.TypeDefinitionKindInterface || typeDef.Kind == ast.TypeDefinitionKindObject {
+				fieldCount = typeDef.FieldsDefinition.Len()
+			} else if typeDef.Kind == ast.TypeDefinitionKindInputObject {
+				fieldCount = typeDef.InputFieldsDefinition.Len()
+			}
+		}
+
+		if typeExt, ok := ctx.TypeExtensions[typeName]; ok {
+			if typeExt.Kind == ast.TypeExtensionKindInterface || typeExt.Kind == ast.TypeExtensionKindObject {
+				fieldCount = typeExt.FieldsDefinition.Len()
+			} else if typeExt.Kind == ast.TypeExtensionKindInputObject {
+				fieldCount = typeExt.InputFieldsDefinition.Len()
+			}
 		}
 
 		ctx.SDLContext.KnownFieldNames[typeName] = make(map[string]struct{}, fieldCount)

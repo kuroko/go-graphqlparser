@@ -83,6 +83,7 @@ type Context struct {
 
 	// TypeDefinitions is a map of all TypeDefinition nodes in the current document.
 	TypeDefinitions map[string]*ast.TypeDefinition
+	TypeExtensions  map[string]*ast.TypeExtension
 
 	// OperationsCount ...
 	OperationsCount int
@@ -280,35 +281,29 @@ func setDirectiveDefinitions(w *Walker) {
 func setTypeDefinitions(w *Walker) {
 	w.AddDocumentEnterEventHandler(func(ctx *Context, doc ast.Document) {
 		if ctx.TypeDefinitions == nil {
-			var count int
+			var defs int
+			var exts int
 
 			doc.Definitions.ForEach(func(def ast.Definition, i int) {
-				switch def.Kind {
-				case ast.DefinitionKindTypeSystem:
-					if def.TypeSystemDefinition.Kind != ast.TypeSystemDefinitionKindType {
-						return
-					}
+				if def.Kind == ast.DefinitionKindTypeSystem && def.TypeSystemDefinition.Kind == ast.TypeSystemDefinitionKindType {
+					defs++
+				}
 
-					count++
-				case ast.DefinitionKindTypeSystemExtension:
-					if def.TypeSystemExtension.Kind != ast.TypeSystemExtensionKindType {
-						return
-					}
-
-					count++
+				if def.Kind == ast.DefinitionKindTypeSystemExtension && def.TypeSystemExtension.Kind == ast.TypeSystemExtensionKindType {
+					exts++
 				}
 			})
 
-			ctx.TypeDefinitions = make(map[string]*ast.TypeDefinition, count)
+			ctx.TypeDefinitions = make(map[string]*ast.TypeDefinition, defs)
+			ctx.TypeExtensions = make(map[string]*ast.TypeExtension, exts)
 		}
 	})
 
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *Context, def *ast.TypeDefinition) {
-		if ctx.TypeDefinitions == nil {
-			ctx.TypeDefinitions = make(map[string]*ast.TypeDefinition)
-		}
-
-		// TODO: Do type definitions always have a name?..
 		ctx.TypeDefinitions[def.Name] = def
+	})
+
+	w.AddTypeExtensionEnterEventHandler(func(ctx *Context, ext *ast.TypeExtension) {
+		ctx.TypeExtensions[ext.Name] = ext
 	})
 }
