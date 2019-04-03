@@ -28,7 +28,7 @@ func ProvidedRequiredArgumentsOnDirectives(w *validation.Walker) {
 			_, provided := directiveArguments[ivd.Name]
 
 			if !provided && ivd.DefaultValue == nil && ivd.Type.NonNullable {
-				ctx.AddError(MissingDirectiveArgMessage(d.Name, ivd.Name, ivd.Type.NamedType, 0, 0))
+				ctx.AddError(MissingDirectiveArgMessage(d.Name, ivd.Name, ivd.Type.String(), 0, 0))
 			}
 		})
 	})

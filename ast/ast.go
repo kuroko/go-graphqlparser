@@ -316,6 +316,21 @@ type Type struct {
 	Kind        TypeKind
 }
 
+func (t Type) String() string {
+	if t.ListType != nil {
+		return nonNullable(t.NonNullable, "["+t.ListType.String()+"]")
+
+	}
+	return nonNullable(t.NonNullable, t.NamedType)
+}
+
+func nonNullable(isNN bool, typeName string) string {
+	if isNN {
+		return typeName + "!"
+	}
+	return typeName
+}
+
 // 2.12 Directives
 // http://facebook.github.io/graphql/June2018/#sec-Language.Directives
 
