@@ -60,7 +60,7 @@ var SpecifiedSDL = []validation.VisitFunc{
 	// KnownArgumentNamesOnDirectives,
 	UniqueArgumentNames,
 	UniqueInputFieldNames,
-	// ProvidedRequiredArgumentsOnDirectives,
+	ProvidedRequiredArgumentsOnDirectives,
 
 	// TODO: You shouldn't be able to apply the same directive to a type and any type extensions for
 	// that type, they should be unique across the whole type. Again, this is not tested in the

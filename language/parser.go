@@ -39,6 +39,33 @@ func (p *Parser) Parse() (ast.Document, error) {
 
 		definitions = definitions.Add(definition)
 
+		// Maybe there's a better way of doing this?
+		switch definition.Kind {
+		case ast.DefinitionKindExecutable:
+			switch definition.ExecutableDefinition.Kind {
+			case ast.ExecutableDefinitionKindOperation:
+				document.OperationDefinitions++
+			case ast.ExecutableDefinitionKindFragment:
+				document.FragmentDefinitions++
+			}
+		case ast.DefinitionKindTypeSystem:
+			switch definition.TypeSystemDefinition.Kind {
+			case ast.TypeSystemDefinitionKindDirective:
+				document.DirectiveDefinitions++
+			case ast.TypeSystemDefinitionKindSchema:
+				document.SchemaDefinitions++
+			case ast.TypeSystemDefinitionKindType:
+				document.TypeDefinitions++
+			}
+		case ast.DefinitionKindTypeSystemExtension:
+			switch definition.TypeSystemExtension.Kind {
+			case ast.TypeSystemExtensionKindSchema:
+				document.SchemaExtensions++
+			case ast.TypeSystemExtensionKindType:
+				document.TypeExtensions++
+			}
+		}
+
 		if p.peek0(TokenKindIllegal) {
 			return ast.Document{}, p.unexpected(p.token)
 		}

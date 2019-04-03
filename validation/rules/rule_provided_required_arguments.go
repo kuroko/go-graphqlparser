@@ -12,10 +12,10 @@ func ProvidedRequiredArguments(w *validation.Walker) {}
 // ProvidedRequiredArgumentsOnDirectives ...
 func ProvidedRequiredArgumentsOnDirectives(w *validation.Walker) {
 	w.AddDirectiveEnterEventHandler(func(ctx *validation.Context, d ast.Directive) {
-		ctx.DirectiveArguments = make(map[string]struct{}, d.Arguments.Len())
+		directiveArguments := make(map[string]struct{}, d.Arguments.Len())
 
 		d.Arguments.ForEach(func(a ast.Argument, _ int) {
-			ctx.DirectiveArguments[a.Name] = struct{}{}
+			directiveArguments[a.Name] = struct{}{}
 		})
 
 		dd, ok := ctx.Schema.Directives[d.Name]
@@ -24,7 +24,7 @@ func ProvidedRequiredArgumentsOnDirectives(w *validation.Walker) {
 		}
 
 		dd.ArgumentsDefinition.ForEach(func(ivd ast.InputValueDefinition, _ int) {
-			_, provided := ctx.DirectiveArguments[ivd.Name]
+			_, provided := directiveArguments[ivd.Name]
 
 			if !provided && ivd.DefaultValue == nil && ivd.Type.NonNullable {
 				ctx.AddError(MissingDirectiveArgMessage(d.Name, ivd.Name, ivd.Type.NamedType, 0, 0))

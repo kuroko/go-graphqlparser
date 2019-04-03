@@ -8,6 +8,8 @@ import (
 
 // UniqueTypeNames ...
 func UniqueTypeNames(w *validation.Walker) {
+	// TODO: Does this actually need another separate map? Maybe it'd be faster to loop over all of
+	// the definitions, and maybe it won't escape?
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.TypeDefinition) {
 		if ctx.SDLContext.KnownTypeNames == nil {
 			ctx.SDLContext.KnownTypeNames = make(map[string]struct{})

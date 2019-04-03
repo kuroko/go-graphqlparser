@@ -42,21 +42,14 @@ func NewIntPathNode(i int) PathNode {
 // http://facebook.github.io/graphql/June2018/#sec-Language.Document
 
 type Document struct {
-	Definitions *Definitions
-
-	// TODO: Can we do this instead? It'd make preparing things for validation much easier, and
-	// actually it'd make walking the AST easier probably. Making this document more of a "raw"
-	// symbol table than a super-optimised structure.
-	// NOTE: All of the below should be lists, as we can parse any number of these things, that
-	// doesn't make it valid by any means, but it does mean things like "lone schema definition" are
-	// absurdly easy to validate - just check the length of SchemaDefinitions is 1.
-	//DirectiveDefinitions *DirectiveDefinitions
-	//OperationDefinitions *OperationDefinitions
-	//FragmentDefinitions  *FragmentDefinitions
-	//SchemaDefinitions    *SchemaDefinitions
-	//SchemaExtensions     *SchemaExtensions
-	//TypeDefinitions      *TypeDefinitions
-	//TypeExtensions       *TypeExtensions
+	Definitions          *Definitions
+	OperationDefinitions int32
+	FragmentDefinitions  int32
+	DirectiveDefinitions int32
+	SchemaDefinitions    int32
+	TypeDefinitions      int32
+	SchemaExtensions     int32
+	TypeExtensions       int32
 }
 
 const (

@@ -8,6 +8,7 @@ import (
 var (
 	// queryContextDecoratorWalker ...
 	queryContextDecoratorWalker = NewWalker([]VisitFunc{
+		setMapSizes,
 		setExecutableDefinition,
 		setFragments,
 		setReferencedFragments,
@@ -16,6 +17,7 @@ var (
 	})
 	// sdlContextDecoratorWalker ...
 	sdlContextDecoratorWalker = NewWalker([]VisitFunc{
+		setMapSizes,
 		setDirectiveDefinitions,
 		setTypeDefinitions,
 		//setSchemaDefinitionTypes,
@@ -71,22 +73,9 @@ type Context struct {
 	// Used if we're validating an SDL file.
 	SDLContext *SDLContext
 
-	// KnownArgNames ...
-	KnownArgNames map[string]struct{}
-	// KnownInputFieldNamesStack ...
-	KnownInputFieldNamesStack []map[string]struct{}
-	// KnownInputFieldNames ...
-	KnownInputFieldNames map[string]struct{}
-
-	// DirectiveArguments ...
-	DirectiveArguments map[string]struct{}
-
 	// TypeDefinitions is a map of all TypeDefinition nodes in the current document.
 	TypeDefinitions map[string]*ast.TypeDefinition
 	TypeExtensions  map[string]*ast.TypeExtension
-
-	// OperationsCount ...
-	OperationsCount int
 
 	// fragments contains all fragment definitions found in the input query, accessible by name.
 	fragments map[string]*ast.FragmentDefinition
@@ -249,6 +238,23 @@ func setReferencedFragments(w *Walker) {
 	})
 }
 
+// setMapSizes ...
+func setMapSizes(w *Walker) {
+	w.AddDocumentEnterEventHandler(func(ctx *Context, doc ast.Document) {
+		if ctx.TypeDefinitions == nil {
+			ctx.TypeDefinitions = make(map[string]*ast.TypeDefinition, doc.TypeDefinitions)
+			ctx.TypeExtensions = make(map[string]*ast.TypeExtension, doc.TypeExtensions)
+		}
+
+		// SDL documents only (for now).
+		if ctx.SDLContext != nil {
+			if ctx.SDLContext.DirectiveDefinitions == nil {
+				ctx.SDLContext.DirectiveDefinitions = make(map[string]*ast.DirectiveDefinition, doc.DirectiveDefinitions)
+			}
+		}
+	})
+}
+
 // setVariableUsages ...
 func setVariableUsages(w *Walker) {
 	w.AddVariableValueEnterEventHandler(func(ctx *Context, v ast.Value) {
@@ -269,36 +275,12 @@ func setVariableUsages(w *Walker) {
 // setDirectiveDefinitions ...
 func setDirectiveDefinitions(w *Walker) {
 	w.AddDirectiveDefinitionEnterEventHandler(func(ctx *Context, def *ast.DirectiveDefinition) {
-		if ctx.SDLContext.DirectiveDefinitions == nil {
-			ctx.SDLContext.DirectiveDefinitions = make(map[string]*ast.DirectiveDefinition)
-		}
-
 		ctx.SDLContext.DirectiveDefinitions[def.Name] = def
 	})
 }
 
 // setTypeDefinitions ...
 func setTypeDefinitions(w *Walker) {
-	w.AddDocumentEnterEventHandler(func(ctx *Context, doc ast.Document) {
-		if ctx.TypeDefinitions == nil {
-			var defs int
-			var exts int
-
-			doc.Definitions.ForEach(func(def ast.Definition, i int) {
-				if def.Kind == ast.DefinitionKindTypeSystem && def.TypeSystemDefinition.Kind == ast.TypeSystemDefinitionKindType {
-					defs++
-				}
-
-				if def.Kind == ast.DefinitionKindTypeSystemExtension && def.TypeSystemExtension.Kind == ast.TypeSystemExtensionKindType {
-					exts++
-				}
-			})
-
-			ctx.TypeDefinitions = make(map[string]*ast.TypeDefinition, defs)
-			ctx.TypeExtensions = make(map[string]*ast.TypeExtension, exts)
-		}
-	})
-
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *Context, def *ast.TypeDefinition) {
 		ctx.TypeDefinitions[def.Name] = def
 	})
