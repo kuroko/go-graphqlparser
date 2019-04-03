@@ -18,6 +18,7 @@ func ProvidedRequiredArgumentsOnDirectives(w *validation.Walker) {
 			directiveArguments[a.Name] = struct{}{}
 		})
 
+		// TODO: Built-in directives aren't defined at this point, their uses should be validated.
 		dd, ok := ctx.Schema.Directives[d.Name]
 		if !ok {
 			return
