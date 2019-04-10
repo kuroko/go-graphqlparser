@@ -24,16 +24,13 @@ func BenchmarkValidateSDL(b *testing.B) {
 	doc, err := graphql.Parse(schemaDoc)
 	require.NoError(b, err)
 
-	// Default query rules.
-	walker := validation.NewWalker(rules.SpecifiedSDL)
-
 	var errs *types.Errors
 
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		errs = validation.ValidateSDL(doc, nil, walker)
+		errs = validation.ValidateSDL(doc, nil, graphql.DefaultValidationWalkerSDL)
 	}
 
 	b.StopTimer()

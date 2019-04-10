@@ -8,17 +8,10 @@ import (
 var (
 	// queryContextDecoratorWalker ...
 	queryContextDecoratorWalker = NewWalker([]VisitFunc{
-		setMapSizes,
 		setExecutableDefinition,
 		setFragments,
 		setReferencedFragments,
 		setVariableUsages,
-	})
-	// sdlContextDecoratorWalker ...
-	sdlContextDecoratorWalker = NewWalker([]VisitFunc{
-		setMapSizes,
-		setDirectiveDefinitions,
-		setTypeDefinitions,
 	})
 )
 
@@ -57,7 +50,8 @@ func NewSDLContext(doc ast.Document, schema *types.Schema) *Context {
 		IsExtending: isExtending,
 	}
 
-	sdlContextDecoratorWalker.Walk(ctx, doc)
+	// Perform some initial validation, set up some data structures for further validation.
+	PrepareContextSDL(ctx)
 
 	return ctx
 }
@@ -170,8 +164,6 @@ type SDLContext struct {
 	TypeDefinitions      map[string]*ast.TypeDefinition
 	TypeExtensions       map[string]*ast.TypeExtension
 
-	KnownTypeNames      map[string]struct{}
-	KnownDirectiveNames map[string]struct{}
 	KnownEnumValueNames map[string]map[string]struct{}
 	KnownFieldNames     map[string]map[string]struct{}
 
@@ -198,7 +190,7 @@ func setExecutableDefinition(w *Walker) {
 func setFragments(w *Walker) {
 	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, def *ast.FragmentDefinition) {
 		if ctx.FragmentDefinitions == nil {
-			ctx.FragmentDefinitions = make(map[string]*ast.FragmentDefinition)
+			ctx.FragmentDefinitions = make(map[string]*ast.FragmentDefinition, ctx.Document.FragmentDefinitions)
 		}
 
 		ctx.FragmentDefinitions[def.Name] = def
@@ -235,30 +227,6 @@ func setReferencedFragments(w *Walker) {
 	})
 }
 
-// setMapSizes ...
-func setMapSizes(w *Walker) {
-	w.AddDocumentEnterEventHandler(func(ctx *Context, doc ast.Document) {
-		if ctx.FragmentDefinitions == nil {
-			ctx.FragmentDefinitions = make(map[string]*ast.FragmentDefinition, doc.FragmentDefinitions)
-		}
-
-		// SDL documents only (for now).
-		if ctx.SDLContext != nil {
-			if ctx.SDLContext.DirectiveDefinitions == nil {
-				ctx.SDLContext.DirectiveDefinitions = make(map[string]*ast.DirectiveDefinition, doc.DirectiveDefinitions)
-			}
-
-			if ctx.SDLContext.TypeDefinitions == nil {
-				ctx.SDLContext.TypeDefinitions = make(map[string]*ast.TypeDefinition, doc.TypeDefinitions)
-			}
-
-			if ctx.SDLContext.TypeExtensions == nil {
-				ctx.SDLContext.TypeExtensions = make(map[string]*ast.TypeExtension, doc.TypeExtensions)
-			}
-		}
-	})
-}
-
 // setVariableUsages ...
 func setVariableUsages(w *Walker) {
 	w.AddVariableValueEnterEventHandler(func(ctx *Context, v ast.Value) {
@@ -276,22 +244,99 @@ func setVariableUsages(w *Walker) {
 	})
 }
 
-// setDirectiveDefinitions ...
-func setDirectiveDefinitions(w *Walker) {
-	w.AddDirectiveDefinitionEnterEventHandler(func(ctx *Context, def *ast.DirectiveDefinition) {
-		ctx.SDLContext.DirectiveDefinitions[def.Name] = def
+// PrepareContextSDL is a function that populates information needed prior to walking the AST. It
+// also performs some validation that would be far more inefficient if we were to walk (e.g. we'd
+// either need to allocate another map and duplicate data, or we'd need to walk the whole AST twice.
+// Instead, we manually touch the specific portions of the AST we need in one go. Currently we only
+// want to use quite shallow data in from the AST at this phase, so using the Walker would be quite
+// inefficient as it would hit many leaf nodes at a depth we simply don't need here).
+func PrepareContextSDL(ctx *Context) {
+	ctx.Document.Definitions.ForEach(func(def ast.Definition, i int) {
+		switch def.Kind {
+		case ast.DefinitionKindTypeSystem:
+			switch def.TypeSystemDefinition.Kind {
+			// UniqueDirectiveNames:
+			case ast.TypeSystemDefinitionKindDirective:
+				if ctx.SDLContext.DirectiveDefinitions == nil {
+					ctx.SDLContext.DirectiveDefinitions = make(map[string]*ast.DirectiveDefinition, ctx.Document.DirectiveDefinitions)
+				}
+
+				ddef := def.TypeSystemDefinition.DirectiveDefinition
+
+				if _, ok := ctx.Schema.Directives[ddef.Name]; ok {
+					ctx.AddError(ExistedDirectiveNameError(ddef.Name, 0, 0))
+					return
+				}
+
+				if _, ok := ctx.SDLContext.DirectiveDefinitions[ddef.Name]; ok {
+					ctx.AddError(DuplicateDirectiveNameError(ddef.Name, 0, 0))
+				} else {
+					ctx.SDLContext.DirectiveDefinitions[ddef.Name] = ddef
+				}
+
+			// UniqueTypeNames:
+			case ast.TypeSystemDefinitionKindType:
+				if ctx.SDLContext.TypeDefinitions == nil {
+					ctx.SDLContext.TypeDefinitions = make(map[string]*ast.TypeDefinition, ctx.Document.TypeDefinitions)
+				}
+
+				tdef := def.TypeSystemDefinition.TypeDefinition
+
+				if _, ok := ctx.Schema.Types[tdef.Name]; ok {
+					ctx.AddError(ExistedTypeNameError(tdef.Name, 0, 0))
+					return
+				}
+
+				if _, ok := ctx.SDLContext.TypeDefinitions[tdef.Name]; ok {
+					ctx.AddError(DuplicateTypeNameError(tdef.Name, 0, 0))
+				} else {
+					ctx.SDLContext.TypeDefinitions[tdef.Name] = tdef
+				}
+			}
+
+		case ast.DefinitionKindTypeSystemExtension:
+			switch def.TypeSystemExtension.Kind {
+			case ast.TypeSystemExtensionKindType:
+				if ctx.SDLContext.TypeExtensions == nil {
+					ctx.SDLContext.TypeExtensions = make(map[string]*ast.TypeExtension, ctx.Document.TypeExtensions)
+				}
+
+				ext := def.TypeSystemExtension.TypeExtension
+
+				ctx.SDLContext.TypeExtensions[ext.Name] = ext
+			}
+		}
 	})
 }
 
-// setTypeDefinitions ...
-func setTypeDefinitions(w *Walker) {
-	// NOTE: Only for SDL documents.
-	// TODO: This should occur as part of UniqueTypeNames, probably.
-	w.AddTypeDefinitionEnterEventHandler(func(ctx *Context, def *ast.TypeDefinition) {
-		ctx.SDLContext.TypeDefinitions[def.Name] = def
-	})
+// DuplicateTypeNameError ...
+func DuplicateTypeNameError(typeName string, line, col int) types.Error {
+	return types.NewError(
+		"There can be only one type named " + typeName + ".",
+		// TODO: Location.
+	)
+}
 
-	w.AddTypeExtensionEnterEventHandler(func(ctx *Context, ext *ast.TypeExtension) {
-		ctx.SDLContext.TypeExtensions[ext.Name] = ext
-	})
+// ExistedTypeNameError ...
+func ExistedTypeNameError(typeName string, line, col int) types.Error {
+	return types.NewError(
+		"Type " + typeName + " already exists in the schema. It cannot also be defined in this type definition.",
+		// TODO: Location.
+	)
+}
+
+// DuplicateDirectiveNameError ...
+func DuplicateDirectiveNameError(directiveName string, line, col int) types.Error {
+	return types.NewError(
+		"There can be only one directive named \"" + directiveName + "\".",
+		// TODO: Location.
+	)
+}
+
+// ExistedDirectiveNameError ...
+func ExistedDirectiveNameError(directiveName string, line, col int) types.Error {
+	return types.NewError(
+		"Directive \"" + directiveName + "\" already exists in the schema. It cannot be redefined.",
+		// TODO: Location.
+	)
 }

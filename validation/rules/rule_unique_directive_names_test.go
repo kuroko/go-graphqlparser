@@ -5,7 +5,7 @@ import (
 
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
-	"github.com/bucketd/go-graphqlparser/validation/rules"
+	"github.com/bucketd/go-graphqlparser/validation"
 )
 
 func TestUniqueDirectiveNames(t *testing.T) {
@@ -47,7 +47,7 @@ func TestUniqueDirectiveNames(t *testing.T) {
 				directive @foo on SCHEMA
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateDirectiveNameError("foo", 0, 0)),
+				Add(validation.DuplicateDirectiveNameError("foo", 0, 0)),
 		},
 		{
 			msg: "adding new directive to existing schema",
@@ -67,7 +67,7 @@ func TestUniqueDirectiveNames(t *testing.T) {
 				directive @skip on SCHEMA
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExistedDirectiveNameError("skip", 0, 0)),
+				Add(validation.ExistedDirectiveNameError("skip", 0, 0)),
 		},
 		{
 			msg: "adding new directive to existing schema with same-named type",
@@ -87,9 +87,9 @@ func TestUniqueDirectiveNames(t *testing.T) {
 				directive @foo on SCHEMA
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExistedDirectiveNameError("foo", 0, 0)),
+				Add(validation.ExistedDirectiveNameError("foo", 0, 0)),
 		},
 	}
 
-	sdlRuleTester(t, tt, rules.UniqueDirectiveNames)
+	sdlRuleTester(t, tt, func(w *validation.Walker) {})
 }

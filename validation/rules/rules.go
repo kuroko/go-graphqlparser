@@ -49,23 +49,21 @@ var Specified = []validation.VisitFunc{
 var SpecifiedSDL = []validation.VisitFunc{
 	LoneSchemaDefinition,
 	UniqueOperationTypes,
-	UniqueTypeNames,
-	UniqueEnumValueNames,
+	UniqueDirectivesPerLocation,
+	UniqueArgumentNames,
+	UniqueInputFieldNames,
+	// KnownArgumentNamesOnDirectives,
+	KnownDirectives,
+	KnownTypeNames,
+	// PossibleTypeExtensions,
+	ProvidedRequiredArgumentsOnDirectives,
+
 	// TODO: Move to BuildSchema:
 	// NOTE: This one is an absolute killer of performance, but may be difficult to move.
 	//UniqueFieldDefinitionNames,
-	UniqueDirectiveNames,
-	KnownTypeNames,
-	KnownDirectives,
-	UniqueDirectivesPerLocation,
-	// PossibleTypeExtensions,
-	// KnownArgumentNamesOnDirectives,
-	UniqueArgumentNames,
-	UniqueInputFieldNames,
-	ProvidedRequiredArgumentsOnDirectives,
+	UniqueEnumValueNames,
 
 	// TODO: You shouldn't be able to apply the same directive to a type and any type extensions for
 	// that type, they should be unique across the whole type. Again, this is not tested in the
 	// reference implementation. Update the 'UniqueDirectivesPerLocation' rule to support this.
-
 }

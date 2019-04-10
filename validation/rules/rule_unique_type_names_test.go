@@ -5,7 +5,7 @@ import (
 
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
-	"github.com/bucketd/go-graphqlparser/validation/rules"
+	"github.com/bucketd/go-graphqlparser/validation"
 )
 
 func TestUniqueTypeNames(t *testing.T) {
@@ -53,12 +53,12 @@ func TestUniqueTypeNames(t *testing.T) {
 				input Foo
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
-				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
-				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
-				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
-				Add(rules.DuplicateTypeNameError("Foo", 0, 0)).
-				Add(rules.DuplicateTypeNameError("Foo", 0, 0)),
+				Add(validation.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(validation.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(validation.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(validation.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(validation.DuplicateTypeNameError("Foo", 0, 0)).
+				Add(validation.DuplicateTypeNameError("Foo", 0, 0)),
 		},
 		{
 			msg: "adding new types to existing schema",
@@ -92,14 +92,14 @@ func TestUniqueTypeNames(t *testing.T) {
 				input Foo
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
-				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
-				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
-				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
-				Add(rules.ExistedTypeNameError("Foo", 0, 0)).
-				Add(rules.ExistedTypeNameError("Foo", 0, 0)),
+				Add(validation.ExistedTypeNameError("Foo", 0, 0)).
+				Add(validation.ExistedTypeNameError("Foo", 0, 0)).
+				Add(validation.ExistedTypeNameError("Foo", 0, 0)).
+				Add(validation.ExistedTypeNameError("Foo", 0, 0)).
+				Add(validation.ExistedTypeNameError("Foo", 0, 0)).
+				Add(validation.ExistedTypeNameError("Foo", 0, 0)),
 		},
 	}
 
-	sdlRuleTester(t, tt, rules.UniqueTypeNames)
+	sdlRuleTester(t, tt, func(w *validation.Walker) {})
 }
