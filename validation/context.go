@@ -13,7 +13,6 @@ var (
 		setFragments,
 		setReferencedFragments,
 		setVariableUsages,
-		setTypeDefinitions,
 	})
 	// sdlContextDecoratorWalker ...
 	sdlContextDecoratorWalker = NewWalker([]VisitFunc{
@@ -73,15 +72,11 @@ type Context struct {
 	// Used if we're validating an SDL file.
 	SDLContext *SDLContext
 
-	// The following maps are prepared because we will need these when building the schema later.
-	TypeDefinitions map[string]*ast.TypeDefinition
-	TypeExtensions  map[string]*ast.TypeExtension
-
-	// fragments contains all fragment definitions found in the input query, accessible by name.
-	fragments map[string]*ast.FragmentDefinition
+	// FragmentDefinitions contains all fragment definitions found in the input query, by name.
+	FragmentDefinitions map[string]*ast.FragmentDefinition
 
 	// referencedFragments stores the fragment definitions referenced directly by an executable
-	// definition, i.e. this is not recursively referenced fragments.
+	// definition, i.e. this is not recursively referenced FragmentDefinitions.
 	referencedFragments map[*ast.ExecutableDefinition][]ast.Definition
 
 	// variableUsages stores the variable usages referenced directly by an executable definition,
@@ -99,7 +94,7 @@ func (ctx *Context) AddError(err types.Error) {
 
 // Fragment ...
 func (ctx *Context) Fragment(name string) *ast.FragmentDefinition {
-	return ctx.fragments[name]
+	return ctx.FragmentDefinitions[name]
 }
 
 // VariableUsages returns the variable usages in an operation or fragment definition.
@@ -124,7 +119,7 @@ func (ctx *Context) recursiveVariableUsagesIter(def *ast.ExecutableDefinition, a
 		agg[vu] = struct{}{}
 	}
 
-	// TODO: Can this be swapped to use a cached version of recursively referenced fragments.
+	// TODO: Can this be swapped to use a cached version of recursively referenced FragmentDefinitions.
 	for _, rd := range ctx.referencedFragments[def] {
 		// We only want to recurse deeper if we've never seen the fragment before.
 		if _, ok := seen[rd.ExecutableDefinition]; !ok {
@@ -134,7 +129,7 @@ func (ctx *Context) recursiveVariableUsagesIter(def *ast.ExecutableDefinition, a
 	}
 }
 
-// ReferencedFragments returns the fragments directly referenced by the given executable definition.
+// ReferencedFragments returns the FragmentDefinitions directly referenced by the given executable definition.
 func (ctx *Context) ReferencedFragments(def *ast.ExecutableDefinition) []ast.Definition {
 	return ctx.referencedFragments[def]
 }
@@ -155,7 +150,7 @@ func (ctx *Context) RecursivelyReferencedFragments(def *ast.ExecutableDefinition
 }
 
 // recursivelyReferencedFragmentsIter is the inner iteration method for finding recursively
-// referenced fragments for a given executable definition. It modifies the given aggregate map of
+// referenced FragmentDefinitions for a given executable definition. It modifies the given aggregate map of
 // results.
 func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefinition, agg map[ast.Definition]struct{}, seen map[*ast.ExecutableDefinition]struct{}) {
 	// For each referenced fragment in the current executable definition...
@@ -173,7 +168,10 @@ func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefini
 // SDLContext ...
 type SDLContext struct {
 	DirectiveDefinitions map[string]*ast.DirectiveDefinition
-	//KnownTypeNames       map[string]struct{}
+	TypeDefinitions      map[string]*ast.TypeDefinition
+	TypeExtensions       map[string]*ast.TypeExtension
+
+	KnownTypeNames      map[string]struct{}
 	KnownDirectiveNames map[string]struct{}
 	KnownEnumValueNames map[string]map[string]struct{}
 	KnownFieldNames     map[string]map[string]struct{}
@@ -200,11 +198,11 @@ func setExecutableDefinition(w *Walker) {
 // setFragments ...
 func setFragments(w *Walker) {
 	w.AddFragmentDefinitionEnterEventHandler(func(ctx *Context, def *ast.FragmentDefinition) {
-		if ctx.fragments == nil {
-			ctx.fragments = make(map[string]*ast.FragmentDefinition)
+		if ctx.FragmentDefinitions == nil {
+			ctx.FragmentDefinitions = make(map[string]*ast.FragmentDefinition)
 		}
 
-		ctx.fragments[def.Name] = def
+		ctx.FragmentDefinitions[def.Name] = def
 	})
 }
 
@@ -241,15 +239,22 @@ func setReferencedFragments(w *Walker) {
 // setMapSizes ...
 func setMapSizes(w *Walker) {
 	w.AddDocumentEnterEventHandler(func(ctx *Context, doc ast.Document) {
-		if ctx.TypeDefinitions == nil {
-			ctx.TypeDefinitions = make(map[string]*ast.TypeDefinition, doc.TypeDefinitions)
-			ctx.TypeExtensions = make(map[string]*ast.TypeExtension, doc.TypeExtensions)
+		if ctx.FragmentDefinitions == nil {
+			ctx.FragmentDefinitions = make(map[string]*ast.FragmentDefinition, doc.FragmentDefinitions)
 		}
 
 		// SDL documents only (for now).
 		if ctx.SDLContext != nil {
 			if ctx.SDLContext.DirectiveDefinitions == nil {
 				ctx.SDLContext.DirectiveDefinitions = make(map[string]*ast.DirectiveDefinition, doc.DirectiveDefinitions)
+			}
+
+			if ctx.SDLContext.TypeDefinitions == nil {
+				ctx.SDLContext.TypeDefinitions = make(map[string]*ast.TypeDefinition, doc.TypeDefinitions)
+			}
+
+			if ctx.SDLContext.TypeExtensions == nil {
+				ctx.SDLContext.TypeExtensions = make(map[string]*ast.TypeExtension, doc.TypeExtensions)
 			}
 		}
 	})
@@ -281,11 +286,13 @@ func setDirectiveDefinitions(w *Walker) {
 
 // setTypeDefinitions ...
 func setTypeDefinitions(w *Walker) {
+	// NOTE: Only for SDL documents.
+
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *Context, def *ast.TypeDefinition) {
-		ctx.TypeDefinitions[def.Name] = def
+		ctx.SDLContext.TypeDefinitions[def.Name] = def
 	})
 
 	w.AddTypeExtensionEnterEventHandler(func(ctx *Context, ext *ast.TypeExtension) {
-		ctx.TypeExtensions[ext.Name] = ext
+		ctx.SDLContext.TypeExtensions[ext.Name] = ext
 	})
 }

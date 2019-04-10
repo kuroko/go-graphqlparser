@@ -10,7 +10,7 @@ import (
 func UniqueDirectiveNames(w *validation.Walker) {
 	w.AddDirectiveDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.DirectiveDefinition) {
 		if ctx.SDLContext.KnownDirectiveNames == nil {
-			ctx.SDLContext.KnownDirectiveNames = make(map[string]struct{})
+			ctx.SDLContext.KnownDirectiveNames = make(map[string]struct{}, ctx.Document.DirectiveDefinitions)
 		}
 
 		directiveName := def.Name

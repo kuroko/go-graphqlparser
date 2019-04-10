@@ -209,7 +209,7 @@ func BenchmarkContext_RecursivelyReferencedFragments(b *testing.B) {
 //	_ = ctx
 //
 //	doc.Definitions.ForEach(func(d ast.Definition, i int) {
-//		// We want to see the fragments referenced on the query...
+//		// We want to see the FragmentDefinitions referenced on the query...
 //		if d.Kind != ast.DefinitionKindExecutable || d.ExecutableDefinition.Kind != ast.ExecutableDefinitionKindOperation {
 //			return
 //		}

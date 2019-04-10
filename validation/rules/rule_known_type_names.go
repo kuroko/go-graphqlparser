@@ -11,8 +11,16 @@ func KnownTypeNames(w *validation.Walker) {
 	w.AddNamedTypeEnterEventHandler(func(ctx *validation.Context, t ast.Type) {
 		typeName := t.NamedType
 
-		_, existsInSchema := ctx.Schema.Types[typeName]
-		_, existsInDocument := ctx.TypeDefinitions[typeName]
+		var existsInSchema bool
+		var existsInDocument bool
+
+		_, existsInSchema = ctx.Schema.Types[typeName]
+
+		// If we're validating an SDL document, types declared in the current document must also be
+		// taken into account.
+		if ctx.SDLContext != nil {
+			_, existsInDocument = ctx.SDLContext.TypeDefinitions[typeName]
+		}
 
 		if !existsInSchema && !existsInDocument && !isSpecifiedScalarName(typeName) {
 			ctx.AddError(UnknownTypeError(typeName, 0, 0))

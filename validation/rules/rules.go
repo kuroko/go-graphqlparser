@@ -52,7 +52,8 @@ var SpecifiedSDL = []validation.VisitFunc{
 	UniqueTypeNames,
 	UniqueEnumValueNames,
 	// TODO: Move to BuildSchema:
-	//UniqueFieldDefinitionNames, // NOTE: This one is an absolute killer of performance.
+	// NOTE: This one is an absolute killer of performance, but may be difficult to move.
+	//UniqueFieldDefinitionNames,
 	UniqueDirectiveNames,
 	KnownTypeNames,
 	KnownDirectives,

@@ -72,13 +72,13 @@ func ExistedFieldDefinitionNameError(typeName, fieldName string, line, col int) 
 // prepareFieldDefinitionSymbolTables ...
 func prepareFieldDefinitionSymbolTables(ctx *validation.Context, typeName string) {
 	if ctx.SDLContext.KnownFieldNames == nil {
-		ctx.SDLContext.KnownFieldNames = make(map[string]map[string]struct{}, len(ctx.TypeDefinitions))
+		ctx.SDLContext.KnownFieldNames = make(map[string]map[string]struct{}, ctx.Document.TypeDefinitions)
 	}
 
 	if _, ok := ctx.SDLContext.KnownFieldNames[typeName]; !ok {
 		var fieldCount int
 
-		if typeDef, ok := ctx.TypeDefinitions[typeName]; ok {
+		if typeDef, ok := ctx.SDLContext.TypeDefinitions[typeName]; ok {
 			if typeDef.Kind == ast.TypeDefinitionKindInterface || typeDef.Kind == ast.TypeDefinitionKindObject {
 				fieldCount = typeDef.FieldsDefinition.Len()
 			} else if typeDef.Kind == ast.TypeDefinitionKindInputObject {
@@ -86,7 +86,7 @@ func prepareFieldDefinitionSymbolTables(ctx *validation.Context, typeName string
 			}
 		}
 
-		if typeExt, ok := ctx.TypeExtensions[typeName]; ok {
+		if typeExt, ok := ctx.SDLContext.TypeExtensions[typeName]; ok {
 			if typeExt.Kind == ast.TypeExtensionKindInterface || typeExt.Kind == ast.TypeExtensionKindObject {
 				fieldCount = typeExt.FieldsDefinition.Len()
 			} else if typeExt.Kind == ast.TypeExtensionKindInputObject {
