@@ -19,7 +19,6 @@ var (
 		setMapSizes,
 		setDirectiveDefinitions,
 		setTypeDefinitions,
-		//setSchemaDefinitionTypes,
 	})
 )
 
@@ -287,7 +286,7 @@ func setDirectiveDefinitions(w *Walker) {
 // setTypeDefinitions ...
 func setTypeDefinitions(w *Walker) {
 	// NOTE: Only for SDL documents.
-
+	// TODO: This should occur as part of UniqueTypeNames, probably.
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *Context, def *ast.TypeDefinition) {
 		ctx.SDLContext.TypeDefinitions[def.Name] = def
 	})
