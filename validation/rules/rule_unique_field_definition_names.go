@@ -8,7 +8,8 @@ import (
 
 // UniqueFieldDefinitionNames ...
 //
-// TODO: Maybe we can run this rule when we begin merging types with their extensions. We'll be
+// TODO: Move to BuildSchema:
+// NOTE: Maybe we can run this rule when we begin merging types with their extensions. We'll be
 // going over this same data, stored in a similar format again, but maybe using less memory in fact.
 func UniqueFieldDefinitionNames(w *validation.Walker) {
 	w.AddTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.TypeDefinition) {

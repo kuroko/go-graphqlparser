@@ -73,7 +73,7 @@ type Context struct {
 	// Used if we're validating an SDL file.
 	SDLContext *SDLContext
 
-	// TypeDefinitions is a map of all TypeDefinition nodes in the current document.
+	// The following maps are prepared because we will need these when building the schema later.
 	TypeDefinitions map[string]*ast.TypeDefinition
 	TypeExtensions  map[string]*ast.TypeExtension
 
@@ -173,10 +173,10 @@ func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefini
 // SDLContext ...
 type SDLContext struct {
 	DirectiveDefinitions map[string]*ast.DirectiveDefinition
-	KnownTypeNames       map[string]struct{}
-	KnownDirectiveNames  map[string]struct{}
-	KnownEnumValueNames  map[string]map[string]struct{}
-	KnownFieldNames      map[string]map[string]struct{}
+	//KnownTypeNames       map[string]struct{}
+	KnownDirectiveNames map[string]struct{}
+	KnownEnumValueNames map[string]map[string]struct{}
+	KnownFieldNames     map[string]map[string]struct{}
 
 	QueryTypeDefined        bool
 	MutationTypeDefined     bool

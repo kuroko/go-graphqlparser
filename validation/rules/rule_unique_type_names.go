@@ -8,23 +8,32 @@ import (
 
 // UniqueTypeNames ...
 func UniqueTypeNames(w *validation.Walker) {
-	// TODO: Does this actually need another separate map? Maybe it'd be faster to loop over all of
-	// the definitions, and maybe it won't escape?
-	w.AddTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.TypeDefinition) {
-		if ctx.SDLContext.KnownTypeNames == nil {
-			ctx.SDLContext.KnownTypeNames = make(map[string]struct{})
-		}
+	w.AddDocumentEnterEventHandler(func(ctx *validation.Context, doc ast.Document) {
+		knownTypeNames := make(map[string]struct{}, doc.TypeDefinitions)
 
-		if _, ok := ctx.Schema.Types[def.Name]; ok {
-			ctx.AddError(ExistedTypeNameError(def.Name, 0, 0))
-			return
-		}
+		doc.Definitions.ForEach(func(def ast.Definition, i int) {
+			if def.Kind != ast.DefinitionKindTypeSystem {
+				return
+			}
 
-		if _, ok := ctx.SDLContext.KnownTypeNames[def.Name]; ok {
-			ctx.AddError(DuplicateTypeNameError(def.Name, 0, 0))
-		} else {
-			ctx.SDLContext.KnownTypeNames[def.Name] = struct{}{}
-		}
+			if def.TypeSystemDefinition.Kind != ast.TypeSystemDefinitionKindType {
+				return
+			}
+
+			tdef := def.TypeSystemDefinition.TypeDefinition
+
+			if _, ok := ctx.Schema.Types[tdef.Name]; ok {
+				ctx.AddError(ExistedTypeNameError(tdef.Name, 0, 0))
+				return
+			}
+
+			if _, ok := knownTypeNames[tdef.Name]; ok {
+				ctx.AddError(DuplicateTypeNameError(tdef.Name, 0, 0))
+				return
+			} else {
+				knownTypeNames[tdef.Name] = struct{}{}
+			}
+		})
 	})
 }
 
