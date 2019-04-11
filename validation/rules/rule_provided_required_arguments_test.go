@@ -3,6 +3,7 @@ package rules_test
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -52,69 +53,69 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			directive @test(arg1: String, arg2: String! = "") on FIELD_DEFINITION
 			`,
 		},
-		// {
-		// 	msg: "missing arg on directive defined inside SDL",
-		// 	query: `
-		// 	type Query {
-		// 		foo: String @test
-		// 	}
-		// 	directive @test(arg: String!) on FIELD_DEFINITION
-		// 	`,
-		// 	errs: (*types.Errors)(nil).
-		// 		Add(rules.MissingDirectiveArgMessage("test", "arg", "String!", 0, 0)),
-		// },
-		// {
-		// 	msg: "missing arg on standard directive",
-		// 	query: `
-		// 	type Query {
-		// 		foo: String @include
-		// 	}
-		// 	`,
-		// 	errs: (*types.Errors)(nil).
-		// 		Add(rules.MissingDirectiveArgMessage("include", "if", "Boolean!", 0, 0)),
-		// },
-		// {
-		// 	msg: "missing arg on overridden standard directive",
-		// 	query: `
-		// 	type Query {
-		// 		foo: String @deprecated
-		// 	  }
-		// 	directive @deprecated(reason: String!) on FIELD
-		// 	`,
-		// 	errs: (*types.Errors)(nil).
-		// 		Add(rules.MissingDirectiveArgMessage("deprecated", "reason", "String!", 0, 0)),
-		// },
-		// {
-		// 	msg: "missing arg on directive defined in schema extension",
-		// 	schema: graphql.MustBuildSchema(nil, []byte(`
-		// 	type Query {
-		// 		foo: String
-		// 	}
-		// 	`)),
-		// 	query: `
-		// 	directive @test(arg: String!) on OBJECT
-		// 	extend type Query  @test
-		// 	`,
-		// 	errs: (*types.Errors)(nil).
-		// 		Add(rules.MissingDirectiveArgMessage("test", "arg", "String!", 0, 0)),
-		// },
-		// {
-		// 	msg: "missing arg on directive used in schema extension",
-		// 	schema: graphql.MustBuildSchema(nil, []byte(`
-		// 	directive @test(arg: String!) on OBJECT
-		// 	type Query {
-		// 		foo: String
-		// 	}
-		// 	`)),
-		// 	query: `
-		// 	extend type Query @test
-		// 	`,
-		// 	errs: (*types.Errors)(nil).
-		// 		Add(rules.MissingDirectiveArgMessage("test", "arg", "String!", 0, 0)),
-		// },
+		{
+			msg: "missing arg on directive defined inside SDL",
+			query: `
+			type Query {
+				foo: String @test
+			}
+			directive @test(arg: String!) on FIELD_DEFINITION
+			`,
+			errs: (*types.Errors)(nil).
+				Add(rules.MissingDirectiveArgMessage("test", "arg", "String!", 0, 0)),
+		},
+		{
+			msg: "missing arg on standard directive",
+			query: `
+			type Query {
+				foo: String @include
+			}
+			`,
+			errs: (*types.Errors)(nil).
+				Add(rules.MissingDirectiveArgMessage("include", "if", "Boolean!", 0, 0)),
+		},
+		{
+			msg: "missing arg on overridden standard directive",
+			query: `
+			type Query {
+				foo: String @deprecated
+			  }
+			directive @deprecated(reason: String!) on FIELD
+			`,
+			errs: (*types.Errors)(nil).
+				Add(rules.MissingDirectiveArgMessage("deprecated", "reason", "String!", 0, 0)),
+		},
+		{
+			msg: "missing arg on directive defined in schema extension",
+			schema: graphql.MustBuildSchema(nil, []byte(`
+			type Query {
+				foo: String
+			}
+			`)),
+			query: `
+			directive @test(arg: String!) on OBJECT
+			extend type Query  @test
+			`,
+			errs: (*types.Errors)(nil).
+				Add(rules.MissingDirectiveArgMessage("test", "arg", "String!", 0, 0)),
+		},
+		{
+			msg: "missing arg on directive used in schema extension",
+			schema: graphql.MustBuildSchema(nil, []byte(`
+			directive @test(arg: String!) on OBJECT
+			type Query {
+				foo: String
+			}
+			`)),
+			query: `
+			extend type Query @test
+			`,
+			errs: (*types.Errors)(nil).
+				Add(rules.MissingDirectiveArgMessage("test", "arg", "String!", 0, 0)),
+		},
 	}
 
-	queryRuleTester(t, tt, rules.ProvidedRequiredArgumentsOnDirectives)
+	sdlRuleTester(t, tt, rules.ProvidedRequiredArgumentsOnDirectives)
 }
 
 func TestProvidedRequiredArguments(t *testing.T) {
