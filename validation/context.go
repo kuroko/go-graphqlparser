@@ -62,10 +62,16 @@ type Context struct {
 	Errors   *types.Errors
 	Schema   *types.Schema
 
-	// Used if we're validating an SDL file.
+	// Used if we're validating an SDL file. This contains state for validating SDL documents, along
+	// with symbol tables for definitions that can only be used in SDL documents.
 	SDLContext *SDLContext
 
-	// FragmentDefinitions contains all fragment definitions found in the input query, by name.
+	// OperationDefinitions contains all operation definitions found in the input document, by name,
+	// except for anonymous operations (i.e. shorthand queries), which will be stored under the key
+	// `$$query` - which is an otherwise invalid name.
+	OperationDefinitions map[string]*ast.OperationDefinition
+
+	// FragmentDefinitions contains all fragment definitions found in the input document, by name.
 	FragmentDefinitions map[string]*ast.FragmentDefinition
 
 	// referencedFragments stores the fragment definitions referenced directly by an executable
@@ -162,7 +168,9 @@ func (ctx *Context) recursivelyReferencedFragmentsIter(def *ast.ExecutableDefini
 type SDLContext struct {
 	DirectiveDefinitions map[string]*ast.DirectiveDefinition
 	TypeDefinitions      map[string]*ast.TypeDefinition
-	TypeExtensions       map[string]*ast.TypeExtension
+	TypeExtensions       map[string][]*ast.TypeExtension
+	SchemaDefinition     *ast.SchemaDefinition
+	SchemaExtensions     []*ast.SchemaExtension
 
 	KnownEnumValueNames map[string]map[string]struct{}
 	KnownFieldNames     map[string]map[string]struct{}
@@ -251,8 +259,34 @@ func setVariableUsages(w *Walker) {
 // want to use quite shallow data in from the AST at this phase, so using the Walker would be quite
 // inefficient as it would hit many leaf nodes at a depth we simply don't need here).
 func PrepareContextSDL(ctx *Context) {
+	// TODO: We can do 'LoneSchemaDefinition' here.
+
 	ctx.Document.Definitions.ForEach(func(def ast.Definition, i int) {
 		switch def.Kind {
+		case ast.DefinitionKindExecutable:
+			switch def.ExecutableDefinition.Kind {
+			case ast.ExecutableDefinitionKindOperation:
+				if ctx.OperationDefinitions == nil {
+					ctx.OperationDefinitions = make(map[string]*ast.OperationDefinition, ctx.Document.OperationDefinitions)
+				}
+
+				odef := def.ExecutableDefinition.OperationDefinition
+				if odef.Name == "" {
+					odef.Name = "$$query"
+				}
+
+				ctx.OperationDefinitions[odef.Name] = odef
+
+			case ast.ExecutableDefinitionKindFragment:
+				if ctx.FragmentDefinitions == nil {
+					ctx.FragmentDefinitions = make(map[string]*ast.FragmentDefinition, ctx.Document.FragmentDefinitions)
+				}
+
+				fdef := def.ExecutableDefinition.FragmentDefinition
+
+				ctx.FragmentDefinitions[fdef.Name] = fdef
+			}
+
 		case ast.DefinitionKindTypeSystem:
 			switch def.TypeSystemDefinition.Kind {
 			// UniqueDirectiveNames:
@@ -273,6 +307,12 @@ func PrepareContextSDL(ctx *Context) {
 				} else {
 					ctx.SDLContext.DirectiveDefinitions[ddef.Name] = ddef
 				}
+
+			case ast.TypeSystemDefinitionKindSchema:
+				sdef := def.TypeSystemDefinition.SchemaDefinition
+
+				// TODO: Validate here.
+				ctx.SDLContext.SchemaDefinition = sdef
 
 			// UniqueTypeNames:
 			case ast.TypeSystemDefinitionKindType:
@@ -296,14 +336,23 @@ func PrepareContextSDL(ctx *Context) {
 
 		case ast.DefinitionKindTypeSystemExtension:
 			switch def.TypeSystemExtension.Kind {
+			case ast.TypeSystemExtensionKindSchema:
+				if ctx.SDLContext.SchemaExtensions == nil {
+					ctx.SDLContext.SchemaExtensions = make([]*ast.SchemaExtension, 0, ctx.Document.SchemaExtensions)
+				}
+
+				ext := def.TypeSystemExtension.SchemaExtension
+
+				ctx.SDLContext.SchemaExtensions = append(ctx.SDLContext.SchemaExtensions, ext)
+
 			case ast.TypeSystemExtensionKindType:
 				if ctx.SDLContext.TypeExtensions == nil {
-					ctx.SDLContext.TypeExtensions = make(map[string]*ast.TypeExtension, ctx.Document.TypeExtensions)
+					ctx.SDLContext.TypeExtensions = make(map[string][]*ast.TypeExtension, ctx.Document.TypeExtensions)
 				}
 
 				ext := def.TypeSystemExtension.TypeExtension
 
-				ctx.SDLContext.TypeExtensions[ext.Name] = ext
+				ctx.SDLContext.TypeExtensions[ext.Name] = append(ctx.SDLContext.TypeExtensions[ext.Name], ext)
 			}
 		}
 	})

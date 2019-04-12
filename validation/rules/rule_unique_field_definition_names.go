@@ -86,7 +86,9 @@ func prepareFieldDefinitionSymbolTables(ctx *validation.Context, typeName string
 			}
 		}
 
-		if typeExt, ok := ctx.SDLContext.TypeExtensions[typeName]; ok {
+		extensions := ctx.SDLContext.TypeExtensions[typeName]
+
+		for _, typeExt := range extensions {
 			if typeExt.Kind == ast.TypeExtensionKindInterface || typeExt.Kind == ast.TypeExtensionKindObject {
 				fieldCount = typeExt.FieldsDefinition.Len()
 			} else if typeExt.Kind == ast.TypeExtensionKindInputObject {
