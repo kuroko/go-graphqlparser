@@ -5,7 +5,7 @@ import (
 
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
-	"github.com/bucketd/go-graphqlparser/validation/rules"
+	"github.com/bucketd/go-graphqlparser/validation"
 )
 
 func TestLoneSchemaDefinition(t *testing.T) {
@@ -34,8 +34,8 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				schema { subscription: Foo }
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.SchemaDefinitionNotAloneError(0, 0)).
-				Add(rules.SchemaDefinitionNotAloneError(0, 0)),
+				Add(validation.SchemaDefinitionNotAloneError(0, 0)).
+				Add(validation.SchemaDefinitionNotAloneError(0, 0)),
 		},
 		{
 			msg:    "define schema in schema extension",
@@ -46,7 +46,7 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.CanNotDefineSchemaWithinExtensionError(0, 0)),
+				Add(validation.CanNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "redefine schema in schema extension",
@@ -54,7 +54,7 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				schema {
 					query: Foo
 				}
-
+		
 				type Foo
 			`)),
 			query: `
@@ -63,7 +63,7 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.CanNotDefineSchemaWithinExtensionError(0, 0)),
+				Add(validation.CanNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "redefine implicit schema in schema extension",
@@ -71,7 +71,7 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				type Query {
 					fooField: Foo
 				}
-
+		
 				type Foo {
 					foo: String
 				}
@@ -82,7 +82,7 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.CanNotDefineSchemaWithinExtensionError(0, 0)),
+				Add(validation.CanNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "extend schema in schema extension",
@@ -90,7 +90,7 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				schema {
 					query: Foo
 				}
-
+		
 				type Foo
 			`)),
 			query: `
@@ -102,5 +102,5 @@ func TestLoneSchemaDefinition(t *testing.T) {
 		},
 	}
 
-	sdlRuleTester(t, tt, rules.LoneSchemaDefinition)
+	sdlRuleTester(t, tt, func(w *validation.Walker) {})
 }

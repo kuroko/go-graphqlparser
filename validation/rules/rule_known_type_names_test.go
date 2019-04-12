@@ -215,7 +215,7 @@ func TestKnownTypeNames(t *testing.T) {
 
 					scalar Bar
 
-					schema {
+					type NotSchema {
 						query: QueryRoot
 					}
 				`,
@@ -242,7 +242,7 @@ func TestKnownTypeNames(t *testing.T) {
 
 					directive @SomeDirective(k: K) on QUERY
 
-					schema {
+					type NotSchema {
 						query: L
 						mutation: M
 						subscription: N

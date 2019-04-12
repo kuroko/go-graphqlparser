@@ -199,6 +199,16 @@ func TestKnownDirectives(t *testing.T) {
 					Add(rules.UnknownDirectiveError("unknown", 0, 0)),
 			},
 			{
+				msg: "well placed on schema",
+				query: `
+					directive @onSchema on SCHEMA
+
+					schema @onSchema {
+						query: MyQuery
+					}
+				`,
+			},
+			{
 				msg:    "with well placed directives",
 				schema: schemaWithSDLDirectives,
 				query: `
@@ -234,10 +244,6 @@ func TestKnownDirectives(t *testing.T) {
 
 					extend input MyInput @onInputObject
 
-					schema @onSchema {
-						query: MyQuery
-					}
-
 					extend schema @onSchema
 				`,
 			},
@@ -265,8 +271,8 @@ func TestKnownDirectives(t *testing.T) {
 						myField: Int @onArgumentDefinition
 					}
 
-					schema @onObject {
-						query: MyQuery
+					enum NotSchema @onObject {
+						NOT_SCHEMA
 					}
 
 					extend schema @onObject
@@ -284,7 +290,7 @@ func TestKnownDirectives(t *testing.T) {
 					Add(rules.MisplacedDirectiveError("onUnion", ast.DirectiveLocationKindEnumValue, 0, 0)).
 					Add(rules.MisplacedDirectiveError("onEnum", ast.DirectiveLocationKindInputObject, 0, 0)).
 					Add(rules.MisplacedDirectiveError("onArgumentDefinition", ast.DirectiveLocationKindInputFieldDefinition, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onObject", ast.DirectiveLocationKindSchema, 0, 0)).
+					Add(rules.MisplacedDirectiveError("onObject", ast.DirectiveLocationKindEnum, 0, 0)).
 					Add(rules.MisplacedDirectiveError("onObject", ast.DirectiveLocationKindSchema, 0, 0)),
 			},
 		}

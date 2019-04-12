@@ -179,9 +179,6 @@ type SDLContext struct {
 	MutationTypeDefined     bool
 	SubscriptionTypeDefined bool
 
-	// HasSeenSchemaDefinition ...
-	HasSeenSchemaDefinition bool
-
 	// IsExtending is true if this context was created with an existing Schema, and it's being
 	// extended by another SDL file.
 	IsExtending bool
@@ -259,8 +256,6 @@ func setVariableUsages(w *Walker) {
 // want to use quite shallow data in from the AST at this phase, so using the Walker would be quite
 // inefficient as it would hit many leaf nodes at a depth we simply don't need here).
 func PrepareContextSDL(ctx *Context) {
-	// TODO: We can do 'LoneSchemaDefinition' here.
-
 	ctx.Document.Definitions.ForEach(func(def ast.Definition, i int) {
 		switch def.Kind {
 		case ast.DefinitionKindExecutable:
@@ -308,7 +303,19 @@ func PrepareContextSDL(ctx *Context) {
 					ctx.SDLContext.DirectiveDefinitions[ddef.Name] = ddef
 				}
 
+			// LoneSchemaDefinition:
 			case ast.TypeSystemDefinitionKindSchema:
+				if ctx.SDLContext.IsExtending {
+					// There cannot be any schema definitions in schema extensions, as either one will have
+					// already been defined, or one will have been automatically created.
+					ctx.AddError(CanNotDefineSchemaWithinExtensionError(0, 0))
+					return
+				} else if !ctx.SDLContext.IsExtending && ctx.SDLContext.SchemaDefinition != nil {
+					// There should only be one schema definition in schema document, when not extending.
+					ctx.AddError(SchemaDefinitionNotAloneError(0, 0))
+					return
+				}
+
 				sdef := def.TypeSystemDefinition.SchemaDefinition
 
 				// TODO: Validate here.
@@ -386,6 +393,22 @@ func DuplicateDirectiveNameError(directiveName string, line, col int) types.Erro
 func ExistedDirectiveNameError(directiveName string, line, col int) types.Error {
 	return types.NewError(
 		"Directive \"" + directiveName + "\" already exists in the schema. It cannot be redefined.",
+		// TODO: Location.
+	)
+}
+
+// SchemaDefinitionNotAloneError ...
+func SchemaDefinitionNotAloneError(line, col int) types.Error {
+	return types.NewError(
+		"Must provide only one schema definition.",
+		// TODO: Location.
+	)
+}
+
+// CanNotDefineSchemaWithinExtensionError ...
+func CanNotDefineSchemaWithinExtensionError(line, col int) types.Error {
+	return types.NewError(
+		"Cannot define a new schema within a schema extension.",
 		// TODO: Location.
 	)
 }

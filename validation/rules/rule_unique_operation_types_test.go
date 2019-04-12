@@ -177,34 +177,36 @@ func TestUniqueOperationTypes(t *testing.T) {
 				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
 				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)),
 		},
-		{
-			msg:    "define schema inside extension SDL",
-			schema: &types.Schema{},
-			query: `
-				schema {
-					query: Query
-					mutation: Mutation
-					subscription: Subscription
-				}
-			`,
-		},
-		{
-			msg:    "define and extend schema inside extension SDL",
-			schema: &types.Schema{},
-			query: `
-				schema {
-					query: Query
-				}
-
-				extend schema {
-					mutation: Mutation
-				}
-
-				extend schema {
-					subscription: Subscription
-				}
-			`,
-		},
+		// These tests provide invalid schemas, and part of our validation occurs before these rules
+		// are run, so we can't include these tests.
+		//{
+		//	msg:    "define schema inside extension SDL",
+		//	schema: &types.Schema{},
+		//	query: `
+		//		schema {
+		//			query: Query
+		//			mutation: Mutation
+		//			subscription: Subscription
+		//		}
+		//	`,
+		//},
+		//{
+		//	msg:    "define and extend schema inside extension SDL",
+		//	schema: &types.Schema{},
+		//	query: `
+		//		schema {
+		//			query: Query
+		//		}
+		//
+		//		extend schema {
+		//			mutation: Mutation
+		//		}
+		//
+		//		extend schema {
+		//			subscription: Subscription
+		//		}
+		//	`,
+		//},
 		{
 			msg:    "adding new operation types to existing schema",
 			schema: &types.Schema{},
