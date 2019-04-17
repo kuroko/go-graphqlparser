@@ -45,6 +45,44 @@ func (as *Arguments) ForEach(fn func(a Argument, i int)) {
 	}
 }
 
+// @wg:ignore
+type ArgumentsGenerator struct {
+	original *Arguments
+	current  *Arguments
+	iter     int
+	length   int
+}
+
+func (g *ArgumentsGenerator) Emit() (Argument, int) {
+	if g.current == nil {
+		return Argument{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *ArgumentsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (as *Arguments) Generator() ArgumentsGenerator {
+	return ArgumentsGenerator{
+		current: as,
+		iter:    0,
+		length:  as.Len(),
+	}
+}
+
 // Insert places the Argument in the position given by pos.
 // The method will insert at top if pos is greater than or equal to list length.
 // The method will insert at bottom if the pos is less than 0.
@@ -170,6 +208,44 @@ func (ds *Definitions) ForEach(fn func(d Definition, i int)) {
 
 		iter++
 		current = current.next
+	}
+}
+
+// @wg:ignore
+type DefinitionsGenerator struct {
+	original *Definitions
+	current  *Definitions
+	iter     int
+	length   int
+}
+
+func (g *DefinitionsGenerator) Emit() (Definition, int) {
+	if g.current == nil {
+		return Definition{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *DefinitionsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (ds *Definitions) Generator() DefinitionsGenerator {
+	return DefinitionsGenerator{
+		current: ds,
+		iter:    0,
+		length:  ds.Len(),
 	}
 }
 
@@ -301,6 +377,44 @@ func (ds *Directives) ForEach(fn func(d Directive, i int)) {
 	}
 }
 
+// @wg:ignore
+type DirectivesGenerator struct {
+	original *Directives
+	current  *Directives
+	iter     int
+	length   int
+}
+
+func (g *DirectivesGenerator) Emit() (Directive, int) {
+	if g.current == nil {
+		return Directive{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *DirectivesGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (ds *Directives) Generator() DirectivesGenerator {
+	return DirectivesGenerator{
+		current: ds,
+		iter:    0,
+		length:  ds.Len(),
+	}
+}
+
 // Insert places the Directive in the position given by pos.
 // The method will insert at top if pos is greater than or equal to list length.
 // The method will insert at bottom if the pos is less than 0.
@@ -426,6 +540,44 @@ func (evds *EnumValueDefinitions) ForEach(fn func(evd EnumValueDefinition, i int
 
 		iter++
 		current = current.next
+	}
+}
+
+// @wg:ignore
+type EnumValueDefinitionsGenerator struct {
+	original *EnumValueDefinitions
+	current  *EnumValueDefinitions
+	iter     int
+	length   int
+}
+
+func (g *EnumValueDefinitionsGenerator) Emit() (EnumValueDefinition, int) {
+	if g.current == nil {
+		return EnumValueDefinition{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *EnumValueDefinitionsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (evds *EnumValueDefinitions) Generator() EnumValueDefinitionsGenerator {
+	return EnumValueDefinitionsGenerator{
+		current: evds,
+		iter:    0,
+		length:  evds.Len(),
 	}
 }
 
@@ -557,6 +709,44 @@ func (fds *FieldDefinitions) ForEach(fn func(fd FieldDefinition, i int)) {
 	}
 }
 
+// @wg:ignore
+type FieldDefinitionsGenerator struct {
+	original *FieldDefinitions
+	current  *FieldDefinitions
+	iter     int
+	length   int
+}
+
+func (g *FieldDefinitionsGenerator) Emit() (FieldDefinition, int) {
+	if g.current == nil {
+		return FieldDefinition{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *FieldDefinitionsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (fds *FieldDefinitions) Generator() FieldDefinitionsGenerator {
+	return FieldDefinitionsGenerator{
+		current: fds,
+		iter:    0,
+		length:  fds.Len(),
+	}
+}
+
 // Insert places the FieldDefinition in the position given by pos.
 // The method will insert at top if pos is greater than or equal to list length.
 // The method will insert at bottom if the pos is less than 0.
@@ -682,6 +872,44 @@ func (ivds *InputValueDefinitions) ForEach(fn func(ivd InputValueDefinition, i i
 
 		iter++
 		current = current.next
+	}
+}
+
+// @wg:ignore
+type InputValueDefinitionsGenerator struct {
+	original *InputValueDefinitions
+	current  *InputValueDefinitions
+	iter     int
+	length   int
+}
+
+func (g *InputValueDefinitionsGenerator) Emit() (InputValueDefinition, int) {
+	if g.current == nil {
+		return InputValueDefinition{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *InputValueDefinitionsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (ivds *InputValueDefinitions) Generator() InputValueDefinitionsGenerator {
+	return InputValueDefinitionsGenerator{
+		current: ivds,
+		iter:    0,
+		length:  ivds.Len(),
 	}
 }
 
@@ -813,6 +1041,44 @@ func (ls *Locations) ForEach(fn func(l Location, i int)) {
 	}
 }
 
+// @wg:ignore
+type LocationsGenerator struct {
+	original *Locations
+	current  *Locations
+	iter     int
+	length   int
+}
+
+func (g *LocationsGenerator) Emit() (Location, int) {
+	if g.current == nil {
+		return Location{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *LocationsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (ls *Locations) Generator() LocationsGenerator {
+	return LocationsGenerator{
+		current: ls,
+		iter:    0,
+		length:  ls.Len(),
+	}
+}
+
 // Insert places the Location in the position given by pos.
 // The method will insert at top if pos is greater than or equal to list length.
 // The method will insert at bottom if the pos is less than 0.
@@ -938,6 +1204,44 @@ func (otds *OperationTypeDefinitions) ForEach(fn func(otd OperationTypeDefinitio
 
 		iter++
 		current = current.next
+	}
+}
+
+// @wg:ignore
+type OperationTypeDefinitionsGenerator struct {
+	original *OperationTypeDefinitions
+	current  *OperationTypeDefinitions
+	iter     int
+	length   int
+}
+
+func (g *OperationTypeDefinitionsGenerator) Emit() (OperationTypeDefinition, int) {
+	if g.current == nil {
+		return OperationTypeDefinition{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *OperationTypeDefinitionsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (otds *OperationTypeDefinitions) Generator() OperationTypeDefinitionsGenerator {
+	return OperationTypeDefinitionsGenerator{
+		current: otds,
+		iter:    0,
+		length:  otds.Len(),
 	}
 }
 
@@ -1069,6 +1373,44 @@ func (pns *PathNodes) ForEach(fn func(pn PathNode, i int)) {
 	}
 }
 
+// @wg:ignore
+type PathNodesGenerator struct {
+	original *PathNodes
+	current  *PathNodes
+	iter     int
+	length   int
+}
+
+func (g *PathNodesGenerator) Emit() (PathNode, int) {
+	if g.current == nil {
+		return PathNode{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *PathNodesGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (pns *PathNodes) Generator() PathNodesGenerator {
+	return PathNodesGenerator{
+		current: pns,
+		iter:    0,
+		length:  pns.Len(),
+	}
+}
+
 // Insert places the PathNode in the position given by pos.
 // The method will insert at top if pos is greater than or equal to list length.
 // The method will insert at bottom if the pos is less than 0.
@@ -1194,6 +1536,44 @@ func (ss *Selections) ForEach(fn func(s Selection, i int)) {
 
 		iter++
 		current = current.next
+	}
+}
+
+// @wg:ignore
+type SelectionsGenerator struct {
+	original *Selections
+	current  *Selections
+	iter     int
+	length   int
+}
+
+func (g *SelectionsGenerator) Emit() (Selection, int) {
+	if g.current == nil {
+		return Selection{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *SelectionsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (ss *Selections) Generator() SelectionsGenerator {
+	return SelectionsGenerator{
+		current: ss,
+		iter:    0,
+		length:  ss.Len(),
 	}
 }
 
@@ -1325,6 +1705,44 @@ func (ts *Types) ForEach(fn func(t Type, i int)) {
 	}
 }
 
+// @wg:ignore
+type TypesGenerator struct {
+	original *Types
+	current  *Types
+	iter     int
+	length   int
+}
+
+func (g *TypesGenerator) Emit() (Type, int) {
+	if g.current == nil {
+		return Type{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *TypesGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (ts *Types) Generator() TypesGenerator {
+	return TypesGenerator{
+		current: ts,
+		iter:    0,
+		length:  ts.Len(),
+	}
+}
+
 // Insert places the Type in the position given by pos.
 // The method will insert at top if pos is greater than or equal to list length.
 // The method will insert at bottom if the pos is less than 0.
@@ -1450,6 +1868,44 @@ func (vds *VariableDefinitions) ForEach(fn func(vd VariableDefinition, i int)) {
 
 		iter++
 		current = current.next
+	}
+}
+
+// @wg:ignore
+type VariableDefinitionsGenerator struct {
+	original *VariableDefinitions
+	current  *VariableDefinitions
+	iter     int
+	length   int
+}
+
+func (g *VariableDefinitionsGenerator) Emit() (VariableDefinition, int) {
+	if g.current == nil {
+		return VariableDefinition{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *VariableDefinitionsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (vds *VariableDefinitions) Generator() VariableDefinitionsGenerator {
+	return VariableDefinitionsGenerator{
+		current: vds,
+		iter:    0,
+		length:  vds.Len(),
 	}
 }
 

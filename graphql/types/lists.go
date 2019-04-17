@@ -45,6 +45,44 @@ func (es *Errors) ForEach(fn func(e Error, i int)) {
 	}
 }
 
+// @wg:ignore
+type ErrorsGenerator struct {
+	original *Errors
+	current  *Errors
+	iter     int
+	length   int
+}
+
+func (g *ErrorsGenerator) Emit() (Error, int) {
+	if g.current == nil {
+		return Error{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *ErrorsGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more
+// convenient, because ForEach is a high order function, it's slower.
+func (es *Errors) Generator() ErrorsGenerator {
+	return ErrorsGenerator{
+		current: es,
+		iter:    0,
+		length:  es.Len(),
+	}
+}
+
 // Insert places the Error in the position given by pos.
 // The method will insert at top if pos is greater than or equal to list length.
 // The method will insert at bottom if the pos is less than 0.

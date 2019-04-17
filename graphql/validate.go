@@ -27,13 +27,15 @@ func Validate(schema *types.Schema, doc []byte) (*types.Errors, error) {
 }
 
 // ValidateSDL ...
-func ValidateSDL(schema *types.Schema, doc []byte) (*types.Errors, error) {
+func ValidateSDL(schema *types.Schema, doc []byte) (*types.Schema, *types.Errors, error) {
 	parsed, err := Parse(doc)
 	if err != nil {
-		return nil, errors.New("graphql: failed to parse document")
+		return nil, nil, errors.New("graphql: failed to parse document")
 	}
 
-	return ValidateSDLAST(schema, parsed), nil
+	schema, errs := ValidateSDLAST(schema, parsed)
+
+	return schema, errs, nil
 }
 
 // ValidateAST ...
@@ -43,7 +45,7 @@ func ValidateAST(schema *types.Schema, doc ast.Document) *types.Errors {
 }
 
 // ValidateSDLAST ...
-func ValidateSDLAST(schema *types.Schema, doc ast.Document) *types.Errors {
+func ValidateSDLAST(schema *types.Schema, doc ast.Document) (*types.Schema, *types.Errors) {
 	// TODO: Re-use existing walker, stored in global.
 	return validation.ValidateSDL(doc, schema, DefaultValidationWalkerSDL)
 }

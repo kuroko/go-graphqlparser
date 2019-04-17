@@ -10,7 +10,7 @@ import (
 
 // BuildASTSchema ...
 func BuildASTSchema(schema *types.Schema, doc ast.Document) (*types.Schema, *types.Errors) {
-	errs := ValidateSDLAST(nil, doc)
+	_, errs := ValidateSDLAST(nil, doc)
 	if errs.Len() > 0 {
 		return nil, errs
 	}

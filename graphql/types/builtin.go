@@ -61,6 +61,15 @@ var (
 				},
 			}),
 	}
+
+	// IDType ...
+	// TODO: Fully implement.
+	IDType = &ast.TypeDefinition{
+		Name: "ID",
+		Kind: ast.TypeDefinitionKindScalar,
+	}
+
+	// TODO: Implement all built-in scalar types
 )
 
 // SpecifiedDirectives returns a map similar to the one found on the Schema type, containing all
@@ -71,5 +80,12 @@ func SpecifiedDirectives() map[string]*ast.DirectiveDefinition {
 		"skip":       SkipDirective,
 		"include":    IncludeDirective,
 		"deprecated": DeprecatedDirective,
+	}
+}
+
+// SpecifiedTypes ...
+func SpecifiedTypes() map[string]*ast.TypeDefinition {
+	return map[string]*ast.TypeDefinition{
+		"ID": IDType,
 	}
 }

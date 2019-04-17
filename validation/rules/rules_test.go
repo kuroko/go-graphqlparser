@@ -191,7 +191,7 @@ func sdlRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 
 		walker := validation.NewWalker([]validation.VisitFunc{fn})
 
-		errs := validation.ValidateSDL(doc, tc.schema, walker)
+		_, errs := validation.ValidateSDL(doc, tc.schema, walker)
 		assert.Equal(t, tc.errs, errs, tc.msg)
 	}
 }

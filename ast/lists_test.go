@@ -141,12 +141,12 @@ func TestArguments_Reverse(t *testing.T) {
 	r2 := list.Reverse().Reverse()
 	assert.Equal(t, list, r2)
 
-	// data and pos are correctly reversed.
+	// data and Pos are correctly reversed.
 	list = list.Add(Argument{Name: "third"})
 	r3 := list.Reverse()
 	validate(t, r3, []string{"first", "second", "third"})
 
-	// data and pos are correctly re-reversed.
+	// data and Pos are correctly re-reversed.
 	r4 := r3.Reverse()
 	validate(t, r4, []string{"third", "second", "first"})
 }

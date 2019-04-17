@@ -23,7 +23,7 @@ var (
 		}
 
 		type Dog implements Being & Pet & Canine {
-			name(surname: Boolean): String
+			name(surname: Boolean): String @deprecated
 			nickname: String
 			barkVolume: Int
 			barks: Boolean

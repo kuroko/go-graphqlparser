@@ -30,7 +30,7 @@ func BenchmarkValidateSDL(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		errs = validation.ValidateSDL(doc, nil, graphql.DefaultValidationWalkerSDL)
+		_, errs = validation.ValidateSDL(doc, nil, graphql.DefaultValidationWalkerSDL)
 	}
 
 	b.StopTimer()

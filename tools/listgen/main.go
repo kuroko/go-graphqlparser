@@ -100,6 +100,44 @@ func ({{.AbridgedTN}}s *{{.TypeName}}s) ForEach(fn func({{.AbridgedTN}} {{.TypeN
 	}
 }
 
+// @wg:ignore
+type {{.TypeName}}sGenerator struct {
+	original *{{.TypeName}}s
+	current  *{{.TypeName}}s
+	iter     int
+	length   int
+}
+
+func (g *{{.TypeName}}sGenerator) Emit() ({{.TypeName}}, int) {
+	if g.current == nil {
+		return {{.TypeName}}{}, -1
+	}
+
+	retv := g.current.Data
+	reti := g.iter
+
+	g.current = g.current.next
+	g.iter++
+
+	return retv, reti
+}
+
+func (g *{{.TypeName}}sGenerator) Reset() {
+	g.current = g.original
+	g.iter = 0
+}
+
+// Generator returns a "Generator" type for this list, allowing for much more efficient iteration
+// over items within this linked list than using ForEach, though ForEach may still be more 
+// convenient, because ForEach is a high order function, it's slower.
+func ({{.AbridgedTN}}s *{{.TypeName}}s) Generator() {{.TypeName}}sGenerator {
+	return {{.TypeName}}sGenerator{
+		current: {{.AbridgedTN}}s,
+		iter:    0,
+		length:  {{.AbridgedTN}}s.Len(),
+	}
+}
+
 // Insert places the {{.TypeName}} in the position given by pos.
 // The method will insert at top if pos is greater than or equal to list length.
 // The method will insert at bottom if the pos is less than 0.

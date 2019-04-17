@@ -8,8 +8,8 @@ import (
 var (
 	// queryContextDecoratorWalker ...
 	queryContextDecoratorWalker = NewWalker([]VisitFunc{
-		setExecutableDefinition,
 		setFragments,
+		setExecutableDefinition,
 		setReferencedFragments,
 		setVariableUsages,
 	})
@@ -354,6 +354,8 @@ func PrepareContextSDL(ctx *Context) {
 
 			case ast.TypeSystemExtensionKindType:
 				if ctx.SDLContext.TypeExtensions == nil {
+					// TODO: This map is the wrong length, unless all type extensions are for unique
+					// types - not sure how we could get around that though...
 					ctx.SDLContext.TypeExtensions = make(map[string][]*ast.TypeExtension, ctx.Document.TypeExtensions)
 				}
 
