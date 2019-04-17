@@ -53,7 +53,7 @@ func UniqueFieldDefinitionNames(w *validation.Walker) {
 	})
 }
 
-// DuplicateFieldDefinitionNameMessage ...
+// DuplicateFieldDefinitionNameError ...
 func DuplicateFieldDefinitionNameError(typeName, fieldName string, line, col int) types.Error {
 	return types.NewError(
 		"Field \"" + typeName + "." + fieldName + "\" can only be defined once.",
@@ -61,7 +61,7 @@ func DuplicateFieldDefinitionNameError(typeName, fieldName string, line, col int
 	)
 }
 
-// ExistedFieldDefinitionNameMessage ...
+// ExistedFieldDefinitionNameError ...
 func ExistedFieldDefinitionNameError(typeName, fieldName string, line, col int) types.Error {
 	return types.NewError(
 		"Field \"" + typeName + "." + fieldName + "\" already exists in the schema. It cannot also be defined in this type extension.",

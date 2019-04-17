@@ -75,12 +75,12 @@ func TestPossibleTypeExtensions(t *testing.T) {
 			extend input Unknown @dummy
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)),
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)),
 		},
 		{
 			msg: "does not consider non-type definitions",
@@ -96,12 +96,12 @@ func TestPossibleTypeExtensions(t *testing.T) {
 			extend input Foo @dummy
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExtendingUnknownTypeMessage("Foo", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Foo", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Foo", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Foo", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Foo", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Foo", 0, 0)),
+				Add(rules.ExtendingUnknownTypeError("Foo", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Foo", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Foo", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Foo", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Foo", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Foo", 0, 0)),
 		},
 		{
 			msg: "extending with different kinds",
@@ -120,12 +120,12 @@ func TestPossibleTypeExtensions(t *testing.T) {
 			extend scalar FooInputObject @dummy
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooScalar", "scalar", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooObject", "object", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooInterface", "interface", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooUnion", "union", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooEnum", "enum", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooInputObject", "input object", 0, 0)),
+				Add(rules.ExtendingDifferentTypeKindError("FooScalar", "scalar", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooObject", "object", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooInterface", "interface", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooUnion", "union", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooEnum", "enum", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooInputObject", "input object", 0, 0)),
 		},
 		{
 			msg: "extending types within existing schema",
@@ -158,12 +158,12 @@ func TestPossibleTypeExtensions(t *testing.T) {
 			extend input Unknown @dummy
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)).
-				Add(rules.ExtendingUnknownTypeMessage("Unknown", 0, 0)),
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)).
+				Add(rules.ExtendingUnknownTypeError("Unknown", 0, 0)),
 		},
 		{
 			msg: "extending types with different kinds within existing schema",
@@ -184,12 +184,12 @@ func TestPossibleTypeExtensions(t *testing.T) {
 			extend scalar FooInputObject @dummy
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooScalar", "scalar", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooObject", "object", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooInterface", "interface", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooUnion", "union", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooEnum", "enum", 0, 0)).
-				Add(rules.ExtendingDifferentTypeKindMessage("FooInputObject", "input object", 0, 0)),
+				Add(rules.ExtendingDifferentTypeKindError("FooScalar", "scalar", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooObject", "object", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooInterface", "interface", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooUnion", "union", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooEnum", "enum", 0, 0)).
+				Add(rules.ExtendingDifferentTypeKindError("FooInputObject", "input object", 0, 0)),
 		},
 	}
 

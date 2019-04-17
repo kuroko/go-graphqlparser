@@ -21,12 +21,12 @@ func LoneAnonymousOperation(w *validation.Walker) {
 // AnonOperationNotAloneError ...
 func AnonOperationNotAloneError(line, col int) types.Error {
 	return types.NewError(
-		anonOperationNotAloneMessage(),
+		anonOperationNotAloneError(),
 		// TODO: Location.
 	)
 }
 
-// anonOperationNotAloneMessage ...
-func anonOperationNotAloneMessage() string {
+// anonOperationNotAloneError ...
+func anonOperationNotAloneError() string {
 	return "This anonymous operation must be the only defined operation."
 }

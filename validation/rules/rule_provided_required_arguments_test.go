@@ -41,8 +41,8 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.MissingDirectiveArgMessage("include", "if", "Boolean!", 0, 0)).
-				Add(rules.MissingDirectiveArgMessage("skip", "if", "Boolean!", 0, 0)),
+				Add(rules.MissingDirectiveArgError("include", "if", "Boolean!", 0, 0)).
+				Add(rules.MissingDirectiveArgError("skip", "if", "Boolean!", 0, 0)),
 		},
 		{
 			msg: "missing optional args on directive defined inside SDL",
@@ -62,7 +62,7 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			directive @test(arg: String!) on FIELD_DEFINITION
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.MissingDirectiveArgMessage("test", "arg", "String!", 0, 0)),
+				Add(rules.MissingDirectiveArgError("test", "arg", "String!", 0, 0)),
 		},
 		{
 			msg: "missing arg on standard directive",
@@ -72,7 +72,7 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.MissingDirectiveArgMessage("include", "if", "Boolean!", 0, 0)),
+				Add(rules.MissingDirectiveArgError("include", "if", "Boolean!", 0, 0)),
 		},
 		{
 			msg: "missing arg on overridden standard directive",
@@ -83,7 +83,7 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			directive @deprecated(reason: String!) on FIELD
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.MissingDirectiveArgMessage("deprecated", "reason", "String!", 0, 0)),
+				Add(rules.MissingDirectiveArgError("deprecated", "reason", "String!", 0, 0)),
 		},
 		{
 			msg: "missing arg on directive defined in schema extension",
@@ -97,7 +97,7 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			extend type Query  @test
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.MissingDirectiveArgMessage("test", "arg", "String!", 0, 0)),
+				Add(rules.MissingDirectiveArgError("test", "arg", "String!", 0, 0)),
 		},
 		{
 			msg: "missing arg on directive used in schema extension",
@@ -111,7 +111,7 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			extend type Query @test
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.MissingDirectiveArgMessage("test", "arg", "String!", 0, 0)),
+				Add(rules.MissingDirectiveArgError("test", "arg", "String!", 0, 0)),
 		},
 	}
 
@@ -250,7 +250,7 @@ func TestProvidedRequiredArguments(t *testing.T) {
 		}
 		`,
 			errs: (*types.Errors)(nil).
-				Add(rules.MissingFieldArgMessage("multipleReqs", "req1", "Int!", 0, 0)),
+				Add(rules.MissingFieldArgError("multipleReqs", "req1", "Int!", 0, 0)),
 		},
 		{
 			msg: "missing multiple non-nullable arguments",
@@ -262,8 +262,8 @@ func TestProvidedRequiredArguments(t *testing.T) {
 		}
 		`,
 			errs: (*types.Errors)(nil).
-				Add(rules.MissingFieldArgMessage("multipleReqs", "req1", "Int!", 0, 0)).
-				Add(rules.MissingFieldArgMessage("multipleReqs", "req2", "Int!", 0, 0)),
+				Add(rules.MissingFieldArgError("multipleReqs", "req1", "Int!", 0, 0)).
+				Add(rules.MissingFieldArgError("multipleReqs", "req2", "Int!", 0, 0)),
 		},
 		{
 			msg: "incorrect value and missing argument",
@@ -275,7 +275,7 @@ func TestProvidedRequiredArguments(t *testing.T) {
 		}
 		`,
 			errs: (*types.Errors)(nil).
-				Add(rules.MissingFieldArgMessage("multipleReqs", "req2", "Int!", 0, 0)),
+				Add(rules.MissingFieldArgError("multipleReqs", "req2", "Int!", 0, 0)),
 		},
 	}
 

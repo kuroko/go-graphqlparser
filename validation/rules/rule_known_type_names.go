@@ -28,7 +28,7 @@ func KnownTypeNames(w *validation.Walker) {
 	})
 }
 
-// UnknownTypeMessage ...
+// UnknownTypeError ...
 func UnknownTypeError(typeName string, line, col int) types.Error {
 	return types.NewError(
 		"Unknown type \"" + typeName + "\".",

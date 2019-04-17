@@ -42,13 +42,13 @@ func NoUnusedVariables(w *validation.Walker) {
 // UnusedVariableError ...
 func UnusedVariableError(varName, opName string, line, col int) types.Error {
 	return types.NewError(
-		unusedVariableMessage(varName, opName),
+		unusedVariableError(varName, opName),
 		// TODO: Location.
 	)
 }
 
-// unusedVariableMessage ...
-func unusedVariableMessage(varName, opName string) string {
+// unusedVariableError ...
+func unusedVariableError(varName, opName string) string {
 	if len(opName) > 0 {
 		return fmt.Sprintf("Variable %s is never used in operation %s", varName, opName)
 	}

@@ -8,12 +8,12 @@ import (
 // PossibleTypeExtensions ...
 func PossibleTypeExtensions(w *validation.Walker) {}
 
-// ExtendingUnknownTypeMessage ...
-func ExtendingUnknownTypeMessage(typeName string, line, col int) types.Error {
+// ExtendingUnknownTypeError ...
+func ExtendingUnknownTypeError(typeName string, line, col int) types.Error {
 	return types.NewError("Cannot extend type \"" + typeName + "\" because it is not defined.")
 }
 
-// ExtendingDifferentTypeKindMessage ...
-func ExtendingDifferentTypeKindMessage(typeName, kind string, line, col int) types.Error {
+// ExtendingDifferentTypeKindError ...
+func ExtendingDifferentTypeKindError(typeName, kind string, line, col int) types.Error {
 	return types.NewError("Cannot extend non-" + kind + "type \"" + typeName + "\".")
 }
