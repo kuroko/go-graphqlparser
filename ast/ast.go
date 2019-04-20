@@ -443,12 +443,14 @@ func (d TypeDefinition) GetEnumValueDefinition(valueName string) (EnumValueDefin
 	var found bool
 
 	if IsEnumTypeDefinition(&d) {
-		d.EnumValuesDefinition.ForEach(func(ievd EnumValueDefinition, i int) {
+		gen := d.EnumValuesDefinition.Generator()
+		for ievd, i := gen.Emit(); i < d.EnumValuesDefinition.Len(); ievd, i = gen.Emit() {
 			if ievd.EnumValue == valueName {
 				evd = ievd
 				found = true
+				break
 			}
-		})
+		}
 	}
 
 	return evd, found
