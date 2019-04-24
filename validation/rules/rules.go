@@ -52,6 +52,10 @@ var SpecifiedSDL = []validation.VisitFunc{
 	//UniqueDirectiveNames,
 	//UniqueTypeNames,
 
+	// These rules are handled after walking:
+	//UniqueEnumValueNames,
+	//UniqueFieldDefinitionNames,
+
 	UniqueOperationTypes,
 	UniqueDirectivesPerLocation,
 	UniqueArgumentNames,
@@ -61,11 +65,6 @@ var SpecifiedSDL = []validation.VisitFunc{
 	KnownTypeNames,
 	// PossibleTypeExtensions,
 	ProvidedRequiredArgumentsOnDirectives,
-
-	// TODO: Move to BuildSchema:
-	// NOTE: This one is an absolute killer of performance, but may be difficult to move.
-	//UniqueFieldDefinitionNames,
-	UniqueEnumValueNames,
 
 	// TODO: You shouldn't be able to apply the same directive to a type and any type extensions for
 	// that type, they should be unique across the whole type. Again, this is not tested in the

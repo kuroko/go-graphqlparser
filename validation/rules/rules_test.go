@@ -179,7 +179,13 @@ func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 		walker := validation.NewWalker([]validation.VisitFunc{fn})
 
 		errs := validation.Validate(doc, schema, walker)
-		assert.Equal(t, tc.errs, errs, tc.msg)
+
+		// We need to sort errors, because we use maps in some places, and it leads to unpredictable
+		// result error ordering.
+		testErrs := types.SortErrors(tc.errs)
+		rsltErrs := types.SortErrors(errs)
+
+		assert.Equal(t, testErrs, rsltErrs, tc.msg)
 	}
 }
 
@@ -192,6 +198,12 @@ func sdlRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 		walker := validation.NewWalker([]validation.VisitFunc{fn})
 
 		_, errs := validation.ValidateSDL(doc, tc.schema, walker)
-		assert.Equal(t, tc.errs, errs, tc.msg)
+
+		// We need to sort errors, because we use maps in some places, and it leads to unpredictable
+		// result error ordering.
+		testErrs := types.SortErrors(tc.errs)
+		rsltErrs := types.SortErrors(errs)
+
+		assert.Equal(t, testErrs, rsltErrs, tc.msg)
 	}
 }

@@ -444,7 +444,7 @@ func (d TypeDefinition) GetEnumValueDefinition(valueName string) (EnumValueDefin
 
 	if IsEnumTypeDefinition(&d) {
 		gen := d.EnumValuesDefinition.Generator()
-		for ievd, i := gen.Emit(); i < d.EnumValuesDefinition.Len(); ievd, i = gen.Emit() {
+		for ievd, i := gen.Next(); i < d.EnumValuesDefinition.Len(); ievd, i = gen.Next() {
 			if ievd.EnumValue == valueName {
 				evd = ievd
 				found = true

@@ -45,6 +45,7 @@ func (es *Errors) ForEach(fn func(e Error, i int)) {
 	}
 }
 
+// ErrorsGenerator is a type used to iterate efficiently over Errors.
 // @wg:ignore
 type ErrorsGenerator struct {
 	original *Errors
@@ -53,7 +54,9 @@ type ErrorsGenerator struct {
 	length   int
 }
 
-func (g *ErrorsGenerator) Emit() (Error, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *ErrorsGenerator) Next() (Error, int) {
 	if g.current == nil {
 		return Error{}, -1
 	}
@@ -67,6 +70,8 @@ func (g *ErrorsGenerator) Emit() (Error, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *ErrorsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0

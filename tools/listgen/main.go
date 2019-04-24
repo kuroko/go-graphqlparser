@@ -100,6 +100,7 @@ func ({{.AbridgedTN}}s *{{.TypeName}}s) ForEach(fn func({{.AbridgedTN}} {{.TypeN
 	}
 }
 
+// {{.TypeName}}sGenerator is a type used to iterate efficiently over {{.TypeName}}s.
 // @wg:ignore
 type {{.TypeName}}sGenerator struct {
 	original *{{.TypeName}}s
@@ -108,7 +109,9 @@ type {{.TypeName}}sGenerator struct {
 	length   int
 }
 
-func (g *{{.TypeName}}sGenerator) Emit() ({{.TypeName}}, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be 
+// returned.
+func (g *{{.TypeName}}sGenerator) Next() ({{.TypeName}}, int) {
 	if g.current == nil {
 		return {{.TypeName}}{}, -1
 	}
@@ -122,6 +125,8 @@ func (g *{{.TypeName}}sGenerator) Emit() ({{.TypeName}}, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *{{.TypeName}}sGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0

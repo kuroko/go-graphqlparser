@@ -1,3 +1,5 @@
+// +build ignore
+
 package rules_test
 
 import (
@@ -5,6 +7,7 @@ import (
 
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -43,7 +46,7 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
+				Add(validation.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "extend enum with new value",
@@ -51,11 +54,11 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				enum SomeEnum {
 					FOO
 				}
-
+		
 				extend enum SomeEnum {
 					BAR
 				}
-
+		
 				extend enum SomeEnum {
 					BAZ
 				}
@@ -67,19 +70,19 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				enum SomeEnum {
 					FOO
 				}
-
+		
 				extend enum SomeEnum {
 					FOO
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
+				Add(validation.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "duplicate value inside extension",
 			query: `
 				enum SomeEnum
-
+		
 				extend enum SomeEnum {
 					FOO
 					BAR
@@ -87,23 +90,23 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
+				Add(validation.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "duplicate value inside different extensions",
 			query: `
 				enum SomeEnum
-
+		
 				extend enum SomeEnum {
 					FOO
 				}
-
+		
 				extend enum SomeEnum {
 					FOO
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
+				Add(validation.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "adding new value to the type inside existing schema",
@@ -127,14 +130,14 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				extend enum SomeEnum {
 					FOO
 				}
-
+		
 				extend enum SomeEnum {
 					FOO
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExistedEnumValueNameError("SomeEnum", "FOO", 0, 0)).
-				Add(rules.ExistedEnumValueNameError("SomeEnum", "FOO", 0, 0)),
+				Add(validation.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)).
+				Add(validation.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 		{
 			msg: "adding conflicting value to existing schema twice",
@@ -145,13 +148,13 @@ func TestUniqueEnumValueNames(t *testing.T) {
 				extend enum SomeEnum {
 					FOO
 				}
-
+		
 				extend enum SomeEnum {
 					FOO
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
+				Add(validation.DuplicateEnumValueNameError("SomeEnum", "FOO", 0, 0)),
 		},
 	}
 

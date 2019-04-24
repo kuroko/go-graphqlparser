@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"sort"
 	"strconv"
 
 	"github.com/bucketd/go-graphqlparser/ast"
@@ -69,4 +70,27 @@ func (e *Error) MarshalJSON() ([]byte, error) {
 	buf.WriteString(`}`)
 
 	return buf.Bytes(), nil
+}
+
+// SortErrors ...
+func SortErrors(errs *Errors) *Errors {
+	sl := make([]Error, 0, errs.Len())
+	errs.ForEach(func(err Error, i int) {
+		sl = append(sl, err)
+	})
+
+	sort.Slice(sl, func(i, j int) bool {
+		// Don't worry, these can't error.
+		ei, _ := sl[i].MarshalJSON()
+		ej, _ := sl[j].MarshalJSON()
+
+		return string(ei) < string(ej)
+	})
+
+	sorted := (*Errors)(nil)
+	for _, err := range sl {
+		sorted = sorted.Add(err)
+	}
+
+	return sorted
 }

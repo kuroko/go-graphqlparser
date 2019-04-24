@@ -45,6 +45,7 @@ func (as *Arguments) ForEach(fn func(a Argument, i int)) {
 	}
 }
 
+// ArgumentsGenerator is a type used to iterate efficiently over Arguments.
 // @wg:ignore
 type ArgumentsGenerator struct {
 	original *Arguments
@@ -53,7 +54,9 @@ type ArgumentsGenerator struct {
 	length   int
 }
 
-func (g *ArgumentsGenerator) Emit() (Argument, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *ArgumentsGenerator) Next() (Argument, int) {
 	if g.current == nil {
 		return Argument{}, -1
 	}
@@ -67,6 +70,8 @@ func (g *ArgumentsGenerator) Emit() (Argument, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *ArgumentsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -211,6 +216,7 @@ func (ds *Definitions) ForEach(fn func(d Definition, i int)) {
 	}
 }
 
+// DefinitionsGenerator is a type used to iterate efficiently over Definitions.
 // @wg:ignore
 type DefinitionsGenerator struct {
 	original *Definitions
@@ -219,7 +225,9 @@ type DefinitionsGenerator struct {
 	length   int
 }
 
-func (g *DefinitionsGenerator) Emit() (Definition, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *DefinitionsGenerator) Next() (Definition, int) {
 	if g.current == nil {
 		return Definition{}, -1
 	}
@@ -233,6 +241,8 @@ func (g *DefinitionsGenerator) Emit() (Definition, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *DefinitionsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -377,6 +387,7 @@ func (ds *Directives) ForEach(fn func(d Directive, i int)) {
 	}
 }
 
+// DirectivesGenerator is a type used to iterate efficiently over Directives.
 // @wg:ignore
 type DirectivesGenerator struct {
 	original *Directives
@@ -385,7 +396,9 @@ type DirectivesGenerator struct {
 	length   int
 }
 
-func (g *DirectivesGenerator) Emit() (Directive, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *DirectivesGenerator) Next() (Directive, int) {
 	if g.current == nil {
 		return Directive{}, -1
 	}
@@ -399,6 +412,8 @@ func (g *DirectivesGenerator) Emit() (Directive, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *DirectivesGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -543,6 +558,7 @@ func (evds *EnumValueDefinitions) ForEach(fn func(evd EnumValueDefinition, i int
 	}
 }
 
+// EnumValueDefinitionsGenerator is a type used to iterate efficiently over EnumValueDefinitions.
 // @wg:ignore
 type EnumValueDefinitionsGenerator struct {
 	original *EnumValueDefinitions
@@ -551,7 +567,9 @@ type EnumValueDefinitionsGenerator struct {
 	length   int
 }
 
-func (g *EnumValueDefinitionsGenerator) Emit() (EnumValueDefinition, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *EnumValueDefinitionsGenerator) Next() (EnumValueDefinition, int) {
 	if g.current == nil {
 		return EnumValueDefinition{}, -1
 	}
@@ -565,6 +583,8 @@ func (g *EnumValueDefinitionsGenerator) Emit() (EnumValueDefinition, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *EnumValueDefinitionsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -709,6 +729,7 @@ func (fds *FieldDefinitions) ForEach(fn func(fd FieldDefinition, i int)) {
 	}
 }
 
+// FieldDefinitionsGenerator is a type used to iterate efficiently over FieldDefinitions.
 // @wg:ignore
 type FieldDefinitionsGenerator struct {
 	original *FieldDefinitions
@@ -717,7 +738,9 @@ type FieldDefinitionsGenerator struct {
 	length   int
 }
 
-func (g *FieldDefinitionsGenerator) Emit() (FieldDefinition, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *FieldDefinitionsGenerator) Next() (FieldDefinition, int) {
 	if g.current == nil {
 		return FieldDefinition{}, -1
 	}
@@ -731,6 +754,8 @@ func (g *FieldDefinitionsGenerator) Emit() (FieldDefinition, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *FieldDefinitionsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -875,6 +900,7 @@ func (ivds *InputValueDefinitions) ForEach(fn func(ivd InputValueDefinition, i i
 	}
 }
 
+// InputValueDefinitionsGenerator is a type used to iterate efficiently over InputValueDefinitions.
 // @wg:ignore
 type InputValueDefinitionsGenerator struct {
 	original *InputValueDefinitions
@@ -883,7 +909,9 @@ type InputValueDefinitionsGenerator struct {
 	length   int
 }
 
-func (g *InputValueDefinitionsGenerator) Emit() (InputValueDefinition, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *InputValueDefinitionsGenerator) Next() (InputValueDefinition, int) {
 	if g.current == nil {
 		return InputValueDefinition{}, -1
 	}
@@ -897,6 +925,8 @@ func (g *InputValueDefinitionsGenerator) Emit() (InputValueDefinition, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *InputValueDefinitionsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -1041,6 +1071,7 @@ func (ls *Locations) ForEach(fn func(l Location, i int)) {
 	}
 }
 
+// LocationsGenerator is a type used to iterate efficiently over Locations.
 // @wg:ignore
 type LocationsGenerator struct {
 	original *Locations
@@ -1049,7 +1080,9 @@ type LocationsGenerator struct {
 	length   int
 }
 
-func (g *LocationsGenerator) Emit() (Location, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *LocationsGenerator) Next() (Location, int) {
 	if g.current == nil {
 		return Location{}, -1
 	}
@@ -1063,6 +1096,8 @@ func (g *LocationsGenerator) Emit() (Location, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *LocationsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -1207,6 +1242,7 @@ func (otds *OperationTypeDefinitions) ForEach(fn func(otd OperationTypeDefinitio
 	}
 }
 
+// OperationTypeDefinitionsGenerator is a type used to iterate efficiently over OperationTypeDefinitions.
 // @wg:ignore
 type OperationTypeDefinitionsGenerator struct {
 	original *OperationTypeDefinitions
@@ -1215,7 +1251,9 @@ type OperationTypeDefinitionsGenerator struct {
 	length   int
 }
 
-func (g *OperationTypeDefinitionsGenerator) Emit() (OperationTypeDefinition, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *OperationTypeDefinitionsGenerator) Next() (OperationTypeDefinition, int) {
 	if g.current == nil {
 		return OperationTypeDefinition{}, -1
 	}
@@ -1229,6 +1267,8 @@ func (g *OperationTypeDefinitionsGenerator) Emit() (OperationTypeDefinition, int
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *OperationTypeDefinitionsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -1373,6 +1413,7 @@ func (pns *PathNodes) ForEach(fn func(pn PathNode, i int)) {
 	}
 }
 
+// PathNodesGenerator is a type used to iterate efficiently over PathNodes.
 // @wg:ignore
 type PathNodesGenerator struct {
 	original *PathNodes
@@ -1381,7 +1422,9 @@ type PathNodesGenerator struct {
 	length   int
 }
 
-func (g *PathNodesGenerator) Emit() (PathNode, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *PathNodesGenerator) Next() (PathNode, int) {
 	if g.current == nil {
 		return PathNode{}, -1
 	}
@@ -1395,6 +1438,8 @@ func (g *PathNodesGenerator) Emit() (PathNode, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *PathNodesGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -1539,6 +1584,7 @@ func (ss *Selections) ForEach(fn func(s Selection, i int)) {
 	}
 }
 
+// SelectionsGenerator is a type used to iterate efficiently over Selections.
 // @wg:ignore
 type SelectionsGenerator struct {
 	original *Selections
@@ -1547,7 +1593,9 @@ type SelectionsGenerator struct {
 	length   int
 }
 
-func (g *SelectionsGenerator) Emit() (Selection, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *SelectionsGenerator) Next() (Selection, int) {
 	if g.current == nil {
 		return Selection{}, -1
 	}
@@ -1561,6 +1609,8 @@ func (g *SelectionsGenerator) Emit() (Selection, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *SelectionsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -1705,6 +1755,7 @@ func (ts *Types) ForEach(fn func(t Type, i int)) {
 	}
 }
 
+// TypesGenerator is a type used to iterate efficiently over Types.
 // @wg:ignore
 type TypesGenerator struct {
 	original *Types
@@ -1713,7 +1764,9 @@ type TypesGenerator struct {
 	length   int
 }
 
-func (g *TypesGenerator) Emit() (Type, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *TypesGenerator) Next() (Type, int) {
 	if g.current == nil {
 		return Type{}, -1
 	}
@@ -1727,6 +1780,8 @@ func (g *TypesGenerator) Emit() (Type, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *TypesGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
@@ -1871,6 +1926,7 @@ func (vds *VariableDefinitions) ForEach(fn func(vd VariableDefinition, i int)) {
 	}
 }
 
+// VariableDefinitionsGenerator is a type used to iterate efficiently over VariableDefinitions.
 // @wg:ignore
 type VariableDefinitionsGenerator struct {
 	original *VariableDefinitions
@@ -1879,7 +1935,9 @@ type VariableDefinitionsGenerator struct {
 	length   int
 }
 
-func (g *VariableDefinitionsGenerator) Emit() (VariableDefinition, int) {
+// Next returns the current value, and it's index in the list, and sets up the next value to be
+// returned.
+func (g *VariableDefinitionsGenerator) Next() (VariableDefinition, int) {
 	if g.current == nil {
 		return VariableDefinition{}, -1
 	}
@@ -1893,6 +1951,8 @@ func (g *VariableDefinitionsGenerator) Emit() (VariableDefinition, int) {
 	return retv, reti
 }
 
+// Reset returns this generator to it's initial state, allowing it to be used again to iterate over
+// this linked list.
 func (g *VariableDefinitionsGenerator) Reset() {
 	g.current = g.original
 	g.iter = 0
