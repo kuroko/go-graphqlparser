@@ -1,5 +1,3 @@
-// +build ignore
-
 package rules_test
 
 import (
@@ -8,7 +6,6 @@ import (
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
-	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 func TestUniqueEnumValueNames(t *testing.T) {
@@ -158,5 +155,5 @@ func TestUniqueEnumValueNames(t *testing.T) {
 		},
 	}
 
-	sdlRuleTester(t, tt, rules.UniqueEnumValueNames)
+	sdlRuleTester(t, tt, func(w *validation.Walker) {})
 }
