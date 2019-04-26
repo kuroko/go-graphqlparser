@@ -87,7 +87,7 @@ func (l *Lexer) Scan() Token {
 		return l.scanNumber(r)
 
 	case r == '#':
-		return l.scanComment(r)
+		return l.scanComment()
 
 	case r == '"':
 		r1, w1 := l.read()
@@ -101,13 +101,13 @@ func (l *Lexer) Scan() Token {
 		}
 
 		if r1 == '"' && r2 == '"' {
-			return l.scanBlockString(r)
+			return l.scanBlockString()
 		}
 
 		l.unread(w2)
 		l.unread(w1)
 
-		return l.scanString(r)
+		return l.scanString()
 
 	case r == eof:
 		return Token{
@@ -127,8 +127,9 @@ func (l *Lexer) Scan() Token {
 }
 
 // scanString scans a valid GraphQL string.
-func (l *Lexer) scanString(r rune) Token {
+func (l *Lexer) scanString() Token {
 	var w int
+	var r rune
 
 	startPos := l.pos
 	startLPos := l.lpos
@@ -161,9 +162,9 @@ Loop:
 		case r == bsl:
 			hasEscape = true
 
-			r, w = l.read()
+			r, _ = l.read()
 			if r >= utf8.RuneSelf {
-				r, w = l.readUnicode()
+				r, _ = l.readUnicode()
 			}
 
 			// No need to increment bc here, if we hit backslash, we should already have incremented
@@ -175,22 +176,22 @@ Loop:
 			if r == 'u' {
 				r, _ = l.read()
 				if r >= utf8.RuneSelf {
-					r, _ = l.readUnicode()
+					_, _ = l.readUnicode()
 				}
 
 				r, _ = l.read()
 				if r >= utf8.RuneSelf {
-					r, _ = l.readUnicode()
+					_, _ = l.readUnicode()
 				}
 
 				r, _ = l.read()
 				if r >= utf8.RuneSelf {
-					r, _ = l.readUnicode()
+					_, _ = l.readUnicode()
 				}
 
 				r, _ = l.read()
 				if r >= utf8.RuneSelf {
-					r, _ = l.readUnicode()
+					_, _ = l.readUnicode()
 				}
 
 				// Increment bc by 3, because we've already incremented by 1 above at the start of
@@ -259,12 +260,13 @@ Loop:
 }
 
 // scanBlockString scans a valid GraphQL block string.
-func (l *Lexer) scanBlockString(r rune) Token {
+func (l *Lexer) scanBlockString() Token {
 	startPos := l.pos
 	startLPos := l.lpos
 	startLine := l.line
 
 	var bc int
+	var r rune
 	var w int
 
 	var hasEscape bool
@@ -589,8 +591,9 @@ func hexRuneToInt(r rune) int {
 }
 
 // scanComment scans valid GraphQL comments.
-func (l *Lexer) scanComment(r rune) Token {
+func (l *Lexer) scanComment() Token {
 	var wasCR bool
+	var r rune
 	var w int
 
 	for {
@@ -725,9 +728,9 @@ func (l *Lexer) scanNumber(r rune) Token {
 
 	// Check for preceding minus sign
 	if r == '-' {
-		r, w = l.read()
+		r, _ = l.read()
 		if r >= utf8.RuneSelf {
-			r, w = l.readUnicode()
+			r, _ = l.readUnicode()
 		}
 	}
 
@@ -766,9 +769,9 @@ func (l *Lexer) scanNumber(r rune) Token {
 	if r == '.' {
 		float = true
 
-		r, w = l.read()
+		r, _ = l.read()
 		if r >= utf8.RuneSelf {
-			r, w = l.readUnicode()
+			r, _ = l.readUnicode()
 		}
 
 		// Read the digits after the decimal place if the first character is not a digit, error.
@@ -787,16 +790,16 @@ func (l *Lexer) scanNumber(r rune) Token {
 	if r == 'e' || r == 'E' {
 		float = true
 
-		r, w = l.read()
+		r, _ = l.read()
 		if r >= utf8.RuneSelf {
-			r, w = l.readUnicode()
+			r, _ = l.readUnicode()
 		}
 
 		// Check for positive or negative symbol in front of the value.
 		if r == '+' || r == '-' {
-			r, w = l.read()
+			r, _ = l.read()
 			if r >= utf8.RuneSelf {
-				r, w = l.readUnicode()
+				r, _ = l.readUnicode()
 			}
 		}
 

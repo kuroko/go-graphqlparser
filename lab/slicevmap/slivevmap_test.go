@@ -5,8 +5,6 @@ import (
 	"testing"
 )
 
-const n = 10
-
 type brt struct {
 	m map[int]struct{}
 	s []int

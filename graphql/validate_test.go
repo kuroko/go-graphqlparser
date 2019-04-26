@@ -40,7 +40,7 @@ func BenchmarkValidateSDL(b *testing.B) {
 	var err error
 
 	for i := 0; i < b.N; i++ {
-		gerrs, err = graphql.ValidateSDL(nil, schemaDoc)
+		_, gerrs, err = graphql.ValidateSDL(nil, schemaDoc)
 	}
 
 	b.StopTimer()

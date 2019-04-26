@@ -210,7 +210,7 @@ func TestLexer_ScanGolden(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(fmt.Sprintf("%s", test.index), func(t *testing.T) {
+		t.Run(test.index, func(t *testing.T) {
 			lxr := language.NewLexer([]byte(test.input))
 			actual := record{
 				Input: test.input,
