@@ -7,42 +7,10 @@ import (
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 )
 
-// DuplicateTypeNameError ...
-func DuplicateTypeNameError(typeName string, line, col int) types.Error {
+// AnonOperationNotAloneError ...
+func AnonOperationNotAloneError(line, col int) types.Error {
 	return types.NewError(
-		"There can be only one type named " + typeName + ".",
-		// TODO: Location.
-	)
-}
-
-// ExistedTypeNameError ...
-func ExistedTypeNameError(typeName string, line, col int) types.Error {
-	return types.NewError(
-		"Type " + typeName + " already exists in the schema. It cannot also be defined in this type definition.",
-		// TODO: Location.
-	)
-}
-
-// DuplicateDirectiveNameError ...
-func DuplicateDirectiveNameError(directiveName string, line, col int) types.Error {
-	return types.NewError(
-		"There can be only one directive named \"" + directiveName + "\".",
-		// TODO: Location.
-	)
-}
-
-// ExistedDirectiveNameError ...
-func ExistedDirectiveNameError(directiveName string, line, col int) types.Error {
-	return types.NewError(
-		"Directive \"" + directiveName + "\" already exists in the schema. It cannot be redefined.",
-		// TODO: Location.
-	)
-}
-
-// SchemaDefinitionNotAloneError ...
-func SchemaDefinitionNotAloneError(line, col int) types.Error {
-	return types.NewError(
-		"Must provide only one schema definition.",
+		"This anonymous operation must be the only defined operation.",
 		// TODO: Location.
 	)
 }
@@ -55,10 +23,23 @@ func CanNotDefineSchemaWithinExtensionError(line, col int) types.Error {
 	)
 }
 
-// DuplicateFieldDefinitionNameError ...
-func DuplicateFieldDefinitionNameError(typeName, fieldName string, line, col int) types.Error {
+// DuplicateArgError ...
+func DuplicateArgError(argName string, line, col int) types.Error {
+	return types.NewError("There can be only one argument named \"" + argName + "\".")
+}
+
+// DuplicateDirectiveError ...
+func DuplicateDirectiveError(directiveName string, line, col int) types.Error {
 	return types.NewError(
-		"Field \"" + typeName + "." + fieldName + "\" can only be defined once.",
+		"The directive \"" + directiveName + "\" can only be used once at this location.",
+		// TODO: Location.
+	)
+}
+
+// DuplicateDirectiveNameError ...
+func DuplicateDirectiveNameError(directiveName string, line, col int) types.Error {
+	return types.NewError(
+		"There can be only one directive named \"" + directiveName + "\".",
 		// TODO: Location.
 	)
 }
@@ -71,10 +52,47 @@ func DuplicateEnumValueNameError(typeName, valueName string, line, col int) type
 	)
 }
 
+// DuplicateFieldDefinitionNameError ...
+func DuplicateFieldDefinitionNameError(typeName, fieldName string, line, col int) types.Error {
+	return types.NewError(
+		"Field \"" + typeName + "." + fieldName + "\" can only be defined once.",
+		// TODO: Location.
+	)
+}
+
+// DuplicateInputFieldError ...
+func DuplicateInputFieldError(fieldName string, line, col int) types.Error {
+	return types.NewError(
+		"There can be only one input field named \"" + fieldName + "\".",
+		// TODO: Location.
+	)
+}
+
+// DuplicateOperationNameError ...
+func DuplicateOperationNameError(operationName string, line, col int) types.Error {
+	return types.NewError("There can be only one operation named " + operationName + ".")
+}
+
 // DuplicateOperationTypeError ...
 func DuplicateOperationTypeError(operation string, line, col int) types.Error {
 	return types.NewError(
 		"There can be only one " + operation + " type in schema.",
+		// TODO: Location.
+	)
+}
+
+// DuplicateTypeNameError ...
+func DuplicateTypeNameError(typeName string, line, col int) types.Error {
+	return types.NewError(
+		"There can be only one type named " + typeName + ".",
+		// TODO: Location.
+	)
+}
+
+// ExistedDirectiveNameError ...
+func ExistedDirectiveNameError(directiveName string, line, col int) types.Error {
+	return types.NewError(
+		"Directive \"" + directiveName + "\" already exists in the schema. It cannot be redefined.",
 		// TODO: Location.
 	)
 }
@@ -87,36 +105,28 @@ func ExistedOperationTypeError(operation string, line, col int) types.Error {
 	)
 }
 
-// DuplicateOperationNameError ...
-func DuplicateOperationNameError(operationName string, line, col int) types.Error {
-	return types.NewError("There can be only one operation named " + operationName + ".")
-}
-
-// DuplicateInputFieldError ...
-func DuplicateInputFieldError(fieldName string, line, col int) types.Error {
+// ExistedTypeNameError ...
+func ExistedTypeNameError(typeName string, line, col int) types.Error {
 	return types.NewError(
-		"There can be only one input field named \"" + fieldName + "\".",
+		"Type " + typeName + " already exists in the schema. It cannot also be defined in this type definition.",
 		// TODO: Location.
 	)
 }
 
-// DuplicateDirectiveError ...
-func DuplicateDirectiveError(directiveName string, line, col int) types.Error {
-	return types.NewError(
-		"The directive \"" + directiveName + "\" can only be used once at this location.",
-		// TODO: Location.
-	)
+// ExtendingDifferentTypeKindError ...
+func ExtendingDifferentTypeKindError(typeName, kind string, line, col int) types.Error {
+	return types.NewError("Cannot extend non-" + kind + "type \"" + typeName + "\".")
 }
 
-// DuplicateArgError ...
-func DuplicateArgError(argName string, line, col int) types.Error {
-	return types.NewError("There can be only one argument named \"" + argName + "\".")
+// ExtendingUnknownTypeError ...
+func ExtendingUnknownTypeError(typeName string, line, col int) types.Error {
+	return types.NewError("Cannot extend type \"" + typeName + "\" because it is not defined.")
 }
 
-// MissingFieldArgError ...
-func MissingFieldArgError(fieldName, argName, typeName string, line, col int) types.Error {
+// MisplacedDirectiveError ...
+func MisplacedDirectiveError(directiveName string, location ast.DirectiveLocation, line, col int) types.Error {
 	return types.NewError(
-		"Field \"" + fieldName + "\" argument \"" + argName + "\" of type \"" + typeName + "\" is required, but it was not provided",
+		"Directive \"" + directiveName + "\" may not be used on " + ast.NamesByDirectiveLocations[location] + ".",
 		// TODO: Location.
 	)
 }
@@ -129,14 +139,36 @@ func MissingDirectiveArgError(directiveName, argName, typeName string, line, col
 	)
 }
 
-// ExtendingUnknownTypeError ...
-func ExtendingUnknownTypeError(typeName string, line, col int) types.Error {
-	return types.NewError("Cannot extend type \"" + typeName + "\" because it is not defined.")
+// MissingFieldArgError ...
+func MissingFieldArgError(fieldName, argName, typeName string, line, col int) types.Error {
+	return types.NewError(
+		"Field \"" + fieldName + "\" argument \"" + argName + "\" of type \"" + typeName + "\" is required, but it was not provided",
+		// TODO: Location.
+	)
 }
 
-// ExtendingDifferentTypeKindError ...
-func ExtendingDifferentTypeKindError(typeName, kind string, line, col int) types.Error {
-	return types.NewError("Cannot extend non-" + kind + "type \"" + typeName + "\".")
+// NonExecutableDefinitionError ...
+func NonExecutableDefinitionError(name string, line, col int) types.Error {
+	return types.NewError(
+		"The \"" + name + "\" definition is not executable.",
+		// TODO: Location.
+	)
+}
+
+// SchemaDefinitionNotAloneError ...
+func SchemaDefinitionNotAloneError(line, col int) types.Error {
+	return types.NewError(
+		"Must provide only one schema definition.",
+		// TODO: Location.
+	)
+}
+
+// UnknownTypeError ...
+func UnknownTypeError(typeName string, line, col int) types.Error {
+	return types.NewError(
+		"Unknown type \"" + typeName + "\".",
+		// TODO: Location.
+	)
 }
 
 // UnusedVariableError ...
@@ -156,42 +188,10 @@ func unusedVariableMessage(varName, opName string) string {
 	return fmt.Sprintf("Variable %s is never used", varName)
 }
 
-// AnonOperationNotAloneError ...
-func AnonOperationNotAloneError(line, col int) types.Error {
-	return types.NewError(
-		"This anonymous operation must be the only defined operation.",
-		// TODO: Location.
-	)
-}
-
-// UnknownTypeError ...
-func UnknownTypeError(typeName string, line, col int) types.Error {
-	return types.NewError(
-		"Unknown type \"" + typeName + "\".",
-		// TODO: Location.
-	)
-}
-
 // UnknownDirectiveError ...
 func UnknownDirectiveError(directiveName string, line, col int) types.Error {
 	return types.NewError(
 		"Unknown directive \"" + directiveName + "\".",
-		// TODO: Location.
-	)
-}
-
-// MisplacedDirectiveError ...
-func MisplacedDirectiveError(directiveName string, location ast.DirectiveLocation, line, col int) types.Error {
-	return types.NewError(
-		"Directive \"" + directiveName + "\" may not be used on " + ast.NamesByDirectiveLocations[location] + ".",
-		// TODO: Location.
-	)
-}
-
-// NonExecutableDefinitionError ...
-func NonExecutableDefinitionError(name string, line, col int) types.Error {
-	return types.NewError(
-		"The \"" + name + "\" definition is not executable.",
 		// TODO: Location.
 	)
 }
