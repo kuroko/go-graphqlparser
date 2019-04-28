@@ -158,7 +158,7 @@ func BenchmarkContext_RecursivelyReferencedFragments(b *testing.B) {
 
 	ctx := NewContext(doc, nil)
 
-	// TODO: Make list function get item at index.
+	// TODO: Make list function to get item at index.
 	var def ast.Definition
 	doc.Definitions.ForEach(func(d ast.Definition, i int) {
 		if i == 0 {

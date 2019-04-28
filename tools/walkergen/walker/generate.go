@@ -337,7 +337,6 @@ func buildTypeKindFuncName(constName string) string {
 }
 
 // isTypeAlwaysPointer ...
-// TODO: Verify that this behaves as expected...
 func isTypeAlwaysPointer(st goast.SymbolTable, tn string) bool {
 	var referenced bool
 

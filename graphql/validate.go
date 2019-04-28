@@ -40,12 +40,10 @@ func ValidateSDL(schema *types.Schema, doc []byte) (*types.Schema, *types.Errors
 
 // ValidateAST ...
 func ValidateAST(schema *types.Schema, doc ast.Document) *types.Errors {
-	// TODO: Re-use existing walker, stored in global.
 	return validation.Validate(doc, schema, DefaultValidationWalker)
 }
 
 // ValidateSDLAST ...
 func ValidateSDLAST(schema *types.Schema, doc ast.Document) (*types.Schema, *types.Errors) {
-	// TODO: Re-use existing walker, stored in global.
 	return validation.ValidateSDL(doc, schema, DefaultValidationWalkerSDL)
 }

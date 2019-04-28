@@ -18,7 +18,6 @@ func ExecutableDefinitions(w *validation.Walker) {
 func getDefinitionName(def ast.Definition) string {
 	var name string
 
-	// TODO: We really need to move the name field to the top level of Definition...
 	switch def.Kind {
 	case ast.DefinitionKindTypeSystem:
 		tsDef := def.TypeSystemDefinition

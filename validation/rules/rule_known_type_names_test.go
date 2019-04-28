@@ -75,7 +75,7 @@ func TestKnownTypeNames(t *testing.T) {
 					Add(validation.UnknownTypeError("Badger", 0, 0)).
 					Add(validation.UnknownTypeError("Peettt", 0, 0)),
 			},
-			// TODO: It's not possible to use our parser and have a schema without the built-in
+			// NOTE: It's not possible to use our parser and have a schema without the built-in
 			// scalar types included. It's part of the spec, and a server would be pretty useless
 			// without them, so we're not going to include this test, but for reference, it's name
 			// is included below:
