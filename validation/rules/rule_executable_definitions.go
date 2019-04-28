@@ -2,7 +2,6 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -10,17 +9,9 @@ import (
 func ExecutableDefinitions(w *validation.Walker) {
 	w.AddDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.Definition) {
 		if def.Kind != ast.DefinitionKindExecutable {
-			ctx.AddError(NonExecutableDefinitionError(getDefinitionName(def), 0, 0))
+			ctx.AddError(validation.NonExecutableDefinitionError(getDefinitionName(def), 0, 0))
 		}
 	})
-}
-
-// NonExecutableDefinitionError ...
-func NonExecutableDefinitionError(name string, line, col int) types.Error {
-	return types.NewError(
-		"The \"" + name + "\" definition is not executable.",
-		// TODO: Location.
-	)
 }
 
 // getDefinitionName ...

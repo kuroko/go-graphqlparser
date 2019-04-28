@@ -5,6 +5,7 @@ import (
 
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -95,9 +96,9 @@ func TestUniqueOperationTypes(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)),
+				Add(validation.DuplicateOperationTypeError("query", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg: "duplicate operation types inside schema extension",
@@ -117,9 +118,9 @@ func TestUniqueOperationTypes(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)),
+				Add(validation.DuplicateOperationTypeError("query", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg: "duplicate operation types inside schema extension twice",
@@ -145,12 +146,12 @@ func TestUniqueOperationTypes(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)),
+				Add(validation.DuplicateOperationTypeError("query", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("subscription", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("query", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg: "duplicate operation types inside second schema extension",
@@ -173,9 +174,9 @@ func TestUniqueOperationTypes(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateOperationTypeError("query", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("mutation", 0, 0)).
-				Add(rules.DuplicateOperationTypeError("subscription", 0, 0)),
+				Add(validation.DuplicateOperationTypeError("query", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("mutation", 0, 0)).
+				Add(validation.DuplicateOperationTypeError("subscription", 0, 0)),
 		},
 		// These tests provide invalid schemas, and part of our validation occurs before these rules
 		// are run, so we can't include these tests.
@@ -241,9 +242,9 @@ func TestUniqueOperationTypes(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExistedOperationTypeError("query", 0, 0)).
-				Add(rules.ExistedOperationTypeError("mutation", 0, 0)).
-				Add(rules.ExistedOperationTypeError("subscription", 0, 0)),
+				Add(validation.ExistedOperationTypeError("query", 0, 0)).
+				Add(validation.ExistedOperationTypeError("mutation", 0, 0)).
+				Add(validation.ExistedOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg: "adding conflicting operation types to existing schema twice",
@@ -272,12 +273,12 @@ func TestUniqueOperationTypes(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.ExistedOperationTypeError("query", 0, 0)).
-				Add(rules.ExistedOperationTypeError("mutation", 0, 0)).
-				Add(rules.ExistedOperationTypeError("subscription", 0, 0)).
-				Add(rules.ExistedOperationTypeError("query", 0, 0)).
-				Add(rules.ExistedOperationTypeError("mutation", 0, 0)).
-				Add(rules.ExistedOperationTypeError("subscription", 0, 0)),
+				Add(validation.ExistedOperationTypeError("query", 0, 0)).
+				Add(validation.ExistedOperationTypeError("mutation", 0, 0)).
+				Add(validation.ExistedOperationTypeError("subscription", 0, 0)).
+				Add(validation.ExistedOperationTypeError("query", 0, 0)).
+				Add(validation.ExistedOperationTypeError("mutation", 0, 0)).
+				Add(validation.ExistedOperationTypeError("subscription", 0, 0)),
 		},
 	}
 

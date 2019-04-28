@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -61,8 +62,8 @@ func TestLoneAnonymousOperation(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.AnonOperationNotAloneError(0, 0)).
-				Add(rules.AnonOperationNotAloneError(0, 0)),
+				Add(validation.AnonOperationNotAloneError(0, 0)).
+				Add(validation.AnonOperationNotAloneError(0, 0)),
 		},
 		{
 			msg: "anon operation with a mutation",
@@ -76,7 +77,7 @@ func TestLoneAnonymousOperation(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.AnonOperationNotAloneError(0, 0)),
+				Add(validation.AnonOperationNotAloneError(0, 0)),
 		},
 		{
 			msg: "anon operation with a subscription",
@@ -90,7 +91,7 @@ func TestLoneAnonymousOperation(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.AnonOperationNotAloneError(0, 0)),
+				Add(validation.AnonOperationNotAloneError(0, 0)),
 		},
 	}
 

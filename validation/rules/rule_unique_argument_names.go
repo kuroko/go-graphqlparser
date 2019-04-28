@@ -2,7 +2,6 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -35,7 +34,7 @@ func validateArguments(ctx *validation.Context, arguments *ast.Arguments) {
 		argName := a.Name
 
 		if _, ok := knownArgNames[argName]; ok {
-			ctx.AddError(DuplicateArgError(argName, 0, 0))
+			ctx.AddError(validation.DuplicateArgError(argName, 0, 0))
 		} else {
 			knownArgNames[argName] = struct{}{}
 		}
@@ -50,14 +49,9 @@ func validateInputValueDefinitions(ctx *validation.Context, ivds *ast.InputValue
 		argName := ivd.Name
 
 		if _, ok := knownArgNames[argName]; ok {
-			ctx.AddError(DuplicateArgError(argName, 0, 0))
+			ctx.AddError(validation.DuplicateArgError(argName, 0, 0))
 		} else {
 			knownArgNames[argName] = struct{}{}
 		}
 	})
-}
-
-// DuplicateArgError ...
-func DuplicateArgError(argName string, line, col int) types.Error {
-	return types.NewError("There can be only one argument named \"" + argName + "\".")
 }

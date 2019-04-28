@@ -2,7 +2,6 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -13,20 +12,7 @@ import (
 func LoneAnonymousOperation(w *validation.Walker) {
 	w.AddOperationDefinitionEnterEventHandler(func(ctx *validation.Context, definition *ast.OperationDefinition) {
 		if definition.Name == "" && ctx.Document.OperationDefinitions > 1 {
-			ctx.AddError(AnonOperationNotAloneError(0, 0))
+			ctx.AddError(validation.AnonOperationNotAloneError(0, 0))
 		}
 	})
-}
-
-// AnonOperationNotAloneError ...
-func AnonOperationNotAloneError(line, col int) types.Error {
-	return types.NewError(
-		anonOperationNotAloneError(),
-		// TODO: Location.
-	)
-}
-
-// anonOperationNotAloneError ...
-func anonOperationNotAloneError() string {
-	return "This anonymous operation must be the only defined operation."
 }

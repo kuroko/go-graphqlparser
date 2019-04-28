@@ -1,10 +1,7 @@
 package rules
 
 import (
-	"fmt"
-
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -33,25 +30,8 @@ func NoUnusedVariables(w *validation.Walker) {
 			}
 
 			if !used {
-				ctx.Errors = ctx.Errors.Add(UnusedVariableError(varDef.Name, opDef.Name, 0, 0))
+				ctx.Errors = ctx.Errors.Add(validation.UnusedVariableError(varDef.Name, opDef.Name, 0, 0))
 			}
 		})
 	})
-}
-
-// UnusedVariableError ...
-func UnusedVariableError(varName, opName string, line, col int) types.Error {
-	return types.NewError(
-		unusedVariableError(varName, opName),
-		// TODO: Location.
-	)
-}
-
-// unusedVariableError ...
-func unusedVariableError(varName, opName string) string {
-	if len(opName) > 0 {
-		return fmt.Sprintf("Variable %s is never used in operation %s", varName, opName)
-	}
-
-	return fmt.Sprintf("Variable %s is never used", varName)
 }

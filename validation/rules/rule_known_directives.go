@@ -29,31 +29,15 @@ func KnownDirectives(w *validation.Walker) {
 			def, ok = types.SpecifiedDirectives()[dir.Name]
 		}
 
-		if !ok {
-			ctx.AddError(UnknownDirectiveError(dir.Name, 0, 0))
+		if def == nil || !ok {
+			ctx.AddError(validation.UnknownDirectiveError(dir.Name, 0, 0))
 			return
 		}
 
 		// The directive definition doesn't contain the location this directive is currently being
 		// used on it.
 		if def.DirectiveLocations&dir.Location == 0 {
-			ctx.AddError(MisplacedDirectiveError(dir.Name, dir.Location, 0, 0))
+			ctx.AddError(validation.MisplacedDirectiveError(dir.Name, dir.Location, 0, 0))
 		}
 	})
-}
-
-// UnknownDirectiveError ...
-func UnknownDirectiveError(directiveName string, line, col int) types.Error {
-	return types.NewError(
-		"Unknown directive \"" + directiveName + "\".",
-		// TODO: Location.
-	)
-}
-
-// MisplacedDirectiveError ...
-func MisplacedDirectiveError(directiveName string, location ast.DirectiveLocation, line, col int) types.Error {
-	return types.NewError(
-		"Directive \"" + directiveName + "\" may not be used on " + ast.NamesByDirectiveLocations[location] + ".",
-		// TODO: Location.
-	)
 }

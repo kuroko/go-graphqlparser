@@ -3,6 +3,8 @@ package rules_test
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/validation"
+
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -71,8 +73,8 @@ func TestUniqueInputFieldNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
-					Add(rules.DuplicateInputFieldError("f1", 0, 0)),
+					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
+					Add(validation.DuplicateInputFieldError("f1", 0, 0)),
 			},
 			{
 				msg: "many duplicate input object fields",
@@ -83,10 +85,10 @@ func TestUniqueInputFieldNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
-					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
-					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
-					Add(rules.DuplicateInputFieldError("f1", 0, 0)),
+					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
+					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
+					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
+					Add(validation.DuplicateInputFieldError("f1", 0, 0)),
 			},
 			{
 				msg: "nested duplicate input object fields",
@@ -97,8 +99,8 @@ func TestUniqueInputFieldNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateInputFieldError("f2", 0, 0)).
-					Add(rules.DuplicateInputFieldError("f2", 0, 0)),
+					Add(validation.DuplicateInputFieldError("f2", 0, 0)).
+					Add(validation.DuplicateInputFieldError("f2", 0, 0)),
 			},
 		}
 
@@ -155,7 +157,7 @@ func TestUniqueInputFieldNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateInputFieldError("f1", 0, 0)),
+					Add(validation.DuplicateInputFieldError("f1", 0, 0)),
 			},
 			{
 				msg: "many duplicate input object fields",
@@ -165,8 +167,8 @@ func TestUniqueInputFieldNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateInputFieldError("f1", 0, 0)).
-					Add(rules.DuplicateInputFieldError("f1", 0, 0)),
+					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
+					Add(validation.DuplicateInputFieldError("f1", 0, 0)),
 			},
 			{
 				msg: "nested duplicate input object fields",
@@ -176,7 +178,7 @@ func TestUniqueInputFieldNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateInputFieldError("f2", 0, 0)),
+					Add(validation.DuplicateInputFieldError("f2", 0, 0)),
 			},
 		}
 

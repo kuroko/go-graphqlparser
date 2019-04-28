@@ -36,24 +36,8 @@ func ProvidedRequiredArgumentsOnDirectives(w *validation.Walker) {
 			_, provided := directiveArguments[ivd.Name]
 
 			if !provided && ivd.DefaultValue == nil && ivd.Type.NonNullable {
-				ctx.AddError(MissingDirectiveArgError(d.Name, ivd.Name, ivd.Type.String(), 0, 0))
+				ctx.AddError(validation.MissingDirectiveArgError(d.Name, ivd.Name, ivd.Type.String(), 0, 0))
 			}
 		})
 	})
-}
-
-// MissingFieldArgError ...
-func MissingFieldArgError(fieldName, argName, typeName string, line, col int) types.Error {
-	return types.NewError(
-		"Field \"" + fieldName + "\" argument \"" + argName + "\" of type \"" + typeName + "\" is required, but it was not provided",
-		// TODO: Location.
-	)
-}
-
-// MissingDirectiveArgError ...
-func MissingDirectiveArgError(directiveName, argName, typeName string, line, col int) types.Error {
-	return types.NewError(
-		"Directive \"" + directiveName + "\" argument \"" + argName + "\" of type \"" + typeName + "\" is required, but it was not provided",
-		// TODO: Location.
-	)
 }

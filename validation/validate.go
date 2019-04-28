@@ -257,22 +257,3 @@ func findTypeDefinitionInContext(ctx *Context, typeName string) *ast.TypeDefinit
 
 	return typeDef
 }
-
-// TODO: Should we move all error functions into one place? Maybe consumers of the library will want
-// to be able to easily access them from one package too? Not split across validation and rules.
-
-// DuplicateFieldDefinitionNameError ...
-func DuplicateFieldDefinitionNameError(typeName, fieldName string, line, col int) types.Error {
-	return types.NewError(
-		"Field \"" + typeName + "." + fieldName + "\" can only be defined once.",
-		// TODO: Location.
-	)
-}
-
-// DuplicateEnumValueNameError ...
-func DuplicateEnumValueNameError(typeName, valueName string, line, col int) types.Error {
-	return types.NewError(
-		"Enum value \"" + typeName + "." + valueName + "\" can only be defined once.",
-		// TODO: Location.
-	)
-}

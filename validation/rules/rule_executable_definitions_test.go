@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -54,8 +55,8 @@ func TestExecutableDefinitions(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.NonExecutableDefinitionError("Cow", 0, 0)).
-				Add(rules.NonExecutableDefinitionError("Dog", 0, 0)),
+				Add(validation.NonExecutableDefinitionError("Cow", 0, 0)).
+				Add(validation.NonExecutableDefinitionError("Dog", 0, 0)),
 		},
 		{
 			msg: "with schema definition",
@@ -71,9 +72,9 @@ func TestExecutableDefinitions(t *testing.T) {
 				extend schema @directive
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.NonExecutableDefinitionError("schema", 0, 0)).
-				Add(rules.NonExecutableDefinitionError("Query", 0, 0)).
-				Add(rules.NonExecutableDefinitionError("schema", 0, 0)),
+				Add(validation.NonExecutableDefinitionError("schema", 0, 0)).
+				Add(validation.NonExecutableDefinitionError("Query", 0, 0)).
+				Add(validation.NonExecutableDefinitionError("schema", 0, 0)),
 		},
 	}
 

@@ -2,7 +2,6 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -19,18 +18,10 @@ func UniqueDirectivesPerLocation(w *validation.Walker) {
 			directiveName := directive.Name
 
 			if _, ok := knownDirectives[directiveName]; ok {
-				ctx.AddError(DuplicateDirectiveError(directiveName, 0, 0))
+				ctx.AddError(validation.DuplicateDirectiveError(directiveName, 0, 0))
 			} else {
 				knownDirectives[directiveName] = struct{}{}
 			}
 		})
 	})
-}
-
-// DuplicateDirectiveError ...
-func DuplicateDirectiveError(directiveName string, line, col int) types.Error {
-	return types.NewError(
-		"The directive \"" + directiveName + "\" can only be used once at this location.",
-		// TODO: Location.
-	)
 }

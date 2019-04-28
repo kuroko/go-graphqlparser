@@ -2,7 +2,6 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -16,18 +15,10 @@ func UniqueInputFieldNames(w *validation.Walker) {
 			fieldName := field.Name
 
 			if _, ok := knownNames[fieldName]; ok {
-				ctx.AddError(DuplicateInputFieldError(fieldName, 0, 0))
+				ctx.AddError(validation.DuplicateInputFieldError(fieldName, 0, 0))
 			} else {
 				knownNames[fieldName] = struct{}{}
 			}
 		}
 	})
-}
-
-// DuplicateInputFieldError ...
-func DuplicateInputFieldError(fieldName string, line, col int) types.Error {
-	return types.NewError(
-		"There can be only one input field named \"" + fieldName + "\".",
-		// TODO: Location.
-	)
 }

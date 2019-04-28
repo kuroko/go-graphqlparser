@@ -3,6 +3,8 @@ package rules_test
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/validation"
+
 	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -110,7 +112,7 @@ func TestNoUnusedVariables(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.UnusedVariableError("c", "", 0, 0)),
+				Add(validation.UnusedVariableError("c", "", 0, 0)),
 		},
 		{
 			msg: "multiple variables not used",
@@ -120,8 +122,8 @@ func TestNoUnusedVariables(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.UnusedVariableError("a", "Foo", 0, 0)).
-				Add(rules.UnusedVariableError("c", "Foo", 0, 0)),
+				Add(validation.UnusedVariableError("a", "Foo", 0, 0)).
+				Add(validation.UnusedVariableError("c", "Foo", 0, 0)),
 		},
 		{
 			msg: "variable not used in fragments",
@@ -144,7 +146,7 @@ func TestNoUnusedVariables(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.UnusedVariableError("c", "Foo", 0, 0)),
+				Add(validation.UnusedVariableError("c", "Foo", 0, 0)),
 		},
 		{
 			msg: "multiple variables not used in fragments",
@@ -167,8 +169,8 @@ func TestNoUnusedVariables(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.UnusedVariableError("a", "Foo", 0, 0)).
-				Add(rules.UnusedVariableError("c", "Foo", 0, 0)),
+				Add(validation.UnusedVariableError("a", "Foo", 0, 0)).
+				Add(validation.UnusedVariableError("c", "Foo", 0, 0)),
 		},
 		{
 			msg: "variable not used by unreferenced fragment",
@@ -184,7 +186,7 @@ func TestNoUnusedVariables(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.UnusedVariableError("b", "Foo", 0, 0)),
+				Add(validation.UnusedVariableError("b", "Foo", 0, 0)),
 		},
 		{
 			msg: "variable not used by fragment used by other operation",
@@ -203,8 +205,8 @@ func TestNoUnusedVariables(t *testing.T) {
 				}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.UnusedVariableError("b", "Foo", 0, 0)).
-				Add(rules.UnusedVariableError("a", "Bar", 0, 0)),
+				Add(validation.UnusedVariableError("b", "Foo", 0, 0)).
+				Add(validation.UnusedVariableError("a", "Bar", 0, 0)),
 		},
 	}
 

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -82,7 +83,7 @@ func TestUniqueOperationNames(t *testing.T) {
 			}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateOperationNameError("Foo", 0, 0)),
+				Add(validation.DuplicateOperationNameError("Foo", 0, 0)),
 		},
 		{
 			msg: "multiple ops of same name of different types (mutation)",
@@ -95,7 +96,7 @@ func TestUniqueOperationNames(t *testing.T) {
 			}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateOperationNameError("Foo", 0, 0)),
+				Add(validation.DuplicateOperationNameError("Foo", 0, 0)),
 		},
 		{
 			msg: "multiple ops of same name of different types (subscription)",
@@ -108,7 +109,7 @@ func TestUniqueOperationNames(t *testing.T) {
 			}
 			`,
 			errs: (*types.Errors)(nil).
-				Add(rules.DuplicateOperationNameError("Foo", 0, 0)),
+				Add(validation.DuplicateOperationNameError("Foo", 0, 0)),
 		},
 	}
 

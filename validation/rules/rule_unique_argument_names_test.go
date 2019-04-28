@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -91,7 +92,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateArgError("arg1", 0, 0)),
+					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "many duplicate field arguments",
@@ -101,8 +102,8 @@ func TestUniqueArgumentNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateArgError("arg1", 0, 0)).
-					Add(rules.DuplicateArgError("arg1", 0, 0)),
+					Add(validation.DuplicateArgError("arg1", 0, 0)).
+					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "duplicate directive arguments",
@@ -112,7 +113,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateArgError("arg1", 0, 0)),
+					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "many duplicate directive arguments",
@@ -122,8 +123,8 @@ func TestUniqueArgumentNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateArgError("arg1", 0, 0)).
-					Add(rules.DuplicateArgError("arg1", 0, 0)),
+					Add(validation.DuplicateArgError("arg1", 0, 0)).
+					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 		}
 
@@ -219,8 +220,8 @@ func TestUniqueArgumentNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateArgError("arg1", 0, 0)).
-					Add(rules.DuplicateArgError("arg1", 0, 0)),
+					Add(validation.DuplicateArgError("arg1", 0, 0)).
+					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "duplicate directive arguments",
@@ -228,7 +229,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 					directive @foo(arg1: String, arg1: String) on SCHEMA
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateArgError("arg1", 0, 0)),
+					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "many duplicate field arguments",
@@ -242,10 +243,10 @@ func TestUniqueArgumentNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateArgError("arg1", 0, 0)).
-					Add(rules.DuplicateArgError("arg1", 0, 0)).
-					Add(rules.DuplicateArgError("arg1", 0, 0)).
-					Add(rules.DuplicateArgError("arg1", 0, 0)),
+					Add(validation.DuplicateArgError("arg1", 0, 0)).
+					Add(validation.DuplicateArgError("arg1", 0, 0)).
+					Add(validation.DuplicateArgError("arg1", 0, 0)).
+					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
 				msg: "many duplicate directive arguments",
@@ -253,8 +254,8 @@ func TestUniqueArgumentNames(t *testing.T) {
 					directive @foo(arg1: String, arg1: String, arg1: String) on SCHEMA
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateArgError("arg1", 0, 0)).
-					Add(rules.DuplicateArgError("arg1", 0, 0)),
+					Add(validation.DuplicateArgError("arg1", 0, 0)).
+					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 		}
 

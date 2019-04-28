@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -59,7 +60,7 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)),
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)),
 			},
 			{
 				msg: "many duplicate directives in one location",
@@ -69,8 +70,8 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)),
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)),
 			},
 			{
 				msg: "different duplicate directives in one location",
@@ -80,8 +81,8 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateDirectiveError("directiveA", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directiveB", 0, 0)),
+					Add(validation.DuplicateDirectiveError("directiveA", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directiveB", 0, 0)),
 			},
 			{
 				msg: "duplicate directives in many locations",
@@ -91,8 +92,8 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)),
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)),
 			},
 		}
 
@@ -123,18 +124,18 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 					extend input TestInput @directive @directive
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)).
-					Add(rules.DuplicateDirectiveError("directive", 0, 0)),
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
+					Add(validation.DuplicateDirectiveError("directive", 0, 0)),
 			},
 		}
 

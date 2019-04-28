@@ -2,7 +2,6 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -14,19 +13,19 @@ func UniqueOperationTypes(w *validation.Walker) {
 			switch rotd.OperationType {
 			case ast.OperationDefinitionKindQuery:
 				if ctx.SDLContext.QueryTypeDefined {
-					ctx.AddError(DuplicateOperationTypeError(rotd.OperationType.String(), 0, 0))
+					ctx.AddError(validation.DuplicateOperationTypeError(rotd.OperationType.String(), 0, 0))
 				}
 
 				ctx.SDLContext.QueryTypeDefined = true
 			case ast.OperationDefinitionKindMutation:
 				if ctx.SDLContext.MutationTypeDefined {
-					ctx.AddError(DuplicateOperationTypeError(rotd.OperationType.String(), 0, 0))
+					ctx.AddError(validation.DuplicateOperationTypeError(rotd.OperationType.String(), 0, 0))
 				}
 
 				ctx.SDLContext.MutationTypeDefined = true
 			case ast.OperationDefinitionKindSubscription:
 				if ctx.SDLContext.SubscriptionTypeDefined {
-					ctx.AddError(DuplicateOperationTypeError(rotd.OperationType.String(), 0, 0))
+					ctx.AddError(validation.DuplicateOperationTypeError(rotd.OperationType.String(), 0, 0))
 				}
 
 				ctx.SDLContext.SubscriptionTypeDefined = true
@@ -39,45 +38,29 @@ func UniqueOperationTypes(w *validation.Walker) {
 			switch otd.OperationType {
 			case ast.OperationDefinitionKindQuery:
 				if ctx.Schema.QueryType != nil {
-					ctx.AddError(ExistedOperationTypeError(otd.OperationType.String(), 0, 0))
+					ctx.AddError(validation.ExistedOperationTypeError(otd.OperationType.String(), 0, 0))
 				} else if ctx.SDLContext.QueryTypeDefined {
-					ctx.AddError(DuplicateOperationTypeError(otd.OperationType.String(), 0, 0))
+					ctx.AddError(validation.DuplicateOperationTypeError(otd.OperationType.String(), 0, 0))
 				}
 
 				ctx.SDLContext.QueryTypeDefined = true
 			case ast.OperationDefinitionKindMutation:
 				if ctx.Schema.MutationType != nil {
-					ctx.AddError(ExistedOperationTypeError(otd.OperationType.String(), 0, 0))
+					ctx.AddError(validation.ExistedOperationTypeError(otd.OperationType.String(), 0, 0))
 				} else if ctx.SDLContext.MutationTypeDefined {
-					ctx.AddError(DuplicateOperationTypeError(otd.OperationType.String(), 0, 0))
+					ctx.AddError(validation.DuplicateOperationTypeError(otd.OperationType.String(), 0, 0))
 				}
 
 				ctx.SDLContext.MutationTypeDefined = true
 			case ast.OperationDefinitionKindSubscription:
 				if ctx.Schema.SubscriptionType != nil {
-					ctx.AddError(ExistedOperationTypeError(otd.OperationType.String(), 0, 0))
+					ctx.AddError(validation.ExistedOperationTypeError(otd.OperationType.String(), 0, 0))
 				} else if ctx.SDLContext.SubscriptionTypeDefined {
-					ctx.AddError(DuplicateOperationTypeError(otd.OperationType.String(), 0, 0))
+					ctx.AddError(validation.DuplicateOperationTypeError(otd.OperationType.String(), 0, 0))
 				}
 
 				ctx.SDLContext.SubscriptionTypeDefined = true
 			}
 		})
 	})
-}
-
-// DuplicateOperationTypeError ...
-func DuplicateOperationTypeError(operation string, line, col int) types.Error {
-	return types.NewError(
-		"There can be only one " + operation + " type in schema.",
-		// TODO: Location.
-	)
-}
-
-// ExistedOperationTypeError ...
-func ExistedOperationTypeError(operation string, line, col int) types.Error {
-	return types.NewError(
-		"Type for " + operation + " already defined in the schema. It cannot be redefined.",
-		// TODO: Location.
-	)
 }

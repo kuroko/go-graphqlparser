@@ -2,7 +2,6 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -23,17 +22,9 @@ func KnownTypeNames(w *validation.Walker) {
 		}
 
 		if !existsInSchema && !existsInDocument && !isSpecifiedScalarName(typeName) {
-			ctx.AddError(UnknownTypeError(typeName, 0, 0))
+			ctx.AddError(validation.UnknownTypeError(typeName, 0, 0))
 		}
 	})
-}
-
-// UnknownTypeError ...
-func UnknownTypeError(typeName string, line, col int) types.Error {
-	return types.NewError(
-		"Unknown type \"" + typeName + "\".",
-		// TODO: Location.
-	)
 }
 
 // isSpecifiedScalarName ...

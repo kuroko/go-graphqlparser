@@ -6,6 +6,7 @@ import (
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -62,7 +63,7 @@ func TestKnownDirectives(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownDirectiveError("unknown", 0, 0)),
+					Add(validation.UnknownDirectiveError("unknown", 0, 0)),
 			},
 			{
 				msg: "with many unknown directives",
@@ -80,9 +81,9 @@ func TestKnownDirectives(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownDirectiveError("unknown", 0, 0)).
-					Add(rules.UnknownDirectiveError("unknown", 0, 0)).
-					Add(rules.UnknownDirectiveError("unknown", 0, 0)),
+					Add(validation.UnknownDirectiveError("unknown", 0, 0)).
+					Add(validation.UnknownDirectiveError("unknown", 0, 0)).
+					Add(validation.UnknownDirectiveError("unknown", 0, 0)),
 			},
 			{
 				msg: "with well placed directives",
@@ -121,10 +122,10 @@ func TestKnownDirectives(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.MisplacedDirectiveError("include", ast.DirectiveLocationKindQuery, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onQuery", ast.DirectiveLocationKindField, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onQuery", ast.DirectiveLocationKindFragmentSpread, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onQuery", ast.DirectiveLocationKindMutation, 0, 0)),
+					Add(validation.MisplacedDirectiveError("include", ast.DirectiveLocationKindQuery, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onQuery", ast.DirectiveLocationKindField, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onQuery", ast.DirectiveLocationKindFragmentSpread, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onQuery", ast.DirectiveLocationKindMutation, 0, 0)),
 			},
 			// TODO: This is in the working draft, not the 2018 spec.
 			//{
@@ -135,7 +136,7 @@ func TestKnownDirectives(t *testing.T) {
 			//		}
 			//	`,
 			//	errs: (*types.Errors)(nil).
-			//		Add(rules.MisplacedDirectiveError("onField", ast.DirectiveLocationKindVariableDefinition, 0, 0)),
+			//		Add(validation.MisplacedDirectiveError("onField", ast.DirectiveLocationKindVariableDefinition, 0, 0)),
 			//},
 		}
 
@@ -196,7 +197,7 @@ func TestKnownDirectives(t *testing.T) {
 					extend type Query @unknown
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownDirectiveError("unknown", 0, 0)),
+					Add(validation.UnknownDirectiveError("unknown", 0, 0)),
 			},
 			{
 				msg: "well placed on schema",
@@ -278,20 +279,20 @@ func TestKnownDirectives(t *testing.T) {
 					extend schema @onObject
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.MisplacedDirectiveError("onInterface", ast.DirectiveLocationKindObject, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindArgumentDefinition, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindFieldDefinition, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onEnum", ast.DirectiveLocationKindScalar, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onObject", ast.DirectiveLocationKindInterface, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindArgumentDefinition, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindFieldDefinition, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onEnumValue", ast.DirectiveLocationKindUnion, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onScalar", ast.DirectiveLocationKindEnum, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onUnion", ast.DirectiveLocationKindEnumValue, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onEnum", ast.DirectiveLocationKindInputObject, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onArgumentDefinition", ast.DirectiveLocationKindInputFieldDefinition, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onObject", ast.DirectiveLocationKindEnum, 0, 0)).
-					Add(rules.MisplacedDirectiveError("onObject", ast.DirectiveLocationKindSchema, 0, 0)),
+					Add(validation.MisplacedDirectiveError("onInterface", ast.DirectiveLocationKindObject, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindArgumentDefinition, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindFieldDefinition, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onEnum", ast.DirectiveLocationKindScalar, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onObject", ast.DirectiveLocationKindInterface, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindArgumentDefinition, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindFieldDefinition, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onEnumValue", ast.DirectiveLocationKindUnion, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onScalar", ast.DirectiveLocationKindEnum, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onUnion", ast.DirectiveLocationKindEnumValue, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onEnum", ast.DirectiveLocationKindInputObject, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onArgumentDefinition", ast.DirectiveLocationKindInputFieldDefinition, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onObject", ast.DirectiveLocationKindEnum, 0, 0)).
+					Add(validation.MisplacedDirectiveError("onObject", ast.DirectiveLocationKindSchema, 0, 0)),
 			},
 		}
 

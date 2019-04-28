@@ -5,6 +5,7 @@ import (
 
 	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -70,9 +71,9 @@ func TestKnownTypeNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownTypeError("JumbledUpLetters", 0, 0)).
-					Add(rules.UnknownTypeError("Badger", 0, 0)).
-					Add(rules.UnknownTypeError("Peettt", 0, 0)),
+					Add(validation.UnknownTypeError("JumbledUpLetters", 0, 0)).
+					Add(validation.UnknownTypeError("Badger", 0, 0)).
+					Add(validation.UnknownTypeError("Peettt", 0, 0)),
 			},
 			// TODO: It's not possible to use our parser and have a schema without the built-in
 			// scalar types included. It's part of the spec, and a server would be pretty useless
@@ -164,18 +165,18 @@ func TestKnownTypeNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownTypeError("C", 0, 0)).
-					Add(rules.UnknownTypeError("D", 0, 0)).
-					Add(rules.UnknownTypeError("E", 0, 0)).
-					Add(rules.UnknownTypeError("F", 0, 0)).
-					Add(rules.UnknownTypeError("G", 0, 0)).
-					Add(rules.UnknownTypeError("H", 0, 0)).
-					Add(rules.UnknownTypeError("I", 0, 0)).
-					Add(rules.UnknownTypeError("J", 0, 0)).
-					Add(rules.UnknownTypeError("K", 0, 0)).
-					Add(rules.UnknownTypeError("L", 0, 0)).
-					Add(rules.UnknownTypeError("M", 0, 0)).
-					Add(rules.UnknownTypeError("N", 0, 0)),
+					Add(validation.UnknownTypeError("C", 0, 0)).
+					Add(validation.UnknownTypeError("D", 0, 0)).
+					Add(validation.UnknownTypeError("E", 0, 0)).
+					Add(validation.UnknownTypeError("F", 0, 0)).
+					Add(validation.UnknownTypeError("G", 0, 0)).
+					Add(validation.UnknownTypeError("H", 0, 0)).
+					Add(validation.UnknownTypeError("I", 0, 0)).
+					Add(validation.UnknownTypeError("J", 0, 0)).
+					Add(validation.UnknownTypeError("K", 0, 0)).
+					Add(validation.UnknownTypeError("L", 0, 0)).
+					Add(validation.UnknownTypeError("M", 0, 0)).
+					Add(validation.UnknownTypeError("N", 0, 0)),
 			},
 			{
 				msg: "doesn't consider non-type definitions",
@@ -189,7 +190,7 @@ func TestKnownTypeNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownTypeError("Foo", 0, 0)),
+					Add(validation.UnknownTypeError("Foo", 0, 0)),
 			},
 			{
 				msg:    "reference standard scalars inside extension document",
@@ -249,18 +250,18 @@ func TestKnownTypeNames(t *testing.T) {
 					}
 				`,
 				errs: (*types.Errors)(nil).
-					Add(rules.UnknownTypeError("C", 0, 0)).
-					Add(rules.UnknownTypeError("D", 0, 0)).
-					Add(rules.UnknownTypeError("E", 0, 0)).
-					Add(rules.UnknownTypeError("F", 0, 0)).
-					Add(rules.UnknownTypeError("G", 0, 0)).
-					Add(rules.UnknownTypeError("H", 0, 0)).
-					Add(rules.UnknownTypeError("I", 0, 0)).
-					Add(rules.UnknownTypeError("J", 0, 0)).
-					Add(rules.UnknownTypeError("K", 0, 0)).
-					Add(rules.UnknownTypeError("L", 0, 0)).
-					Add(rules.UnknownTypeError("M", 0, 0)).
-					Add(rules.UnknownTypeError("N", 0, 0)),
+					Add(validation.UnknownTypeError("C", 0, 0)).
+					Add(validation.UnknownTypeError("D", 0, 0)).
+					Add(validation.UnknownTypeError("E", 0, 0)).
+					Add(validation.UnknownTypeError("F", 0, 0)).
+					Add(validation.UnknownTypeError("G", 0, 0)).
+					Add(validation.UnknownTypeError("H", 0, 0)).
+					Add(validation.UnknownTypeError("I", 0, 0)).
+					Add(validation.UnknownTypeError("J", 0, 0)).
+					Add(validation.UnknownTypeError("K", 0, 0)).
+					Add(validation.UnknownTypeError("L", 0, 0)).
+					Add(validation.UnknownTypeError("M", 0, 0)).
+					Add(validation.UnknownTypeError("N", 0, 0)),
 			},
 		}
 
