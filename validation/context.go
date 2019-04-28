@@ -96,6 +96,25 @@ func (ctx *Context) Fragment(name string) *ast.FragmentDefinition {
 	return ctx.FragmentDefinitions[name]
 }
 
+// TypeDefinition ...
+func (ctx *Context) TypeDefinition(name string) (*ast.TypeDefinition, bool) {
+	var typeDef *ast.TypeDefinition
+	var isInSchema bool
+
+	if ctx.SDLContext.IsExtending {
+		// If we're extending a schema, we might be extending a type that's defined there.
+		typeDef, isInSchema = ctx.Schema.Types[name]
+	}
+
+	if !isInSchema {
+		// If we couldn't find it in the schema, or it's not possible for it to exist there, then
+		// check in the current document.
+		typeDef = ctx.SDLContext.TypeDefinitions[name]
+	}
+
+	return typeDef, isInSchema
+}
+
 // VariableUsages returns the variable usages in an operation or fragment definition.
 func (ctx *Context) VariableUsages(def *ast.ExecutableDefinition) []string {
 	return ctx.variableUsages[def]

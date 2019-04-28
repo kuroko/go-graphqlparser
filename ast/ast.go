@@ -425,6 +425,26 @@ const (
 
 type TypeDefinitionKind int8
 
+// String ...
+func (k TypeDefinitionKind) String() string {
+	switch k {
+	case TypeDefinitionKindScalar:
+		return "scalar"
+	case TypeDefinitionKindObject:
+		return "object"
+	case TypeDefinitionKindInterface:
+		return "interface"
+	case TypeDefinitionKindUnion:
+		return "union"
+	case TypeDefinitionKindEnum:
+		return "enum"
+	case TypeDefinitionKindInputObject:
+		return "input object"
+	default:
+		return "unknown"
+	}
+}
+
 type TypeDefinition struct {
 	Description           string
 	Name                  string

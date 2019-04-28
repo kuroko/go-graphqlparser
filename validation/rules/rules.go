@@ -61,7 +61,7 @@ var SpecifiedSDL = []validation.VisitFunc{
 	// KnownArgumentNamesOnDirectives,
 	KnownDirectives,
 	KnownTypeNames,
-	// PossibleTypeExtensions,
+	PossibleTypeExtensions,
 	ProvidedRequiredArgumentsOnDirectives,
 
 	// TODO: You shouldn't be able to apply the same directive to a type and any type extensions for

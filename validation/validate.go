@@ -148,7 +148,7 @@ func validateTypeDefinitionEnumValues(ctx *Context, typeDef *ast.TypeDefinition)
 
 // validateTypeExtensionFieldDefinitions ...
 func validateTypeExtensionFieldDefinitions(ctx *Context, typeExt *ast.TypeExtension) {
-	typeDef := findTypeDefinitionInContext(ctx, typeExt.Name)
+	typeDef, _ := ctx.TypeDefinition(typeExt.Name)
 	if typeDef == nil {
 		// TODO: This error needs to be defined elsewhere...
 		//ctx.AddError(rules.UnknownTypeError())
@@ -179,7 +179,7 @@ func validateTypeExtensionFieldDefinitions(ctx *Context, typeExt *ast.TypeExtens
 
 // validateTypeExtensionInputFieldDefinitions ...
 func validateTypeExtensionInputFieldDefinitions(ctx *Context, typeExt *ast.TypeExtension) {
-	typeDef := findTypeDefinitionInContext(ctx, typeExt.Name)
+	typeDef, _ := ctx.TypeDefinition(typeExt.Name)
 	if typeDef == nil {
 		// TODO: This error needs to be defined elsewhere...
 		//ctx.AddError(rules.UnknownTypeError())
@@ -210,7 +210,7 @@ func validateTypeExtensionInputFieldDefinitions(ctx *Context, typeExt *ast.TypeE
 
 // validateTypeExtensionInputFieldDefinitions ...
 func validateTypeExtensionEnumValues(ctx *Context, typeExt *ast.TypeExtension) {
-	typeDef := findTypeDefinitionInContext(ctx, typeExt.Name)
+	typeDef, _ := ctx.TypeDefinition(typeExt.Name)
 	if typeDef == nil {
 		// TODO: This error needs to be defined elsewhere...
 		//ctx.AddError(rules.UnknownTypeError())
@@ -237,23 +237,4 @@ func validateTypeExtensionEnumValues(ctx *Context, typeExt *ast.TypeExtension) {
 			typeDef.EnumValuesDefinition = typeDef.EnumValuesDefinition.Add(extVal)
 		}
 	}
-}
-
-// findTypeDefinitionInContext ...
-func findTypeDefinitionInContext(ctx *Context, typeName string) *ast.TypeDefinition {
-	var typeDef *ast.TypeDefinition
-	var isInSchema bool
-
-	if ctx.SDLContext.IsExtending {
-		// If we're extending a schema, we might be extending a type that's defined there.
-		typeDef, isInSchema = ctx.Schema.Types[typeName]
-	}
-
-	if !isInSchema {
-		// If we couldn't find it in the schema, or it's not possible for it to exist there, then
-		// check in the current document.
-		typeDef = ctx.SDLContext.TypeDefinitions[typeName]
-	}
-
-	return typeDef
 }
