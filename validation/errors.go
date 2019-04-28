@@ -163,6 +163,22 @@ func SchemaDefinitionNotAloneError(line, col int) types.Error {
 	)
 }
 
+// UnknownDirectiveArgError ...
+func UnknownDirectiveArgError(argName, directiveName string, line, col int) types.Error {
+	return types.NewError(
+		"Unknown argument \"" + argName + "\" on directive \"" + directiveName + "\".",
+		// TODO: Location.
+	)
+}
+
+// UnknownDirectiveError ...
+func UnknownDirectiveError(directiveName string, line, col int) types.Error {
+	return types.NewError(
+		"Unknown directive \"" + directiveName + "\".",
+		// TODO: Location.
+	)
+}
+
 // UnknownTypeError ...
 func UnknownTypeError(typeName string, line, col int) types.Error {
 	return types.NewError(
@@ -186,12 +202,4 @@ func unusedVariableMessage(varName, opName string) string {
 	}
 
 	return fmt.Sprintf("Variable %s is never used", varName)
-}
-
-// UnknownDirectiveError ...
-func UnknownDirectiveError(directiveName string, line, col int) types.Error {
-	return types.NewError(
-		"Unknown directive \"" + directiveName + "\".",
-		// TODO: Location.
-	)
 }

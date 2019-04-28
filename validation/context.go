@@ -91,6 +91,29 @@ func (ctx *Context) AddError(err types.Error) {
 	ctx.Errors = ctx.Errors.Add(err)
 }
 
+// DirectiveDefinition ...
+func (ctx *Context) DirectiveDefinition(name string) (*ast.DirectiveDefinition, bool) {
+	var dirDef *ast.DirectiveDefinition
+	var isInSchema bool
+
+	if ctx.SDLContext.IsExtending {
+		// If we're extending a schema, we might be extending a type that's defined there.
+		dirDef, isInSchema = ctx.Schema.Directives[name]
+	}
+
+	if !isInSchema {
+		// If we couldn't find it in the schema, or it's not possible for it to exist there, then
+		// check in the current document.
+		dirDef = ctx.SDLContext.DirectiveDefinitions[name]
+	}
+
+	if dirDef == nil {
+		dirDef = types.SpecifiedDirectives()[name]
+	}
+
+	return dirDef, isInSchema
+}
+
 // Fragment ...
 func (ctx *Context) Fragment(name string) *ast.FragmentDefinition {
 	return ctx.FragmentDefinitions[name]
