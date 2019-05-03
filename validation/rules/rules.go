@@ -17,7 +17,7 @@ var Specified = []validation.VisitFunc{
 	KnownTypeNames,
 	// FragmentsOnCompositeTypes,
 	// VariablesAreInputTypes,
-	// ScalarLeafs,
+	// ScalarLeafs,Uni
 	// FieldsOnCorrectType,
 	// UniqueFragmentNames,
 	// KnownFragmentNames,
@@ -58,9 +58,11 @@ var SpecifiedSDL = []validation.VisitFunc{
 	UniqueDirectivesPerLocation,
 	UniqueArgumentNames,
 	UniqueInputFieldNames,
+	UnionHasMembers,
 	KnownArgumentNamesOnDirectives,
 	KnownDirectives,
 	KnownTypeNames,
+	PossibleNames,
 	PossibleTypeExtensions,
 	ProvidedRequiredArgumentsOnDirectives,
 

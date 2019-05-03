@@ -147,6 +147,14 @@ func MissingFieldArgError(fieldName, argName, typeName string, line, col int) ty
 	)
 }
 
+// NameStartsWithTwoUnderscoresError ...
+func NameStartsWithTwoUnderscoresError(name string, line, col int) types.Error {
+	return types.NewError(
+		"Name \"" + name + "\" must not begin with \"__\" (two underscores)",
+		// TODO: Location.
+	)
+}
+
 // NonExecutableDefinitionError ...
 func NonExecutableDefinitionError(name string, line, col int) types.Error {
 	return types.NewError(
@@ -159,6 +167,14 @@ func NonExecutableDefinitionError(name string, line, col int) types.Error {
 func SchemaDefinitionNotAloneError(line, col int) types.Error {
 	return types.NewError(
 		"Must provide only one schema definition.",
+		// TODO: Location.
+	)
+}
+
+// UnionHasNoMembersError ...
+func UnionHasNoMembersError(unionName string, line, col int) types.Error {
+	return types.NewError(
+		"Union \"" + unionName + "\" must have at least one member.",
 		// TODO: Location.
 	)
 }

@@ -15,6 +15,12 @@ func UniqueArgumentNames(w *validation.Walker) {
 		validateArguments(ctx, dir.Arguments)
 	})
 
+	// TODO: This needs moving to post-walk where we can handle input object definitions and
+	// extensions all at once, without allocating more memory.
+	//w.AddInputObjectTypeDefinitionEnterEventHandler(func(ctx *validation.Context, def *ast.TypeDefinition) {
+	//	validateInputValueDefinitions(ctx, def.InputFieldsDefinition)
+	//})
+
 	// NOTE: This is not validated in graphql-js, but will silently cause issues.
 	w.AddFieldDefinitionEnterEventHandler(func(ctx *validation.Context, def ast.FieldDefinition) {
 		validateInputValueDefinitions(ctx, def.ArgumentsDefinition)

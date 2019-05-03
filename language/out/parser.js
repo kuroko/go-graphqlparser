@@ -2,6 +2,18 @@ const graphql = require("graphql/language");
 const util = require('util');
 const parser = graphql.parse;
 
+const gql = require("graphql/utilities");
+
+let schema = gql.buildSchema(`
+type __whatup {
+    foo: String
+}
+`);
+
+console.log(schema);
+
+process.exit(1);
+
 const query = `
 query foo($foo: Boolean = 2) {
 	hello @foo(bar: "baz") {

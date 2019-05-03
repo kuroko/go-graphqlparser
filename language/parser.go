@@ -1455,6 +1455,8 @@ func (p *Parser) parseEnumValuesDefinition() (*ast.EnumValueDefinitions, error) 
 			return nil, err
 		}
 
+		// TODO: Return error if we encounter false, true, or null.
+
 		directives, err := p.parseDirectives(ast.DirectiveLocationKindEnumValue)
 		if err != nil {
 			return nil, err
