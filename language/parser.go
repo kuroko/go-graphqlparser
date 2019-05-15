@@ -989,6 +989,10 @@ func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
 		}
 	}
 
+	if directives.Len() == 0 && operationTypeDefinitions.Len() == 0 {
+		return nil, p.unexpected(p.token)
+	}
+
 	return &ast.SchemaExtension{
 		Directives:               directives,
 		OperationTypeDefinitions: operationTypeDefinitions.Reverse(),

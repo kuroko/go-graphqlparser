@@ -5,7 +5,69 @@ import (
 	"strings"
 
 	"github.com/agnivade/levenshtein"
+	"github.com/bucketd/go-graphqlparser/ast"
+	"github.com/bucketd/go-graphqlparser/graphql/types"
 )
+
+const (
+	scalar = ast.TypeDefinitionKindScalar
+	object = ast.TypeDefinitionKindObject
+	iface  = ast.TypeDefinitionKindInterface
+	union  = ast.TypeDefinitionKindUnion
+	enum   = ast.TypeDefinitionKindEnum
+	inobj  = ast.TypeDefinitionKindInputObject
+)
+
+// IsInputType ...
+func IsInputType(schema *types.Schema, t ast.Type) bool {
+	if t.Kind == ast.TypeKindList {
+		return IsInputType(schema, *t.ListType)
+	}
+
+	if def, ok := schema.Types[t.NamedType]; ok {
+		switch def.Kind {
+		case scalar, enum, inobj:
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsOutputType ...
+func IsOutputType(schema *types.Schema, t ast.Type) bool {
+	if t.Kind == ast.TypeKindList {
+		return IsOutputType(schema, *t.ListType)
+	}
+
+	if def, ok := schema.Types[t.NamedType]; ok {
+		switch def.Kind {
+		case scalar, object, iface, union, enum:
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsUnionMemberType ...
+func IsUnionMemberType(schema *types.Schema, t ast.Type) bool {
+	if t.NonNullable {
+		return false
+	}
+
+	if t.Kind == ast.TypeKindList {
+		return false
+	}
+
+	if def, ok := schema.Types[t.NamedType]; ok {
+		if def.Kind == object {
+			return true
+		}
+	}
+
+	return false
+}
 
 // OrList takes a string slice, and returns each item comma separated, up to the last item which
 // will be separated with ' or '.

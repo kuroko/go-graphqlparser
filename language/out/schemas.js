@@ -4,6 +4,22 @@ const rootSchema = `
     type Query {
         foo: String
     }
+    
+    directive @foo on SCHEMA | UNION
+    
+    interface Fooer {
+        foo: String
+    }
+    
+    type Mut implements Fooer {
+        foo: String
+    }
+    
+    extend type Mut implements Fooer {
+        bar: String
+    }
+    
+    union Foo
 `;
 
 const schema = makeExecutableSchema({

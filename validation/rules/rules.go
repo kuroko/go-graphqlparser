@@ -54,18 +54,6 @@ var SpecifiedSDL = []validation.VisitFunc{
 	//UniqueEnumValueNames,
 	//UniqueFieldDefinitionNames,
 
-	//InputObjectHasFields,
-	//InterfaceHasFields,
-	//NonCyclicDirectiveUsage,
-	//NonNullWrapsNullable,
-	//ObjectHasFields,
-	//PossibleArgumentTypes,
-	//PossibleFieldTypes,
-	//PossibleOperationTypesOnSchema,
-	//PossibleSchemaExtensions,
-	//PossibleUnionMemberTypes,
-	//ProvidedRequiredOperationsOnSchema,
-
 	UniqueOperationTypes,
 	UniqueDirectivesPerLocation,
 	UniqueArgumentNames,

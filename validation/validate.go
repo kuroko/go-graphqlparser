@@ -35,16 +35,41 @@ func buildSchema(ctx *Context) {
 
 	// TODO: At this point, do we stop if we have errors? Or what?
 
-	if !ctx.SDLContext.IsExtending {
-		ctx.Schema.Directives = ctx.SDLContext.DirectiveDefinitions
-		// TODO: Add built-in directives.
-		// TODO: Make sure ctx.SDLContext.DirectiveDefinitions is set to the right size, bearing in
-		// mind the number of built-in directives.
+	if schemaDef := ctx.SDLContext.SchemaDefinition; schemaDef != nil {
+		if operationDefs := schemaDef.OperationTypeDefinitions; operationDefs != nil {
+			operationDefs.ForEach(func(otd ast.OperationTypeDefinition, i int) {
+				switch otd.OperationType {
+				case ast.OperationDefinitionKindQuery:
+					ctx.Schema.QueryType = &otd.NamedType
+				case ast.OperationDefinitionKindMutation:
+					ctx.Schema.MutationType = &otd.NamedType
+				case ast.OperationDefinitionKindSubscription:
+					ctx.Schema.SubscriptionType = &otd.NamedType
+				}
+			})
+		}
+	}
 
+	if !ctx.SDLContext.IsExtending {
+		// The map on SDLContext is created with the right size to also contain the built-in
+		// directives without needing to grow.
+		ctx.Schema.Directives = ctx.SDLContext.DirectiveDefinitions
+
+		for name, def := range types.SpecifiedDirectives() {
+			// TODO: Should we allow overriding built-in directives?
+			ctx.Schema.Directives[name] = def
+		}
+
+		// The map on SDLContext is created with the right size to also contain the built-in types
+		// without needing to grow.
 		ctx.Schema.Types = ctx.SDLContext.TypeDefinitions
-		// TODO: Add built-in types.
-		// TODO: Make sure ctx.SDLContext.TypeDefinitions is set to the right size, bearing in mind
-		// the number of built-in types.
+
+		for name, def := range types.SpecifiedTypes() {
+			// TODO: Should we allow overriding built-in directives?
+			ctx.Schema.Types[name] = def
+		}
+	} else {
+		// TODO: Handle adding the new types / directives to an existing schema.
 	}
 }
 
@@ -60,7 +85,6 @@ func validateTypeDefinitions(ctx *Context) {
 		case ast.IsEnumTypeDefinition(typeDef):
 			validateTypeDefinitionEnumValues(ctx, typeDef)
 		}
-
 	}
 }
 

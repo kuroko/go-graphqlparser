@@ -298,15 +298,40 @@ func setVariableUsages(w *Walker) {
 // want to use quite shallow data in from the AST at this phase, so using the Walker would be quite
 // inefficient as it would hit many leaf nodes at a depth we simply don't need here).
 func PrepareContextSDL(ctx *Context) {
+	// Prepare maps, we always need these, at least for built-in types, etc.
+	if ctx.OperationDefinitions == nil {
+		ctx.OperationDefinitions = make(map[string]*ast.OperationDefinition, ctx.Document.OperationDefinitions)
+	}
+
+	if ctx.FragmentDefinitions == nil {
+		ctx.FragmentDefinitions = make(map[string]*ast.FragmentDefinition, ctx.Document.FragmentDefinitions)
+	}
+
+	if ctx.SDLContext.DirectiveDefinitions == nil {
+		size := int(ctx.Document.DirectiveDefinitions) + len(types.SpecifiedDirectives())
+		ctx.SDLContext.DirectiveDefinitions = make(map[string]*ast.DirectiveDefinition, size)
+	}
+
+	if ctx.SDLContext.TypeDefinitions == nil {
+		size := int(ctx.Document.TypeDefinitions) + len(types.SpecifiedTypes())
+		ctx.SDLContext.TypeDefinitions = make(map[string]*ast.TypeDefinition, size)
+	}
+
+	if ctx.SDLContext.SchemaExtensions == nil {
+		ctx.SDLContext.SchemaExtensions = make([]*ast.SchemaExtension, 0, ctx.Document.SchemaExtensions)
+	}
+
+	if ctx.SDLContext.TypeExtensions == nil {
+		// TODO: This map is the wrong length, unless all type extensions are for unique
+		// types - not sure how we could get around that though...
+		ctx.SDLContext.TypeExtensions = make(map[string][]*ast.TypeExtension, ctx.Document.TypeExtensions)
+	}
+
 	ctx.Document.Definitions.ForEach(func(def ast.Definition, i int) {
 		switch def.Kind {
 		case ast.DefinitionKindExecutable:
 			switch def.ExecutableDefinition.Kind {
 			case ast.ExecutableDefinitionKindOperation:
-				if ctx.OperationDefinitions == nil {
-					ctx.OperationDefinitions = make(map[string]*ast.OperationDefinition, ctx.Document.OperationDefinitions)
-				}
-
 				odef := def.ExecutableDefinition.OperationDefinition
 				if odef.Name == "" {
 					odef.Name = "$$query"
@@ -315,10 +340,6 @@ func PrepareContextSDL(ctx *Context) {
 				ctx.OperationDefinitions[odef.Name] = odef
 
 			case ast.ExecutableDefinitionKindFragment:
-				if ctx.FragmentDefinitions == nil {
-					ctx.FragmentDefinitions = make(map[string]*ast.FragmentDefinition, ctx.Document.FragmentDefinitions)
-				}
-
 				fdef := def.ExecutableDefinition.FragmentDefinition
 
 				ctx.FragmentDefinitions[fdef.Name] = fdef
@@ -328,10 +349,6 @@ func PrepareContextSDL(ctx *Context) {
 			switch def.TypeSystemDefinition.Kind {
 			// UniqueDirectiveNames:
 			case ast.TypeSystemDefinitionKindDirective:
-				if ctx.SDLContext.DirectiveDefinitions == nil {
-					ctx.SDLContext.DirectiveDefinitions = make(map[string]*ast.DirectiveDefinition, ctx.Document.DirectiveDefinitions)
-				}
-
 				ddef := def.TypeSystemDefinition.DirectiveDefinition
 
 				if _, ok := ctx.Schema.Directives[ddef.Name]; ok {
@@ -365,10 +382,6 @@ func PrepareContextSDL(ctx *Context) {
 
 			// UniqueTypeNames:
 			case ast.TypeSystemDefinitionKindType:
-				if ctx.SDLContext.TypeDefinitions == nil {
-					ctx.SDLContext.TypeDefinitions = make(map[string]*ast.TypeDefinition, ctx.Document.TypeDefinitions)
-				}
-
 				tdef := def.TypeSystemDefinition.TypeDefinition
 
 				if _, ok := ctx.Schema.Types[tdef.Name]; ok {
@@ -386,21 +399,11 @@ func PrepareContextSDL(ctx *Context) {
 		case ast.DefinitionKindTypeSystemExtension:
 			switch def.TypeSystemExtension.Kind {
 			case ast.TypeSystemExtensionKindSchema:
-				if ctx.SDLContext.SchemaExtensions == nil {
-					ctx.SDLContext.SchemaExtensions = make([]*ast.SchemaExtension, 0, ctx.Document.SchemaExtensions)
-				}
-
 				ext := def.TypeSystemExtension.SchemaExtension
 
 				ctx.SDLContext.SchemaExtensions = append(ctx.SDLContext.SchemaExtensions, ext)
 
 			case ast.TypeSystemExtensionKindType:
-				if ctx.SDLContext.TypeExtensions == nil {
-					// TODO: This map is the wrong length, unless all type extensions are for unique
-					// types - not sure how we could get around that though...
-					ctx.SDLContext.TypeExtensions = make(map[string][]*ast.TypeExtension, ctx.Document.TypeExtensions)
-				}
-
 				ext := def.TypeSystemExtension.TypeExtension
 
 				ctx.SDLContext.TypeExtensions[ext.Name] = append(ctx.SDLContext.TypeExtensions[ext.Name], ext)
