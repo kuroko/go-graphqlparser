@@ -1,4 +1,4 @@
-package types
+package graphql
 
 import "github.com/bucketd/go-graphqlparser/ast"
 

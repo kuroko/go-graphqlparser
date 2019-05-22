@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -46,7 +45,7 @@ func TestPossibleNames(t *testing.T) {
 				enum __FooEnum
 				directive @__fooDirective on FIELD
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.NameStartsWithTwoUnderscoresError("__FooObject", 0, 0)).
 				Add(validation.NameStartsWithTwoUnderscoresError("__FooInputObject", 0, 0)).
 				Add(validation.NameStartsWithTwoUnderscoresError("__bar", 0, 0)).
@@ -61,7 +60,7 @@ func TestPossibleNames(t *testing.T) {
 		},
 		{
 			msg: "invalid names in extensions",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				type FooObject {
 					bar: String
 				}
@@ -71,7 +70,7 @@ func TestPossibleNames(t *testing.T) {
 					__baz: String
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.NameStartsWithTwoUnderscoresError("__baz", 0, 0)),
 		},
 	}

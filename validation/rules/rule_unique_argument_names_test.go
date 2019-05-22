@@ -3,7 +3,7 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -91,7 +91,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field(arg1: "value", arg1: "value")
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
@@ -101,7 +101,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field(arg1: "value", arg1: "value", arg1: "value")
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateArgError("arg1", 0, 0)).
 					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
@@ -112,7 +112,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field @directive(arg1: "value", arg1: "value")
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
@@ -122,7 +122,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field @directive(arg1: "value", arg1: "value", arg1: "value")
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateArgError("arg1", 0, 0)).
 					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
@@ -219,7 +219,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field(arg1: String, arg1: String): String
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateArgError("arg1", 0, 0)).
 					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
@@ -228,7 +228,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 				query: `
 					directive @foo(arg1: String, arg1: String) on SCHEMA
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},
 			{
@@ -242,7 +242,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 						field(arg1: String, arg1: String, arg1: String): String
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateArgError("arg1", 0, 0)).
 					Add(validation.DuplicateArgError("arg1", 0, 0)).
 					Add(validation.DuplicateArgError("arg1", 0, 0)).
@@ -253,7 +253,7 @@ func TestUniqueArgumentNames(t *testing.T) {
 				query: `
 					directive @foo(arg1: String, arg1: String, arg1: String) on SCHEMA
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateArgError("arg1", 0, 0)).
 					Add(validation.DuplicateArgError("arg1", 0, 0)),
 			},

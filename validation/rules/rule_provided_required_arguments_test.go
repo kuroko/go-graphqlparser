@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -41,7 +40,7 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 				}
 			}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.MissingDirectiveArgError("include", "if", "Boolean!", 0, 0)).
 				Add(validation.MissingDirectiveArgError("skip", "if", "Boolean!", 0, 0)),
 		},
@@ -62,7 +61,7 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			}
 			directive @test(arg: String!) on FIELD_DEFINITION
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.MissingDirectiveArgError("test", "arg", "String!", 0, 0)),
 		},
 		{
@@ -72,7 +71,7 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 				foo: String @include
 			}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.MissingDirectiveArgError("include", "if", "Boolean!", 0, 0)),
 		},
 		{
@@ -83,12 +82,12 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			  }
 			directive @deprecated(reason: String!) on FIELD
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.MissingDirectiveArgError("deprecated", "reason", "String!", 0, 0)),
 		},
 		{
 			msg: "missing arg on directive defined in schema extension",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 			type Query {
 				foo: String
 			}
@@ -97,12 +96,12 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			directive @test(arg: String!) on OBJECT
 			extend type Query  @test
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.MissingDirectiveArgError("test", "arg", "String!", 0, 0)),
 		},
 		{
 			msg: "missing arg on directive used in schema extension",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 			directive @test(arg: String!) on OBJECT
 			type Query {
 				foo: String
@@ -111,7 +110,7 @@ func TestProvidedRequiredArgumentsOnDirectives(t *testing.T) {
 			query: `
 			extend type Query @test
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.MissingDirectiveArgError("test", "arg", "String!", 0, 0)),
 		},
 	}
@@ -250,7 +249,7 @@ func TestProvidedRequiredArguments(t *testing.T) {
 			}
 		}
 		`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.MissingFieldArgError("multipleReqs", "req1", "Int!", 0, 0)),
 		},
 		{
@@ -262,7 +261,7 @@ func TestProvidedRequiredArguments(t *testing.T) {
 			}
 		}
 		`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.MissingFieldArgError("multipleReqs", "req1", "Int!", 0, 0)).
 				Add(validation.MissingFieldArgError("multipleReqs", "req2", "Int!", 0, 0)),
 		},
@@ -275,7 +274,7 @@ func TestProvidedRequiredArguments(t *testing.T) {
 			}
 		}
 		`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.MissingFieldArgError("multipleReqs", "req2", "Int!", 0, 0)),
 		},
 	}

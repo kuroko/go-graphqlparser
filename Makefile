@@ -18,5 +18,5 @@ generate-walker: ## Generate the walker go source files.
 ast/lists.go:
 	./scripts/ast-lists.sh
 
-graphql/types/lists.go:
+graphql/lists.go:
 	./scripts/graphql-lists.sh

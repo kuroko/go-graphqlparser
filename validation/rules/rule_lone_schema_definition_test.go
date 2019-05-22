@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -33,24 +32,24 @@ func TestLoneSchemaDefinition(t *testing.T) {
 				schema { mutation: Foo }
 				schema { subscription: Foo }
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.SchemaDefinitionNotAloneError(0, 0)).
 				Add(validation.SchemaDefinitionNotAloneError(0, 0)),
 		},
 		{
 			msg:    "define schema in schema extension",
-			schema: &types.Schema{},
+			schema: &graphql.Schema{},
 			query: `
 				schema {
 					query: Foo
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.CanNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "redefine schema in schema extension",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				schema {
 					query: Foo
 				}
@@ -62,12 +61,12 @@ func TestLoneSchemaDefinition(t *testing.T) {
 					mutation: Foo
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.CanNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "redefine implicit schema in schema extension",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				type Query {
 					fooField: Foo
 				}
@@ -81,12 +80,12 @@ func TestLoneSchemaDefinition(t *testing.T) {
 					mutation: Foo
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.CanNotDefineSchemaWithinExtensionError(0, 0)),
 		},
 		{
 			msg: "extend schema in schema extension",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				schema {
 					query: Foo
 				}

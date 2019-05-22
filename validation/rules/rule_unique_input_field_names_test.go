@@ -3,9 +3,9 @@ package rules_test
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -72,7 +72,7 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field2 @foo(arg: { f1: "value", f1: "value" })
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
 					Add(validation.DuplicateInputFieldError("f1", 0, 0)),
 			},
@@ -84,7 +84,7 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field2 @foo(arg: { f1: "value", f1: "value", f1: "value" })
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
 					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
 					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
@@ -98,7 +98,7 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field2 @foo(arg: { f1: { f2: "value", f2: "value" } })
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateInputFieldError("f2", 0, 0)).
 					Add(validation.DuplicateInputFieldError("f2", 0, 0)),
 			},
@@ -156,7 +156,7 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field: String @foo(arg: { f1: "value", f1: "value" })
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateInputFieldError("f1", 0, 0)),
 			},
 			{
@@ -166,7 +166,7 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field: String @foo(arg: { f1: "value", f1: "value", f1: "value" })
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateInputFieldError("f1", 0, 0)).
 					Add(validation.DuplicateInputFieldError("f1", 0, 0)),
 			},
@@ -177,7 +177,7 @@ func TestUniqueInputFieldNames(t *testing.T) {
 						field: String @foo(arg: { f1: { f2: "value", f2: "value" } })
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateInputFieldError("f2", 0, 0)),
 			},
 		}

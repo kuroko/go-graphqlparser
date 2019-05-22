@@ -2,7 +2,7 @@ package validation
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/graphql"
 )
 
 var (
@@ -18,9 +18,9 @@ var (
 // NewContext instantiates a validation context struct, this involves the walker doing a
 // preliminary pass of a query document, gathering basic information for the more complicated
 // validation walk to come.
-func NewContext(doc ast.Document, schema *types.Schema) *Context {
+func NewContext(doc ast.Document, schema *graphql.Schema) *Context {
 	if schema == nil {
-		schema = &types.Schema{}
+		schema = &graphql.Schema{}
 	}
 
 	ctx := &Context{
@@ -34,10 +34,10 @@ func NewContext(doc ast.Document, schema *types.Schema) *Context {
 }
 
 // NewSDLContext ...
-func NewSDLContext(doc ast.Document, schema *types.Schema) *Context {
+func NewSDLContext(doc ast.Document, schema *graphql.Schema) *Context {
 	isExtending := schema != nil
 	if !isExtending {
-		schema = &types.Schema{}
+		schema = &graphql.Schema{}
 	}
 
 	ctx := &Context{
@@ -59,8 +59,8 @@ func NewSDLContext(doc ast.Document, schema *types.Schema) *Context {
 // Context ...
 type Context struct {
 	Document ast.Document
-	Errors   *types.Errors
-	Schema   *types.Schema
+	Errors   *graphql.Errors
+	Schema   *graphql.Schema
 
 	// Used if we're validating an SDL file. This contains state for validating SDL documents, along
 	// with symbol tables for definitions that can only be used in SDL documents.
@@ -87,7 +87,7 @@ type Context struct {
 }
 
 // AddError adds an error to the linked list of errors on this Context.
-func (ctx *Context) AddError(err types.Error) {
+func (ctx *Context) AddError(err graphql.Error) {
 	ctx.Errors = ctx.Errors.Add(err)
 }
 
@@ -108,7 +108,7 @@ func (ctx *Context) DirectiveDefinition(name string) (*ast.DirectiveDefinition, 
 	}
 
 	if dirDef == nil {
-		dirDef = types.SpecifiedDirectives()[name]
+		dirDef = graphql.SpecifiedDirectives()[name]
 	}
 
 	return dirDef, isInSchema
@@ -308,12 +308,12 @@ func PrepareContextSDL(ctx *Context) {
 	}
 
 	if ctx.SDLContext.DirectiveDefinitions == nil {
-		size := int(ctx.Document.DirectiveDefinitions) + len(types.SpecifiedDirectives())
+		size := int(ctx.Document.DirectiveDefinitions) + len(graphql.SpecifiedDirectives())
 		ctx.SDLContext.DirectiveDefinitions = make(map[string]*ast.DirectiveDefinition, size)
 	}
 
 	if ctx.SDLContext.TypeDefinitions == nil {
-		size := int(ctx.Document.TypeDefinitions) + len(types.SpecifiedTypes())
+		size := int(ctx.Document.TypeDefinitions) + len(graphql.SpecifiedTypes())
 		ctx.SDLContext.TypeDefinitions = make(map[string]*ast.TypeDefinition, size)
 	}
 

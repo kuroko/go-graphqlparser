@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -46,12 +45,12 @@ func TestUniqueDirectiveNames(t *testing.T) {
 				directive @foo on SCHEMA
 				directive @foo on SCHEMA
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.DuplicateDirectiveNameError("foo", 0, 0)),
 		},
 		{
 			msg: "adding new directive to existing schema",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				directive @foo on SCHEMA
 			`)),
 			query: `
@@ -60,18 +59,18 @@ func TestUniqueDirectiveNames(t *testing.T) {
 		},
 		{
 			msg: "adding new directive with standard name to existing schema",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				type foo
 			`)),
 			query: `
 				directive @skip on SCHEMA
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExistedDirectiveNameError("skip", 0, 0)),
 		},
 		{
 			msg: "adding new directive to existing schema with same-named type",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				type foo
 			`)),
 			query: `
@@ -80,13 +79,13 @@ func TestUniqueDirectiveNames(t *testing.T) {
 		},
 		{
 			msg: "adding conflicting directives to existing schema",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				directive @foo on SCHEMA
 			`)),
 			query: `
 				directive @foo on SCHEMA
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExistedDirectiveNameError("foo", 0, 0)),
 		},
 	}

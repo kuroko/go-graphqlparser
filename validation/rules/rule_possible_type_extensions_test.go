@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -73,7 +72,7 @@ func TestPossibleTypeExtensions(t *testing.T) {
 				extend enum Unknown @dummy
 				extend input Unknown @dummy
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExtendingUnknownTypeError("Unknown", 0, 0)).
 				Add(validation.ExtendingUnknownTypeError("Unknown", 0, 0)).
 				Add(validation.ExtendingUnknownTypeError("Unknown", 0, 0)).
@@ -94,7 +93,7 @@ func TestPossibleTypeExtensions(t *testing.T) {
 				extend enum Foo @dummy
 				extend input Foo @dummy
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExtendingUnknownTypeError("Foo", 0, 0)).
 				Add(validation.ExtendingUnknownTypeError("Foo", 0, 0)).
 				Add(validation.ExtendingUnknownTypeError("Foo", 0, 0)).
@@ -118,7 +117,7 @@ func TestPossibleTypeExtensions(t *testing.T) {
 				extend input FooEnum @dummy
 				extend scalar FooInputObject @dummy
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExtendingDifferentTypeKindError("FooScalar", "scalar", 0, 0)).
 				Add(validation.ExtendingDifferentTypeKindError("FooObject", "object", 0, 0)).
 				Add(validation.ExtendingDifferentTypeKindError("FooInterface", "interface", 0, 0)).
@@ -128,7 +127,7 @@ func TestPossibleTypeExtensions(t *testing.T) {
 		},
 		{
 			msg: "extending types within existing schema",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				scalar FooScalar
 				type FooObject
 				interface FooInterface
@@ -147,7 +146,7 @@ func TestPossibleTypeExtensions(t *testing.T) {
 		},
 		{
 			msg:    "extending unknown types within existing schema",
-			schema: graphql.MustBuildSchema(nil, []byte(`type Known`)),
+			schema: mustBuildSchema(nil, []byte(`type Known`)),
 			query: `
 				extend scalar Unknown @dummy
 				extend type Unknown @dummy
@@ -156,7 +155,7 @@ func TestPossibleTypeExtensions(t *testing.T) {
 				extend enum Unknown @dummy
 				extend input Unknown @dummy
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExtendingUnknownTypeError("Unknown", 0, 0)).
 				Add(validation.ExtendingUnknownTypeError("Unknown", 0, 0)).
 				Add(validation.ExtendingUnknownTypeError("Unknown", 0, 0)).
@@ -166,7 +165,7 @@ func TestPossibleTypeExtensions(t *testing.T) {
 		},
 		{
 			msg: "extending types with different kinds within existing schema",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				scalar FooScalar
 				type FooObject
 				interface FooInterface
@@ -182,7 +181,7 @@ func TestPossibleTypeExtensions(t *testing.T) {
 				extend input FooEnum @dummy
 				extend scalar FooInputObject @dummy
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExtendingDifferentTypeKindError("FooScalar", "scalar", 0, 0)).
 				Add(validation.ExtendingDifferentTypeKindError("FooObject", "object", 0, 0)).
 				Add(validation.ExtendingDifferentTypeKindError("FooInterface", "interface", 0, 0)).

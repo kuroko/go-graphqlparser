@@ -13,5 +13,5 @@ for i in ${!typeNames[@]}; do
   fi
 done
 
-go run tools/listgen/main.go -package types -types ${types} > graphql/types/lists.go
-go fmt graphql/types/lists.go
+go run tools/listgen/main.go -package types -types ${types} > graphql/lists.go
+go fmt graphql/lists.go

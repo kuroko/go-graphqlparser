@@ -5,13 +5,12 @@ import (
 
 	"github.com/bucketd/go-graphqlparser/ast"
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
 // schemaWithSDLDirectives ...
-var schemaWithSDLDirectives = graphql.MustBuildSchema(nil, []byte(`
+var schemaWithSDLDirectives = mustBuildSchema(nil, []byte(`
 	directive @onSchema on SCHEMA
 	directive @onScalar on SCALAR
 	directive @onObject on OBJECT
@@ -62,7 +61,7 @@ func TestKnownDirectives(t *testing.T) {
 						}
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.UnknownDirectiveError("unknown", 0, 0)),
 			},
 			{
@@ -80,7 +79,7 @@ func TestKnownDirectives(t *testing.T) {
 						}
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.UnknownDirectiveError("unknown", 0, 0)).
 					Add(validation.UnknownDirectiveError("unknown", 0, 0)).
 					Add(validation.UnknownDirectiveError("unknown", 0, 0)),
@@ -121,7 +120,7 @@ func TestKnownDirectives(t *testing.T) {
 						someField
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.MisplacedDirectiveError("include", ast.DirectiveLocationKindQuery, 0, 0)).
 					Add(validation.MisplacedDirectiveError("onQuery", ast.DirectiveLocationKindField, 0, 0)).
 					Add(validation.MisplacedDirectiveError("onQuery", ast.DirectiveLocationKindFragmentSpread, 0, 0)).
@@ -135,7 +134,7 @@ func TestKnownDirectives(t *testing.T) {
 			//			name
 			//		}
 			//	`,
-			//	errs: (*types.Errors)(nil).
+			//	errs: (*graphql.Errors)(nil).
 			//		Add(validation.MisplacedDirectiveError("onField", ast.DirectiveLocationKindVariableDefinition, 0, 0)),
 			//},
 		}
@@ -175,7 +174,7 @@ func TestKnownDirectives(t *testing.T) {
 			},
 			{
 				msg: "with directive defined in schema extension",
-				schema: graphql.MustBuildSchema(nil, []byte(`
+				schema: mustBuildSchema(nil, []byte(`
 					type Query {
 						foo: String
 					}
@@ -188,7 +187,7 @@ func TestKnownDirectives(t *testing.T) {
 			},
 			{
 				msg: "with unknown directive in schema extension",
-				schema: graphql.MustBuildSchema(nil, []byte(`
+				schema: mustBuildSchema(nil, []byte(`
 					type Query {
 						foo: String
 					}
@@ -196,7 +195,7 @@ func TestKnownDirectives(t *testing.T) {
 				query: `
 					extend type Query @unknown
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.UnknownDirectiveError("unknown", 0, 0)),
 			},
 			{
@@ -278,7 +277,7 @@ func TestKnownDirectives(t *testing.T) {
 
 					extend schema @onObject
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.MisplacedDirectiveError("onInterface", ast.DirectiveLocationKindObject, 0, 0)).
 					Add(validation.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindArgumentDefinition, 0, 0)).
 					Add(validation.MisplacedDirectiveError("onInputFieldDefinition", ast.DirectiveLocationKindFieldDefinition, 0, 0)).

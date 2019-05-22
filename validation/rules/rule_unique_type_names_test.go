@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -52,7 +51,7 @@ func TestUniqueTypeNames(t *testing.T) {
 				enum Foo
 				input Foo
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.DuplicateTypeNameError("Foo", 0, 0)).
 				Add(validation.DuplicateTypeNameError("Foo", 0, 0)).
 				Add(validation.DuplicateTypeNameError("Foo", 0, 0)).
@@ -62,7 +61,7 @@ func TestUniqueTypeNames(t *testing.T) {
 		},
 		{
 			msg: "adding new types to existing schema",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				type Foo
 			`)),
 			query: `
@@ -71,7 +70,7 @@ func TestUniqueTypeNames(t *testing.T) {
 		},
 		{
 			msg: "adding new type to existing schema with same-named directive",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				directive @Foo on SCHEMA
 			`)),
 			query: `
@@ -80,7 +79,7 @@ func TestUniqueTypeNames(t *testing.T) {
 		},
 		{
 			msg: "adding conflicting types to existing schema",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				type Foo
 			`)),
 			query: `
@@ -91,7 +90,7 @@ func TestUniqueTypeNames(t *testing.T) {
 				enum Foo
 				input Foo
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExistedTypeNameError("Foo", 0, 0)).
 				Add(validation.ExistedTypeNameError("Foo", 0, 0)).
 				Add(validation.ExistedTypeNameError("Foo", 0, 0)).

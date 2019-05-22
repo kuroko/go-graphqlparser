@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -144,17 +144,18 @@ var (
 type ruleTestCase struct {
 	msg    string
 	query  string
-	schema *types.Schema
-	errs   *types.Errors
+	schema *graphql.Schema
+	errs   *graphql.Errors
 }
 
 // queryRuleBencher ...
 func queryRuleBencher(b *testing.B, t ruleTestCase, fn validation.VisitFunc) {
-	schema, errs, err := graphql.BuildSchema(nil, schemaDocument)
+	schema, errs, err := buildSchema(nil, schemaDocument)
 	require.NoError(b, err, "failed to build schema")
-	require.Equal(b, (*types.Errors)(nil), errs, "failed to validate schema")
+	require.Equal(b, (*graphql.Errors)(nil), errs, "failed to validate schema")
 
-	doc, err := graphql.Parse([]byte(t.query))
+	parser := language.NewParser([]byte(t.query))
+	doc, err := parser.Parse()
 	require.NoError(b, err)
 
 	walker := validation.NewWalker([]validation.VisitFunc{fn})
@@ -168,22 +169,24 @@ func queryRuleBencher(b *testing.B, t ruleTestCase, fn validation.VisitFunc) {
 
 // queryRuleTester ...
 func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
-	schema, errs, err := graphql.BuildSchema(nil, schemaDocument)
+	schema, errs, err := buildSchema(nil, schemaDocument)
 	require.NoError(t, err, "failed to build schema")
-	require.Equal(t, (*types.Errors)(nil), errs, "failed to validate schema")
+	require.Equal(t, (*graphql.Errors)(nil), errs, "failed to validate schema")
 
 	for _, tc := range tt {
-		doc, err := graphql.Parse([]byte(tc.query))
+		parser := language.NewParser([]byte(tc.query))
+
+		doc, err := parser.Parse()
 		require.NoError(t, err)
 
 		walker := validation.NewWalker([]validation.VisitFunc{fn})
 
-		errs := validation.Validate(doc, schema, walker)
+		ctx := validation.Validate(doc, schema, walker)
 
 		// We need to sort errors, because we use maps in some places, and it leads to unpredictable
 		// result error ordering.
-		testErrs := types.SortErrors(tc.errs)
-		rsltErrs := types.SortErrors(errs)
+		testErrs := graphql.SortErrors(tc.errs)
+		rsltErrs := graphql.SortErrors(ctx.Errors)
 
 		assert.Equal(t, testErrs, rsltErrs, tc.msg)
 	}
@@ -192,17 +195,19 @@ func queryRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 // sdlRuleTester ...
 func sdlRuleTester(t *testing.T, tt []ruleTestCase, fn validation.VisitFunc) {
 	for _, tc := range tt {
-		doc, err := graphql.Parse([]byte(tc.query))
+		parser := language.NewParser([]byte(tc.query))
+
+		doc, err := parser.Parse()
 		require.NoError(t, err, "failed to parse schema document")
 
 		walker := validation.NewWalker([]validation.VisitFunc{fn})
 
-		_, errs := validation.ValidateSDL(doc, tc.schema, walker)
+		ctx := validation.ValidateSDL(doc, tc.schema, walker)
 
 		// We need to sort errors, because we use maps in some places, and it leads to unpredictable
 		// result error ordering.
-		testErrs := types.SortErrors(tc.errs)
-		rsltErrs := types.SortErrors(errs)
+		testErrs := graphql.SortErrors(tc.errs)
+		rsltErrs := graphql.SortErrors(ctx.Errors)
 
 		assert.Equal(t, testErrs, rsltErrs, tc.msg)
 	}

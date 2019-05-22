@@ -3,7 +3,7 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -61,7 +61,7 @@ func TestLoneAnonymousOperation(t *testing.T) {
 					fieldB
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.AnonOperationNotAloneError(0, 0)).
 				Add(validation.AnonOperationNotAloneError(0, 0)),
 		},
@@ -76,7 +76,7 @@ func TestLoneAnonymousOperation(t *testing.T) {
 					fieldB
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.AnonOperationNotAloneError(0, 0)),
 		},
 		{
@@ -90,7 +90,7 @@ func TestLoneAnonymousOperation(t *testing.T) {
 					fieldB
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.AnonOperationNotAloneError(0, 0)),
 		},
 	}

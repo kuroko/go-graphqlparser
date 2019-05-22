@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -70,7 +69,7 @@ func TestKnownTypeNames(t *testing.T) {
 						name
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.UnknownTypeError("JumbledUpLetters", 0, 0)).
 					Add(validation.UnknownTypeError("Badger", 0, 0)).
 					Add(validation.UnknownTypeError("Peettt", 0, 0)),
@@ -164,7 +163,7 @@ func TestKnownTypeNames(t *testing.T) {
 						subscription: N
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.UnknownTypeError("C", 0, 0)).
 					Add(validation.UnknownTypeError("D", 0, 0)).
 					Add(validation.UnknownTypeError("E", 0, 0)).
@@ -189,12 +188,12 @@ func TestKnownTypeNames(t *testing.T) {
 						foo: Foo
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.UnknownTypeError("Foo", 0, 0)),
 			},
 			{
 				msg:    "reference standard scalars inside extension document",
-				schema: graphql.MustBuildSchema(nil, []byte(`type Foo`)),
+				schema: mustBuildSchema(nil, []byte(`type Foo`)),
 				query: `
 					type SomeType {
 						string: String
@@ -207,7 +206,7 @@ func TestKnownTypeNames(t *testing.T) {
 			},
 			{
 				msg:    "reference types inside extension document",
-				schema: graphql.MustBuildSchema(nil, []byte(`type Foo`)),
+				schema: mustBuildSchema(nil, []byte(`type Foo`)),
 				query: `
 					type QueryRoot {
 						foo: Foo
@@ -223,7 +222,7 @@ func TestKnownTypeNames(t *testing.T) {
 			},
 			{
 				msg:    "unknown type references inside extension document",
-				schema: graphql.MustBuildSchema(nil, []byte(`type A`)),
+				schema: mustBuildSchema(nil, []byte(`type A`)),
 				query: `
 					type B
 
@@ -249,7 +248,7 @@ func TestKnownTypeNames(t *testing.T) {
 						subscription: N
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.UnknownTypeError("C", 0, 0)).
 					Add(validation.UnknownTypeError("D", 0, 0)).
 					Add(validation.UnknownTypeError("E", 0, 0)).

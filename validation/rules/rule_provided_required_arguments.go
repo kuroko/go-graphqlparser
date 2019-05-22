@@ -2,7 +2,7 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -26,7 +26,7 @@ func ProvidedRequiredArgumentsOnDirectives(w *validation.Walker) {
 			dd, ok = ctx.SDLContext.DirectiveDefinitions[d.Name]
 		}
 		if !ok {
-			dd, ok = types.SpecifiedDirectives()[d.Name]
+			dd, ok = graphql.SpecifiedDirectives()[d.Name]
 		}
 		if !ok {
 			return

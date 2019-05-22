@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -36,7 +35,7 @@ func TestKnownArgumentNamesOnDirectives(t *testing.T) {
 
 				directive @test(arg: String) on FIELD_DEFINITION
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnknownDirectiveArgError("unknown", "test", 0, 0)),
 		},
 		// NOTE: We don't do suggestions in this library, it's a bit pointless, and uses way too
@@ -51,7 +50,7 @@ func TestKnownArgumentNamesOnDirectives(t *testing.T) {
 					foo: String @deprecated(unknown: "")
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnknownDirectiveArgError("unknown", "deprecated", 0, 0)),
 		},
 		// TODO: Check if this is behaving as intended...
@@ -64,12 +63,12 @@ func TestKnownArgumentNamesOnDirectives(t *testing.T) {
 
 				directive @deprecated(arg: String) on FIELD
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnknownDirectiveArgError("reason", "deprecated", 0, 0)),
 		},
 		{
 			msg: "unknown arg on directive defined in schema extension",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				type Query {
 					foo: String
 				}
@@ -79,12 +78,12 @@ func TestKnownArgumentNamesOnDirectives(t *testing.T) {
 
 				extend type Query @test(unknown: "")
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnknownDirectiveArgError("unknown", "test", 0, 0)),
 		},
 		{
 			msg: "unknown arg on directive used in schema extension",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				directive @test(arg: String) on OBJECT
 
 				type Query {
@@ -94,7 +93,7 @@ func TestKnownArgumentNamesOnDirectives(t *testing.T) {
 			query: `
 				extend type Query @test(unknown: "")
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnknownDirectiveArgError("unknown", "test", 0, 0)),
 		},
 	}

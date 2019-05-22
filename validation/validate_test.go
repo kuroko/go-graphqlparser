@@ -3,8 +3,8 @@ package validation_test
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser"
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/language"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
@@ -21,21 +21,23 @@ import (
 func BenchmarkValidateSDL(b *testing.B) {
 	// When testing Vektah's parser, we can't re-use this, so let's do the same here, even
 	// though in our case we can re-use this document.
-	doc, err := graphql.Parse(schemaDoc)
+	parser := language.NewParser(schemaDoc)
+
+	doc, err := parser.Parse()
 	require.NoError(b, err)
 
-	var errs *types.Errors
+	var ctx *validation.Context
 
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		_, errs = validation.ValidateSDL(doc, nil, graphql.DefaultValidationWalkerSDL)
+		ctx = validation.ValidateSDL(doc, nil, graphqlparser.DefaultValidationWalkerSDL)
 	}
 
 	b.StopTimer()
 
-	require.Nil(b, errs)
+	require.Nil(b, ctx.Errors)
 }
 
 func BenchmarkVektahParseSchema(b *testing.B) {
@@ -91,9 +93,9 @@ func TestValidate(t *testing.T) {
 	}
 
 	walker := validation.NewWalker(rules.Specified)
-	errs := validation.Validate(doc, &types.Schema{}, walker)
+	ctx := validation.Validate(doc, &graphql.Schema{}, walker)
 
-	t.Log(spew.Sdump(errs))
+	t.Log(spew.Sdump(ctx.Errors))
 
-	assert.Equal(t, 2, errs.Len())
+	assert.Equal(t, 2, ctx.Errors.Len())
 }

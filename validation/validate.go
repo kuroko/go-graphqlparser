@@ -2,75 +2,28 @@ package validation
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/graphql"
 )
 
 // VisitFunc ...
 type VisitFunc func(w *Walker)
 
 // Validate ...
-func Validate(doc ast.Document, schema *types.Schema, walker *Walker) *types.Errors {
+func Validate(doc ast.Document, schema *graphql.Schema, walker *Walker) *Context {
 	ctx := NewContext(doc, schema)
 
 	walker.Walk(ctx, doc)
 
-	return ctx.Errors
+	return ctx
 }
 
 // ValidateSDL ...
-func ValidateSDL(doc ast.Document, schema *types.Schema, walker *Walker) (*types.Schema, *types.Errors) {
+func ValidateSDL(doc ast.Document, schema *graphql.Schema, walker *Walker) *Context {
 	ctx := NewSDLContext(doc, schema)
 
 	walker.Walk(ctx, doc)
 
-	buildSchema(ctx)
-
-	return ctx.Schema, ctx.Errors
-}
-
-// buildSchema ...
-func buildSchema(ctx *Context) {
-	validateTypeDefinitions(ctx)
-	validateAndMergeTypeExtensions(ctx)
-
-	// TODO: At this point, do we stop if we have errors? Or what?
-
-	if schemaDef := ctx.SDLContext.SchemaDefinition; schemaDef != nil {
-		if operationDefs := schemaDef.OperationTypeDefinitions; operationDefs != nil {
-			operationDefs.ForEach(func(otd ast.OperationTypeDefinition, i int) {
-				switch otd.OperationType {
-				case ast.OperationDefinitionKindQuery:
-					ctx.Schema.QueryType = &otd.NamedType
-				case ast.OperationDefinitionKindMutation:
-					ctx.Schema.MutationType = &otd.NamedType
-				case ast.OperationDefinitionKindSubscription:
-					ctx.Schema.SubscriptionType = &otd.NamedType
-				}
-			})
-		}
-	}
-
-	if !ctx.SDLContext.IsExtending {
-		// The map on SDLContext is created with the right size to also contain the built-in
-		// directives without needing to grow.
-		ctx.Schema.Directives = ctx.SDLContext.DirectiveDefinitions
-
-		for name, def := range types.SpecifiedDirectives() {
-			// TODO: Should we allow overriding built-in directives?
-			ctx.Schema.Directives[name] = def
-		}
-
-		// The map on SDLContext is created with the right size to also contain the built-in types
-		// without needing to grow.
-		ctx.Schema.Types = ctx.SDLContext.TypeDefinitions
-
-		for name, def := range types.SpecifiedTypes() {
-			// TODO: Should we allow overriding built-in directives?
-			ctx.Schema.Types[name] = def
-		}
-	} else {
-		// TODO: Handle adding the new types / directives to an existing schema.
-	}
+	return ctx
 }
 
 // validateTypeDefinitions ...

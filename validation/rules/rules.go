@@ -58,7 +58,6 @@ var SpecifiedSDL = []validation.VisitFunc{
 	UniqueDirectivesPerLocation,
 	UniqueArgumentNames,
 	UniqueInputFieldNames,
-	UnionHasMembers,
 	KnownArgumentNamesOnDirectives,
 	KnownDirectives,
 	KnownTypeNames,

@@ -6,7 +6,7 @@ import (
 
 	"github.com/agnivade/levenshtein"
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/graphql"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 )
 
 // IsInputType ...
-func IsInputType(schema *types.Schema, t ast.Type) bool {
+func IsInputType(schema *graphql.Schema, t ast.Type) bool {
 	if t.Kind == ast.TypeKindList {
 		return IsInputType(schema, *t.ListType)
 	}
@@ -35,7 +35,7 @@ func IsInputType(schema *types.Schema, t ast.Type) bool {
 }
 
 // IsOutputType ...
-func IsOutputType(schema *types.Schema, t ast.Type) bool {
+func IsOutputType(schema *graphql.Schema, t ast.Type) bool {
 	if t.Kind == ast.TypeKindList {
 		return IsOutputType(schema, *t.ListType)
 	}
@@ -51,7 +51,7 @@ func IsOutputType(schema *types.Schema, t ast.Type) bool {
 }
 
 // IsUnionMemberType ...
-func IsUnionMemberType(schema *types.Schema, t ast.Type) bool {
+func IsUnionMemberType(schema *graphql.Schema, t ast.Type) bool {
 	if t.NonNullable {
 		return false
 	}

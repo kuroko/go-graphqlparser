@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bucketd/go-graphqlparser/graphql"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -95,7 +94,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 					subscription: Subscription
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.DuplicateOperationTypeError("query", 0, 0)).
 				Add(validation.DuplicateOperationTypeError("mutation", 0, 0)).
 				Add(validation.DuplicateOperationTypeError("subscription", 0, 0)),
@@ -117,7 +116,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 					subscription: Subscription
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.DuplicateOperationTypeError("query", 0, 0)).
 				Add(validation.DuplicateOperationTypeError("mutation", 0, 0)).
 				Add(validation.DuplicateOperationTypeError("subscription", 0, 0)),
@@ -145,7 +144,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 					subscription: Subscription
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.DuplicateOperationTypeError("query", 0, 0)).
 				Add(validation.DuplicateOperationTypeError("mutation", 0, 0)).
 				Add(validation.DuplicateOperationTypeError("subscription", 0, 0)).
@@ -173,7 +172,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 					subscription: Subscription
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.DuplicateOperationTypeError("query", 0, 0)).
 				Add(validation.DuplicateOperationTypeError("mutation", 0, 0)).
 				Add(validation.DuplicateOperationTypeError("subscription", 0, 0)),
@@ -182,7 +181,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 		// are run, so we can't include these tests.
 		//{
 		//	msg:    "define schema inside extension SDL",
-		//	schema: &types.Schema{},
+		//	schema: &graphql.Schema{},
 		//	query: `
 		//		schema {
 		//			query: Query
@@ -193,7 +192,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 		//},
 		//{
 		//	msg:    "define and extend schema inside extension SDL",
-		//	schema: &types.Schema{},
+		//	schema: &graphql.Schema{},
 		//	query: `
 		//		schema {
 		//			query: Query
@@ -210,7 +209,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 		//},
 		{
 			msg:    "adding new operation types to existing schema",
-			schema: &types.Schema{},
+			schema: &graphql.Schema{},
 			query: `
 				extend schema {
 					mutation: Mutation
@@ -223,7 +222,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 		},
 		{
 			msg: "adding conflicting operation types to existing schema",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				schema {
 					query: Query
 					mutation: Mutation
@@ -241,14 +240,14 @@ func TestUniqueOperationTypes(t *testing.T) {
 					subscription: Foo
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExistedOperationTypeError("query", 0, 0)).
 				Add(validation.ExistedOperationTypeError("mutation", 0, 0)).
 				Add(validation.ExistedOperationTypeError("subscription", 0, 0)),
 		},
 		{
 			msg: "adding conflicting operation types to existing schema twice",
-			schema: graphql.MustBuildSchema(nil, []byte(`
+			schema: mustBuildSchema(nil, []byte(`
 				schema {
 					query: Query
 					mutation: Mutation
@@ -272,7 +271,7 @@ func TestUniqueOperationTypes(t *testing.T) {
 					subscription: Foo
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.ExistedOperationTypeError("query", 0, 0)).
 				Add(validation.ExistedOperationTypeError("mutation", 0, 0)).
 				Add(validation.ExistedOperationTypeError("subscription", 0, 0)).

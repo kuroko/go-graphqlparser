@@ -2,7 +2,7 @@ package rules
 
 import (
 	"github.com/bucketd/go-graphqlparser/ast"
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 )
 
@@ -26,7 +26,7 @@ func KnownDirectives(w *validation.Walker) {
 		// Lastly, check for built-in directives, these may have been overridden, which is why they
 		// should be checked last.
 		if !ok {
-			def, ok = types.SpecifiedDirectives()[dir.Name]
+			def, ok = graphql.SpecifiedDirectives()[dir.Name]
 		}
 
 		if def == nil || !ok {

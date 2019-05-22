@@ -3,9 +3,9 @@ package rules_test
 import (
 	"testing"
 
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 
-	"github.com/bucketd/go-graphqlparser/graphql/types"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
 
@@ -111,7 +111,7 @@ func TestNoUnusedVariables(t *testing.T) {
 					field(a: $a, b: $b)
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnusedVariableError("c", "", 0, 0)),
 		},
 		{
@@ -121,7 +121,7 @@ func TestNoUnusedVariables(t *testing.T) {
 					field(b: $b)
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnusedVariableError("a", "Foo", 0, 0)).
 				Add(validation.UnusedVariableError("c", "Foo", 0, 0)),
 		},
@@ -145,7 +145,7 @@ func TestNoUnusedVariables(t *testing.T) {
 					field
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnusedVariableError("c", "Foo", 0, 0)),
 		},
 		{
@@ -168,7 +168,7 @@ func TestNoUnusedVariables(t *testing.T) {
 					field
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnusedVariableError("a", "Foo", 0, 0)).
 				Add(validation.UnusedVariableError("c", "Foo", 0, 0)),
 		},
@@ -185,7 +185,7 @@ func TestNoUnusedVariables(t *testing.T) {
 					field(b: $b)
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnusedVariableError("b", "Foo", 0, 0)),
 		},
 		{
@@ -204,7 +204,7 @@ func TestNoUnusedVariables(t *testing.T) {
 					field(b: $b)
 				}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.UnusedVariableError("b", "Foo", 0, 0)).
 				Add(validation.UnusedVariableError("a", "Bar", 0, 0)),
 		},

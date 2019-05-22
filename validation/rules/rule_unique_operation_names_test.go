@@ -5,7 +5,7 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -82,7 +82,7 @@ func TestUniqueOperationNames(t *testing.T) {
 			  fieldB
 			}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.DuplicateOperationNameError("Foo", 0, 0)),
 		},
 		{
@@ -95,7 +95,7 @@ func TestUniqueOperationNames(t *testing.T) {
 			  fieldB
 			}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.DuplicateOperationNameError("Foo", 0, 0)),
 		},
 		{
@@ -108,7 +108,7 @@ func TestUniqueOperationNames(t *testing.T) {
 			  fieldB
 			}
 			`,
-			errs: (*types.Errors)(nil).
+			errs: (*graphql.Errors)(nil).
 				Add(validation.DuplicateOperationNameError("Foo", 0, 0)),
 		},
 	}

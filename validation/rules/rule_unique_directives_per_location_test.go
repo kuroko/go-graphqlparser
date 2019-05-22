@@ -3,7 +3,7 @@ package rules_test
 import (
 	"testing"
 
-	"github.com/bucketd/go-graphqlparser/graphql/types"
+	"github.com/bucketd/go-graphqlparser/graphql"
 	"github.com/bucketd/go-graphqlparser/validation"
 	"github.com/bucketd/go-graphqlparser/validation/rules"
 )
@@ -59,7 +59,7 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 						field @directive @directive
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateDirectiveError("directive", 0, 0)),
 			},
 			{
@@ -69,7 +69,7 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 						field @directive @directive @directive
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
 					Add(validation.DuplicateDirectiveError("directive", 0, 0)),
 			},
@@ -80,7 +80,7 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 						field @directiveA @directiveB @directiveA @directiveB
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateDirectiveError("directiveA", 0, 0)).
 					Add(validation.DuplicateDirectiveError("directiveB", 0, 0)),
 			},
@@ -91,7 +91,7 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 						field @directive @directive
 					}
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
 					Add(validation.DuplicateDirectiveError("directive", 0, 0)),
 			},
@@ -123,7 +123,7 @@ func TestUniqueDirectivesPerLocation(t *testing.T) {
 					input TestInput @directive @directive
 					extend input TestInput @directive @directive
 				`,
-				errs: (*types.Errors)(nil).
+				errs: (*graphql.Errors)(nil).
 					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
 					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
 					Add(validation.DuplicateDirectiveError("directive", 0, 0)).
