@@ -89,6 +89,8 @@ func mergeSchemaExtensions(ctx *Context) {
 
 // mergeTypeExtensions ...
 func mergeTypeExtensions(ctx *Context) {
+	// TODO: Is this done?
+
 	for _, typeExts := range ctx.SDLContext.TypeExtensions {
 		for _, typeExt := range typeExts {
 			switch {
