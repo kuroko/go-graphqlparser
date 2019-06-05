@@ -11,6 +11,8 @@ type Schema struct {
 	// ast.Document for the schema.
 	//Document ast.Document
 
+	Definition *ast.SchemaDefinition
+
 	// NOTE: The following should all have the "kind" ast.TypeKindNamed.
 	QueryType        *ast.Type
 	MutationType     *ast.Type

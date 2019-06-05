@@ -908,7 +908,15 @@ func (p *Parser) parseTypeSystemExtension() (*ast.TypeSystemExtension, error) {
 		return tsExtension, nil
 	}
 
-	return nil, nil
+	return nil, p.unexpected(p.token, p.expected(TokenKindName,
+		"schema",
+		"scalar",
+		"type",
+		"interface",
+		"union",
+		"enum",
+		"input",
+	))
 }
 
 // parseSchemaDefinition ...
