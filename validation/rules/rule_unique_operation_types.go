@@ -8,26 +8,33 @@ import (
 // UniqueOperationTypes ...
 func UniqueOperationTypes(w *validation.Walker) {
 	w.AddSchemaDefinitionLeaveEventHandler(func(ctx *validation.Context, def *ast.SchemaDefinition) {
+		var qryDefined bool
+		var mutDefined bool
+		var subDefined bool
+
 		def.OperationTypeDefinitions.ForEach(func(rotd ast.OperationTypeDefinition, i int) {
 			// NOTE: Can't be extending here.
 			switch rotd.OperationType {
 			case ast.OperationDefinitionKindQuery:
-				if ctx.SDLContext.QueryTypeDefined {
+				if qryDefined {
 					ctx.AddError(validation.DuplicateOperationTypeError(rotd.OperationType.String(), 0, 0))
 				}
 
+				qryDefined = true
 				ctx.SDLContext.QueryTypeDefined = true
 			case ast.OperationDefinitionKindMutation:
-				if ctx.SDLContext.MutationTypeDefined {
+				if mutDefined {
 					ctx.AddError(validation.DuplicateOperationTypeError(rotd.OperationType.String(), 0, 0))
 				}
 
+				mutDefined = true
 				ctx.SDLContext.MutationTypeDefined = true
 			case ast.OperationDefinitionKindSubscription:
-				if ctx.SDLContext.SubscriptionTypeDefined {
+				if subDefined {
 					ctx.AddError(validation.DuplicateOperationTypeError(rotd.OperationType.String(), 0, 0))
 				}
 
+				subDefined = true
 				ctx.SDLContext.SubscriptionTypeDefined = true
 			}
 		})

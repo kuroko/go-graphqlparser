@@ -1,26 +1,21 @@
 const {ApolloServer, makeExecutableSchema} = require("apollo-server");
 
 const rootSchema = `
-   
-    directive @foo on SCHEMA | UNION
-    
-    enum Floop {
-        FOO
-    }
-    
-    interface Fooer {
-        foo: String
-    }
-    
-    type Mut implements Fooer {
-        foo: String
-    }
-    
-    extend type Mut implements Fooer {
-        bar: String
-    }
-    
-    union Foo
+  schema {
+    query: Foo
+  }
+
+  schema {
+    query: Foo
+  }
+
+  type Foo {
+    bar: String!
+  }
+
+  extend type Foo {
+    baz: Int!
+  }
 `;
 
 const schema = makeExecutableSchema({

@@ -27,28 +27,38 @@ func buildSchema(ctx *Context) {
 	mergeSchemaExtensions(ctx)
 	mergeTypeExtensions(ctx)
 
+	// TODO: Split to function v
 	schemaDef := ctx.SDLContext.SchemaDefinition
-
-	// TODO: Split to function.
-	if schemaDef != nil {
-		if operationDefs := schemaDef.OperationTypeDefinitions; operationDefs != nil {
-			operationDefs.ForEach(func(otd ast.OperationTypeDefinition, i int) {
-				switch otd.OperationType {
-				case ast.OperationDefinitionKindQuery:
-					ctx.Schema.QueryType = &otd.NamedType
-				case ast.OperationDefinitionKindMutation:
-					ctx.Schema.MutationType = &otd.NamedType
-				case ast.OperationDefinitionKindSubscription:
-					ctx.Schema.SubscriptionType = &otd.NamedType
-				}
-			})
+	if schemaDef == nil {
+		// TODO: What if there's no Query type defined? When do we add an error, given that this is
+		// not validation, and we're trying to avoid adding errors here.
+		schemaDef = &ast.SchemaDefinition{
+			OperationTypeDefinitions: (*ast.OperationTypeDefinitions)(nil).
+				Add(ast.OperationTypeDefinition{
+					NamedType: ast.Type{
+						NamedType: "Query",
+						Kind:      ast.TypeKindNamed,
+					},
+					OperationType: ast.OperationDefinitionKindQuery,
+				}),
 		}
-
-		ctx.Schema.Definition = schemaDef
-	} else {
-		// TODO: Include default schema definition, with query option set up.
-		// TODO: Ensure there's some validation around the Query type being defined in this case.
 	}
+
+	if operationDefs := schemaDef.OperationTypeDefinitions; operationDefs != nil {
+		operationDefs.ForEach(func(otd ast.OperationTypeDefinition, i int) {
+			switch otd.OperationType {
+			case ast.OperationDefinitionKindQuery:
+				ctx.Schema.QueryType = &otd.NamedType
+			case ast.OperationDefinitionKindMutation:
+				ctx.Schema.MutationType = &otd.NamedType
+			case ast.OperationDefinitionKindSubscription:
+				ctx.Schema.SubscriptionType = &otd.NamedType
+			}
+		})
+	}
+
+	ctx.Schema.Definition = schemaDef
+	// TODO: Split to function ^
 
 	if !ctx.SDLContext.IsExtending {
 		// The map on SDLContext is created with the right size to also contain the built-in
@@ -89,51 +99,29 @@ func mergeSchemaExtensions(ctx *Context) {
 
 // mergeTypeExtensions ...
 func mergeTypeExtensions(ctx *Context) {
-	// TODO: Is this done?
+	for typeName, typeExts := range ctx.SDLContext.TypeExtensions {
+		typeDef, _ := ctx.TypeDefinition(typeName)
+		if typeDef == nil {
+			// Handled by rule PossibleTypeExtensions.
+			return
+		}
 
-	for _, typeExts := range ctx.SDLContext.TypeExtensions {
 		for _, typeExt := range typeExts {
+			typeDef.Directives.Join(typeExt.Directives)
+
 			switch {
-			case ast.IsObjectTypeExtension(typeExt) || ast.IsInterfaceTypeExtension(typeExt):
-				mergeTypeExtensionFieldDefinitions(ctx, typeExt)
-			case ast.IsInputObjectTypeExtension(typeExt):
-				mergeTypeExtensionInputFieldDefinitions(ctx, typeExt)
+			case ast.IsObjectTypeExtension(typeExt):
+				typeDef.FieldsDefinition.Join(typeExt.FieldsDefinition)
+				typeDef.ImplementsInterface.Join(typeExt.ImplementsInterface)
+			case ast.IsInterfaceTypeExtension(typeExt):
+				typeDef.FieldsDefinition.Join(typeExt.FieldsDefinition)
+			case ast.IsUnionTypeExtension(typeExt):
+				typeDef.UnionMemberTypes.Join(typeExt.UnionMemberTypes)
 			case ast.IsEnumTypeExtension(typeExt):
-				mergeTypeExtensionEnumValues(ctx, typeExt)
+				typeDef.EnumValuesDefinition.Join(typeExt.EnumValuesDefinition)
+			case ast.IsInputObjectTypeExtension(typeExt):
+				typeDef.InputFieldsDefinition.Join(typeExt.InputFieldsDefinition)
 			}
 		}
 	}
-}
-
-// mergeTypeExtensionFieldDefinitions ...
-func mergeTypeExtensionFieldDefinitions(ctx *Context, typeExt *ast.TypeExtension) {
-	typeDef, _ := ctx.TypeDefinition(typeExt.Name)
-	if typeDef == nil {
-		// Handled by rule PossibleTypeExtensions.
-		return
-	}
-
-	typeDef.FieldsDefinition.Join(typeExt.FieldsDefinition)
-}
-
-// mergeTypeExtensionInputFieldDefinitions ...
-func mergeTypeExtensionInputFieldDefinitions(ctx *Context, typeExt *ast.TypeExtension) {
-	typeDef, _ := ctx.TypeDefinition(typeExt.Name)
-	if typeDef == nil {
-		// Handled by rule PossibleTypeExtensions.
-		return
-	}
-
-	typeDef.InputFieldsDefinition.Join(typeExt.InputFieldsDefinition)
-}
-
-// mergeTypeExtensionEnumValues ...
-func mergeTypeExtensionEnumValues(ctx *Context, typeExt *ast.TypeExtension) {
-	typeDef, _ := ctx.TypeDefinition(typeExt.Name)
-	if typeDef == nil {
-		// Handled by rule PossibleTypeExtensions.
-		return
-	}
-
-	typeDef.EnumValuesDefinition.Join(typeExt.EnumValuesDefinition)
 }
