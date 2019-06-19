@@ -123,6 +123,14 @@ func ExtendingUnknownTypeError(typeName string, line, col int) graphql.Error {
 	return graphql.NewError("Cannot extend type \"" + typeName + "\" because it is not defined.")
 }
 
+// InvalidNameError ...
+func InvalidNameError(name string, line, col int) graphql.Error {
+	return graphql.NewError(
+		"Name must match /^[_a-zA-Z][_a-zA-Z0-9]*$/ but \"" + name + "\" does not.",
+		// TODO: Location.
+	)
+}
+
 // MisplacedDirectiveError ...
 func MisplacedDirectiveError(directiveName string, location ast.DirectiveLocation, line, col int) graphql.Error {
 	return graphql.NewError(
@@ -159,6 +167,14 @@ func NameStartsWithTwoUnderscoresError(name string, line, col int) graphql.Error
 func NonExecutableDefinitionError(name string, line, col int) graphql.Error {
 	return graphql.NewError(
 		"The \"" + name + "\" definition is not executable.",
+		// TODO: Location.
+	)
+}
+
+// ReservedNameError ...
+func ReservedNameError(name string, line, col int) graphql.Error {
+	return graphql.NewError(
+		"Name \"" + name + "\" must not begin with \"__\" which is reserved by GraphQL introspection.",
 		// TODO: Location.
 	)
 }

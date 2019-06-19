@@ -1,21 +1,11 @@
 const {ApolloServer, makeExecutableSchema} = require("apollo-server");
 
 const rootSchema = `
-  schema {
-    query: Foo
-  }
-
-  schema {
-    query: Foo
-  }
-
-  type Foo {
+  type Query {
     bar: String!
   }
-
-  extend type Foo {
-    baz: Int!
-  }
+  
+  directive @foo(foo: String, foo: String) on QUERY
 `;
 
 const schema = makeExecutableSchema({

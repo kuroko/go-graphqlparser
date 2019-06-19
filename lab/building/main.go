@@ -10,6 +10,10 @@ import (
 
 func main() {
 	schema, errs, err := graphqlparser.ParseSDLDoc([]byte(`
+		schema {
+			query: Foo
+		}
+
 		type Foo {
 			bar: String!
 		}
@@ -17,6 +21,8 @@ func main() {
 		extend type Foo {
 			baz: Int!
 		}
+
+		directive @f9oo on QUERY
 	`), nil)
 
 	if err != nil {

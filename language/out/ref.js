@@ -1,21 +1,17 @@
-const { buildSchema, graphql } = require("graphql");
+const { buildSchema, graphql, validateSchema } = require("graphql");
 
 let schema = buildSchema(`
-    type Query {
-        foo: String
-    }
-    
-    directive @foo on SCHEMA | UNION
-    
-    type Mut {
-        sup: String
-    }
-    
-    union Foo
+  type Query {
+    bar: String @foo(foo: "hello")
+  }
+  
+  directive @foo(foo: String, foo: Int) on QUERY | FIELD_DEFINITION
 `);
 
-graphql(schema, `{
-    foo
-}`).then(function (res) {
-    console.log(res);
-});
+console.log(validateSchema(schema));
+
+// graphql(schema, `{
+//     bar
+// }`).then(function (res) {
+//     console.log(res);
+// });
