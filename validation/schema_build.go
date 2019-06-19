@@ -27,11 +27,65 @@ func buildSchema(ctx *Context) {
 	mergeSchemaExtensions(ctx)
 	mergeTypeExtensions(ctx)
 
-	// TODO: Split to function v
+	buildSchemaDefinition(ctx)
+	buildDirectives(ctx)
+	buildTypes(ctx)
+}
+
+// buildDirectives ...
+func buildDirectives(ctx *Context) {
+	if !ctx.SDLContext.IsExtending {
+		// The map on SDLContext is created with the right size to also contain the built-in types
+		// without needing to grow.
+		ctx.Schema.Directives = ctx.SDLContext.DirectiveDefinitions
+
+		for name, def := range graphql.SpecifiedDirectives() {
+			if _, ok := ctx.Schema.Directives[name]; !ok {
+				ctx.Schema.Directives[name] = def
+			}
+		}
+	} else {
+		directivesSize := len(ctx.Schema.Directives) + len(ctx.SDLContext.DirectiveDefinitions)
+		directives := make(map[string]*ast.DirectiveDefinition, directivesSize)
+
+		for name, def := range ctx.SDLContext.DirectiveDefinitions {
+			directives[name] = def
+		}
+
+		ctx.Schema.Directives = directives
+	}
+}
+
+// buildTypes ...
+func buildTypes(ctx *Context) {
+	if !ctx.SDLContext.IsExtending {
+		// The map on SDLContext is created with the right size to also contain the built-in types
+		// without needing to grow.
+		ctx.Schema.Types = ctx.SDLContext.TypeDefinitions
+
+		for name, def := range graphql.SpecifiedTypes() {
+			if _, ok := ctx.Schema.Types[name]; !ok {
+				ctx.Schema.Types[name] = def
+			}
+		}
+	} else {
+		typesSize := len(ctx.Schema.Types) + len(ctx.SDLContext.TypeDefinitions)
+		types := make(map[string]*ast.TypeDefinition, typesSize)
+
+		for name, def := range ctx.SDLContext.TypeDefinitions {
+			types[name] = def
+		}
+
+		ctx.Schema.Types = types
+	}
+}
+
+// buildSchemaDefinition ...
+func buildSchemaDefinition(ctx *Context) {
 	schemaDef := ctx.SDLContext.SchemaDefinition
 	if schemaDef == nil {
-		// TODO: What if there's no Query type defined? When do we add an error, given that this is
-		// not validation, and we're trying to avoid adding errors here.
+		// This is validated by the next step, as it would be if we were using a definition found on
+		// the SDLContext instance.
 		schemaDef = &ast.SchemaDefinition{
 			OperationTypeDefinitions: (*ast.OperationTypeDefinitions)(nil).
 				Add(ast.OperationTypeDefinition{
@@ -58,30 +112,6 @@ func buildSchema(ctx *Context) {
 	}
 
 	ctx.Schema.Definition = schemaDef
-	// TODO: Split to function ^
-
-	if !ctx.SDLContext.IsExtending {
-		// The map on SDLContext is created with the right size to also contain the built-in
-		// directives without needing to grow.
-		ctx.Schema.Directives = ctx.SDLContext.DirectiveDefinitions
-
-		for name, def := range graphql.SpecifiedDirectives() {
-			// TODO: Should we allow overriding built-in directives?
-			// TODO: ^ Yes, maybe?
-			ctx.Schema.Directives[name] = def
-		}
-
-		// The map on SDLContext is created with the right size to also contain the built-in types
-		// without needing to grow.
-		ctx.Schema.Types = ctx.SDLContext.TypeDefinitions
-
-		for name, def := range graphql.SpecifiedTypes() {
-			// TODO: Should we allow overriding built-in types?
-			ctx.Schema.Types[name] = def
-		}
-	} else {
-		// TODO: Handle adding the new types / directives to an existing schema.
-	}
 }
 
 // mergeSchemaExtensions ...

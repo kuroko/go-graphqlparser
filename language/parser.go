@@ -31,6 +31,8 @@ func (p *Parser) Parse() (ast.Document, error) {
 
 	var definitions *ast.Definitions
 
+	typeExtensions := make(map[string]struct{})
+
 	for {
 		definition, err := p.parseDefinition(document)
 		if err != nil {
@@ -62,7 +64,7 @@ func (p *Parser) Parse() (ast.Document, error) {
 			case ast.TypeSystemExtensionKindSchema:
 				document.SchemaExtensions++
 			case ast.TypeSystemExtensionKindType:
-				document.TypeExtensions++
+				typeExtensions[definition.TypeSystemExtension.TypeExtension.Name] = struct{}{}
 			}
 		}
 
@@ -74,6 +76,11 @@ func (p *Parser) Parse() (ast.Document, error) {
 			break
 		}
 	}
+
+	// This has to be handled differently to the other counts because you can have multiple type
+	// extensions per type, so if we just increment each time we see one we could have the wrong
+	// count, and end up allocating more memory than needed later.
+	document.TypeExtensions = int32(len(typeExtensions))
 
 	document.Definitions = definitions.Reverse()
 
@@ -1467,7 +1474,10 @@ func (p *Parser) parseEnumValuesDefinition() (*ast.EnumValueDefinitions, error) 
 			return nil, err
 		}
 
-		// TODO: Return error if we encounter false, true, or null.
+		switch enumValue.Literal {
+		case "false", "true", "null":
+			return nil, p.unexpected(enumValue, p.expected(TokenKindName, "valid enum value"))
+		}
 
 		directives, err := p.parseDirectives(ast.DirectiveLocationKindEnumValue)
 		if err != nil {

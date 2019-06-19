@@ -18,7 +18,13 @@ var (
 
 		enum DogCommand {
 			SIT
+		}
+
+		extend enum DogCommand {
 			HEEL
+		}
+
+		extend enum DogCommand {
 			DOWN
 		}
 

@@ -51,7 +51,10 @@ func ParseSDLDoc(doc []byte, schema *graphql.Schema) (*graphql.Schema, *graphql.
 		return nil, nil, err
 	}
 
-	// TODO: validation.ValidateSchema
+	errs := validation.ValidateSchema(ctx, schema)
+	if errs.Len() > 0 {
+		return nil, errs, nil
+	}
 
 	return schema, nil, nil
 }
