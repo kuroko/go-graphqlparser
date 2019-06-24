@@ -100,7 +100,7 @@ func validateTypes(ctx *Context, schema *graphql.Schema) {
 		switch {
 		case ast.IsObjectTypeDefinition(typeDef):
 			validateFields(ctx, schema, typeDef)
-			// TODO: ...
+			validateObjectInterfaces(ctx, schema, typeDef)
 		case ast.IsInterfaceTypeDefinition(typeDef):
 			validateFields(ctx, schema, typeDef)
 			// TODO: ...
@@ -155,6 +155,66 @@ func validateFields(ctx *Context, schema *graphql.Schema, typeDef *ast.TypeDefin
 				))
 			}
 		})
+	})
+}
+
+// validateObjectInterfaces ...
+func validateObjectInterfaces(ctx *Context, schema *graphql.Schema, typeDef *ast.TypeDefinition) {
+	implementedTypeNames := make(map[string]struct{}, typeDef.ImplementsInterface.Len())
+
+	typeDef.ImplementsInterface.ForEach(func(t ast.Type, i int) {
+		if !IsInterfaceType(schema, t) {
+			ctx.AddError(graphql.NewError(
+				"Type " + typeDef.Name + " must only implement Interface types, it cannot " +
+					"implement " + t.NamedType,
+				// TODO: Location.
+			))
+			return
+		}
+
+		if _, ok := implementedTypeNames[t.NamedType]; ok {
+			ctx.AddError(graphql.NewError(
+				"Type " + typeDef.Name + " can only implement " + t.NamedType + " once.",
+				// TODO: Location.
+			))
+			return
+		}
+
+		implementedTypeNames[t.NamedType] = struct{}{}
+
+		// It's safe to assume this exists at this point, thanks to IsInterfaceType.
+		ifaceDef := schema.Types[t.NamedType]
+
+		validateObjectImplementsInterface(ctx, schema, typeDef, ifaceDef)
+	})
+}
+
+// validateObjectImplementsInterface ...
+func validateObjectImplementsInterface(
+	ctx *Context,
+	schema *graphql.Schema,
+	typeDef *ast.TypeDefinition,
+	ifaceDef *ast.TypeDefinition,
+) {
+	ifaceDef.FieldsDefinition.ForEach(func(ifaceField ast.FieldDefinition, i int) {
+		typeField, ok := typeDef.FieldDefinitionByName(ifaceField.Name)
+		if !ok {
+			ctx.AddError(graphql.NewError(
+				"Interface field " + ifaceDef.Name + "." + ifaceField.Name + " expected but " +
+					typeDef.Name + " does not provide it.",
+				// TODO: Location.
+			))
+			return
+		}
+
+		if !IsTypeSubTypeOf(schema, typeField.Type, ifaceField.Type) {
+			ctx.AddError(graphql.NewError(
+				"Interface field " + ifaceDef.Name + "." + ifaceField.Name + " expects type " +
+					ifaceField.Type.String() + " but " + typeDef.Name + "." + typeField.Name +
+					" is type " + typeField.Type.String(),
+				// TODO: Location.
+			))
+		}
 	})
 }
 

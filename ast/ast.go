@@ -457,8 +457,8 @@ type TypeDefinition struct {
 	Kind                  TypeDefinitionKind
 }
 
-// GetEnumValueDefinition ...
-func (d TypeDefinition) GetEnumValueDefinition(valueName string) (EnumValueDefinition, bool) {
+// EnumValueDefinitionByName ...
+func (d TypeDefinition) EnumValueDefinitionByName(valueName string) (EnumValueDefinition, bool) {
 	var evd EnumValueDefinition
 	var found bool
 
@@ -474,6 +474,24 @@ func (d TypeDefinition) GetEnumValueDefinition(valueName string) (EnumValueDefin
 	}
 
 	return evd, found
+}
+
+// FieldDefinitionByName ...
+func (d TypeDefinition) FieldDefinitionByName(fieldName string) (FieldDefinition, bool) {
+	if IsObjectTypeDefinition(&d) || IsInterfaceTypeDefinition(&d) {
+		if d.FieldsDefinition.Len() == 0 {
+			return FieldDefinition{}, false
+		}
+
+		gen := d.FieldsDefinition.Generator()
+		for ifd, i := gen.Next(); i >= 0; ifd, i = gen.Next() {
+			if ifd.Name == fieldName {
+				return ifd, true
+			}
+		}
+	}
+
+	return FieldDefinition{}, false
 }
 
 // IsScalarTypeDefinition ...

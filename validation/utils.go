@@ -18,6 +18,11 @@ const (
 	inobj  = ast.TypeDefinitionKindInputObject
 )
 
+// IsAbstractType ...
+func IsAbstractType(schema *graphql.Schema, t ast.Type) bool {
+	return IsInterfaceType(schema, t) || IsUnionType(schema, t)
+}
+
 // IsInputType ...
 func IsInputType(schema *graphql.Schema, t ast.Type) bool {
 	if t.Kind == ast.TypeKindList {
@@ -29,6 +34,33 @@ func IsInputType(schema *graphql.Schema, t ast.Type) bool {
 		case scalar, enum, inobj:
 			return true
 		}
+	}
+
+	return false
+}
+
+// IsInterfaceType
+func IsInterfaceType(schema *graphql.Schema, t ast.Type) bool {
+	if def, ok := schema.Types[t.NamedType]; ok {
+		return def.Kind == ast.TypeDefinitionKindInterface
+	}
+
+	return false
+}
+
+// IsObjectType ...
+func IsObjectType(schema *graphql.Schema, t ast.Type) bool {
+	if def, ok := schema.Types[t.NamedType]; ok {
+		return def.Kind == ast.TypeDefinitionKindObject
+	}
+
+	return false
+}
+
+// IsUnionType ...
+func IsUnionType(schema *graphql.Schema, t ast.Type) bool {
+	if def, ok := schema.Types[t.NamedType]; ok {
+		return def.Kind == ast.TypeDefinitionKindUnion
 	}
 
 	return false
@@ -48,6 +80,114 @@ func IsOutputType(schema *graphql.Schema, t ast.Type) bool {
 	}
 
 	return false
+}
+
+// IsTypeSubTypeOf ...
+func IsTypeSubTypeOf(schema *graphql.Schema, maybeSubType, superType ast.Type) bool {
+	if maybeSubType == superType {
+		return true
+	}
+
+	if superType.NonNullable {
+		if maybeSubType.NonNullable {
+			maybeSubType.NonNullable = false
+			superType.NonNullable = false
+			return IsTypeSubTypeOf(schema, maybeSubType, superType)
+		}
+
+		return false
+	}
+
+	if maybeSubType.NonNullable {
+		maybeSubType.NonNullable = false
+		return IsTypeSubTypeOf(schema, maybeSubType, superType)
+	}
+
+	if superType.Kind == ast.TypeKindList {
+		if maybeSubType.Kind == ast.TypeKindList {
+			return IsTypeSubTypeOf(schema, *maybeSubType.ListType, *superType.ListType)
+		}
+
+		return false
+	}
+
+	if maybeSubType.Kind == ast.TypeKindList {
+		return false
+	}
+
+	isAbstractSuperType := IsAbstractType(schema, superType)
+	isObjectSubType := IsObjectType(schema, maybeSubType)
+
+	if isAbstractSuperType && isObjectSubType && IsPossibleType(schema, superType, maybeSubType) {
+		return true
+	}
+
+	return false
+}
+
+// IsPossibleType ...
+func IsPossibleType(schema *graphql.Schema, abstractType, possibleType ast.Type) bool {
+	var found bool
+
+	possibleTypes := PossibleTypes(schema, abstractType)
+	gen := possibleTypes.Generator()
+
+	for t, i := gen.Next(); i < possibleTypes.Len(); t, i = gen.Next() {
+		if t == possibleType {
+			found = true
+			break
+		}
+	}
+
+	return found
+}
+
+// PossibleTypes ...
+func PossibleTypes(schema *graphql.Schema, abstractType ast.Type) *ast.Types {
+	if IsUnionType(schema, abstractType) {
+		unionType := schema.Types[abstractType.NamedType]
+		return unionType.UnionMemberTypes
+	}
+
+	// TODO: This is crazy inefficient. We should do this once per schema.
+	implementations := InterfaceImplementations(schema)
+
+	return implementations[abstractType.NamedType]
+}
+
+// InterfaceImplementations ...
+func InterfaceImplementations(schema *graphql.Schema) map[string]*ast.Types {
+	// TODO: Maybe do this when we load the data.
+	var interfaces int
+	for _, typeDef := range schema.Types {
+		if ast.IsInterfaceTypeDefinition(typeDef) {
+			interfaces++
+		}
+	}
+
+	implementations := make(map[string]*ast.Types, interfaces)
+
+	for typeName, typeDef := range schema.Types {
+		if ast.IsObjectTypeDefinition(typeDef) {
+			typeDef.ImplementsInterface.ForEach(func(iface ast.Type, i int) {
+				if IsInterfaceType(schema, iface) {
+					if _, ok := implementations[iface.NamedType]; ok {
+						implementations[iface.NamedType] = implementations[iface.NamedType].
+							Add(ast.Type{NamedType: typeName})
+					} else {
+						implementations[iface.NamedType] = (*ast.Types)(nil).
+							Add(ast.Type{NamedType: typeName})
+					}
+				}
+			})
+		} else if ast.IsInterfaceTypeDefinition(typeDef) {
+			if _, ok := implementations[typeName]; !ok {
+				implementations[typeName] = (*ast.Types)(nil)
+			}
+		}
+	}
+
+	return implementations
 }
 
 // IsUnionMemberType ...

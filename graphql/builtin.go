@@ -69,6 +69,13 @@ var (
 		Kind: ast.TypeDefinitionKindScalar,
 	}
 
+	// StringType ...
+	// TODO: Fully implement.
+	StringType = &ast.TypeDefinition{
+		Name: "String",
+		Kind: ast.TypeDefinitionKindScalar,
+	}
+
 	// TODO: Implement all built-in scalar types
 )
 
@@ -86,6 +93,7 @@ func SpecifiedDirectives() map[string]*ast.DirectiveDefinition {
 // SpecifiedTypes ...
 func SpecifiedTypes() map[string]*ast.TypeDefinition {
 	return map[string]*ast.TypeDefinition{
-		"ID": IDType,
+		"ID":     IDType,
+		"String": StringType,
 	}
 }
