@@ -69,7 +69,7 @@ func validateRootTypes(ctx *Context, schema *graphql.Schema) {
 // validateDirectives ...
 func validateDirectives(ctx *Context, schema *graphql.Schema) {
 	for directiveName, directiveDef := range schema.Directives {
-		validateName(ctx, directiveName, 0, 0)
+		validateName(ctx, directiveName, 0, 0) // TODO: Location
 
 		argNames := make(map[string]struct{})
 		directiveDef.ArgumentsDefinition.ForEach(func(ivd ast.InputValueDefinition, i int) {
@@ -81,7 +81,7 @@ func validateDirectives(ctx *Context, schema *graphql.Schema) {
 				return
 			}
 
-			validateName(ctx, ivd.Name, 0, 0)
+			validateName(ctx, ivd.Name, 0, 0) // TODO: Location
 
 			argNames[ivd.Name] = struct{}{}
 		})
@@ -94,13 +94,15 @@ func validateTypes(ctx *Context, schema *graphql.Schema) {
 		// If the name exactly matches one of the built-in introspection type names, don't bother
 		// validating any further.
 		if !isIntrospectionTypeName(typeName) {
-			validateName(ctx, typeName, 0, 0)
+			validateName(ctx, typeName, 0, 0) // TODO: Location
 		}
 
 		switch {
 		case ast.IsObjectTypeDefinition(typeDef):
+			validateFields(ctx, schema, typeDef)
 			// TODO: ...
 		case ast.IsInterfaceTypeDefinition(typeDef):
+			validateFields(ctx, schema, typeDef)
 			// TODO: ...
 		case ast.IsUnionTypeDefinition(typeDef):
 			// TODO: ...
@@ -110,6 +112,50 @@ func validateTypes(ctx *Context, schema *graphql.Schema) {
 			// TODO: ...
 		}
 	}
+}
+
+// validateFields ...
+func validateFields(ctx *Context, schema *graphql.Schema, typeDef *ast.TypeDefinition) {
+	if typeDef.FieldsDefinition.Len() == 0 {
+		ctx.AddError(graphql.NewError(
+			"Type " + typeDef.Name + " must define one or more fields.",
+			// TODO: Location.
+		))
+	}
+
+	typeDef.FieldsDefinition.ForEach(func(field ast.FieldDefinition, i int) {
+		validateName(ctx, field.Name, 0, 0) // TODO: Location.
+
+		if !IsOutputType(schema, field.Type) {
+			ctx.AddError(graphql.NewError(
+				"The type of " + typeDef.Name + "." + field.Name + " must be Output Type.",
+				// TODO: Location.
+			))
+		}
+
+		argNames := make(map[string]struct{}, field.ArgumentsDefinition.Len())
+
+		field.ArgumentsDefinition.ForEach(func(ivd ast.InputValueDefinition, i int) {
+			validateName(ctx, ivd.Name, 0, 0) // TODO: Location.
+
+			if _, ok := argNames[ivd.Name]; ok {
+				ctx.AddError(graphql.NewError(
+					"Field argument " + typeDef.Name + "." + field.Name + "(" + ivd.Name + ":) can only be defined " +
+						"once.",
+					// TODO: Location.
+				))
+			}
+
+			argNames[ivd.Name] = struct{}{}
+
+			if !IsInputType(schema, ivd.Type) {
+				ctx.AddError(graphql.NewError(
+					"The type of " + typeDef.Name + "." + field.Name + "(" + ivd.Name + ":) must be Input Type.",
+					// TODO: Location.
+				))
+			}
+		})
+	})
 }
 
 // validateName ...
